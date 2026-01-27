@@ -2,25 +2,18 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { DFSRegistry } from "../core/DFSRegistry.sol";
-import { DSProxy } from "../DS/DSProxy.sol";
+import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
 import { ActionsUtilHelper } from "./utils/helpers/ActionsUtilHelper.sol";
-import { ISafe } from "../interfaces/safe/ISafe.sol";
-import { CheckWalletType } from "../utils/CheckWalletType.sol";
+import { SmartWalletUtils } from "../utils/SmartWalletUtils.sol";
 
 /// @title Implements Action interface and common helpers for passing inputs
-abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
-    event ActionEvent(
-        string indexed logName,
-        bytes data
-    );
+abstract contract ActionBase is AdminAuth, ActionsUtilHelper, SmartWalletUtils {
+    event ActionEvent(string indexed logName, bytes data);
 
-    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
-    DefisaverLogger public constant logger = DefisaverLogger(
-        DFS_LOGGER_ADDR
-    );
+    DefisaverLogger public constant logger = DefisaverLogger(DFS_LOGGER_ADDR);
 
     //Wrong sub index value
     error SubIndexValueError();
@@ -39,7 +32,13 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
     uint8 public constant NO_PARAM_MAPPING = 0;
 
     /// @dev We need to parse Flash loan actions in a different way
-    enum ActionType { FL_ACTION, STANDARD_ACTION, FEE_ACTION, CHECK_ACTION, CUSTOM_ACTION }
+    enum ActionType {
+        FL_ACTION,
+        STANDARD_ACTION,
+        FEE_ACTION,
+        CHECK_ACTION,
+        CUSTOM_ACTION
+    }
 
     /// @notice Parses inputs and runs the implemented action through a user wallet
     /// @dev Is called by the RecipeExecutor chaining actions together
@@ -57,11 +56,10 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
 
     /// @notice Parses inputs and runs the single implemented action through a user wallet
     /// @dev Used to save gas when executing a single action directly
-    function executeActionDirect(bytes memory _callData) public virtual payable;
+    function executeActionDirect(bytes memory _callData) public payable virtual;
 
     /// @notice Returns the type of action we are implementing
     function actionType() public pure virtual returns (uint8);
-
 
     //////////////////////////// HELPER METHODS ////////////////////////////
 
@@ -71,14 +69,14 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
     /// @param _subData Array of subscription data we can replace the input value with
     /// @param _returnValues Array of subscription data we can replace the input value with
     function _parseParamUint(
-        uint _param,
+        uint256 _param,
         uint8 _mapType,
         bytes32[] memory _subData,
         bytes32[] memory _returnValues
-    ) internal pure returns (uint) {
+    ) internal pure returns (uint256) {
         if (isReplaceable(_mapType)) {
             if (isReturnInjection(_mapType)) {
-                _param = uint(_returnValues[getReturnIndex(_mapType)]);
+                _param = uint256(_returnValues[getReturnIndex(_mapType)]);
             } else {
                 _param = uint256(_subData[getSubIndex(_mapType)]);
             }
@@ -86,7 +84,6 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
 
         return _param;
     }
-
 
     /// @notice Given an addr input, injects return/sub values if specified
     /// @param _param The original input value
@@ -105,7 +102,7 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
             } else {
                 /// @dev The last two values are specially reserved for proxy addr and owner addr
                 if (_mapType == 254) return address(this); // wallet address
-                if (_mapType == 255) return fetchOwnersOrWallet(); // owner if 1/1 wallet or the wallet itself
+                if (_mapType == 255) return _fetchOwnerOrWallet(address(this)); // owner if 1/1 wallet or the wallet itself
 
                 _param = address(uint160(uint256(_subData[getSubIndex(_mapType)])));
             }
@@ -151,7 +148,7 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
     /// @notice Transforms the paramMapping value to the index in return array value
     /// @param _type Indicated the type of the input
     function getReturnIndex(uint8 _type) internal pure returns (uint8) {
-        if (!(isReturnInjection(_type))){
+        if (!(isReturnInjection(_type))) {
             revert SubIndexValueError();
         }
 
@@ -161,18 +158,9 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
     /// @notice Transforms the paramMapping value to the index in sub array value
     /// @param _type Indicated the type of the input
     function getSubIndex(uint8 _type) internal pure returns (uint8) {
-        if (_type < SUB_MIN_INDEX_VALUE){
+        if (_type < SUB_MIN_INDEX_VALUE) {
             revert ReturnIndexValueError();
         }
         return (_type - SUB_MIN_INDEX_VALUE);
-    }
-
-    function fetchOwnersOrWallet() internal view returns (address) {
-        if (isDSProxy(address(this))) 
-            return DSProxy(payable(address(this))).owner();
-
-        // if not DSProxy, we assume we are in context of Safe
-        address[] memory owners = ISafe(address(this)).getOwners();
-        return owners.length == 1 ? owners[0] : address(this);
     }
 }

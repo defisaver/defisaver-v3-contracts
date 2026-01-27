@@ -2,9 +2,9 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { MorphoBlueHelper } from "./helpers/MorphoBlueHelper.sol";
-import { MarketParams } from "../../interfaces/morpho-blue/IMorphoBlue.sol";
+import { MarketParams } from "../../interfaces/protocols/morpho-blue/IMorphoBlue.sol";
 
 /// @title Withdraw a token to Morpho Blue market that is collateral
 contract MorphoBlueWithdrawCollateral is ActionBase, MorphoBlueHelper {
@@ -29,13 +29,22 @@ contract MorphoBlueWithdrawCollateral is ActionBase, MorphoBlueHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.marketParams.loanToken = _parseParamAddr(params.marketParams.loanToken , _paramMapping[0], _subData, _returnValues);
-        params.marketParams.collateralToken = _parseParamAddr(params.marketParams.collateralToken , _paramMapping[1], _subData, _returnValues);
-        params.marketParams.oracle = _parseParamAddr(params.marketParams.oracle , _paramMapping[2], _subData, _returnValues);
-        params.marketParams.irm = _parseParamAddr(params.marketParams.irm , _paramMapping[3], _subData, _returnValues);
-        params.marketParams.lltv = _parseParamUint(params.marketParams.lltv, _paramMapping[4], _subData, _returnValues);
-        params.withdrawAmount = _parseParamUint(params.withdrawAmount, _paramMapping[5], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[6], _subData, _returnValues);
+        params.marketParams.loanToken = _parseParamAddr(
+            params.marketParams.loanToken, _paramMapping[0], _subData, _returnValues
+        );
+        params.marketParams.collateralToken = _parseParamAddr(
+            params.marketParams.collateralToken, _paramMapping[1], _subData, _returnValues
+        );
+        params.marketParams.oracle =
+            _parseParamAddr(params.marketParams.oracle, _paramMapping[2], _subData, _returnValues);
+        params.marketParams.irm =
+            _parseParamAddr(params.marketParams.irm, _paramMapping[3], _subData, _returnValues);
+        params.marketParams.lltv =
+            _parseParamUint(params.marketParams.lltv, _paramMapping[4], _subData, _returnValues);
+        params.withdrawAmount =
+            _parseParamUint(params.withdrawAmount, _paramMapping[5], _subData, _returnValues);
+        params.onBehalf =
+            _parseParamAddr(params.onBehalf, _paramMapping[6], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[7], _subData, _returnValues);
 
         (uint256 amount, bytes memory logData) = _withdraw(params);
@@ -58,7 +67,9 @@ contract MorphoBlueWithdrawCollateral is ActionBase, MorphoBlueHelper {
         if (_params.onBehalf == address(0)) {
             _params.onBehalf = address(this);
         }
-        morphoBlue.withdrawCollateral(_params.marketParams, _params.withdrawAmount, _params.onBehalf, _params.to);
+        morphoBlue.withdrawCollateral(
+            _params.marketParams, _params.withdrawAmount, _params.onBehalf, _params.to
+        );
 
         bytes memory logData = abi.encode(_params);
 

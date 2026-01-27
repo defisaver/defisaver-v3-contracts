@@ -3,11 +3,11 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { DSMath } from "../DS/DSMath.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
+import { DSMath } from "../_vendor/DS/DSMath.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
+import { TokenUtils } from "../utils/token/TokenUtils.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
-import { TokenPriceHelper } from "../utils/TokenPriceHelper.sol";
+import { TokenPriceHelper } from "../utils/token/TokenPriceHelper.sol";
 
 /// @title Trigger contract that verifies if current token price is over/under the price specified during subscription
 /// @notice If there's no chainlink oracle available for the token, price will be fetched from AaveV2, Spark and AaveV3 (in that order).
@@ -33,7 +33,7 @@ contract ChainLinkPriceTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath, To
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         uint256 currPrice = getPriceInUSD(triggerSubData.tokenAddr);
-        
+
         /// @dev if currPrice is 0, we failed fetching the price
         if (currPrice == 0) return false;
 
@@ -48,12 +48,9 @@ contract ChainLinkPriceTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath, To
         return false;
     }
 
-    
-    
-    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {
-    }
-    
-    function isChangeable() public pure override returns (bool){
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
+
+    function isChangeable() public pure override returns (bool) {
         return false;
     }
 

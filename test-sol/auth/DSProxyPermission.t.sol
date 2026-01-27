@@ -1,20 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { DSProxyPermission } from "../../contracts/auth/DSProxyPermission.sol";
-import { DSAuth } from "../../contracts/DS/DSAuth.sol";
-import { DSAuthority } from "../../contracts/DS/DSAuthority.sol";
+import { MockDSProxyPermission } from "../../contracts/mocks/MockDSProxyPermission.sol";
+import { IDSAuth } from "../../contracts/interfaces/DS/IDSAuth.sol";
+import { IDSAuthority } from "../../contracts/interfaces/DS/IDSAuthority.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
-import { Addresses } from "../utils/Addresses.sol";
 
-contract TestCore_DSProxyPermission is DSProxyPermission, BaseTest {
-    
+contract TestCore_DSProxyPermission is MockDSProxyPermission, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
-    DSProxyPermission cut;
+    MockDSProxyPermission cut;
 
     /*//////////////////////////////////////////////////////////////////////////
                                      VARIABLES
@@ -22,6 +20,7 @@ contract TestCore_DSProxyPermission is DSProxyPermission, BaseTest {
     SmartWallet wallet;
     address sender;
     address walletAddr;
+    bytes4 constant EXECUTE_SELECTOR = bytes4(keccak256("execute(address,bytes)"));
 
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
@@ -33,7 +32,7 @@ contract TestCore_DSProxyPermission is DSProxyPermission, BaseTest {
         walletAddr = wallet.createDSProxy();
         sender = wallet.owner();
 
-        cut = new DSProxyPermission();
+        cut = new MockDSProxyPermission();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -61,17 +60,19 @@ contract TestCore_DSProxyPermission is DSProxyPermission, BaseTest {
                                       HELPERS
     //////////////////////////////////////////////////////////////////////////*/
     function _give_proxy_permission(address _addr) internal {
-        bytes memory _calldata = abi.encodeWithSelector(DSProxyPermission.giveProxyPermission.selector, _addr);
+        bytes memory _calldata =
+            abi.encodeWithSelector(MockDSProxyPermission.giveProxyPermission.selector, _addr);
         wallet.execute(address(cut), _calldata, 0);
     }
 
     function _remove_proxy_permission(address _addr) internal {
-        bytes memory _calldata = abi.encodeWithSelector(DSProxyPermission.removeProxyPermission.selector, _addr);
+        bytes memory _calldata =
+            abi.encodeWithSelector(MockDSProxyPermission.removeProxyPermission.selector, _addr);
         wallet.execute(address(cut), _calldata, 0);
     }
 
     function _address_has_proxy_permission(address _addr) internal view returns (bool) {
-        DSAuthority authority = DSAuthority(DSAuth(walletAddr).authority());
+        IDSAuthority authority = IDSAuthority(IDSAuth(walletAddr).authority());
         return authority.canCall(_addr, walletAddr, EXECUTE_SELECTOR);
     }
 }

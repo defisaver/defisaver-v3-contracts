@@ -26,7 +26,11 @@ const { callDcaStrategy } = require('../utils/strategy-calls');
 const { subDcaStrategy } = require('../utils/strategy-subs');
 const { createLimitOrderL2Strategy } = require('../../../strategies-spec/l2');
 
-const { createStrategy, addBotCaller, getUpdatedStrategySub } = require('../utils/utils-strategies');
+const {
+    createStrategy,
+    addBotCaller,
+    getUpdatedStrategySub,
+} = require('../utils/utils-strategies');
 
 const { callLimitOrderStrategy } = require('../utils/strategy-calls');
 const { subLimitOrderStrategy } = require('../utils/strategy-subs');
@@ -38,19 +42,34 @@ const TWO_DAYS = 2 * 24 * 60 * 60;
 const limitOrderStrategyTest = async () => {
     const tokenPairs = [
         {
-            srcTokenSymbol: 'WETH', destTokenSymbol: 'DAI', amount: '1', uniV3Fee: '3000',
+            srcTokenSymbol: 'WETH',
+            destTokenSymbol: 'DAI',
+            amount: '1',
+            uniV3Fee: '3000',
         },
         {
-            srcTokenSymbol: 'WETH', destTokenSymbol: 'USDC', amount: '2', uniV3Fee: '3000',
+            srcTokenSymbol: 'WETH',
+            destTokenSymbol: 'USDC',
+            amount: '2',
+            uniV3Fee: '3000',
         },
         {
-            srcTokenSymbol: 'DAI', destTokenSymbol: 'WETH', amount: '1000', uniV3Fee: '3000',
+            srcTokenSymbol: 'DAI',
+            destTokenSymbol: 'WETH',
+            amount: '1000',
+            uniV3Fee: '3000',
         },
         {
-            srcTokenSymbol: 'WBTC', destTokenSymbol: 'WETH', amount: '1', uniV3Fee: '3000',
+            srcTokenSymbol: 'WBTC',
+            destTokenSymbol: 'WETH',
+            amount: '1',
+            uniV3Fee: '3000',
         },
         {
-            srcTokenSymbol: 'USDC', destTokenSymbol: 'WBTC', amount: '3400', uniV3Fee: '3000',
+            srcTokenSymbol: 'USDC',
+            destTokenSymbol: 'WBTC',
+            amount: '3400',
+            uniV3Fee: '3000',
         },
     ];
 
@@ -85,18 +104,21 @@ const limitOrderStrategyTest = async () => {
 
             strategyExecutor = await redeployCore(network !== 'mainnet');
 
-            // eslint-disable-next-line no-unused-expressions
-            network === 'mainnet' ? (await redeploy('LimitSell')) : (await redeploy('LimitSellL2'));
+            network === 'mainnet' ? await redeploy('LimitSell') : await redeploy('LimitSellL2');
             await redeploy('OffchainPriceTrigger');
 
-            uniV3Wrapper = await hre.ethers.getContractAt('UniswapWrapperV3', addrs[network].UNISWAP_V3_WRAPPER);
+            uniV3Wrapper = await hre.ethers.getContractAt(
+                'UniswapWrapperV3',
+                addrs[network].UNISWAP_V3_WRAPPER,
+            );
 
             await setNewExchangeWrapper(senderAcc, addrs[network].UNISWAP_V3_WRAPPER);
 
             await addBotCaller(botAcc.address);
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
 
-            const strategyData = network === 'mainnet' ? createLimitOrderStrategy() : createLimitOrderL2Strategy();
+            const strategyData =
+                network === 'mainnet' ? createLimitOrderStrategy() : createLimitOrderL2Strategy();
             await openStrategyAndBundleStorage();
 
             strategyId = await createStrategy(...strategyData, false);
@@ -105,9 +127,7 @@ const limitOrderStrategyTest = async () => {
         });
 
         for (let i = 0; i < tokenPairs.length; i++) {
-            const {
-                srcTokenSymbol, destTokenSymbol, amount, uniV3Fee,
-            } = tokenPairs[i];
+            const { srcTokenSymbol, destTokenSymbol, amount, uniV3Fee } = tokenPairs[i];
 
             it('... should make a new Limit order [Take profit] strategy', async () => {
                 const srcToken = getAssetInfo(srcTokenSymbol);
@@ -118,10 +138,17 @@ const limitOrderStrategyTest = async () => {
 
                 sellAmountWei = hre.ethers.utils.parseUnits(amount, srcToken.decimals);
 
-                const path = hre.ethers.utils.solidityPack(['address', 'uint24', 'address'], [tokenAddrSell, uniV3Fee, tokenAddrBuy]);
+                const path = hre.ethers.utils.solidityPack(
+                    ['address', 'uint24', 'address'],
+                    [tokenAddrSell, uniV3Fee, tokenAddrBuy],
+                );
 
-                // eslint-disable-next-line max-len
-                currPrice = await uniV3Wrapper.getSellRate(tokenAddrSell, tokenAddrBuy, sellAmountWei, path);
+                currPrice = await uniV3Wrapper.getSellRate(
+                    tokenAddrSell,
+                    tokenAddrBuy,
+                    sellAmountWei,
+                    path,
+                );
 
                 // Set target price to 10% below current price to trigger the strategy
                 const targetPrice = currPrice.sub(currPrice.div('10'));
@@ -153,7 +180,6 @@ const limitOrderStrategyTest = async () => {
                 const buyBalanceBefore = await balanceOf(destAddrTransformed, senderAcc.address);
                 const sellBalanceBefore = await balanceOf(tokenAddrSell, senderAcc.address);
 
-                // eslint-disable-next-line max-len
                 await callLimitOrderStrategy(
                     botAcc,
                     minPrice,
@@ -200,10 +226,17 @@ const limitOrderStrategyTest = async () => {
 
                 sellAmountWei = hre.ethers.utils.parseUnits(amount, srcToken.decimals);
 
-                const path = hre.ethers.utils.solidityPack(['address', 'uint24', 'address'], [tokenAddrSell, uniV3Fee, tokenAddrBuy]);
+                const path = hre.ethers.utils.solidityPack(
+                    ['address', 'uint24', 'address'],
+                    [tokenAddrSell, uniV3Fee, tokenAddrBuy],
+                );
 
-                // eslint-disable-next-line max-len
-                currPrice = await uniV3Wrapper.getSellRate(tokenAddrSell, tokenAddrBuy, sellAmountWei, path);
+                currPrice = await uniV3Wrapper.getSellRate(
+                    tokenAddrSell,
+                    tokenAddrBuy,
+                    sellAmountWei,
+                    path,
+                );
 
                 // Set target price to 10% above current price to trigger the strategy
                 const targetPrice = currPrice.add(currPrice.div('10'));
@@ -235,7 +268,6 @@ const limitOrderStrategyTest = async () => {
                 const buyBalanceBefore = await balanceOf(destAddrTransformed, senderAcc.address);
                 const sellBalanceBefore = await balanceOf(tokenAddrSell, senderAcc.address);
 
-                // eslint-disable-next-line max-len
                 await callLimitOrderStrategy(
                     botAcc,
                     minPrice,
@@ -260,19 +292,34 @@ const limitOrderStrategyTest = async () => {
 const dcaStrategyTest = async () => {
     const tokenPairs = [
         {
-            srcTokenSymbol: 'WETH', destTokenSymbol: 'DAI', amount: '1', uniV3Fee: '3000',
+            srcTokenSymbol: 'WETH',
+            destTokenSymbol: 'DAI',
+            amount: '1',
+            uniV3Fee: '3000',
         },
         {
-            srcTokenSymbol: 'WETH', destTokenSymbol: 'USDC', amount: '2', uniV3Fee: '3000',
+            srcTokenSymbol: 'WETH',
+            destTokenSymbol: 'USDC',
+            amount: '2',
+            uniV3Fee: '3000',
         },
         {
-            srcTokenSymbol: 'DAI', destTokenSymbol: 'WETH', amount: '1000', uniV3Fee: '3000',
+            srcTokenSymbol: 'DAI',
+            destTokenSymbol: 'WETH',
+            amount: '1000',
+            uniV3Fee: '3000',
         },
         {
-            srcTokenSymbol: 'WBTC', destTokenSymbol: 'WETH', amount: '1', uniV3Fee: '3000',
+            srcTokenSymbol: 'WBTC',
+            destTokenSymbol: 'WETH',
+            amount: '1',
+            uniV3Fee: '3000',
         },
         {
-            srcTokenSymbol: 'USDC', destTokenSymbol: 'WBTC', amount: '3400', uniV3Fee: '3000',
+            srcTokenSymbol: 'USDC',
+            destTokenSymbol: 'WBTC',
+            amount: '3400',
+            uniV3Fee: '3000',
         },
     ];
 
@@ -319,9 +366,7 @@ const dcaStrategyTest = async () => {
         });
 
         for (let i = 0; i < tokenPairs.length; i++) {
-            const {
-                srcTokenSymbol, destTokenSymbol, amount, uniV3Fee,
-            } = tokenPairs[i];
+            const { srcTokenSymbol, destTokenSymbol, amount, uniV3Fee } = tokenPairs[i];
 
             it(`... should make a new DCA Strategy for selling ${srcTokenSymbol} into ${destTokenSymbol}`, async () => {
                 const srcToken = getAssetInfo(srcTokenSymbol);
@@ -371,7 +416,6 @@ const dcaStrategyTest = async () => {
                     tokenAddrSell,
                     tokenAddrBuy,
                     uniV3Fee,
-
                 );
 
                 strategySub = await getUpdatedStrategySub(subStorage, subStorageAddr);

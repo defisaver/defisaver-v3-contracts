@@ -2,18 +2,17 @@
 
 pragma solidity =0.8.24;
 
-import { IStkAave } from "../../interfaces/aave/IStkAave.sol";
+import { IStkAave } from "../../interfaces/protocols/aave/IStkAave.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Action to claim AAVE rewards from stkGHO token
 /// @notice After AaveV3 Umbrella upgrade, stkGHO token is no longer eligible for AAVE rewards so this action will only be used for old rewards.
 contract GhoClaimAAVE is ActionBase, AaveV3Helper {
-
     using TokenUtils for address;
 
-    /// @param amount Amount of AAVE token to claim (uintMax is supported)  
+    /// @param amount Amount of AAVE token to claim (uintMax is supported)
     /// @param to Address that will be receiving the rewards
     struct Params {
         uint256 amount;
@@ -52,7 +51,10 @@ contract GhoClaimAAVE is ActionBase, AaveV3Helper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Claims AAVE reward from stkGHO token.
-    function _ghoClaimAAVE(Params memory _params) internal returns (uint256 claimedAmount, bytes memory logData) {
+    function _ghoClaimAAVE(Params memory _params)
+        internal
+        returns (uint256 claimedAmount, bytes memory logData)
+    {
         uint256 startingBalance = AAVE_GOV_TOKEN.getBalance(_params.to);
         IStkAave(STAKED_GHO_TOKEN).claimRewards(_params.to, _params.amount);
         claimedAmount = AAVE_GOV_TOKEN.getBalance(_params.to) - startingBalance;
@@ -60,8 +62,7 @@ contract GhoClaimAAVE is ActionBase, AaveV3Helper {
         logData = abi.encode(_params, claimedAmount);
     }
 
-    function parseInputs(bytes memory _callData) public pure returns (Params memory params)
-    {
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
     }
 }

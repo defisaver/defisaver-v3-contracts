@@ -2,16 +2,16 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { SparkHelper } from "./helpers/SparkHelper.sol";
-import { ISparkPool } from "../../interfaces/spark/ISparkPool.sol";
+import { ISparkPool } from "../../interfaces/protocols/spark/ISparkPool.sol";
 import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Swaps user's wallet positions borrow rate mode between stable and variable.
 contract SparkSwapBorrowRateMode is ActionBase, SparkHelper {
     using TokenUtils for address;
-    
+
     /// @param rateMode Type of borrow debt [Stable: 1, Variable: 2]
     /// @param assetId The id of the token to be swapped
     /// @param useDefaultMarket Whether to use the default market
@@ -32,7 +32,8 @@ contract SparkSwapBorrowRateMode is ActionBase, SparkHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.market = _parseParamAddr(inputData.market, _paramMapping[0], _subData, _returnValues);
+        inputData.market =
+            _parseParamAddr(inputData.market, _paramMapping[0], _subData, _returnValues);
 
         (, bytes memory logData) = _swapBorrowRate(inputData);
 
@@ -61,10 +62,7 @@ contract SparkSwapBorrowRateMode is ActionBase, SparkHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _swapBorrowRate(Params memory _inputData)
-        internal
-        returns (uint256, bytes memory)
-    {
+    function _swapBorrowRate(Params memory _inputData) internal returns (uint256, bytes memory) {
         ISparkPool lendingPool = getSparkLendingPool(_inputData.market);
         address tokenAddr = lendingPool.getReserveAddressById(_inputData.assetId);
         lendingPool.swapBorrowRateMode(tokenAddr, _inputData.rateMode);

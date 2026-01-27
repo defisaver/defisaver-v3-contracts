@@ -69,16 +69,6 @@ const adminAuthTest = async () => {
                 expectError(err.toString(), 'SenderNotOwner()');
             }
         });
-
-        it('... non admin should not be able to kill the contract', async () => {
-            try {
-                await adminAuth.kill();
-
-                expect(true).to.be(false);
-            } catch (err) {
-                expectError(err.toString(), 'SenderNotAdmin()');
-            }
-        });
     });
 };
 const adminVaultTest = async () => {
@@ -158,7 +148,7 @@ const dsProxyPermissionTest = async () => {
         let dsProxyPermission;
 
         before(async () => {
-            dsProxyPermission = await deployContract('DSProxyPermission');
+            dsProxyPermission = await deployContract('MockDSProxyPermission');
 
             ownerAcc1 = (await hre.ethers.getSigners())[0];
             ownerAcc2 = (await hre.ethers.getSigners())[1];
@@ -167,26 +157,32 @@ const dsProxyPermissionTest = async () => {
         });
 
         it('... should through DSProxy give contract permission', async () => {
-            const DSProxyPermission = await hre.ethers.getContractFactory('DSProxyPermission');
-            const functionData = DSProxyPermission.interface.encodeFunctionData(
+            const MockDSProxyPermission =
+                await hre.ethers.getContractFactory('MockDSProxyPermission');
+            const functionData = MockDSProxyPermission.interface.encodeFunctionData(
                 'giveProxyPermission',
                 [ownerAcc2.address],
             );
 
-            await proxy['execute(address,bytes)'](dsProxyPermission.address, functionData, { gasLimit: 1500000 });
+            await proxy['execute(address,bytes)'](dsProxyPermission.address, functionData, {
+                gasLimit: 1500000,
+            });
 
             const hasPermission = await getProxyAuth(proxy.address, ownerAcc2.address);
             expect(hasPermission).to.be.equal(true);
         });
 
         it('... should through DSProxy remove contract permission', async () => {
-            const DSProxyPermission = await hre.ethers.getContractFactory('DSProxyPermission');
-            const functionData = DSProxyPermission.interface.encodeFunctionData(
+            const MockDSProxyPermission =
+                await hre.ethers.getContractFactory('MockDSProxyPermission');
+            const functionData = MockDSProxyPermission.interface.encodeFunctionData(
                 'removeProxyPermission',
                 [ownerAcc2.address],
             );
 
-            await proxy['execute(address,bytes)'](dsProxyPermission.address, functionData, { gasLimit: 1500000 });
+            await proxy['execute(address,bytes)'](dsProxyPermission.address, functionData, {
+                gasLimit: 1500000,
+            });
 
             const hasPermission = await getProxyAuth(proxy.address, ownerAcc2.address);
             expect(hasPermission).to.be.equal(false);
@@ -203,7 +199,7 @@ const safeModulePermissionTest = async () => {
         let snapshotId;
 
         before(async () => {
-            modulePermissionContract = await redeploy('SafeModulePermission');
+            modulePermissionContract = await redeploy('MockSafeModulePermission');
 
             flAddr = await getAddrFromRegistry('FLAction');
 
@@ -215,8 +211,12 @@ const safeModulePermissionTest = async () => {
             safeInstance = await hre.ethers.getContractAt('ISafe', safeAddr);
         });
 
-        beforeEach(async () => { snapshotId = await takeSnapshot(); });
-        afterEach(async () => { await revertToSnapshot(snapshotId); });
+        beforeEach(async () => {
+            snapshotId = await takeSnapshot();
+        });
+        afterEach(async () => {
+            await revertToSnapshot(snapshotId);
+        });
 
         const enableSafeModule = async (moduleAddr) => {
             const enableModuleFuncData = modulePermissionContract.interface.encodeFunctionData(

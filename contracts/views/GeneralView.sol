@@ -1,22 +1,42 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { CheckWalletType } from "../utils/CheckWalletType.sol";
-import { IDSProxy } from "../interfaces/IDSProxy.sol";
-import { ISafe } from "../interfaces/safe/ISafe.sol";
+import { IInstaList } from "../interfaces/protocols/insta/IInstaList.sol";
+import {
+    IAccountImplementation
+} from "../interfaces/protocols/summerfi/IAccountImplementation.sol";
 
-contract GeneralView is CheckWalletType{
+import { SmartWalletUtils } from "../utils/SmartWalletUtils.sol";
+import { WalletType } from "../utils/DFSTypes.sol";
 
-    enum WalletType { DSPROXY, SAFE }
+contract GeneralView is SmartWalletUtils {
+    /// @notice Retrieves information about a smart wallet
+    /// @param _smartWalletAddress Address of the smart wallet
+    /// @return smartWalletType Type of the smart wallet
+    /// @return owner Address of the owner of the smart wallet
+    function getSmartWalletInfo(address _smartWalletAddress)
+        public
+        view
+        returns (WalletType smartWalletType, address owner)
+    {
+        smartWalletType = _getWalletType(_smartWalletAddress);
 
-    function getSmartWalletInfo(address smartWalletAddress) public view returns (WalletType smartWalletType, address owner) {
-        if (isDSProxy(smartWalletAddress))
-            return (WalletType.DSPROXY, IDSProxy(payable(smartWalletAddress)).owner());
+        // DSA Proxy accounts are intentionally handled separately from '_fetchOwnerOrWallet'
+        if (smartWalletType == WalletType.DSAPROXY) {
+            owner = _fetchDSAProxyOwner(_smartWalletAddress);
+        } else if (smartWalletType == WalletType.SFPROXY) {
+            owner = _fetchSFProxyOwner(_smartWalletAddress);
+        } else {
+            owner = _fetchOwnerOrWallet(_smartWalletAddress);
+        }
+    }
 
-        // if not DSProxy, we assume we are in context of Safe
-        smartWalletType = WalletType.SAFE;
+    function _fetchDSAProxyOwner(address _dsaProxy) internal view returns (address) {
+        uint64 dsaId = IInstaList(DSA_LIST_ADDR).accountID(_dsaProxy);
+        return IInstaList(DSA_LIST_ADDR).accountLink(dsaId).first;
+    }
 
-        address[] memory owners = ISafe(smartWalletAddress).getOwners();
-        owner = owners.length == 1 ? owners[0] : smartWalletAddress;
+    function _fetchSFProxyOwner(address _sfProxy) internal view returns (address) {
+        return IAccountImplementation(_sfProxy).owner();
     }
 }

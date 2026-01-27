@@ -1,7 +1,3 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-param-reassign */
-/* eslint-disable import/no-extraneous-dependencies */
 require('dotenv-safe').config();
 
 const ethers = require('ethers');
@@ -159,7 +155,11 @@ const addEntryCall = async (idOrName, contractAddr, waitTime, options) => {
     }
     console.log('\n');
 
-    const txData = registry.interface.encodeFunctionData('addNewContract', [id, contractAddr, waitTime]);
+    const txData = registry.interface.encodeFunctionData('addNewContract', [
+        id,
+        contractAddr,
+        waitTime,
+    ]);
 
     return {
         addr: addrs[network].REGISTRY_ADDR,
@@ -208,6 +208,8 @@ const registryDeploymentBlocks = {
     arbitrum: 12302244,
     base: 3654462,
     optimism: 8515878,
+    linea: 22860766,
+    plasma: 1942214,
 };
 
 const compareRegistryWithJson = async (options) => {
@@ -220,7 +222,19 @@ const compareRegistryWithJson = async (options) => {
 
     // fetch newContract events
     const filter = registry.filters.AddNewContract();
-    const events = await registry.queryFilter(filter, startingBlock);
+    let events = [];
+    const latestBlock = await registry.provider.getBlockNumber();
+    const batchSize = 50000;
+
+    if (latestBlock - startingBlock > batchSize) {
+        for (let i = startingBlock; i < latestBlock; i += batchSize) {
+            const end = Math.min(i + batchSize - 1, latestBlock);
+            const chunk = await registry.queryFilter(filter, i, end);
+            events = events.concat(chunk);
+        }
+    } else {
+        events = await registry.queryFilter(filter, startingBlock);
+    }
 
     // Get all registered contracts from on-chain events
     let registeredContracts = [];
@@ -230,9 +244,9 @@ const compareRegistryWithJson = async (options) => {
     });
 
     // Remove duplicates by id
-    registeredContracts = registeredContracts.filter((contract, index, self) => (
-        index === self.findIndex((c) => c.id === contract.id)
-    ));
+    registeredContracts = registeredContracts.filter(
+        (contract, index, self) => index === self.findIndex((c) => c.id === contract.id),
+    );
 
     // Read the JSON file for the network
     const jsonPath = join(__dirname, '..', 'addresses', `${network}.json`);
@@ -253,9 +267,9 @@ const compareRegistryWithJson = async (options) => {
     registeredContracts.forEach((contract) => {
         const jsonContract = jsonData.find((c) => c.id === contract.id);
         const hasMatchingAddr = (c) => c.address.toLowerCase() === contract.addr.toLowerCase();
-        const addrInHistory = (c) => c.history && c.history.some((addr) => (
-            addr.toLowerCase() === contract.addr.toLowerCase()
-        ));
+        const addrInHistory = (c) =>
+            c.history &&
+            c.history.some((addr) => addr.toLowerCase() === contract.addr.toLowerCase());
         const addressExists = jsonData.some((c) => hasMatchingAddr(c) || addrInHistory(c));
 
         if (!jsonContract) {
@@ -275,9 +289,7 @@ const compareRegistryWithJson = async (options) => {
 
             if (addressExists) {
                 // Find where this address exists
-                const existingEntry = jsonData.find((c) => (
-                    hasMatchingAddr(c) || addrInHistory(c)
-                ));
+                const existingEntry = jsonData.find((c) => hasMatchingAddr(c) || addrInHistory(c));
                 addressMatchContracts.push({
                     newEntry: entry,
                     existingEntry: {
@@ -318,7 +330,10 @@ const compareRegistryWithJson = async (options) => {
         });
 
         const answer = await new Promise((resolve) => {
-            rl.question('\nDo you want to update the JSON file with these entries? (y/N): ', resolve);
+            rl.question(
+                '\nDo you want to update the JSON file with these entries? (y/N): ',
+                resolve,
+            );
         });
         rl.close();
 
@@ -355,7 +370,19 @@ const checkChangeTimeMismatches = async (options) => {
 
     // fetch newContract events
     const filter = registry.filters.AddNewContract();
-    const events = await registry.queryFilter(filter, startingBlock);
+    let events = [];
+    const latestBlock = await registry.provider.getBlockNumber();
+    const batchSize = 50000;
+
+    if (latestBlock - startingBlock > batchSize) {
+        for (let i = startingBlock; i < latestBlock; i += batchSize) {
+            const end = Math.min(i + batchSize - 1, latestBlock);
+            const chunk = await registry.queryFilter(filter, i, end);
+            events = events.concat(chunk);
+        }
+    } else {
+        events = await registry.queryFilter(filter, startingBlock);
+    }
 
     // Get all registered contracts from on-chain events
     let registeredContracts = [];
@@ -365,9 +392,9 @@ const checkChangeTimeMismatches = async (options) => {
     });
 
     // Remove duplicates by id
-    registeredContracts = registeredContracts.filter((contract, index, self) => (
-        index === self.findIndex((c) => c.id === contract.id)
-    ));
+    registeredContracts = registeredContracts.filter(
+        (contract, index, self) => index === self.findIndex((c) => c.id === contract.id),
+    );
 
     // Read the JSON file for the network
     const jsonPath = join(__dirname, '..', 'addresses', `${network}.json`);
@@ -452,7 +479,7 @@ const checkChangeTimeMismatches = async (options) => {
         .option('-n, --network <network>', 'Specify network we are calling (defaults to L1)', [])
         .description('Return current state for the entry')
         .action(async (idOrName, options) => {
-            console.log((await getFullEntryData(idOrName, options)));
+            console.log(await getFullEntryData(idOrName, options));
             process.exit(0);
         });
 

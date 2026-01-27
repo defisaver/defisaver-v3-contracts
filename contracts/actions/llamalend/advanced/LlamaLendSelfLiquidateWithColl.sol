@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { LlamaLendHelper } from "../helpers/LlamaLendHelper.sol";
 import { LlamaLendSwapper } from "./LlamaLendSwapper.sol";
-import { ILlamaLendController } from "../../../interfaces/llamalend/ILlamaLendController.sol";
+import {
+    ILlamaLendController
+} from "../../../interfaces/protocols/llamalend/ILlamaLendController.sol";
 import { DFSExchangeData } from "../../../exchangeV3/DFSExchangeData.sol";
+import { DFSIds } from "../../../utils/DFSIds.sol";
 
 /// @title LlamaLendSelfLiquidateWithColl
 /// @dev if current debtToken coll > debt, callback address won't be called -> no swap will be done (any coll token and debt token will be send to params.to)
@@ -41,9 +44,12 @@ contract LlamaLendSelfLiquidateWithColl is ActionBase, LlamaLendHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
-        params.percentage = _parseParamUint(params.percentage, _paramMapping[1], _subData, _returnValues);
-        params.minCrvUsdExpected = _parseParamUint(params.minCrvUsdExpected, _paramMapping[2], _subData, _returnValues);
+        params.controllerAddress =
+            _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
+        params.percentage =
+            _parseParamUint(params.percentage, _paramMapping[1], _subData, _returnValues);
+        params.minCrvUsdExpected =
+            _parseParamUint(params.minCrvUsdExpected, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
 
         (uint256 generatedAmount, bytes memory logData) = _liquidate(params);
@@ -67,13 +73,15 @@ contract LlamaLendSelfLiquidateWithColl is ActionBase, LlamaLendHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _liquidate(Params memory _params) internal returns (uint256, bytes memory) {
-        if (!isControllerValid(_params.controllerAddress, _params.controllerId)) revert InvalidLlamaLendController();
-        address llamalendSwapper = registry.getAddr(LLAMALEND_SWAPPER_ID);
+        if (!isControllerValid(_params.controllerAddress, _params.controllerId)) {
+            revert InvalidLlamaLendController();
+        }
+        address llamalendSwapper = registry.getAddr(DFSIds.LLAMALEND_SWAPPER);
         uint256[] memory info = new uint256[](5);
         info[0] = _params.gasUsed;
         info[1] = _params.controllerId;
         if (_params.sellAllCollateral) info[2] = 1;
-        
+
         transientStorage.setBytesTransiently(abi.encode(_params.exData));
 
         address collToken = ILlamaLendController(_params.controllerAddress).collateral_token();
@@ -82,22 +90,34 @@ contract LlamaLendSelfLiquidateWithColl is ActionBase, LlamaLendHelper {
         uint256 debtStartingBalance = debtToken.getBalance(address(this));
         if (_params.controllerAddress == OLD_WETH_CONTROLLER && block.chainid == 1) {
             ILlamaLendController(_params.controllerAddress)
-            .liquidate_extended(address(this), _params.minCrvUsdExpected, _params.percentage, false, llamalendSwapper, info);
+                .liquidate_extended(
+                    address(this),
+                    _params.minCrvUsdExpected,
+                    _params.percentage,
+                    false,
+                    llamalendSwapper,
+                    info
+                );
         } else {
             ILlamaLendController(_params.controllerAddress)
-            .liquidate_extended(address(this), _params.minCrvUsdExpected, _params.percentage, llamalendSwapper, info);
+                .liquidate_extended(
+                    address(this),
+                    _params.minCrvUsdExpected,
+                    _params.percentage,
+                    llamalendSwapper,
+                    info
+                );
         }
-        
+
         // there shouldn't be any funds left on swapper contract but withdrawing it just in case
         LlamaLendSwapper(llamalendSwapper).withdrawAll(_params.controllerAddress);
 
         // there will usually be both coll token and debt token, unless we're selling all collateral
-        (, uint256 debtTokenReceived) = _sendLeftoverFunds(collToken, debtToken, collStartingBalance, debtStartingBalance, _params.to);
-    
-        return (
-            debtTokenReceived,
-            abi.encode(_params)
+        (, uint256 debtTokenReceived) = _sendLeftoverFunds(
+            collToken, debtToken, collStartingBalance, debtStartingBalance, _params.to
         );
+
+        return (debtTokenReceived, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

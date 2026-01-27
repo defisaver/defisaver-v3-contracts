@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { LiquityHelper } from "../helpers/LiquityHelper.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 
 /// @title Action for depositing LUSD tokens to the stability pool
@@ -15,10 +15,10 @@ contract LiquitySPDeposit is ActionBase, LiquityHelper {
     /// @param wethTo Address that will receive ETH(wrapped) gains
     /// @param lqtyTo Address that will receive LQTY token gains
     struct Params {
-        uint256 lusdAmount; 
-        address from;       
-        address wethTo;     
-        address lqtyTo;     
+        uint256 lusdAmount;
+        address from;
+        address wethTo;
+        address lqtyTo;
     }
 
     /// @inheritdoc ActionBase
@@ -29,7 +29,8 @@ contract LiquitySPDeposit is ActionBase, LiquityHelper {
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
-        params.lusdAmount = _parseParamUint(params.lusdAmount, _paramMapping[0], _subData, _returnValues);
+        params.lusdAmount =
+            _parseParamUint(params.lusdAmount, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.wethTo = _parseParamAddr(params.wethTo, _paramMapping[2], _subData, _returnValues);
         params.lqtyTo = _parseParamAddr(params.lqtyTo, _paramMapping[3], _subData, _returnValues);

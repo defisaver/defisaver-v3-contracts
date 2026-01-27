@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { CompHelper } from "./helpers/CompHelper.sol";
-import { IComptroller } from "../../interfaces/compound/IComptroller.sol";
+import { IComptroller } from "../../interfaces/protocols/compound/IComptroller.sol";
 
 /// @title Claims Comp reward for the specified user.
 contract CompClaim is ActionBase, CompHelper {
@@ -35,7 +35,8 @@ contract CompClaim is ActionBase, CompHelper {
         params.from = _parseParamAddr(params.from, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
 
-        (uint256 compClaimed, bytes memory logData) = _claim(params.cTokensSupply, params.cTokensBorrow, params.from, params.to);
+        (uint256 compClaimed, bytes memory logData) =
+            _claim(params.cTokensSupply, params.cTokensBorrow, params.from, params.to);
         emit ActionEvent("CompClaim", logData);
         return bytes32(compClaimed);
     }
@@ -43,7 +44,8 @@ contract CompClaim is ActionBase, CompHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _claim(params.cTokensSupply, params.cTokensBorrow, params.from, params.to);
+        (, bytes memory logData) =
+            _claim(params.cTokensSupply, params.cTokensBorrow, params.from, params.to);
         logger.logActionDirectEvent("CompClaim", logData);
     }
 

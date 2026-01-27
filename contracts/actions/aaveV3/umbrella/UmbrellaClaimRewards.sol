@@ -2,13 +2,14 @@
 
 pragma solidity =0.8.24;
 
-import { IUmbrellaRewardsController } from "../../../interfaces/aaveV3/IUmbrellaRewardsController.sol";
+import {
+    IUmbrellaRewardsController
+} from "../../../interfaces/protocols/aaveV3/IUmbrellaRewardsController.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { AaveV3Helper } from "../helpers/AaveV3Helper.sol";
 
 /// @title UmbrellaClaimRewards - Claim rewards from staking in Umbrella staking system
-contract UmbrellaClaimRewards is ActionBase, AaveV3Helper  {
-
+contract UmbrellaClaimRewards is ActionBase, AaveV3Helper {
     /// @param asset The asset to claim rewards from
     /// @param to The address to send the rewards to
     /// @param rewards The rewards to claim
@@ -50,16 +51,15 @@ contract UmbrellaClaimRewards is ActionBase, AaveV3Helper  {
     /*//////////////////////////////////////////////////////////////
                             ACTION LOGIC
     //////////////////////////////////////////////////////////////*/
-    function _claimRewards(
-        Params memory _params
-    ) internal returns (uint256[] memory, bytes memory) {
-        IUmbrellaRewardsController rewardsController = IUmbrellaRewardsController(UMBRELLA_REWARDS_CONTROLLER_ADDRESS);
+    function _claimRewards(Params memory _params)
+        internal
+        returns (uint256[] memory, bytes memory)
+    {
+        IUmbrellaRewardsController rewardsController =
+            IUmbrellaRewardsController(UMBRELLA_REWARDS_CONTROLLER_ADDRESS);
 
-        uint256[] memory amounts = rewardsController.claimSelectedRewards(
-            _params.asset,
-            _params.rewards,
-            _params.to
-        );
+        uint256[] memory amounts =
+            rewardsController.claimSelectedRewards(_params.asset, _params.rewards, _params.to);
 
         return (amounts, abi.encode(_params, amounts));
     }

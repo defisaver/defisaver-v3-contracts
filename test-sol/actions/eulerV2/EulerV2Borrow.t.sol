@@ -2,8 +2,8 @@
 
 pragma solidity =0.8.24;
 
-import { IEVault } from "../../../contracts/interfaces/eulerV2/IEVault.sol";
-import { IEVC } from "../../../contracts/interfaces/eulerV2/IEVC.sol";
+import { IEVault } from "../../../contracts/interfaces/protocols/eulerV2/IEVault.sol";
+import { IEVC } from "../../../contracts/interfaces/protocols/eulerV2/IEVC.sol";
 import { EulerV2Supply } from "../../../contracts/actions/eulerV2/EulerV2Supply.sol";
 import { EulerV2Borrow } from "../../../contracts/actions/eulerV2/EulerV2Borrow.sol";
 import { EulerV2TestHelper } from "./EulerV2TestHelper.t.sol";
@@ -12,7 +12,6 @@ import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { console } from "forge-std/console.sol";
 
 contract TestEulerV2Borrow is EulerV2TestHelper {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -54,8 +53,8 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
     ////////////////////////////////////////////////////////////////////////*/
     function test_should_borrow_on_main_account() public {
         address account = walletAddr;
-        uint256 supplyAmountInUsd = 100000;
-        uint256 borrowAmountInUsd = 50000;
+        uint256 supplyAmountInUsd = 100_000;
+        uint256 borrowAmountInUsd = 50_000;
         bool isDirect = false;
 
         _baseTest(account, supplyAmountInUsd, borrowAmountInUsd, isDirect);
@@ -63,7 +62,7 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
 
     function test_should_borrow_on_default_main_account() public {
         address account = address(0);
-        uint256 supplyAmountInUsd = 100000;
+        uint256 supplyAmountInUsd = 100_000;
         uint256 borrowAmountInUsd = 10;
         bool isDirect = false;
 
@@ -84,39 +83,21 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
         address supplyVault = E_WETH_2_GOVERNED;
         address borrowVault = E_USDC_2_GOVERNED;
 
-        uint256 supplyAmountInUsd = 100000;
-        uint256 firstBorrowAmountInUsd = 40000;
+        uint256 supplyAmountInUsd = 100_000;
+        uint256 firstBorrowAmountInUsd = 40_000;
         uint256 secondBorrowAmountInUsd = 5000;
 
         bool isDirect = true;
 
-        uint256 snapshotId = vm.snapshot();
+        uint256 snapshotId = vm.snapshotState();
 
-        _supplyToVault(
-            supplyVault,
-            account,
-            supplyAmountInUsd
-        );
+        _supplyToVault(supplyVault, account, supplyAmountInUsd);
 
-        _borrowFromVault(
-            TestConfig(
-                borrowVault,
-                account,
-                firstBorrowAmountInUsd,
-                isDirect
-            )
-        );
+        _borrowFromVault(TestConfig(borrowVault, account, firstBorrowAmountInUsd, isDirect));
 
-        _borrowFromVault(
-            TestConfig(
-                borrowVault,
-                account,
-                secondBorrowAmountInUsd,
-                isDirect
-            )
-        );
+        _borrowFromVault(TestConfig(borrowVault, account, secondBorrowAmountInUsd, isDirect));
 
-        vm.revertTo(snapshotId);
+        vm.revertToState(snapshotId);
     }
 
     function test_should_borrow_on_main_account_and_two_sub_accounts() public {
@@ -127,24 +108,13 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
 
         address supplyVault = E_USDC_2_GOVERNED;
         address borrowVault = E_WETH_2_GOVERNED;
-        uint256 supplyAmountInUsd = 40000;
-        uint256 borrowAmountInUsd = 15000;
+        uint256 supplyAmountInUsd = 40_000;
+        uint256 borrowAmountInUsd = 15_000;
         bool isDirect = true;
 
         for (uint256 i = 0; i < accounts.length; ++i) {
-            _supplyToVault(
-                supplyVault,
-                accounts[i],
-                supplyAmountInUsd
-            );
-            _borrowFromVault(
-                TestConfig(
-                    borrowVault,
-                    accounts[i],
-                    borrowAmountInUsd,
-                    isDirect
-                )
-            );
+            _supplyToVault(supplyVault, accounts[i], supplyAmountInUsd);
+            _borrowFromVault(TestConfig(borrowVault, accounts[i], borrowAmountInUsd, isDirect));
         }
     }
 
@@ -152,33 +122,25 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
         address account = walletAddr;
         bool isDirect = true;
 
-        uint256 supplyAmountInUsdFirstCollVault = 100000;
-        uint256 supplyAmountInUsdSecondCollVault = 100000;
-        uint256 borrowAmountInUsdBorrowVault = 60000;
+        uint256 supplyAmountInUsdFirstCollVault = 100_000;
+        uint256 supplyAmountInUsdSecondCollVault = 100_000;
+        uint256 borrowAmountInUsdBorrowVault = 60_000;
 
         address borrowVault = E_USDC_2_GOVERNED;
 
-        uint256 snapshotId = vm.snapshot();
+        uint256 snapshotId = vm.snapshotState();
 
         address[] memory supportedVaultCollaterals = IEVault(borrowVault).LTVList();
 
         if (supportedVaultCollaterals.length < 2) {
             console.log("Skipping test: Vault does not support two collaterals");
-            vm.revertTo(snapshotId);
+            vm.revertToState(snapshotId);
             return;
         }
 
-        _supplyToVault(
-            supportedVaultCollaterals[0],
-            account,
-            supplyAmountInUsdFirstCollVault
-        );
+        _supplyToVault(supportedVaultCollaterals[0], account, supplyAmountInUsdFirstCollVault);
 
-        _supplyToVault(
-            supportedVaultCollaterals[1],
-            account,
-            supplyAmountInUsdSecondCollVault
-        );
+        _supplyToVault(supportedVaultCollaterals[1], account, supplyAmountInUsdSecondCollVault);
 
         _borrowFromVault(
             TestConfig({
@@ -189,7 +151,7 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
             })
         );
 
-        vm.revertTo(snapshotId);
+        vm.revertToState(snapshotId);
     }
 
     function _baseTest(
@@ -199,17 +161,13 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
         bool _isDirect
     ) internal {
         for (uint256 i = 0; i < testPairs.length; ++i) {
-            uint256 snapshotId = vm.snapshot();
+            uint256 snapshotId = vm.snapshotState();
 
             TestPair memory testPair = testPairs[i];
             address supplyVault = testPair.supplyAsset;
             address borrowVault = testPair.borrowAsset;
 
-            _supplyToVault(
-                supplyVault,
-                _account,
-                _supplyAmountInUsd
-            );
+            _supplyToVault(supplyVault, _account, _supplyAmountInUsd);
 
             _borrowFromVault(
                 TestConfig({
@@ -220,7 +178,7 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
                 })
             );
 
-            vm.revertTo(snapshotId);
+            vm.revertToState(snapshotId);
         }
     }
 
@@ -229,12 +187,7 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
         uint256 borrowAmount = amountInUSDPrice(assetToken, _config.borrowAmountInUsd);
 
         bytes memory callData = executeActionCalldata(
-            eulerV2BorrowEncode(
-                _config.vault,
-                _config.account,
-                sender,
-                borrowAmount
-            ),
+            eulerV2BorrowEncode(_config.vault, _config.account, sender, borrowAmount),
             _config.isDirect
         );
 
@@ -253,27 +206,14 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
         assertTrue(IEVC(EVC_ADDR).isControllerEnabled(account, _config.vault));
     }
 
-    function _supplyToVault(
-        address _vault,
-        address _account,
-        uint256 _supplyAmountInUsd
-    ) internal {
+    function _supplyToVault(address _vault, address _account, uint256 _supplyAmountInUsd) internal {
         address assetToken = IEVault(_vault).asset();
         uint256 supplyAmount = amountInUSDPrice(assetToken, _supplyAmountInUsd);
 
         EulerV2Supply.Params memory supplyParams = EulerV2Supply.Params({
-            vault: _vault,
-            account: _account,
-            from: sender,
-            amount: supplyAmount,
-            enableAsColl: true
+            vault: _vault, account: _account, from: sender, amount: supplyAmount, enableAsColl: true
         });
 
-        executeEulerV2Supply(
-            supplyParams,
-            wallet,
-            false,
-            address(eulerV2Supply)
-        );
+        executeEulerV2Supply(supplyParams, wallet, false, address(eulerV2Supply));
     }
 }

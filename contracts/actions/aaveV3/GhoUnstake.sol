@@ -2,17 +2,16 @@
 
 pragma solidity =0.8.24;
 
-import { IStkAave } from "../../interfaces/aave/IStkAave.sol";
+import { IStkAave } from "../../interfaces/protocols/aave/IStkAave.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Action to unstake stkGHO tokens.
 /// @notice After AaveV3 Umbrella upgrade, cooldown period is set to 0.
 /// @notice For legacy reasons, unstaking will still require 2 calls to GhoUnstake.
 /// @notice One to start cooldown() with amount set to 0 and one to redeem() with amount set to the desired amount in the same block.
 contract GhoUnstake is ActionBase, AaveV3Helper {
-
     using TokenUtils for address;
 
     /// @param amount amount of stkGHO tokens to burn (max.uint to redeem whole balance, 0 to start cooldown period)
@@ -53,9 +52,10 @@ contract GhoUnstake is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _unstake(
-        Params memory _params
-    ) internal returns (uint256 unstakedAmount, bytes memory logData) {
+    function _unstake(Params memory _params)
+        internal
+        returns (uint256 unstakedAmount, bytes memory logData)
+    {
         if (_params.amount == 0) {
             IStkAave(STAKED_GHO_TOKEN).cooldown();
         } else {

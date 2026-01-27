@@ -2,12 +2,12 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
-import { IDebtToken } from "../../interfaces/aaveV3/IDebtToken.sol";
-import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
-import { DataTypes } from "../../interfaces/aaveV3/DataTypes.sol";
+import { IDebtToken } from "../../interfaces/protocols/aaveV3/IDebtToken.sol";
+import { IPoolV3 } from "../../interfaces/protocols/aaveV3/IPoolV3.sol";
+import { DataTypes } from "../../interfaces/protocols/aaveV3/DataTypes.sol";
 import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Delegate credit for someone to borrow on user's wallet behalf
@@ -16,7 +16,7 @@ contract AaveV3DelegateCredit is ActionBase, AaveV3Helper {
 
     uint256 internal constant STABLE_ID = 1;
     uint256 internal constant VARIABLE_ID = 2;
-    
+
     error NonExistantRateMode();
 
     /// @param amount Amount of tokens to delegate.
@@ -44,10 +44,18 @@ contract AaveV3DelegateCredit is ActionBase, AaveV3Helper {
         Params memory params = parseInputs(_callData);
 
         params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
-        params.delegatee = _parseParamAddr(params.delegatee, _paramMapping[1], _subData, _returnValues);
-        params.assetId = uint16(_parseParamUint(uint16(params.assetId), _paramMapping[2], _subData, _returnValues));
-        params.rateMode = uint8(_parseParamUint(uint8(params.rateMode), _paramMapping[3], _subData, _returnValues));
-        params.useDefaultMarket = _parseParamUint(params.useDefaultMarket ? 1 : 0, _paramMapping[4], _subData, _returnValues) == 1;
+        params.delegatee =
+            _parseParamAddr(params.delegatee, _paramMapping[1], _subData, _returnValues);
+        params.assetId = uint16(
+            _parseParamUint(uint16(params.assetId), _paramMapping[2], _subData, _returnValues)
+        );
+        params.rateMode = uint8(
+            _parseParamUint(uint8(params.rateMode), _paramMapping[3], _subData, _returnValues)
+        );
+        params.useDefaultMarket =
+            _parseParamUint(
+                    params.useDefaultMarket ? 1 : 0, _paramMapping[4], _subData, _returnValues
+                ) == 1;
         params.market = _parseParamAddr(params.market, _paramMapping[5], _subData, _returnValues);
 
         (bytes memory logData) = _delegate(params);
@@ -75,18 +83,17 @@ contract AaveV3DelegateCredit is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _delegate(Params memory _params)
-        internal
-        returns (bytes memory logData)
-    {
+    function _delegate(Params memory _params) internal returns (bytes memory logData) {
         IPoolV3 lendingPool = getLendingPool(_params.market);
         address tokenAddr = lendingPool.getReserveAddressById(_params.assetId);
         DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(tokenAddr);
 
-        if (_params.rateMode == VARIABLE_ID){
-            IDebtToken(reserveData.variableDebtTokenAddress).approveDelegation(_params.delegatee, _params.amount);
-        } else if (_params.rateMode == STABLE_ID){
-            IDebtToken(reserveData.stableDebtTokenAddress).approveDelegation(_params.delegatee, _params.amount);
+        if (_params.rateMode == VARIABLE_ID) {
+            IDebtToken(reserveData.variableDebtTokenAddress)
+                .approveDelegation(_params.delegatee, _params.amount);
+        } else if (_params.rateMode == STABLE_ID) {
+            IDebtToken(reserveData.stableDebtTokenAddress)
+                .approveDelegation(_params.delegatee, _params.amount);
         } else {
             revert NonExistantRateMode();
         }
@@ -99,7 +106,6 @@ contract AaveV3DelegateCredit is ActionBase, AaveV3Helper {
             params.market = DEFAULT_AAVE_MARKET;
         }
     }
-
 
     function encodeInputs(Params memory _params) public pure returns (bytes memory encodedInput) {
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
@@ -125,16 +131,25 @@ contract AaveV3DelegateCredit is ActionBase, AaveV3Helper {
             params.market = address(bytes20(_encodedInput[56:76]));
         }
     }
-    
-    function getCreditDelegation(address _market, uint16 _assetId, uint8 _rateMode, address _delegator, address _delegatee) public view returns (uint256 creditAvailable){
+
+    function getCreditDelegation(
+        address _market,
+        uint16 _assetId,
+        uint8 _rateMode,
+        address _delegator,
+        address _delegatee
+    ) public view returns (uint256 creditAvailable) {
         IPoolV3 lendingPool = getLendingPool(_market);
         address tokenAddr = lendingPool.getReserveAddressById(_assetId);
         DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(tokenAddr);
 
-        if (_rateMode == VARIABLE_ID){
-            return IDebtToken(reserveData.variableDebtTokenAddress).borrowAllowance(_delegator, _delegatee);
-        } else if (_rateMode == STABLE_ID){
-            return IDebtToken(reserveData.stableDebtTokenAddress).borrowAllowance(_delegator, _delegatee);
+        if (_rateMode == VARIABLE_ID) {
+            return IDebtToken(reserveData.variableDebtTokenAddress)
+                .borrowAllowance(_delegator, _delegatee);
+        } else if (_rateMode == STABLE_ID) {
+            return
+                IDebtToken(reserveData.stableDebtTokenAddress)
+                    .borrowAllowance(_delegator, _delegatee);
         } else {
             revert NonExistantRateMode();
         }

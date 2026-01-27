@@ -2,17 +2,19 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
-import { IStabilityPool } from "../../../contracts/interfaces/liquityV2/IStabilityPool.sol";
+import {
+    IAddressesRegistry
+} from "../../../contracts/interfaces/protocols/liquityV2/IAddressesRegistry.sol";
 import { LiquityV2View } from "../../../contracts/views/LiquityV2View.sol";
-import { LiquityV2SPDeposit } from "../../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPDeposit.sol";
+import {
+    LiquityV2SPDeposit
+} from "../../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPDeposit.sol";
 
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
-import {LiquityV2Utils} from "../../utils/liquityV2/LiquityV2Utils.sol";
+import { LiquityV2Utils } from "../../utils/liquityV2/LiquityV2Utils.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
 contract TestLiquityV2SPDeposit is LiquityV2ExecuteActions, LiquityV2Utils {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -84,25 +86,17 @@ contract TestLiquityV2SPDeposit is LiquityV2ExecuteActions, LiquityV2Utils {
 
     function _baseTest(bool _isDirect, bool _shouldClaim) public {
         for (uint256 i = 0; i < markets.length; i++) {
-            _spDeposit(
-                markets[i],
-                _isDirect,
-                _shouldClaim
-            );
+            _spDeposit(markets[i], _isDirect, _shouldClaim);
         }
     }
 
-    function _spDeposit(
-        IAddressesRegistry _market,
-        bool _isDirect,
-        bool _shouldClaim
-    ) internal {
+    function _spDeposit(IAddressesRegistry _market, bool _isDirect, bool _shouldClaim) internal {
         TestSPDepositLocalParams memory vars;
 
         vars.collToken = _market.collToken();
-        vars.depositAmount = amountInUSDPriceMock(BOLD, 10000, 1e8);
+        vars.depositAmount = amountInUSDPriceMock(BOLD, 10_000, 1e8);
         vars.stabilityPool = _market.stabilityPool();
-        vars.simulatedCollGain = 10000;
+        vars.simulatedCollGain = 10_000;
         _simulateCollGain(vars.stabilityPool, vars.simulatedCollGain, vars.collToken, walletAddr);
 
         give(BOLD, sender, vars.depositAmount);
@@ -110,38 +104,27 @@ contract TestLiquityV2SPDeposit is LiquityV2ExecuteActions, LiquityV2Utils {
 
         vars.executeActionCallData = executeActionCalldata(
             liquityV2SPDepositEncode(
-                address(_market),
-                sender,
-                sender,
-                sender,
-                vars.depositAmount,
-                false
+                address(_market), sender, sender, sender, vars.depositAmount, false
             ),
             _isDirect
         );
 
         wallet.execute(address(cut), vars.executeActionCallData, 0);
 
-        (vars.compoundedBOLD, vars.collGain, vars.boldGain) = viewContract
-            .getDepositorInfo(address(_market), walletAddr);
+        (vars.compoundedBOLD, vars.collGain, vars.boldGain) =
+            viewContract.getDepositorInfo(address(_market), walletAddr);
 
         if (!_shouldClaim) {
             assertEq(vars.compoundedBOLD, vars.depositAmount);
             assertGe(vars.collGain, 0);
             assertGe(vars.boldGain, 0);
-        } 
-        else {
+        } else {
             give(BOLD, sender, vars.depositAmount);
             approveAsSender(sender, BOLD, walletAddr, vars.depositAmount);
 
             vars.executeActionCallData = executeActionCalldata(
                 liquityV2SPDepositEncode(
-                    address(_market),
-                    sender,
-                    sender,
-                    sender,
-                    vars.depositAmount,
-                    true
+                    address(_market), sender, sender, sender, vars.depositAmount, true
                 ),
                 _isDirect
             );
@@ -153,11 +136,14 @@ contract TestLiquityV2SPDeposit is LiquityV2ExecuteActions, LiquityV2Utils {
 
             vars.senderCollBalanceAfter = balanceOf(vars.collToken, sender);
             vars.senderBoldBalanceAfter = balanceOf(BOLD, sender);
-            (vars.compoundedBOLDAfter, vars.collGainAfter, vars.boldGainAfter) = viewContract
-                .getDepositorInfo(address(_market), walletAddr);
+            (vars.compoundedBOLDAfter, vars.collGainAfter, vars.boldGainAfter) =
+                viewContract.getDepositorInfo(address(_market), walletAddr);
 
             assertEq(vars.senderCollBalanceAfter, vars.senderCollBalanceBefore + vars.collGain);
-            assertEq(vars.senderBoldBalanceAfter, vars.senderBoldBalanceBefore - vars.depositAmount + vars.boldGain);
+            assertEq(
+                vars.senderBoldBalanceAfter,
+                vars.senderBoldBalanceBefore - vars.depositAmount + vars.boldGain
+            );
             assertEq(vars.compoundedBOLDAfter, vars.compoundedBOLD + vars.depositAmount);
             assertEq(vars.collGainAfter, 0);
             assertEq(vars.boldGainAfter, 0);

@@ -2,7 +2,9 @@ const hre = require('hardhat');
 const { getAssetInfo } = require('@defisaver/tokens');
 const { topUp } = require('../../../scripts/utils/fork');
 const {
-    getProxy, addrs, getContractFromRegistry,
+    getProxy,
+    addrs,
+    getContractFromRegistry,
     getOwnerAddr,
     setBalance,
     BOLD_ADDR,
@@ -29,7 +31,7 @@ class BaseLiquityV2StrategyTest {
 
         await this.setUpCallers();
         await this.setUpContracts();
-        await this.addLiquidity();
+        // await this.addLiquidity();
         await addBotCaller(this.botAcc.address, this.isFork);
     }
 
@@ -56,10 +58,15 @@ class BaseLiquityV2StrategyTest {
     }
 
     async setUpContracts() {
-        const strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', addrs[network].STRATEGY_EXECUTOR_ADDR);
+        const strategyExecutor = await hre.ethers.getContractAt(
+            'StrategyExecutor',
+            addrs[network].STRATEGY_EXECUTOR_ADDR,
+        );
         this.contracts.strategyExecutor = strategyExecutor.connect(this.botAcc);
         this.contracts.flAction = await getContractFromRegistry('FLAction', this.isFork);
         this.contracts.view = await redeploy('LiquityV2View', this.isFork);
+        /*
+        redeploying this will break creation of new liquity troves (time travel)
         await redeploy('LiquityV2Open', this.isFork);
         await redeploy('LiquityV2RatioCheck', this.isFork);
         await redeploy('LiquityV2Borrow', this.isFork);
@@ -68,6 +75,13 @@ class BaseLiquityV2StrategyTest {
         await redeploy('LiquityV2Adjust', this.isFork);
         await redeploy('LiquityV2Withdraw', this.isFork);
         await redeploy('LiquityV2Payback', this.isFork);
+        await redeploy('LiquityV2AdjustInterestRate', this.isFork);
+        */
+        this.contracts.trigger = await redeploy(
+            'LiquityV2AdjustRateDebtInFrontTrigger',
+            this.isFork,
+        );
+        await redeploy('LiquityV2NewInterestRateChecker', this.isFork);
     }
 
     async addLiquidity() {
@@ -96,9 +110,9 @@ class BaseLiquityV2StrategyTest {
         );
     }
 
-    async openTrove(testPair, collAmount, debtAmount) {
+    async openTrove(testPair, collAmount, debtAmount, openInterestRate = 1) {
         const collAsset = getAssetInfo(testPair.supplyTokenSymbol);
-        const interestRate = hre.ethers.utils.parseUnits('1', 18);
+        const interestRate = hre.ethers.utils.parseUnits(openInterestRate.toString(), 16);
         const ownerIndex = 0;
 
         await liquityV2Open(
@@ -117,8 +131,8 @@ class BaseLiquityV2StrategyTest {
         );
 
         const encodedData = hre.ethers.utils.defaultAbiCoder.encode(
-            ['address', 'uint256'],
-            [this.proxy.address, ownerIndex],
+            ['address', 'address', 'uint256'],
+            [this.proxy.address, this.proxy.address, ownerIndex],
         );
         const troveId = hre.ethers.utils.keccak256(encodedData);
 

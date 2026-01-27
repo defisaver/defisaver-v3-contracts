@@ -3,10 +3,10 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { IPot } from "../../interfaces/mcd/IPot.sol";
-import { IDaiJoin } from "../../interfaces/mcd/IDaiJoin.sol";
+import { IPot } from "../../interfaces/protocols/mcd/IPot.sol";
+import { IDaiJoin } from "../../interfaces/protocols/mcd/IDaiJoin.sol";
 import { McdHelper } from "./helpers/McdHelper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Action for withdrawing DAI from Maker DSR
 contract McdDsrWithdraw is McdHelper, ActionBase {
@@ -52,7 +52,10 @@ contract McdDsrWithdraw is McdHelper, ActionBase {
         return (x * RAY + y - 1) / y;
     }
 
-    function _withdraw(Params memory _params) internal returns (uint256 withdrawn, bytes memory logData) {
+    function _withdraw(Params memory _params)
+        internal
+        returns (uint256 withdrawn, bytes memory logData)
+    {
         IPot pot = IPot(POT_ADDR);
 
         uint256 chi = (block.timestamp > pot.rho()) ? pot.drip() : pot.chi();
@@ -77,11 +80,7 @@ contract McdDsrWithdraw is McdHelper, ActionBase {
         withdrawn = _params.amount;
     }
 
-    function parseInputs(bytes memory _callData)
-        internal
-        pure
-        returns (Params memory inputData)
-    {
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
         inputData = abi.decode(_callData, (Params));
     }
 }

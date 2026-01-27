@@ -6,12 +6,13 @@ const {
     revertToSnapshot,
     getProxy,
     redeploy,
-    getOwnerAddr, setBalance, approve, getGasUsed,
+    getOwnerAddr,
+    setBalance,
+    approve,
+    getGasUsed,
 } = require('../../utils/utils');
 const { topUp } = require('../../../scripts/utils/fork');
-const {
-    getEulerV2TestPairs, eulerV2CreatePosition, EVC_ADDR,
-} = require('../../utils/eulerV2');
+const { getEulerV2TestPairs, eulerV2CreatePosition, EVC_ADDR } = require('../../utils/eulerV2');
 
 const eulerV2CreateTest = async (testPair) => {
     describe('EulerV2-Create-Compare', function () {
@@ -69,9 +70,18 @@ const eulerV2CreateTest = async (testPair) => {
             const borrowAmount = testPair.borrowAmount;
 
             const evcContract = await hre.ethers.getContractAt('IEVC', EVC_ADDR);
-            const erc4626Abi = [{
-                inputs: [{ internalType: 'uint256', name: 'amount', type: 'uint256' }, { internalType: 'address', name: 'receiver', type: 'address' }], name: 'deposit', outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }], stateMutability: 'nonpayable', type: 'function',
-            }];
+            const erc4626Abi = [
+                {
+                    inputs: [
+                        { internalType: 'uint256', name: 'amount', type: 'uint256' },
+                        { internalType: 'address', name: 'receiver', type: 'address' },
+                    ],
+                    name: 'deposit',
+                    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+                    stateMutability: 'nonpayable',
+                    type: 'function',
+                },
+            ];
             const depositVaultContract = await hre.ethers.getContractAt(erc4626Abi, supplyVault);
             const borrowVaultContract = await hre.ethers.getContractAt('IBorrowing', borrowVault);
 
@@ -84,45 +94,50 @@ const eulerV2CreateTest = async (testPair) => {
                 targetContract: EVC_ADDR,
                 onBehalfOfAccount: hre.ethers.constants.AddressZero,
                 value: 0,
-                data: evcContract.interface.encodeFunctionData(
-                    'enableCollateral',
-                    [account, supplyVault],
-                ),
+                data: evcContract.interface.encodeFunctionData('enableCollateral', [
+                    account,
+                    supplyVault,
+                ]),
             };
             const supplyCollateralCall = {
                 targetContract: supplyVault,
                 onBehalfOfAccount: account,
                 value: 0,
-                data: depositVaultContract.interface.encodeFunctionData(
-                    'deposit',
-                    [supplyAmount, account],
-                ),
+                data: depositVaultContract.interface.encodeFunctionData('deposit', [
+                    supplyAmount,
+                    account,
+                ]),
             };
             const enableControllerCall = {
                 targetContract: EVC_ADDR,
                 onBehalfOfAccount: hre.ethers.constants.AddressZero,
                 value: 0,
-                data: evcContract.interface.encodeFunctionData(
-                    'enableController',
-                    [account, borrowVault],
-                ),
+                data: evcContract.interface.encodeFunctionData('enableController', [
+                    account,
+                    borrowVault,
+                ]),
             };
             const borrowFromControllerCall = {
                 targetContract: borrowVault,
                 onBehalfOfAccount: account,
                 value: 0,
-                data: borrowVaultContract.interface.encodeFunctionData(
-                    'borrow',
-                    [borrowAmount, account],
-                ),
+                data: borrowVaultContract.interface.encodeFunctionData('borrow', [
+                    borrowAmount,
+                    account,
+                ]),
             };
 
-            const receipt = await evcContract.connect(senderAcc).batch([
-                enableCollateralCall,
-                supplyCollateralCall,
-                enableControllerCall,
-                borrowFromControllerCall,
-            ], { gasLimit: 2000000 });
+            const receipt = await evcContract
+                .connect(senderAcc)
+                .batch(
+                    [
+                        enableCollateralCall,
+                        supplyCollateralCall,
+                        enableControllerCall,
+                        borrowFromControllerCall,
+                    ],
+                    { gasLimit: 2000000 },
+                );
 
             const gasUsed = await getGasUsed(receipt);
             console.log(`Gas used using multi-call; ${gasUsed}`);

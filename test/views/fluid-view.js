@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const { network, redeploy } = require('../utils/utils');
 
 const TEST_DATA = {
@@ -55,7 +54,9 @@ const fluidViewTest = async () => {
             viewContract = await redeploy('FluidView', false);
         });
         it('... should call getUserPositions', async () => {
-            const userPositions = await viewContract.callStatic.getUserPositions(TEST_DATA[network].BORROW_USER);
+            const userPositions = await viewContract.callStatic.getUserPositions(
+                TEST_DATA[network].BORROW_USER,
+            );
             console.log(userPositions);
         });
         it('... should call getUserNftIds', async () => {
@@ -63,15 +64,21 @@ const fluidViewTest = async () => {
             console.log(userNftIds);
         });
         it('... should call getUserNftIdsWithVaultIds', async () => {
-            const userNftIdsWithVaultIds = await viewContract.getUserNftIdsWithVaultIds(TEST_DATA[network].BORROW_USER);
+            const userNftIdsWithVaultIds = await viewContract.getUserNftIdsWithVaultIds(
+                TEST_DATA[network].BORROW_USER,
+            );
             console.log(userNftIdsWithVaultIds);
         });
         it('... should call getPositionByNftId', async () => {
-            const positionByNftId = await viewContract.callStatic.getPositionByNftId(TEST_DATA[network].NFT_ID);
+            const positionByNftId = await viewContract.callStatic.getPositionByNftId(
+                TEST_DATA[network].NFT_ID,
+            );
             console.log(positionByNftId);
         });
         it('... should call getVaultData', async () => {
-            const vaultData = await viewContract.callStatic.getVaultData(TEST_DATA[network].VAULT_ADDR);
+            const vaultData = await viewContract.callStatic.getVaultData(
+                TEST_DATA[network].VAULT_ADDR,
+            );
             console.log(vaultData);
         });
         it('... should call getAllFTokens', async () => {
@@ -87,58 +94,83 @@ const fluidViewTest = async () => {
             console.log(allFTokensData);
         });
         it('... should call getUserEarnPosition', async () => {
-            const userEarnPosition = await viewContract.getUserEarnPosition(TEST_DATA[network].F_USDC_ADDR, TEST_DATA[network].EARN_USER);
+            const userEarnPosition = await viewContract.getUserEarnPosition(
+                TEST_DATA[network].F_USDC_ADDR,
+                TEST_DATA[network].EARN_USER,
+            );
             console.log(userEarnPosition);
         });
         it('... should call getUserEarnPositionWithFToken', async () => {
-            const userEarnPositionWithFToken = await viewContract.getUserEarnPositionWithFToken(TEST_DATA[network].F_USDC_ADDR, TEST_DATA[network].EARN_USER);
+            const userEarnPositionWithFToken = await viewContract.getUserEarnPositionWithFToken(
+                TEST_DATA[network].F_USDC_ADDR,
+                TEST_DATA[network].EARN_USER,
+            );
             console.log(userEarnPositionWithFToken);
         });
         it('... should call getAllUserEarnPositionsWithFTokens', async () => {
-            const allUserPositionsWithFTokens = await viewContract.getAllUserEarnPositionsWithFTokens(TEST_DATA[network].EARN_USER);
+            const allUserPositionsWithFTokens =
+                await viewContract.getAllUserEarnPositionsWithFTokens(TEST_DATA[network].EARN_USER);
             console.log(allUserPositionsWithFTokens);
         });
         it('... should call getVaultData for smart coll vault', async () => {
             if (isZeroAddress(TEST_DATA[network].SMART_COLL_VAULT)) return;
-            const vaultData = await viewContract.callStatic.getVaultData(TEST_DATA[network].SMART_COLL_VAULT);
+            const vaultData = await viewContract.callStatic.getVaultData(
+                TEST_DATA[network].SMART_COLL_VAULT,
+            );
             console.log(vaultData);
         });
         it('... should call getVaultData for smart debt vault', async () => {
             if (isZeroAddress(TEST_DATA[network].SMART_DEBT_VAULT)) return;
-            const vaultData = await viewContract.callStatic.getVaultData(TEST_DATA[network].SMART_DEBT_VAULT);
+            const vaultData = await viewContract.callStatic.getVaultData(
+                TEST_DATA[network].SMART_DEBT_VAULT,
+            );
             console.log(vaultData);
         });
         it('... should call getVaultData for smart coll and debt vault', async () => {
             if (isZeroAddress(TEST_DATA[network].SMART_COLL_DEBT_VAULT)) return;
-            const vaultData = await viewContract.callStatic.getVaultData(TEST_DATA[network].SMART_COLL_DEBT_VAULT);
+            const vaultData = await viewContract.callStatic.getVaultData(
+                TEST_DATA[network].SMART_COLL_DEBT_VAULT,
+            );
             console.log(vaultData);
         });
         it('... should call getVaultData for smart coll user', async () => {
             if (isZeroAddress(TEST_DATA[network].SMART_COLL_USER)) return;
-            const vaultData = await viewContract.callStatic.getUserPositions(TEST_DATA[network].SMART_COLL_USER);
+            const vaultData = await viewContract.callStatic.getUserPositions(
+                TEST_DATA[network].SMART_COLL_USER,
+            );
             console.log(vaultData);
         });
         it('... should call getVaultData for smart debt user', async () => {
             if (isZeroAddress(TEST_DATA[network].SMART_DEBT_USER)) return;
-            const vaultData = await viewContract.callStatic.getUserPositions(TEST_DATA[network].SMART_DEBT_USER);
+            const vaultData = await viewContract.callStatic.getUserPositions(
+                TEST_DATA[network].SMART_DEBT_USER,
+            );
             console.log(vaultData);
         });
         it('... should call getVaultData for smart coll and debt user', async () => {
             if (isZeroAddress(TEST_DATA[network].SMART_COLL_DEBT_USER)) return;
-            const vaultData = await viewContract.callStatic.getUserPositions(TEST_DATA[network].SMART_COLL_DEBT_USER);
+            const vaultData = await viewContract.callStatic.getUserPositions(
+                TEST_DATA[network].SMART_COLL_DEBT_USER,
+            );
             console.log(vaultData);
         });
         it('... get dex shares rates', async () => {
             if (!isZeroAddress(TEST_DATA[network].SMART_COLL_VAULT)) {
-                const smartCollVaultRates = await viewContract.callStatic.getDexShareRates(TEST_DATA[network].SMART_COLL_VAULT);
+                const smartCollVaultRates = await viewContract.callStatic.getDexShareRates(
+                    TEST_DATA[network].SMART_COLL_VAULT,
+                );
                 console.log(smartCollVaultRates);
             }
             if (!isZeroAddress(TEST_DATA[network].SMART_DEBT_VAULT)) {
-                const smartDebtVaultRates = await viewContract.callStatic.getDexShareRates(TEST_DATA[network].SMART_DEBT_VAULT);
+                const smartDebtVaultRates = await viewContract.callStatic.getDexShareRates(
+                    TEST_DATA[network].SMART_DEBT_VAULT,
+                );
                 console.log(smartDebtVaultRates);
             }
             if (!isZeroAddress(TEST_DATA[network].SMART_COLL_DEBT_VAULT)) {
-                const smartCollDebtVaultRates = await viewContract.callStatic.getDexShareRates(TEST_DATA[network].SMART_COLL_DEBT_VAULT);
+                const smartCollDebtVaultRates = await viewContract.callStatic.getDexShareRates(
+                    TEST_DATA[network].SMART_COLL_DEBT_VAULT,
+                );
                 console.log(smartCollDebtVaultRates);
             }
         });

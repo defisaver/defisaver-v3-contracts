@@ -5,10 +5,17 @@ const { deployLiquityV2RepayBundle, getLiquityV2TestPairs } = require('../../uti
 const { BaseLiquityV2StrategyTest } = require('./common');
 const { subLiquityV2RepayBundle } = require('../utils/strategy-subs');
 const {
-    formatExchangeObjSdk, BOLD_ADDR, addrs, network, isNetworkFork,
+    formatExchangeObjSdk,
+    BOLD_ADDR,
+    addrs,
+    network,
+    isNetworkFork,
     fetchAmountInUSDPrice,
 } = require('../../utils/utils');
-const { callLiquityV2RepayStrategy, callLiquityV2FLRepayStrategy } = require('../utils/strategy-calls');
+const {
+    callLiquityV2RepayStrategy,
+    callLiquityV2FLRepayStrategy,
+} = require('../utils/strategy-calls');
 
 class RepayTest extends BaseLiquityV2StrategyTest {
     async setUp() {
@@ -65,10 +72,7 @@ class RepayTest extends BaseLiquityV2StrategyTest {
                     repayAmount,
                 );
 
-                const troveInfoAfter = await this.contracts.view.getTroveInfo(
-                    pair.market,
-                    troveId,
-                );
+                const troveInfoAfter = await this.contracts.view.getTroveInfo(pair.market, troveId);
                 const ratioAfter = troveInfoAfter.TCRatio;
                 console.log('Trove ratio after:', ratioAfter.toString());
 
@@ -122,10 +126,7 @@ class RepayTest extends BaseLiquityV2StrategyTest {
                     this.contracts.flAction.address,
                 );
 
-                const troveInfoAfter = await this.contracts.view.getTroveInfo(
-                    pair.market,
-                    troveId,
-                );
+                const troveInfoAfter = await this.contracts.view.getTroveInfo(pair.market, troveId);
                 const ratioAfter = troveInfoAfter.TCRatio;
                 console.log('ratioAfter', ratioAfter.toString());
 
@@ -141,9 +142,15 @@ module.exports = async function runRepayTests() {
     const repayTest = new RepayTest(testPairs, isFork);
     describe('LiquityV2 Repay Strategy Tests', function () {
         this.timeout(1200000);
-        before(async () => { await repayTest.setUp(); });
-        beforeEach(async () => { await repayTest.takeSnapshot(); });
-        afterEach(async () => { await repayTest.revertToSnapshot(); });
+        before(async () => {
+            await repayTest.setUp();
+        });
+        beforeEach(async () => {
+            await repayTest.takeSnapshot();
+        });
+        afterEach(async () => {
+            await repayTest.revertToSnapshot();
+        });
         repayTest.runTests();
     });
 };

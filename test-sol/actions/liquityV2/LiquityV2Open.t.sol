@@ -2,12 +2,13 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
-import { ITroveManager } from "../../../contracts/interfaces/liquityV2/ITroveManager.sol";
-import { IHintHelpers } from "../../../contracts/interfaces/liquityV2/IHintHelpers.sol";
-import { IPriceFeed } from "../../../contracts/interfaces/liquityV2/IPriceFeed.sol";
-import { ITroveNFT } from "../../../contracts/interfaces/liquityV2/ITroveNFT.sol";
-import { IBorrowerOperations } from "../../../contracts/interfaces/liquityV2/IBorrowerOperations.sol";
+import {
+    IAddressesRegistry
+} from "../../../contracts/interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import { ITroveManager } from "../../../contracts/interfaces/protocols/liquityV2/ITroveManager.sol";
+import { IHintHelpers } from "../../../contracts/interfaces/protocols/liquityV2/IHintHelpers.sol";
+import { IPriceFeed } from "../../../contracts/interfaces/protocols/liquityV2/IPriceFeed.sol";
+import { ITroveNFT } from "../../../contracts/interfaces/protocols/liquityV2/ITroveNFT.sol";
 import { LiquityV2Open } from "../../../contracts/actions/liquityV2/trove/LiquityV2Open.sol";
 import { LiquityV2View } from "../../../contracts/views/LiquityV2View.sol";
 
@@ -15,10 +16,8 @@ import { LiquityV2TestHelper } from "./LiquityV2TestHelper.t.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
-import { console2 } from "forge-std/console2.sol";
 
 contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -74,12 +73,13 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
                 takeMaxUint256: false,
                 interestRateManager: address(0),
                 annualInterestRate: 1e18 / 100, // 1%
-                collateralAmountInUSD: 30000,
-                borrowAmountInUSD: 10000,
+                collateralAmountInUSD: 30_000,
+                borrowAmountInUSD: 10_000,
                 senderHasEnoughForCollAndGas: true
             })
         );
     }
+
     function test_should_open_trove_with_batch_manager() public {
         _baseTest(
             TestConfig({
@@ -87,12 +87,13 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
                 takeMaxUint256: false,
                 interestRateManager: address(0xdeadbeef),
                 annualInterestRate: 0,
-                collateralAmountInUSD: 30000,
-                borrowAmountInUSD: 10000,
+                collateralAmountInUSD: 30_000,
+                borrowAmountInUSD: 10_000,
                 senderHasEnoughForCollAndGas: true
             })
         );
     }
+
     function test_should_open_trove_with_action_direct() public {
         _baseTest(
             TestConfig({
@@ -100,12 +101,13 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
                 takeMaxUint256: false,
                 interestRateManager: address(0),
                 annualInterestRate: 1e18 / 100, // 1%
-                collateralAmountInUSD: 30000,
-                borrowAmountInUSD: 10000,
+                collateralAmountInUSD: 30_000,
+                borrowAmountInUSD: 10_000,
                 senderHasEnoughForCollAndGas: true
             })
         );
     }
+
     function test_should_open_trove_with_maxUint256_pull() public {
         _baseTest(
             TestConfig({
@@ -113,12 +115,13 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
                 takeMaxUint256: true,
                 interestRateManager: address(0),
                 annualInterestRate: 1e18 / 100, // 1%
-                collateralAmountInUSD: 30000,
-                borrowAmountInUSD: 10000,
+                collateralAmountInUSD: 30_000,
+                borrowAmountInUSD: 10_000,
                 senderHasEnoughForCollAndGas: true
             })
         );
     }
+
     function test_should_fail_to_open_trove_with_maxUint256_pull() public {
         _baseTest(
             TestConfig({
@@ -126,18 +129,19 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
                 takeMaxUint256: true,
                 interestRateManager: address(0),
                 annualInterestRate: 1e18 / 100, // 1%
-                collateralAmountInUSD: 30000,
-                borrowAmountInUSD: 10000,
+                collateralAmountInUSD: 30_000,
+                borrowAmountInUSD: 10_000,
                 senderHasEnoughForCollAndGas: false
             })
         );
     }
 
     function _baseTest(TestConfig memory _config) internal {
-        for (uint i = 0; i < markets.length; i++) {
-
+        for (uint256 i = 0; i < markets.length; i++) {
             if (_config.interestRateManager != address(0)) {
-                _registerBatchManager(markets[i], _config.interestRateManager);
+                vm.startPrank(_config.interestRateManager);
+                registerBatchManager(markets[i]);
+                vm.stopPrank();
             }
 
             IAddressesRegistry market = markets[i];
@@ -148,26 +152,25 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
                 ? uint256(1e18 / 10)
                 : _config.annualInterestRate;
 
-            (uint256 upperHint, uint256 lowerHint) = getInsertPosition(
-                liquityV2View,
-                markets[i],
-                i,
-                interestRate
-            );
+            (uint256 upperHint, uint256 lowerHint) =
+                getInsertPosition(liquityV2View, markets[i], i, interestRate);
 
             uint256 collPriceWAD = IPriceFeed(market.priceFeed()).lastGoodPrice();
-            uint256 collAmount = amountInUSDPriceMock(collToken, _config.collateralAmountInUSD, collPriceWAD / 1e10);
+            uint256 collAmount =
+                amountInUSDPriceMock(collToken, _config.collateralAmountInUSD, collPriceWAD / 1e10);
             uint256 borrowAmount = amountInUSDPriceMock(BOLD, _config.borrowAmountInUSD, 1e8);
 
             uint256 predictMaxUpfrontFee = _config.interestRateManager != address(0)
-                ? hintHelpers.predictOpenTroveAndJoinBatchUpfrontFee(i, borrowAmount, _config.interestRateManager)
+                ? hintHelpers.predictOpenTroveAndJoinBatchUpfrontFee(
+                    i, borrowAmount, _config.interestRateManager
+                )
                 : hintHelpers.predictOpenTroveUpfrontFee(i, borrowAmount, interestRate);
 
             LiquityV2Open.Params memory params = LiquityV2Open.Params({
                 market: address(market),
                 from: sender,
                 to: sender,
-                interestBatchManager:  _config.interestRateManager,
+                interestBatchManager: _config.interestRateManager,
                 ownerIndex: 0,
                 collAmount: collAmount,
                 boldAmount: borrowAmount,
@@ -190,8 +193,7 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
             if (_config.senderHasEnoughForCollAndGas) {
                 give(WETH, sender, _params.collAmount + ETH_GAS_COMPENSATION);
                 approveAsSender(sender, WETH, walletAddr, _params.collAmount + ETH_GAS_COMPENSATION);
-            }
-            else {
+            } else {
                 // not enough WETH for gas compensation. This should revert
                 give(WETH, sender, ETH_GAS_COMPENSATION - 1);
                 approveAsSender(sender, WETH, walletAddr, ETH_GAS_COMPENSATION - 1);
@@ -236,7 +238,10 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
         uint256 senderCollBalanceAfter = balanceOf(_collToken, sender);
 
         if (_collToken == WETH) {
-            assertEq(senderWethBalanceBefore - senderWethBalanceAfter, _params.collAmount + ETH_GAS_COMPENSATION);
+            assertEq(
+                senderWethBalanceBefore - senderWethBalanceAfter,
+                _params.collAmount + ETH_GAS_COMPENSATION
+            );
         } else {
             assertEq(senderCollBalanceBefore - senderCollBalanceAfter, _params.collAmount);
             assertEq(senderWethBalanceBefore - senderWethBalanceAfter, ETH_GAS_COMPENSATION);
@@ -244,7 +249,8 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
 
         uint256 troveId = uint256(keccak256(abi.encode(walletAddr, walletAddr, 0)));
 
-        LiquityV2View.TroveData memory troveData = liquityV2View.getTroveInfo(_params.market, troveId);
+        LiquityV2View.TroveData memory troveData =
+            liquityV2View.getTroveInfo(_params.market, troveId);
 
         assertEq(uint256(troveData.status), uint256(ITroveManager.Status.active));
         assertEq(troveData.collAmount, _params.collAmount);
@@ -254,25 +260,5 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
 
         ITroveNFT troveNft = ITroveNFT(IAddressesRegistry(_params.market).troveNFT());
         assertEq(troveNft.ownerOf(troveId), walletAddr);
-    }
-
-    function _registerBatchManager(IAddressesRegistry _market, address _batchManager) internal {
-        IBorrowerOperations borrowerOperations = IBorrowerOperations(_market.borrowerOperations());
-        
-        uint128 minInterestRate = 1e18 / 100; // 1%
-        uint128 maxInterestRate = 1e18 / 4; // 25%
-        uint128 currentInterestRate = 1e18 / 10; // 10%
-        uint128 fee = 1e18 / 100; // 1%
-        uint128 minInterestRateChangePeriod = 7 days;
-
-        vm.prank(_batchManager);
-        borrowerOperations.registerBatchManager(
-            minInterestRate,
-            maxInterestRate,
-            currentInterestRate,
-            fee,
-            minInterestRateChangePeriod
-        );
-        vm.stopPrank();
     }
 }

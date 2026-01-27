@@ -2,13 +2,15 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../interfaces/liquityV2/IAddressesRegistry.sol";
-import { IBorrowerOperations } from "../../../interfaces/liquityV2/IBorrowerOperations.sol";
-import { ITroveManager } from "../../../interfaces/liquityV2/ITroveManager.sol";
+import { IAddressesRegistry } from "../../../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import {
+    IBorrowerOperations
+} from "../../../interfaces/protocols/liquityV2/IBorrowerOperations.sol";
+import { ITroveManager } from "../../../interfaces/protocols/liquityV2/ITroveManager.sol";
 
 import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Closes a LiquityV2 trove on a specific market
 /// @notice Upon closing a trove on LiquityV2, fixed fee of 0.0375 WETH during opening is returned to the user
@@ -65,8 +67,8 @@ contract LiquityV2Close is ActionBase, LiquityV2Helper {
         address borrowerOperations = IAddressesRegistry(_params.market).borrowerOperations();
         address troveManager = IAddressesRegistry(_params.market).troveManager();
 
-        ITroveManager.LatestTroveData memory troveData = ITroveManager(troveManager)
-            .getLatestTroveData(_params.troveId);
+        ITroveManager.LatestTroveData memory troveData =
+            ITroveManager(troveManager).getLatestTroveData(_params.troveId);
 
         BOLD_ADDR.pullTokensIfNeeded(_params.from, troveData.entireDebt);
 

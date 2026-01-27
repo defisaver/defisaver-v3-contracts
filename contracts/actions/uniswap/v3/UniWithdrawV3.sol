@@ -2,12 +2,14 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { UniV3Helper } from "./helpers/UniV3Helper.sol";
-import { IUniswapV3NonfungiblePositionManager } from "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
+import {
+    IUniswapV3NonfungiblePositionManager
+} from "../../../interfaces/protocols/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
 
 /// @title Decreases liquidity from a position represented by tokenID, and collects tokensOwed from position to recipient
-contract UniWithdrawV3 is ActionBase, UniV3Helper{
+contract UniWithdrawV3 is ActionBase, UniV3Helper {
     using TokenUtils for address;
 
     /// @param tokenId - The ID of the token for which liquidity is being decreased
@@ -18,7 +20,7 @@ contract UniWithdrawV3 is ActionBase, UniV3Helper{
     /// @param recipient - accounts to receive the tokens
     /// @param amount0Max - The maximum amount of token0 to collect
     /// @param amount1Max - The maximum amount of token1 to collect
-    struct Params{
+    struct Params {
         uint256 tokenId;
         uint128 liquidity;
         uint256 amount0Min;
@@ -38,10 +40,12 @@ contract UniWithdrawV3 is ActionBase, UniV3Helper{
     ) public payable virtual override returns (bytes32) {
         Params memory uniData = parseInputs(_callData);
 
-        uniData.tokenId = _parseParamUint(uniData.tokenId, _paramMapping[0], _subData, _returnValues);
-        uniData.liquidity = uint128(_parseParamUint(uniData.liquidity, _paramMapping[1], _subData, _returnValues));
+        uniData.tokenId =
+            _parseParamUint(uniData.tokenId, _paramMapping[0], _subData, _returnValues);
+        uniData.liquidity =
+            uint128(_parseParamUint(uniData.liquidity, _paramMapping[1], _subData, _returnValues));
 
-        (uint256 amount0, , bytes memory logData) = _uniWithdrawFromPosition(uniData);
+        (uint256 amount0,, bytes memory logData) = _uniWithdrawFromPosition(uniData);
         emit ActionEvent("UniWithdrawV3", logData);
         return bytes32(amount0);
     }
@@ -49,7 +53,7 @@ contract UniWithdrawV3 is ActionBase, UniV3Helper{
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory uniData = parseInputs(_callData);
-        (, , bytes memory logData) = _uniWithdrawFromPosition(uniData);
+        (,, bytes memory logData) = _uniWithdrawFromPosition(uniData);
         logger.logActionDirectEvent("UniWithdrawV3", logData);
     }
 
@@ -63,13 +67,13 @@ contract UniWithdrawV3 is ActionBase, UniV3Helper{
     /// @return amount0 amounts of token0 and token1 collected and sent to the recipient
     function _uniWithdrawFromPosition(Params memory _uniData)
         internal
-        returns(uint256 amount0, uint256 amount1, bytes memory logData)
+        returns (uint256 amount0, uint256 amount1, bytes memory logData)
     {
         //amount0 and amount1 now transfer to tokensOwed on position
         _uniWithdraw(_uniData);
 
         (amount0, amount1) = _uniCollect(_uniData);
-    
+
         logData = abi.encode(_uniData, amount0, amount1);
     }
 
@@ -77,12 +81,10 @@ contract UniWithdrawV3 is ActionBase, UniV3Helper{
     /// @return amount0 returns how much tokens were added to tokensOwed on position
     function _uniWithdraw(Params memory _uniData)
         internal
-        returns (
-            uint256 amount0,
-            uint256 amount1
-        )
+        returns (uint256 amount0, uint256 amount1)
     {
-        IUniswapV3NonfungiblePositionManager.DecreaseLiquidityParams memory decreaseLiquidityParams = 
+        IUniswapV3NonfungiblePositionManager.DecreaseLiquidityParams memory
+            decreaseLiquidityParams =
             IUniswapV3NonfungiblePositionManager.DecreaseLiquidityParams({
                 tokenId: _uniData.tokenId,
                 liquidity: _uniData.liquidity,
@@ -92,33 +94,24 @@ contract UniWithdrawV3 is ActionBase, UniV3Helper{
             });
         (amount0, amount1) = positionManager.decreaseLiquidity(decreaseLiquidityParams);
     }
-    
+
     /// @dev collects from tokensOwed on position, sends to recipient, up to amountMax
     /// @return amount0 amount sent to the recipient
     function _uniCollect(Params memory _uniData)
         internal
-        returns (
-            uint256 amount0,
-            uint256 amount1
-        )
+        returns (uint256 amount0, uint256 amount1)
     {
-        IUniswapV3NonfungiblePositionManager.CollectParams memory collectParams = 
-            IUniswapV3NonfungiblePositionManager.CollectParams({
-                tokenId: _uniData.tokenId,
-                recipient: _uniData.recipient,
-                amount0Max: _uniData.amount0Max,
-                amount1Max: _uniData.amount1Max
-            });
+        IUniswapV3NonfungiblePositionManager.CollectParams memory
+            collectParams = IUniswapV3NonfungiblePositionManager.CollectParams({
+            tokenId: _uniData.tokenId,
+            recipient: _uniData.recipient,
+            amount0Max: _uniData.amount0Max,
+            amount1Max: _uniData.amount1Max
+        });
         (amount0, amount1) = positionManager.collect(collectParams);
     }
-        
-    function parseInputs(bytes memory _callData)
-       public
-        pure
-        returns (
-            Params memory uniData
-        )
-    {
+
+    function parseInputs(bytes memory _callData) public pure returns (Params memory uniData) {
         uniData = abi.decode(_callData, (Params));
     }
 }

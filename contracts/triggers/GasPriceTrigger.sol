@@ -3,11 +3,10 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
 
 /// @title Trigger contract that verifies if the current gas price of tx is lower than the max allowed gas price
 contract GasPriceTrigger is ITrigger, AdminAuth {
-
     /// @param maxGasPrice max gas price that represents the triggerable point
     struct SubParams {
         uint256 maxGasPrice;
@@ -20,11 +19,10 @@ contract GasPriceTrigger is ITrigger, AdminAuth {
 
         return false;
     }
-    
-    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {
-    }
-    
-    function isChangeable() public pure override returns (bool){
+
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
+
+    function isChangeable() public pure override returns (bool) {
         return false;
     }
 

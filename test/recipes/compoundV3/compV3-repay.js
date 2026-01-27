@@ -56,12 +56,7 @@ describe('CompoundV3 Repay recipe test', function () {
             );
 
             // Supply action
-            await supplyCompV3(
-                proxy,
-                tokenData.address,
-                colAmount,
-                senderAcc.address,
-            );
+            await supplyCompV3(proxy, tokenData.address, colAmount, senderAcc.address);
 
             const borrowingAmount = hre.ethers.utils.parseUnits(
                 fetchAmountinUSDPrice('USDC', '2000'),
@@ -136,12 +131,7 @@ describe('CompoundV3 Repay recipe test', function () {
             );
 
             // Supply action
-            await supplyCompV3(
-                proxy,
-                tokenData.address,
-                colAmount,
-                senderAcc.address,
-            );
+            await supplyCompV3(proxy, tokenData.address, colAmount, senderAcc.address);
 
             const borrowingAmount = hre.ethers.utils.parseUnits(
                 fetchAmountinUSDPrice('USDC', '2000'),

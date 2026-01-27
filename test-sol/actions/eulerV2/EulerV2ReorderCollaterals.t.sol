@@ -2,15 +2,18 @@
 
 pragma solidity =0.8.24;
 
-import { IEVC } from "../../../contracts/interfaces/eulerV2/IEVC.sol";
+import { IEVC } from "../../../contracts/interfaces/protocols/eulerV2/IEVC.sol";
 import { EulerV2TestHelper } from "./EulerV2TestHelper.t.sol";
-import {EulerV2CollateralSwitch} from "../../../contracts/actions/eulerV2/EulerV2CollateralSwitch.sol";
-import {EulerV2ReorderCollaterals} from "../../../contracts/actions/eulerV2/EulerV2ReorderCollaterals.sol";
+import {
+    EulerV2CollateralSwitch
+} from "../../../contracts/actions/eulerV2/EulerV2CollateralSwitch.sol";
+import {
+    EulerV2ReorderCollaterals
+} from "../../../contracts/actions/eulerV2/EulerV2ReorderCollaterals.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
 contract TestEulerV2ReorderCollaterals is EulerV2TestHelper {
-    
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -41,7 +44,7 @@ contract TestEulerV2ReorderCollaterals is EulerV2TestHelper {
     /*//////////////////////////////////////////////////////////////////////////
                                       TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function test_should_reorder_collaterals_on_main_account() public  revertToSnapshot {
+    function test_should_reorder_collaterals_on_main_account() public revertToSnapshot {
         address account = walletAddr;
         bool isDirect = false;
         address firstCollateral = E_USDC_2_GOVERNED;
@@ -64,7 +67,10 @@ contract TestEulerV2ReorderCollaterals is EulerV2TestHelper {
         _baseTest(account, indexes, expectedOrderedCollaterals, isDirect);
     }
 
-    function test_should_reorder_collaterals_on_default_account_with_action_direct() public revertToSnapshot {
+    function test_should_reorder_collaterals_on_default_account_with_action_direct()
+        public
+        revertToSnapshot
+    {
         address account = address(0);
         bool isDirect = true;
         address firstCollateral = E_USDC_2_GOVERNED;
@@ -137,11 +143,7 @@ contract TestEulerV2ReorderCollaterals is EulerV2TestHelper {
         bool _isDirect
     ) internal {
         bytes memory executeActionCallData = executeActionCalldata(
-            eulerV2ReorderCollaterals(
-                _account,
-                _indexes
-            ),
-            _isDirect
+            eulerV2ReorderCollaterals(_account, _indexes), _isDirect
         );
 
         address account = _account == address(0) ? walletAddr : _account;
@@ -156,14 +158,8 @@ contract TestEulerV2ReorderCollaterals is EulerV2TestHelper {
     }
 
     function _enableCollateral(address _account, address _vault) internal {
-        bytes memory executeActionCallData = executeActionCalldata(
-            eulerV2CollateralSwitchEncode(
-                _vault,
-                _account,
-                true
-            ),
-            true
-        );
+        bytes memory executeActionCallData =
+            executeActionCalldata(eulerV2CollateralSwitchEncode(_vault, _account, true), true);
         wallet.execute(address(collateralSwitch), executeActionCallData, 0);
     }
 }

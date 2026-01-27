@@ -2,19 +2,20 @@
 
 pragma solidity =0.8.24;
 
-import { ITxSaverBytesTransientStorage } from "../interfaces/ITxSaverBytesTransientStorage.sol";
+import {
+    ITxSaverBytesTransientStorage
+} from "../interfaces/core/ITxSaverBytesTransientStorage.sol";
 
 /// @title Used to store TxSaver data in a transaction
 /// @dev Only TxSaverExecutor can store data, and anyone can read it
 contract TxSaverBytesTransientStorage is ITxSaverBytesTransientStorage {
-    
     uint256 constant POSITION_FEE_FLAG = 1;
     uint256 constant EOA_OR_WALLET_FEE_FLAG = 2;
 
     function setBytesTransiently(bytes memory _data, bool _takeFeeFromPosition) internal {
         uint256 dataLength = _data.length;
 
-        // ensure data follows abi specification, so length will be multiple of 32 when using abi.encode    
+        // ensure data follows abi specification, so length will be multiple of 32 when using abi.encode
         require(dataLength >= 32 && dataLength % 32 == 0);
 
         // write flag to first slot to indicate if fee is taken from position or EOA/wallet
@@ -44,16 +45,16 @@ contract TxSaverBytesTransientStorage is ITxSaverBytesTransientStorage {
 
     function getFeeType() public view returns (uint256) {
         uint256 feeType;
-        assembly{
+        assembly {
             feeType := tload(0)
         }
         return feeType;
     }
 
-    function getBytesTransiently() public view returns (bytes memory result){
+    function getBytesTransiently() public view returns (bytes memory result) {
         uint256 dataLength;
         // fetch data length from second slot
-        assembly{
+        assembly {
             dataLength := tload(1)
         }
         // find out how many full size chunks there are

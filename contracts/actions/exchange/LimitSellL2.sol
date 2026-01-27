@@ -3,10 +3,10 @@
 pragma solidity =0.8.24;
 
 import { DFSExchangeCore } from "../../exchangeV3/DFSExchangeCore.sol";
-import { TransientStorage } from "../../utils/TransientStorage.sol";
+import { TransientStorage } from "../../utils/transient/TransientStorage.sol";
 import { GasFeeHelperL2 } from "../fee/helpers/GasFeeHelperL2.sol";
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title A special Limit Sell L2 action used as a part of the limit order strategy
 /// @dev Adds different gas fee calculation on top of regular LimitSell action
@@ -34,42 +34,27 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.exchangeData.srcAddr = _parseParamAddr(
-            params.exchangeData.srcAddr,
-            _paramMapping[0],
-            _subData,
-            _returnValues
-        );
+        params.exchangeData.srcAddr =
+            _parseParamAddr(params.exchangeData.srcAddr, _paramMapping[0], _subData, _returnValues);
         params.exchangeData.destAddr = _parseParamAddr(
-            params.exchangeData.destAddr,
-            _paramMapping[1],
-            _subData,
-            _returnValues
+            params.exchangeData.destAddr, _paramMapping[1], _subData, _returnValues
         );
 
         params.exchangeData.srcAmount = _parseParamUint(
-            params.exchangeData.srcAmount,
-            _paramMapping[2],
-            _subData,
-            _returnValues
+            params.exchangeData.srcAmount, _paramMapping[2], _subData, _returnValues
         );
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
-        (uint256 exchangedAmount, bytes memory logData) = _dfsSell(
-            params.exchangeData,
-            params.from,
-            params.to,
-            params.gasUsed,
-            params.l1GasUsed
-        );
+        (uint256 exchangedAmount, bytes memory logData) =
+            _dfsSell(params.exchangeData, params.from, params.to, params.gasUsed, params.l1GasUsed);
         emit ActionEvent("LimitSellL2", logData);
         return bytes32(exchangedAmount);
     }
 
     /// @inheritdoc ActionBase
     /// @dev No direct action as it"s a part of the limit order strategy
-    function executeActionDirect(bytes memory _callData) public payable virtual override {}
+    function executeActionDirect(bytes memory _callData) public payable virtual override { }
 
     /// @inheritdoc ActionBase
     function actionType() public pure virtual override returns (uint8) {
@@ -113,12 +98,8 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
         (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
 
         {
-            uint256 amountAfterFee = _takeGasFee(
-                _gasUsed,
-                exchangedAmount,
-                _exchangeData.destAddr,
-                _l1GasUsed
-            );
+            uint256 amountAfterFee =
+                _takeGasFee(_gasUsed, exchangedAmount, _exchangeData.destAddr, _l1GasUsed);
 
             address tokenAddr = _exchangeData.destAddr;
             if (tokenAddr == TokenUtils.WETH_ADDR) {
@@ -128,7 +109,6 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
 
             tokenAddr.withdrawTokens(_to, amountAfterFee);
         }
-        
 
         bytes memory logData = abi.encode(
             wrapper,

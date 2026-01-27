@@ -2,13 +2,17 @@
 pragma solidity =0.8.24;
 
 import { YearnHelper } from "../actions/yearn/helpers/YearnHelper.sol";
-import { IYVault } from "../interfaces/yearn/IYVault.sol";
-import { IYearnRegistry } from "../interfaces/yearn/IYearnRegistry.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
-import { DSMath } from "../DS/DSMath.sol";
+import { IYVault } from "../interfaces/protocols/yearn/IYVault.sol";
+import { IYearnRegistry } from "../interfaces/protocols/yearn/IYearnRegistry.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
+import { DSMath } from "../_vendor/DS/DSMath.sol";
 
-contract YearnView is YearnHelper, DSMath  {
-    function getUnderlyingBalanceInVault(address _user, address _vault) public view returns (uint256) {
+contract YearnView is YearnHelper, DSMath {
+    function getUnderlyingBalanceInVault(address _user, address _vault)
+        public
+        view
+        returns (uint256)
+    {
         uint256 exchangeRate = rdiv(IYVault(_vault).totalAssets(), IYVault(_vault).totalSupply());
 
         uint256 yTokenBalance = IERC20(_vault).balanceOf(_user);
@@ -23,9 +27,9 @@ contract YearnView is YearnHelper, DSMath  {
 
         uint256 strategyDebtSum = 0;
 
-        for(uint256 i = 0; i < 20; ++i) {
+        for (uint256 i = 0; i < 20; ++i) {
             address strategyAddr = IYVault(_vault).withdrawalQueue(i);
-            (,,,,,,uint totalDebt,,) = IYVault(_vault).strategies(strategyAddr);
+            (,,,,,, uint256 totalDebt,,) = IYVault(_vault).strategies(strategyAddr);
 
             strategyDebtSum += totalDebt;
         }
@@ -33,23 +37,31 @@ contract YearnView is YearnHelper, DSMath  {
         return balanceInVault + strategyDebtSum;
     }
 
-    function getVaultsForUnderlying(address _regAddr, address _tokenAddr) public view returns (address[] memory vaultAddresses) {
+    function getVaultsForUnderlying(address _regAddr, address _tokenAddr)
+        public
+        view
+        returns (address[] memory vaultAddresses)
+    {
         uint256 numVaults = IYearnRegistry(_regAddr).numVaults(_tokenAddr);
 
         vaultAddresses = new address[](numVaults);
 
-        for(uint256 i = 0; i < numVaults; ++i) {
+        for (uint256 i = 0; i < numVaults; ++i) {
             vaultAddresses[i] = IYearnRegistry(_regAddr).vaults(_tokenAddr, i);
         }
     }
 
-    function getBalanceAndCheckLiquidity(address _user, address _tokenAddr, address _regAddr) public view returns (uint256) {
+    function getBalanceAndCheckLiquidity(address _user, address _tokenAddr, address _regAddr)
+        public
+        view
+        returns (uint256)
+    {
         address[] memory vaultAddresses = getVaultsForUnderlying(_regAddr, _tokenAddr);
 
         uint256 biggestUsableVaultBalance = 0;
         address targetVault;
 
-        for(uint256 i = 0; i < vaultAddresses.length; ++i) {
+        for (uint256 i = 0; i < vaultAddresses.length; ++i) {
             uint256 userBalance = getUnderlyingBalanceInVault(_user, vaultAddresses[i]);
             uint256 availLiquidity = getPoolLiquidity(targetVault);
 

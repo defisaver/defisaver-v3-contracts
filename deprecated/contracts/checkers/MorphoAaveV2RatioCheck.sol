@@ -1,0 +1,99 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity =0.8.24;
+
+import { ActionBase } from "../ActionBase.sol";
+import { MorphoAaveV2Helper } from "../../actions/morpho/aaveV2/helpers/MorphoAaveV2Helper.sol";
+import { TransientStorage } from "../../utils/TransientStorage.sol";
+
+/// @title Action to check the ratio of the Morpho Aave V2 position after strategy execution.
+contract MorphoAaveV2RatioCheck is ActionBase, MorphoAaveV2Helper {
+    /// @notice 5% offset acceptable
+    uint256 internal constant RATIO_OFFSET = 50_000_000_000_000_000;
+
+    TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
+
+    error BadAfterRatio(uint256 startRatio, uint256 currRatio);
+
+    enum RatioState {
+        IN_BOOST,
+        IN_REPAY
+    }
+
+    /// @param ratioState State of the ratio (IN_BOOST or IN_REPAY)
+    /// @param targetRatio Target ratio.
+    /// @param user User address.
+    struct Params {
+        RatioState ratioState;
+        uint256 targetRatio;
+        address user;
+    }
+
+    /// @inheritdoc ActionBase
+    function executeAction(
+        bytes memory _callData,
+        bytes32[] memory _subData,
+        uint8[] memory _paramMapping,
+        bytes32[] memory _returnValues
+    ) public payable virtual override returns (bytes32) {
+        Params memory inputData = parseInputs(_callData);
+
+        uint256 ratioState = _parseParamUint(uint256(inputData.ratioState), _paramMapping[0], _subData, _returnValues);
+        uint256 targetRatio = _parseParamUint(uint256(inputData.targetRatio), _paramMapping[1], _subData, _returnValues);
+
+        address user;
+        if (_paramMapping.length == 3) {
+            user = _parseParamAddr(address(inputData.user), _paramMapping[2], _subData, _returnValues);
+        }
+
+        if (user == address(0)) {
+            user = address(this);
+        }
+
+        uint256 currRatio = getSafetyRatio(user);
+
+        uint256 startRatio = uint256(tempStorage.getBytes32("MORPHO_AAVEV2_RATIO"));
+
+        // if we are doing repay
+        if (RatioState(ratioState) == RatioState.IN_REPAY) {
+            // if repay ratio should be better off
+            if (currRatio <= startRatio) {
+                revert BadAfterRatio(startRatio, currRatio);
+            }
+
+            // can't repay too much over targetRatio so we don't trigger boost after
+            if (currRatio > (targetRatio + RATIO_OFFSET)) {
+                revert BadAfterRatio(startRatio, currRatio);
+            }
+        }
+
+        // if we are doing boost
+        if (RatioState(ratioState) == RatioState.IN_BOOST) {
+            // if boost ratio should be less
+            if (currRatio >= startRatio) {
+                revert BadAfterRatio(startRatio, currRatio);
+            }
+
+            // can't boost too much under targetRatio so we don't trigger repay after
+            if (currRatio < (targetRatio - RATIO_OFFSET)) {
+                revert BadAfterRatio(startRatio, currRatio);
+            }
+        }
+
+        emit ActionEvent("MorphoAaveV2RatioCheck", abi.encode(currRatio));
+        return bytes32(currRatio);
+    }
+
+    /// @inheritdoc ActionBase
+    // solhint-disable-next-line no-empty-blocks
+    function executeActionDirect(bytes memory _callData) public payable override { }
+
+    /// @inheritdoc ActionBase
+    function actionType() public pure virtual override returns (uint8) {
+        return uint8(ActionType.CHECK_ACTION);
+    }
+
+    function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {
+        inputData = abi.decode(_callData, (Params));
+    }
+}

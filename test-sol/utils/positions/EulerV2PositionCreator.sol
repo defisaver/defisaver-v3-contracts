@@ -5,14 +5,12 @@ pragma solidity =0.8.24;
 import { EulerV2ExecuteActions } from "../../utils/executeActions/EulerV2ExecuteActions.sol";
 import { EulerV2Supply } from "../../../contracts/actions/eulerV2/EulerV2Supply.sol";
 import { EulerV2Borrow } from "../../../contracts/actions/eulerV2/EulerV2Borrow.sol";
-import { EulerV2Helper } from "../../../contracts/actions/eulerV2/helpers/EulerV2Helper.sol";
 
 import { CommonPositionCreator } from "./CommonPositionCreator.sol";
 import { SmartWallet } from "../SmartWallet.sol";
 
 contract EulerV2PositionCreator is EulerV2ExecuteActions, CommonPositionCreator {
-
-    function setUp() public override virtual {}
+    function setUp() public virtual override { }
 
     function createEulerV2Position(
         PositionParams memory _params,

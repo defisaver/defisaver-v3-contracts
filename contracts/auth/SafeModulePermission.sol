@@ -2,20 +2,19 @@
 
 pragma solidity =0.8.24;
 
-import { ISafe } from "../interfaces/safe/ISafe.sol";
+import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
 
 /// @title SafeModulePermission contract which works with Safe modules to give execute permission
 contract SafeModulePermission {
-
-    address public constant SENTINEL_MODULES = address(0x1);
+    address private constant SENTINEL_MODULES = address(0x1);
 
     error ModuleNotFoundError(address moduleAddr);
 
     /// @notice Called in the context of Safe to authorize module
     /// @param _moduleAddr Address of module which will be authorized
     /// @dev Can't enable the same module twice
-    function enableModule(address _moduleAddr) public {
-        if(!ISafe(address(this)).isModuleEnabled(_moduleAddr)) {
+    function _enableModule(address _moduleAddr) internal {
+        if (!ISafe(address(this)).isModuleEnabled(_moduleAddr)) {
             ISafe(address(this)).enableModule(_moduleAddr);
         }
     }
@@ -24,7 +23,7 @@ contract SafeModulePermission {
     /// @param _moduleAddr Address of module which will be removed from authority list
     /// @dev moduleAddr has to be one of the last 10 modules added
     /// @dev modules are returned in order SM -> Mn -> M(n-1) -> ... -> M1 -> SM, without SM included
-    function disableModule(address _moduleAddr) public {
+    function _disableModule(address _moduleAddr) internal {
         address startFrom = SENTINEL_MODULES;
 
         // to save on gas, first check for last 2 modules added as they are most likely to be the ones to be removed

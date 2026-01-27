@@ -1,6 +1,4 @@
-const {
-    redeploy,
-} = require('../../utils/utils');
+const { redeploy } = require('../../utils/utils');
 const { approveTokenTest } = require('./utils-actions-tests');
 
 describe('Approve-Token', function () {

@@ -1,10 +1,3 @@
-/* eslint-disable no-param-reassign */
-/* eslint-disable max-len */
-/* eslint-disable no-else-return */
-/* eslint-disable import/no-unresolved */
-/* eslint-disable no-await-in-loop */
-// const { default: curve } = require('@curvefi/api');
-const curve = import('@curvefi/api');
 const fs = require('fs');
 const hre = require('hardhat');
 const { getAssetInfo, getAssetInfoByAddress } = require('@defisaver/tokens');
@@ -13,19 +6,26 @@ const storageSlots = require('../storageSlots.json');
 
 const { BigNumber } = hre.ethers;
 
-const { getAllFiles } = require('../../scripts/hardhat-tasks-functions');
+const { findAllFiles } = require('../../scripts/hardhat-tasks-functions');
 
 const { deployAsOwner, deployContract } = require('../../scripts/utils/deployer');
 
 const { createSafe, executeSafeTx } = require('./safe');
 
-const strategyStorageBytecode = require('../../artifacts/contracts/core/strategy/StrategyStorage.sol/StrategyStorage.json').deployedBytecode;
-const subStorageBytecode = require('../../artifacts/contracts/core/strategy/SubStorage.sol/SubStorage.json').deployedBytecode;
-const subStorageBytecodeL2 = require('../../artifacts/contracts/core/l2/SubStorageL2.sol/SubStorageL2.json').deployedBytecode;
-const bundleStorageBytecode = require('../../artifacts/contracts/core/strategy/BundleStorage.sol/BundleStorage.json').deployedBytecode;
-const recipeExecutorBytecode = require('../../artifacts/contracts/core/RecipeExecutor.sol/RecipeExecutor.json').deployedBytecode;
-const proxyAuthBytecode = require('../../artifacts/contracts/core/strategy/ProxyAuth.sol/ProxyAuth.json').deployedBytecode;
-const mockChainlinkFeedRegistryBytecode = require('../../artifacts/contracts/mocks/MockChainlinkFeedRegistry.sol/MockChainlinkFeedRegistry.json').deployedBytecode;
+const strategyStorageBytecode =
+    require('../../artifacts/contracts/core/strategy/StrategyStorage.sol/StrategyStorage.json').deployedBytecode;
+const subStorageBytecode =
+    require('../../artifacts/contracts/core/strategy/SubStorage.sol/SubStorage.json').deployedBytecode;
+const subStorageBytecodeL2 =
+    require('../../artifacts/contracts/core/l2/SubStorageL2.sol/SubStorageL2.json').deployedBytecode;
+const bundleStorageBytecode =
+    require('../../artifacts/contracts/core/strategy/BundleStorage.sol/BundleStorage.json').deployedBytecode;
+const recipeExecutorBytecode =
+    require('../../artifacts/contracts/core/RecipeExecutor.sol/RecipeExecutor.json').deployedBytecode;
+const proxyAuthBytecode =
+    require('../../artifacts/contracts/core/strategy/ProxyAuth.sol/ProxyAuth.json').deployedBytecode;
+const mockChainlinkFeedRegistryBytecode =
+    require('../../artifacts/contracts/mocks/MockChainlinkFeedRegistry.sol/MockChainlinkFeedRegistry.json').deployedBytecode;
 
 const addrs = {
     mainnet: {
@@ -53,6 +53,7 @@ const addrs = {
         COMP_ADDR: '0xc00e94Cb662C3520282E6f5717214004A7f26888',
         CHICKEN_BONDS_VIEW: '0x809a93fd4a0d7d7906Ef6176f0b5518b418Da08f',
         AAVE_MARKET: '0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e',
+        AAVE_V3_PRIME_MARKET: '0xcfBf336fe147D643B9Cb705648500e101504B16d',
         SPARK_MARKET: '0x02C3eA4e34C0cBd694D2adFa2c690EECbC1793eE',
         AAVE_V3_VIEW: '0xf4B715BB788cC4071061bd67dC8B56681460A2fF',
         ZRX_ALLOWLIST_ADDR: '0x4BA1f38427b33B8ab7Bb0490200dAE1F1C36823F',
@@ -74,6 +75,11 @@ const addrs = {
         REFILL_CALLER: '0x33fDb79aFB4456B604f376A45A546e7ae700e880',
         MORPHO_BLUE_VIEW: '0x10B621823D4f3E85fBDF759e252598e4e097C1fd',
         FLUID_VAULT_T1_RESOLVER_ADDR: '0x814c8C7ceb1411B364c2940c4b9380e739e06686',
+        BOLD_ADDR: '0x6440f144b7e50D6a8439336510312d2F54beB01D',
+        INSTADAPP_INDEX: '0x2971AdFa57b20E5a416aE5a708A8655A9c74f723',
+        INSTADAPP_CONNECTORS_V2: '0x97b0B3A8bDeFE8cB9563a3c610019Ad10DB8aD11',
+        SUMMERFI_FACTORY: '0xF7B75183A2829843dB06266c114297dfbFaeE2b6',
+        SUMMERFI_GUARD: '0xCe91349d2A4577BBd0fC91Fe6019600e047f2847',
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -109,6 +115,10 @@ const addrs = {
         STRATEGY_EXECUTOR_ADDR: '0x2f54a62b18483f395779cCD81A598133aBb7775d',
         FEE_RECIPIENT_ADDR: '0x5b12C2B979CB3aB89DD4813837873bC4Dd1930D0',
         REFILL_CALLER: '0xaFdFC3814921d49AA412d6a22e3F44Cc555dDcC8',
+        INSTADAPP_INDEX: '0x6CE3e607C808b4f4C26B7F6aDAeB619e49CAbb25',
+        INSTADAPP_CONNECTORS_V2: '0x127d8cD0E2b2E0366D522DeA53A787bfE9002C14',
+        SUMMERFI_FACTORY: '0xaaf64927BaFe68E389DE3627AA6b52D81bdA2323',
+        SUMMERFI_GUARD: '0x916411367fC2f0dc828790eA03CF317eC74E24E4',
     },
     arbitrum: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -150,6 +160,11 @@ const addrs = {
         STRATEGY_EXECUTOR_ADDR: '0xa4F087267828C3Ca8ac18b6fE7f456aB20781AA6',
         REFILL_CALLER: '0xcbA094ae1B2B363886CC7f428206dB1b116834A2',
         FLUID_VAULT_T1_RESOLVER_ADDR: '0xD6373b375665DE09533478E8859BeCF12427Bb5e',
+        INSTADAPP_INDEX: '0x1eE00C305C51Ff3bE60162456A9B533C07cD9288',
+        INSTADAPP_CONNECTORS_V2: '0x67fCE99Dd6d8d659eea2a1ac1b8881c57eb6592B',
+        SUMMERFI_FACTORY: '0xCcB155E5B2A3201d5e10EdAa6e9F908871d1722B',
+        SUMMERFI_GUARD: '0x746a6f9Acb42bcB43C08C829A035DBa7Db9E7385',
+        MORPHO_BLUE_VIEW: '0xa3b8b400a2eFF0314fa9605E778692bd4Bd9f880',
     },
     base: {
         PROXY_REGISTRY: '0x425fA97285965E01Cc5F951B62A51F6CDEA5cc0d',
@@ -185,6 +200,51 @@ const addrs = {
         REFILL_CALLER: '0xBefc466abe547B1785f382883833330a47C573f7',
         MORPHO_BLUE_VIEW: '0x53c0E962bd0AC53928ca04703238b2ec2894195B',
         FLUID_VAULT_T1_RESOLVER_ADDR: '0x79B3102173EB84E6BCa182C7440AfCa5A41aBcF8',
+        INSTADAPP_INDEX: '0x6CE3e607C808b4f4C26B7F6aDAeB619e49CAbb25',
+        INSTADAPP_CONNECTORS_V2: '0x127d8cD0E2b2E0366D522DeA53A787bfE9002C14',
+        SUMMERFI_FACTORY: '0x881CD31218f45a75F8ad543A3e1Af087f3986Ae0',
+        SUMMERFI_GUARD: '0x83c8BFfD11913f0e94C1C0B615fC2Fdb1B17A27e',
+    },
+    linea: {
+        REGISTRY_ADDR: '0x09fBeC68D216667C3262211D2E5609578951dCE0',
+        OWNER_ACC: '0x7a7f071B6Fb232181a5f951EccB4D1843Dc9085F',
+        WETH_ADDRESS: '0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f',
+        DAI_ADDRESS: '0x4AF15ec2A0BD43Db75dd04E62FAA3B8EF36b00d5',
+        USDC_ADDR: '0x176211869cA2b568f2A7D4EE941E073a821EE1ff',
+        WRAPPER_EXCHANGE_REGISTRY: '0x291EAc3cA14b7FcA8a93af4f6198E76FcFc6B0cD',
+        FEE_RECEIVER: '0x2226836ec16ff5974dfd8df740cd461b42faffd5',
+        FEE_RECIPIENT_ADDR: '0x2226836ec16ff5974dfd8df740cd461b42faffd5',
+        TOKEN_GROUP_REGISTRY: '0xe40178a2f521fddf0410d87ae853adf04500502f',
+        AAVE_MARKET: '0x89502c3731F69DDC95B65753708A07F8Cd0373F4',
+        AAVE_V3_VIEW: '0x5b0b7e38c2a8e46cfae13c360bc5927570beee94',
+        ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+        ADMIN_VAULT: '0x71a9ef13c960c2f1dd17962d3592a5bcdfad6de0',
+        ADMIN_ACC: '0x6271D249271A9bc9E0285D9865c74a812cEF57b0',
+        EXCHANGE_AGGREGATOR_REGISTRY_ADDR: '0xa793daa424d731bf597ea3a46a16afa283d80ea7',
+        AVG_GAS_PRICE: 0.001,
+        ZEROX_WRAPPER: '0x49658e0cf3883c338397c7257619b280df581057',
+    },
+    plasma: {
+        REGISTRY_ADDR: '0x44e98bB58d725F2eF93a195F518b335dCB784c78',
+        OWNER_ACC: '0x13fa3D42C09E5E15153F08bb90A79A3Bd63E289D',
+        WETH_ADDRESS: '0x9895D81bB462A195b4922ED7De0e3ACD007c32CB', // Real Wrapped ETH on Plasma, this is NOT wrapped native coin, for that, use WXPL_ADDRESS
+        WXPL_ADDRESS: '0x6100E367285b01F48D07953803A2d8dCA5D19873', // WXPL on Plasma. This is WETH inside DFS contracts
+        DAI_ADDRESS: '', // No deployment on Plasma
+        USDC_ADDR: '', // No deployment on Plasma
+        WRAPPER_EXCHANGE_REGISTRY: '0xef86E36CbbDAdA9F5318Df5D6908760cfF226B54',
+        FEE_RECEIVER: '0x4C0607dAD18c0DE19f6d7b25c0B0f1990818e9d7',
+        FEE_RECIPIENT_ADDR: '0x4C0607dAD18c0DE19f6d7b25c0B0f1990818e9d7',
+        TOKEN_GROUP_REGISTRY: '0x09fBeC68D216667C3262211D2E5609578951dCE0',
+        AAVE_MARKET: '0x061D8e131F26512348ee5FA42e2DF1bA9d6505E9',
+        AAVE_V3_VIEW: '0xD8E67968d8a0df4beCf2D50daE1e34d4d80C701C',
+        ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+        ADMIN_VAULT: '0x6AB90ff536f0E2a880DbCdef1bB665C2acC0eDdC',
+        ADMIN_ACC: '0x7CF4F485e3a7fDa831e0579465881C51F3912A28',
+        EXCHANGE_AGGREGATOR_REGISTRY_ADDR: '0xe40178A2f521FDdF0410d87AE853aDf04500502f',
+        AVG_GAS_PRICE: 0.001,
+        ZEROX_WRAPPER: '0x16c9de87215D2198614dbC5419658eAdf4465025',
+        USDT0_ADDR: '0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb',
+        AAVE_V3_POOL_DATA_PROVIDER: '0xf2D6E38B407e31E7E7e4a16E6769728b76c7419F',
     },
 };
 
@@ -234,7 +294,7 @@ const UNI_ADDR = '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984';
 const LINK_ADDR = '0x514910771af9ca656af840dff83e8264ecf986ca';
 const WBTC_ADDR = '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599';
 const LUSD_ADDR = '0x5f98805A4E8be255a32880FDeC7F6728C6568bA0';
-const BOLD_ADDR = '0xb01dd87b29d187f3e3a4bf6cdaebfb97f3d9ab98';
+const BOLD_ADDR = '0x6440f144b7e50D6a8439336510312d2F54beB01D';
 
 const USDT_ADDR = '0xdac17f958d2ee523a2206206994597c13d831ec7';
 const BUSD_ADDR = '0x4fabb145d64652a948d72533023f6e7a623c7c53';
@@ -270,6 +330,8 @@ const chainIds = {
     optimism: 10,
     arbitrum: 42161,
     base: 8453,
+    linea: 59144,
+    plasma: 9745,
 };
 
 const AAVE_FL_FEE = 0.09; // TODO: can we fetch this dynamically
@@ -279,7 +341,8 @@ const MIN_VAULT_RAI_AMOUNT = '3000'; // TODO: can we fetch this dynamically
 
 const getSparkFLFee = async () => {
     console.log(network, addrs[network].SPARK_MARKET);
-    return hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].SPARK_MARKET)
+    return hre.ethers
+        .getContractAt('IPoolAddressesProvider', addrs[network].SPARK_MARKET)
         .then((addressProvider) => addressProvider.getPool())
         .then((poolAddr) => hre.ethers.getContractAt('IPoolV3', poolAddr))
         .then((pool) => pool.FLASHLOAN_PREMIUM_TOTAL());
@@ -395,10 +458,7 @@ async function findBalancesSlot(tokenAddress) {
     const account = hre.ethers.constants.AddressZero;
     const probeA = encode(['uint'], [1]);
     const probeB = encode(['uint'], [2]);
-    const token = await hre.ethers.getContractAt(
-        'IERC20',
-        tokenAddress,
-    );
+    const token = await hre.ethers.getContractAt('IERC20', tokenAddress);
     let setStorageMethod;
     if (hre.network.config.isAnvil) {
         setStorageMethod = 'anvil_setStorageAt';
@@ -410,31 +470,24 @@ async function findBalancesSlot(tokenAddress) {
 
     for (let i = 0; i < 100; i++) {
         {
-            let probedSlot = hre.ethers.utils.keccak256(
-                encode(['address', 'uint'], [account, i]),
-            );
+            let probedSlot = hre.ethers.utils.keccak256(encode(['address', 'uint'], [account, i]));
             // remove padding for JSON RPC
-            while (probedSlot.startsWith('0x0')) { probedSlot = `0x${probedSlot.slice(3)}`; }
-            const prev = await hre.ethers.provider.send(
-                'eth_getStorageAt',
-                [tokenAddress, probedSlot, 'latest'],
-            );
+            while (probedSlot.startsWith('0x0')) {
+                probedSlot = `0x${probedSlot.slice(3)}`;
+            }
+            const prev = await hre.ethers.provider.send('eth_getStorageAt', [
+                tokenAddress,
+                probedSlot,
+                'latest',
+            ]);
             // make sure the probe will change the slot value
             const probe = prev === probeA ? probeB : probeA;
 
-            await hre.ethers.provider.send(setStorageMethod, [
-                tokenAddress,
-                probedSlot,
-                probe,
-            ]);
+            await hre.ethers.provider.send(setStorageMethod, [tokenAddress, probedSlot, probe]);
 
             const balance = await token.balanceOf(account);
             // reset to previous value
-            await hre.ethers.provider.send(setStorageMethod, [
-                tokenAddress,
-                probedSlot,
-                prev,
-            ]);
+            await hre.ethers.provider.send(setStorageMethod, [tokenAddress, probedSlot, prev]);
             if (balance.eq(hre.ethers.BigNumber.from(probe))) {
                 const result = { isVyper: false, num: i };
                 storageSlots[tokenAddress] = result;
@@ -444,31 +497,24 @@ async function findBalancesSlot(tokenAddress) {
             }
         }
         {
-            let probedSlot = hre.ethers.utils.keccak256(
-                encode(['uint', 'address'], [i, account]),
-            );
+            let probedSlot = hre.ethers.utils.keccak256(encode(['uint', 'address'], [i, account]));
             // remove padding for JSON RPC
-            while (probedSlot.startsWith('0x0')) { probedSlot = `0x${probedSlot.slice(3)}`; }
-            const prev = await hre.ethers.provider.send(
-                'eth_getStorageAt',
-                [tokenAddress, probedSlot, 'latest'],
-            );
+            while (probedSlot.startsWith('0x0')) {
+                probedSlot = `0x${probedSlot.slice(3)}`;
+            }
+            const prev = await hre.ethers.provider.send('eth_getStorageAt', [
+                tokenAddress,
+                probedSlot,
+                'latest',
+            ]);
             // make sure the probe will change the slot value
             const probe = prev === probeA ? probeB : probeA;
 
-            await hre.ethers.provider.send(setStorageMethod, [
-                tokenAddress,
-                probedSlot,
-                probe,
-            ]);
+            await hre.ethers.provider.send(setStorageMethod, [tokenAddress, probedSlot, probe]);
 
             const balance = await token.balanceOf(account);
             // reset to previous value
-            await hre.ethers.provider.send(setStorageMethod, [
-                tokenAddress,
-                probedSlot,
-                prev,
-            ]);
+            await hre.ethers.provider.send(setStorageMethod, [tokenAddress, probedSlot, prev]);
             if (balance.eq(hre.ethers.BigNumber.from(probe))) {
                 const result = { isVyper: true, num: i };
                 storageSlots[tokenAddress] = result;
@@ -516,10 +562,9 @@ const setBalance = async (tokenAddr, userAddr, value) => {
 
         tokenContract = await hre.ethers.getContractAt('IProxyERC20', newTokenAddr);
         const tokenState = await tokenContract.callStatic.tokenState();
-        // eslint-disable-next-line no-param-reassign
         tokenAddr = tokenState;
-    // eslint-disable-next-line no-empty
     } catch (error) {
+        // ignore error
     }
     const slotInfo = await findBalancesSlot(tokenAddr);
     let index;
@@ -534,13 +579,11 @@ const setBalance = async (tokenAddr, userAddr, value) => {
             [userAddr, slotInfo.num], // key, slot
         );
     }
-    while (index.startsWith('0x0')) { index = `0x${index.slice(3)}`; }
+    while (index.startsWith('0x0')) {
+        index = `0x${index.slice(3)}`;
+    }
 
-    await setStorageAt(
-        tokenAddr,
-        index.toString(),
-        toBytes32(value).toString(),
-    );
+    await setStorageAt(tokenAddr, index.toString(), toBytes32(value).toString());
 };
 
 let cachedTokenPrices = {};
@@ -627,15 +670,15 @@ const getAddrFromRegistry = async (name) => {
     // if (name === 'SubProxy') {
     //     return addrs[network].SubProxy;
     // }
-    const addr = await registry.getAddr(
-        getNameId(name),
-    );
+    const addr = await registry.getAddr(getNameId(name));
     return addr;
 };
 
 const getProxyWithSigner = async (signer, addr) => {
-    const proxyRegistry = await
-    hre.ethers.getContractAt('IProxyRegistry', addrs[network].PROXY_REGISTRY);
+    const proxyRegistry = await hre.ethers.getContractAt(
+        'IDSProxyRegistry',
+        addrs[network].PROXY_REGISTRY,
+    );
 
     let proxyAddr = await proxyRegistry.proxies(addr);
 
@@ -649,22 +692,62 @@ const getProxyWithSigner = async (signer, addr) => {
     return dsProxy;
 };
 
+const createDsaProxy = async (acc) => {
+    const version = 2;
+    const instaIndex = await hre.ethers.getContractAt(
+        'IInstaIndex',
+        addrs[network].INSTADAPP_INDEX,
+    );
+    let receipt = await instaIndex.build(acc, version, hre.ethers.constants.AddressZero);
+    receipt = await receipt.wait();
+
+    const abiCoder = new hre.ethers.utils.AbiCoder();
+    const [dsaProxyAddr] = abiCoder.decode(['address'], receipt.events.reverse()[0].topics[2]);
+    const contractName = 'IInstaAccountV2';
+    const dsaProxy = await hre.ethers.getContractAt(contractName, dsaProxyAddr);
+    return dsaProxy;
+};
+
+const createSFProxy = async (acc) => {
+    const sfProxyFactory = await hre.ethers.getContractAt(
+        'IAccountFactory',
+        addrs[network].SUMMERFI_FACTORY,
+    );
+
+    let receipt = await sfProxyFactory['createAccount(address)'](acc);
+    receipt = await receipt.wait();
+
+    const abiCoder = new hre.ethers.utils.AbiCoder();
+    const [accountAddr] = abiCoder.decode(['address'], receipt.logs[0].topics[1]);
+
+    const account = await hre.ethers.getContractAt('IAccountImplementation', accountAddr);
+
+    console.log(`Summerfi proxy created ${accountAddr}`);
+
+    return account;
+};
+
+const whitelistContractForSFProxy = async (contractAddr, whitelist = true) => {
+    const guardAddr = addrs[network].SUMMERFI_GUARD;
+    const accountGuard = await hre.ethers.getContractAt('IAccountGuard', guardAddr);
+    const guardOwner = await accountGuard.owner();
+
+    await sendEther((await hre.ethers.getSigners())[0], guardOwner, '1');
+    await impersonateAccount(guardOwner);
+
+    const signer = await hre.ethers.provider.getSigner(guardOwner);
+    const accountGuardWithSigner = accountGuard.connect(signer);
+
+    await accountGuardWithSigner.setWhitelist(contractAddr, whitelist);
+
+    const isWhitelisted = await accountGuard.isWhitelisted(contractAddr);
+    expect(isWhitelisted).to.be.equal(whitelist);
+
+    await stopImpersonatingAccount(guardOwner);
+};
+
 const getProxy = async (acc, isSafe = false) => {
-    if (isSafe === false) {
-        const proxyRegistry = await
-        hre.ethers.getContractAt('IProxyRegistry', addrs[network].PROXY_REGISTRY);
-        let proxyAddr = await proxyRegistry.proxies(acc);
-
-        if (proxyAddr === nullAddress) {
-            await proxyRegistry.build(acc);
-            proxyAddr = await proxyRegistry.proxies(acc);
-        }
-
-        const dsProxy = await hre.ethers.getContractAt('IDSProxy', proxyAddr);
-
-        return dsProxy;
-    } else {
-        // create safe
+    if (isSafe === true) {
         const safeAddr = await createSafe(acc);
         const safe = await hre.ethers.getContractAt('ISafe', safeAddr);
 
@@ -672,6 +755,22 @@ const getProxy = async (acc, isSafe = false) => {
 
         return safe;
     }
+
+    // Else create DS Proxy
+    const proxyRegistry = await hre.ethers.getContractAt(
+        'IDSProxyRegistry',
+        addrs[network].PROXY_REGISTRY,
+    );
+    let proxyAddr = await proxyRegistry.proxies(acc);
+
+    if (proxyAddr === nullAddress) {
+        await proxyRegistry.build(acc);
+        proxyAddr = await proxyRegistry.proxies(acc);
+    }
+
+    const dsProxy = await hre.ethers.getContractAt('IDSProxy', proxyAddr);
+
+    return dsProxy;
 };
 
 const sendEther = async (signer, toAddress, amount) => {
@@ -685,7 +784,9 @@ const sendEther = async (signer, toAddress, amount) => {
 const redeploy = async (name, isFork = false, ...args) => {
     const regAddr = addrs[network].REGISTRY_ADDR;
     if (!isFork) {
-        const setBalanceMethod = hre.network.config.isAnvil ? 'anvil_setBalance' : 'hardhat_setBalance';
+        const setBalanceMethod = hre.network.config.isAnvil
+            ? 'anvil_setBalance'
+            : 'hardhat_setBalance';
         await hre.network.provider.send(setBalanceMethod, [
             getOwnerAddr(),
             '0xC9F2C9CD04674EDEA40000000',
@@ -705,7 +806,10 @@ const redeploy = async (name, isFork = false, ...args) => {
     }
 
     const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
-    const registryInstance = await hre.ethers.getContractFactory('contracts/core/DFSRegistry.sol:DFSRegistry', signer);
+    const registryInstance = await hre.ethers.getContractFactory(
+        'contracts/core/DFSRegistry.sol:DFSRegistry',
+        signer,
+    );
     let registry = await registryInstance.attach(regAddr);
 
     registry = registry.connect(signer);
@@ -751,7 +855,10 @@ const redeploy = async (name, isFork = false, ...args) => {
 
 const approveContractInRegistry = async (name, regAddr = addrs[network].REGISTRY_ADDR) => {
     const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
-    const registryInstance = await hre.ethers.getContractFactory('contracts/core/DFSRegistry.sol:DFSRegistry', signer);
+    const registryInstance = await hre.ethers.getContractFactory(
+        'contracts/core/DFSRegistry.sol:DFSRegistry',
+        signer,
+    );
     let registry = await registryInstance.attach(regAddr);
 
     registry = registry.connect(signer);
@@ -771,11 +878,7 @@ const approveContractInRegistry = async (name, regAddr = addrs[network].REGISTRY
     }
 };
 
-const getContractFromRegistry = async (
-    name,
-    isFork = false,
-    ...args
-) => {
+const getContractFromRegistry = async (name, isFork = false, ...args) => {
     const contractAddr = await getAddrFromRegistry(name);
     if (contractAddr !== nullAddress) return hre.ethers.getContractAt(name, contractAddr);
     return redeploy(name, isFork, ...args);
@@ -841,8 +944,9 @@ const approve = async (tokenAddr, to, signer) => {
     if (allowance.toString() === '0') {
         if (signer) {
             const tokenContractSigner = tokenContract.connect(signer);
-            // eslint-disable-next-line max-len
-            await tokenContractSigner.approve(to, hre.ethers.constants.MaxUint256, { gasLimit: 1000000 });
+            await tokenContractSigner.approve(to, hre.ethers.constants.MaxUint256, {
+                gasLimit: 1000000,
+            });
         } else {
             await tokenContract.approve(to, hre.ethers.constants.MaxUint256, { gasLimit: 1000000 });
         }
@@ -891,24 +995,20 @@ const formatMockExchangeObj = async (
     wrapper = undefined,
 ) => {
     if (!wrapper) {
-        // eslint-disable-next-line no-param-reassign
         wrapper = await getContractFromRegistry('MockExchangeWrapper');
     }
 
     const rateDecimals = 18 + destTokenInfo.decimals - srcTokenInfo.decimals;
     const rate = Float2BN(
-        (getLocalTokenPrice(srcTokenInfo.symbol)
-        / getLocalTokenPrice(destTokenInfo.symbol)).toFixed(rateDecimals),
+        (
+            getLocalTokenPrice(srcTokenInfo.symbol) / getLocalTokenPrice(destTokenInfo.symbol)
+        ).toFixed(rateDecimals),
         rateDecimals,
     );
 
     const expectedOutput = hre.ethers.constants.MaxInt256;
 
-    await setBalance(
-        destTokenInfo.addresses[chainIds[network]],
-        wrapper.address,
-        expectedOutput,
-    );
+    await setBalance(destTokenInfo.addresses[chainIds[network]], wrapper.address, expectedOutput);
 
     return [
         srcTokenInfo.addresses[chainIds[network]],
@@ -934,8 +1034,12 @@ const formatMockExchangeObjUsdFeed = async (
     amountUsedWhenSrcAmountIsPiped = 0,
 ) => {
     const tokenHelper = await getTokenHelperContract();
-    const srcTokenPriceInUSD = await tokenHelper.getPriceInUSD(srcTokenInfo.addresses[chainIds[network]]);
-    const destTokenPriceInUSD = await tokenHelper.getPriceInUSD(destTokenInfo.addresses[chainIds[network]]);
+    const srcTokenPriceInUSD = await tokenHelper.getPriceInUSD(
+        srcTokenInfo.addresses[chainIds[network]],
+    );
+    const destTokenPriceInUSD = await tokenHelper.getPriceInUSD(
+        destTokenInfo.addresses[chainIds[network]],
+    );
 
     const srcTokenPriceInUsdBN = BigNumber.from(srcTokenPriceInUSD);
     const destTokenPriceInUsdBN = BigNumber.from(destTokenPriceInUSD);
@@ -951,8 +1055,6 @@ const formatMockExchangeObjUsdFeed = async (
         .div(destTokenPriceInUsdBN)
         .div(srcScale)
         .mul(2);
-
-    console.log(destTokenAmountBN);
 
     await setBalance(
         destTokenInfo.addresses[chainIds[network]],
@@ -974,8 +1076,15 @@ const formatMockExchangeObjUsdFeed = async (
     ];
 };
 
-// eslint-disable-next-line max-len
-const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, uniV3fee, minPrice = 0) => {
+const formatExchangeObj = (
+    srcAddr,
+    destAddr,
+    amount,
+    wrapper,
+    destAmount = 0,
+    uniV3fee,
+    minPrice = 0,
+) => {
     const abiCoder = new hre.ethers.utils.AbiCoder();
 
     let firstPath = srcAddr;
@@ -998,9 +1107,15 @@ const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, u
     let path = abiCoder.encode(['address[]'], [[firstPath, secondPath]]);
     if (uniV3fee > 0) {
         if (destAmount > 0) {
-            path = hre.ethers.utils.solidityPack(['address', 'uint24', 'address'], [secondPath, uniV3fee, firstPath]);
+            path = hre.ethers.utils.solidityPack(
+                ['address', 'uint24', 'address'],
+                [secondPath, uniV3fee, firstPath],
+            );
         } else {
-            path = hre.ethers.utils.solidityPack(['address', 'uint24', 'address'], [firstPath, uniV3fee, secondPath]);
+            path = hre.ethers.utils.solidityPack(
+                ['address', 'uint24', 'address'],
+                [firstPath, uniV3fee, secondPath],
+            );
         }
     }
     return [
@@ -1017,11 +1132,11 @@ const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, u
     ];
 };
 
-// eslint-disable-next-line no-underscore-dangle
 let _curveObj;
 const curveApiInit = async () => {
     if (!_curveObj) {
-        _curveObj = ((await curve).default);
+        const curveModule = await import('@curvefi/api');
+        _curveObj = curveModule.default;
         await _curveObj.init('JsonRpc', { url: process.env.ETHEREUM_NODE }, { chaindId: '1' });
         // Fetch factory pools
         await _curveObj.factory.fetchPools(true);
@@ -1033,12 +1148,7 @@ const curveApiInit = async () => {
     return _curveObj;
 };
 
-const formatExchangeObjCurve = async (
-    srcAddr,
-    destAddr,
-    amount,
-    wrapper,
-) => {
+const formatExchangeObjCurve = async (srcAddr, destAddr, amount, wrapper) => {
     const curveObj = await curveApiInit();
 
     const { route: sdkRoute } = await curveObj.router.getBestRouteAndOutput(
@@ -1050,7 +1160,6 @@ const formatExchangeObjCurve = async (
 
     const exchangeData = hre.ethers.utils.defaultAbiCoder.encode(
         ['address[11]', 'uint256[5][5]', 'address[5]'],
-        // eslint-disable-next-line no-underscore-dangle
         [args._route, args._swapParams, args._pools],
     );
     if (exchangeData.toString().includes('5e74c9036fb86bd7ecdcb084a0673efc32ea31cb')) {
@@ -1078,15 +1187,15 @@ const formatExchangeObjCurve = async (
 
 // TODO[LiquityV2] remove bold 'boldSrc' and 'boldDest' once deployed. This is only used for temporary testing
 const formatExchangeObjSdk = async (
-    srcAddr, destAddr, amount, wrapper, boldSrc = false, boldDest = false,
+    srcAddr,
+    destAddr,
+    amount,
+    wrapper,
+    boldSrc = false,
+    boldDest = false,
 ) => {
     const { AlphaRouter, SwapType } = await import('@uniswap/smart-order-router');
-    const {
-        CurrencyAmount,
-        Token,
-        TradeType,
-        Percent,
-    } = await import('@uniswap/sdk-core');
+    const { CurrencyAmount, Token, TradeType, Percent } = await import('@uniswap/sdk-core');
     const chainId = chainIds[network];
     const boldInfo = { decimals: 18, symbol: 'Bold', name: 'Bold Stablecoin' };
     const srcTokenInfo = boldSrc ? boldInfo : getAssetInfoByAddress(srcAddr, chainId);
@@ -1108,19 +1217,26 @@ const formatExchangeObjSdk = async (
     const swapAmount = CurrencyAmount.fromRawAmount(srcToken, amount.toString());
 
     const router = new AlphaRouter({ chainId, provider: hre.ethers.provider });
-    const { path } = await router.route(
-        swapAmount, destToken, TradeType.EXACT_INPUT,
-        {
-            type: SwapType.SWAP_ROUTER_02,
-            slippageTolerance: new Percent(5, 100),
-        },
-        {
-            maxSplits: 0,
-        },
-    ).then(({ methodParameters }) => hre.ethers.utils.defaultAbiCoder.decode(
-        ['(bytes path,address,uint256,uint256)'],
-        `0x${methodParameters.calldata.slice(10)}`,
-    )[0]);
+    const { path } = await router
+        .route(
+            swapAmount,
+            destToken,
+            TradeType.EXACT_INPUT,
+            {
+                type: SwapType.SWAP_ROUTER_02,
+                slippageTolerance: new Percent(5, 100),
+            },
+            {
+                maxSplits: 0,
+            },
+        )
+        .then(
+            ({ methodParameters }) =>
+                hre.ethers.utils.defaultAbiCoder.decode(
+                    ['(bytes path,address,uint256,uint256)'],
+                    `0x${methodParameters.calldata.slice(10)}`,
+                )[0],
+        );
 
     console.log({ path });
 
@@ -1139,8 +1255,9 @@ const formatExchangeObjSdk = async (
 };
 
 const isEth = (tokenAddr) => {
-    if (tokenAddr.toLowerCase() === ETH_ADDR.toLowerCase()
-    || tokenAddr.toLowerCase() === addrs[network].WETH_ADDRESS.toLowerCase()
+    if (
+        tokenAddr.toLowerCase() === ETH_ADDR.toLowerCase() ||
+        tokenAddr.toLowerCase() === addrs[network].WETH_ADDRESS.toLowerCase()
     ) {
         return true;
     }
@@ -1157,9 +1274,9 @@ const convertToWeth = (tokenAddr) => {
 };
 
 const getProxyAuth = async (proxyAddr, addrWithAuth) => {
-    const dsAuth = await hre.ethers.getContractAt('DSAuth', proxyAddr);
+    const dsAuth = await hre.ethers.getContractAt('IDSAuth', proxyAddr);
     const authorityAddr = await dsAuth.authority();
-    const dsGuard = await hre.ethers.getContractAt('DSAuthority', authorityAddr);
+    const dsGuard = await hre.ethers.getContractAt('IDSAuthority', authorityAddr);
     const selector = '0x1cff79cd'; // execute selector
 
     const hasPermission = await dsGuard.canCall(addrWithAuth, proxyAddr, selector);
@@ -1233,7 +1350,9 @@ const addToExchangeAggregatorRegistry = async (acc, newAddr, isFork = false) => 
     const signer = hre.ethers.provider.getSigner(ownerAddr);
 
     const registry = await hre.ethers.getContractAt(
-        'ExchangeAggregatorRegistry', addrs[network].EXCHANGE_AGGREGATOR_REGISTRY_ADDR, signer,
+        'ExchangeAggregatorRegistry',
+        addrs[network].EXCHANGE_AGGREGATOR_REGISTRY_ADDR,
+        signer,
     );
 
     await registry.setExchangeTargetAddr(newAddr, true);
@@ -1251,7 +1370,6 @@ const getGasUsed = async (receipt) => {
 
 const callDataCost = (calldata) => {
     if (calldata.slice(0, 2) === '0x') {
-        // eslint-disable-next-line no-param-reassign
         calldata = calldata.slice(2);
     }
 
@@ -1269,7 +1387,6 @@ const callDataCost = (calldata) => {
 
 const calcGasToUSD = (gasUsed, gasPriceInGwei = 0, callData = 0) => {
     if (gasPriceInGwei === 0) {
-        // eslint-disable-next-line no-param-reassign
         gasPriceInGwei = addrs[network].AVG_GAS_PRICE;
     }
 
@@ -1278,12 +1395,12 @@ const calcGasToUSD = (gasUsed, gasPriceInGwei = 0, callData = 0) => {
     if (callData !== 0) {
         const l1GasCost = callDataCost(callData);
 
-        extraCost = ((l1GasCost) * addrs.mainnet.AVG_GAS_PRICE * 1000000000) / 1e18;
+        extraCost = (l1GasCost * addrs.mainnet.AVG_GAS_PRICE * 1000000000) / 1e18;
 
         console.log('L1 gas cost:', extraCost);
     }
 
-    let ethSpent = ((gasUsed) * gasPriceInGwei * 1000000000) / 1e18;
+    let ethSpent = (gasUsed * gasPriceInGwei * 1000000000) / 1e18;
     ethSpent += extraCost;
 
     console.log('Eth gas cost: ', ethSpent);
@@ -1305,17 +1422,17 @@ const cacheChainlinkPrice = async (tokenSymbol, tokenAddr) => {
     try {
         if (cachedTokenPrices[tokenSymbol]) return cachedTokenPrices[tokenSymbol];
 
-        // eslint-disable-next-line no-param-reassign
         if (tokenAddr.toLowerCase() === WBTC_ADDR.toLowerCase()) tokenAddr = BTC_ADDR;
 
         let wstethMultiplier = '1';
         if (tokenAddr.toLowerCase() === WSTETH_ADDRESS.toLowerCase()) {
-            // eslint-disable-next-line no-param-reassign
             tokenAddr = STETH_ADDRESS;
-            wstethMultiplier = BN2Float(await hre.ethers.provider.call({
-                to: WSTETH_ADDRESS,
-                data: hre.ethers.utils.id('stEthPerToken()').slice(0, 10),
-            }));
+            wstethMultiplier = BN2Float(
+                await hre.ethers.provider.call({
+                    to: WSTETH_ADDRESS,
+                    data: hre.ethers.utils.id('stEthPerToken()').slice(0, 10),
+                }),
+            );
         }
 
         let tokenPrice = BN2Float(await getChainLinkPrice(tokenAddr), 8);
@@ -1330,14 +1447,16 @@ const cacheChainlinkPrice = async (tokenSymbol, tokenAddr) => {
     }
 };
 
-const takeSnapshot = async () => hre.network.provider.request({
-    method: 'evm_snapshot',
-});
+const takeSnapshot = async () =>
+    hre.network.provider.request({
+        method: 'evm_snapshot',
+    });
 
-const revertToSnapshot = async (snapshotId) => hre.network.provider.request({
-    method: 'evm_revert',
-    params: [snapshotId],
-});
+const revertToSnapshot = async (snapshotId) =>
+    hre.network.provider.request({
+        method: 'evm_revert',
+        params: [snapshotId],
+    });
 
 const getWeth = () => addrs[network].WETH_ADDRESS;
 
@@ -1374,10 +1493,7 @@ async function setForkForTesting() {
         senderAcc.address,
         '0xC9F2C9CD04674EDEA40000000',
     ]);
-    await hre.network.provider.send(setBalanceMethod, [
-        OWNER_ACC,
-        '0xC9F2C9CD04674EDEA40000000',
-    ]);
+    await hre.network.provider.send(setBalanceMethod, [OWNER_ACC, '0xC9F2C9CD04674EDEA40000000']);
 
     const setNextBlockBaseFeeMethod = hre.network.config.isAnvil
         ? 'anvil_setNextBlockBaseFeePerGas'
@@ -1462,15 +1578,35 @@ const filterEthersObject = (obj) => {
 
 const isProxySafe = (proxy) => proxy.functions.nonce !== undefined;
 
-// executes tx through safe or dsproxy depending the type
+const isProxyDSAProxy = async (proxy) => {
+    try {
+        const version = await proxy.version();
+        return version.eq(2);
+    } catch (error) {
+        return false;
+    }
+};
+
+const isSFProxy = async (proxy) => {
+    try {
+        const mockSmartWalletUtils = await deployContract('MockSmartWalletUtils');
+        return await mockSmartWalletUtils.isSFProxy(proxy.address);
+    } catch (error) {
+        return false;
+    }
+};
+
+// executes tx through wallet depending the type
 const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => {
     let receipt;
+
+    // If signer is not set, try setting it with _address
+    if (!proxy.signer.address) {
+        // eslint-disable-next-line no-underscore-dangle
+        proxy.signer.address = proxy.signer._address;
+    }
+
     if (isProxySafe(proxy)) {
-        // If signer is not set, try setting it with _address
-        if (!proxy.signer.address) {
-            // eslint-disable-next-line no-underscore-dangle
-            proxy.signer.address = proxy.signer._address;
-        }
         receipt = await executeSafeTx(
             proxy.signer.address,
             proxy,
@@ -1480,21 +1616,47 @@ const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => 
             ethValue,
         );
     } else {
-        receipt = await proxy['execute(address,bytes)'](targetAddr, callData, {
-            gasLimit: 10000000,
-            value: ethValue,
-        });
+        const isDSAProxy = await isProxyDSAProxy(proxy);
+        const isSFProxyCheck = await isSFProxy(proxy);
+
+        if (isDSAProxy) {
+            await impersonateAccount(proxy.signer.address);
+            receipt = await proxy['cast(string[],bytes[],address)'](
+                ['DEFI-SAVER-A'],
+                [callData],
+                nullAddress,
+                {
+                    gasLimit: 10000000,
+                    value: ethValue,
+                },
+            );
+            await stopImpersonatingAccount(proxy.signer.address);
+        } else if (isSFProxyCheck) {
+            const sfProxyEntryPointAddr = await getAddrFromRegistry('SFProxyEntryPoint');
+            receipt = await proxy.execute(sfProxyEntryPointAddr, callData, {
+                gasLimit: 10000000,
+                value: ethValue,
+            });
+        } else {
+            // Default to DSProxy execution
+            receipt = await proxy['execute(address,bytes)'](targetAddr, callData, {
+                gasLimit: 10000000,
+                value: ethValue,
+            });
+        }
     }
 
     return receipt;
 };
 
-const WALLETS = ['DS_PROXY', 'SAFE'];
+const WALLETS = ['DS_PROXY', 'SAFE', 'DSA_PROXY', 'SF_PROXY'];
 const isWalletNameDsProxy = (w) => w === 'DS_PROXY';
+const isWalletNameDsaProxy = (w) => w === 'DSA_PROXY';
+const isWalletNameSFProxy = (w) => w === 'SF_PROXY';
 
 const generateIds = () => {
     const idsMap = {};
-    const files = getAllFiles('./contracts');
+    const files = findAllFiles('./contracts');
 
     // add extra non-contract name ids
     files.push('/StrategyExecutorID.sol');
@@ -1532,6 +1694,113 @@ const expectError = (errString, expectedErrSig) => {
     } else {
         expect(true).to.be.equal(false);
     }
+};
+
+const getStrategyExecutorContract = async () => {
+    const strategyContractName = network === 'mainnet' ? 'StrategyExecutor' : 'StrategyExecutorL2';
+    const strategyExecutor = await hre.ethers.getContractAt(
+        strategyContractName,
+        addrs[network].STRATEGY_EXECUTOR_ADDR,
+    );
+    return strategyExecutor;
+};
+
+const getAndSetMockExchangeWrapper = async (acc, newAddr, isFork = false) => {
+    const mockExchangeName =
+        network === 'mainnet' ? 'MockExchangeWrapperUsdFeed' : 'MockExchangeWrapperUsdFeedL2';
+    const mockWrapper = await redeploy(mockExchangeName, isFork);
+    await setNewExchangeWrapper(acc, mockWrapper.address);
+    return mockWrapper;
+};
+
+const addBalancerFlLiquidity = async (tokenAddr) => {
+    await setBalance(tokenAddr, BALANCER_VAULT_ADDR, hre.ethers.utils.parseUnits('1000000000', 18));
+};
+
+// Helper function to get enum name from value
+const getCloseStrategyTypeName = (value) => {
+    const enumNames = [
+        'TAKE_PROFIT_IN_COLLATERAL',
+        'STOP_LOSS_IN_COLLATERAL',
+        'TAKE_PROFIT_IN_DEBT',
+        'STOP_LOSS_IN_DEBT',
+        'TAKE_PROFIT_AND_STOP_LOSS_IN_COLLATERAL',
+        'TAKE_PROFIT_IN_COLLATERAL_AND_STOP_LOSS_IN_DEBT',
+        'TAKE_PROFIT_AND_STOP_LOSS_IN_DEBT',
+        'TAKE_PROFIT_IN_DEBT_AND_STOP_LOSS_IN_COLLATERAL',
+    ];
+    return enumNames[value] || `UNKNOWN_${value}`;
+};
+
+// Close strategy configurations for testing
+const getCloseStrategyConfigs = (automationSdk) => [
+    // Take Profit Only - In Collateral (very high quote price = always triggers)
+    {
+        stopLossPrice: 0,
+        stopLossType: null,
+        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
+        takeProfitType: automationSdk.enums.CloseToAssetType.COLLATERAL,
+    },
+    // Stop Loss Only - In Collateral (very low quote price = always triggers)
+    {
+        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
+        stopLossType: automationSdk.enums.CloseToAssetType.COLLATERAL,
+        takeProfitPrice: 0,
+        takeProfitType: null,
+    },
+    // Take Profit Only - In Debt
+    {
+        stopLossPrice: 0,
+        stopLossType: null,
+        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
+        takeProfitType: automationSdk.enums.CloseToAssetType.DEBT,
+    },
+    // Stop Loss Only - In Debt
+    {
+        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
+        stopLossType: automationSdk.enums.CloseToAssetType.DEBT,
+        takeProfitPrice: 0,
+        takeProfitType: null,
+    },
+    // Both - In Collateral
+    {
+        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
+        stopLossType: automationSdk.enums.CloseToAssetType.COLLATERAL,
+        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
+        takeProfitType: automationSdk.enums.CloseToAssetType.COLLATERAL,
+    },
+    // Take Profit In Collateral, Stop Loss In Debt
+    {
+        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
+        stopLossType: automationSdk.enums.CloseToAssetType.DEBT,
+        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
+        takeProfitType: automationSdk.enums.CloseToAssetType.COLLATERAL,
+    },
+    // Both - In Debt
+    {
+        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
+        stopLossType: automationSdk.enums.CloseToAssetType.DEBT,
+        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
+        takeProfitType: automationSdk.enums.CloseToAssetType.DEBT,
+    },
+    // Take Profit In Debt, Stop Loss In Collateral
+    {
+        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
+        stopLossType: automationSdk.enums.CloseToAssetType.COLLATERAL,
+        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
+        takeProfitType: automationSdk.enums.CloseToAssetType.DEBT,
+    },
+];
+
+const isCloseToDebtType = (automationSdk, closeStrategyType) => {
+    return (
+        closeStrategyType === automationSdk.enums.CloseStrategyType.TAKE_PROFIT_IN_DEBT ||
+        closeStrategyType === automationSdk.enums.CloseStrategyType.STOP_LOSS_IN_DEBT ||
+        closeStrategyType ===
+            automationSdk.enums.CloseStrategyType.TAKE_PROFIT_AND_STOP_LOSS_IN_DEBT ||
+        closeStrategyType ===
+            automationSdk.enums.CloseStrategyType.TAKE_PROFIT_IN_DEBT_AND_STOP_LOSS_IN_COLLATERAL
+    );
 };
 
 module.exports = {
@@ -1603,6 +1872,19 @@ module.exports = {
     setCode,
     expectError,
     toBytes32,
+    getStrategyExecutorContract,
+    getAndSetMockExchangeWrapper,
+    addBalancerFlLiquidity,
+    isWalletNameDsaProxy,
+    isWalletNameSFProxy,
+    isProxyDSAProxy,
+    isSFProxy,
+    createDsaProxy,
+    createSFProxy,
+    whitelistContractForSFProxy,
+    getCloseStrategyTypeName,
+    getCloseStrategyConfigs,
+    isCloseToDebtType,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,

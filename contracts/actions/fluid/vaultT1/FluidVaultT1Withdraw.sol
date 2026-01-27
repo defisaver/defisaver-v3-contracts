@@ -2,15 +2,14 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultT1 } from "../../../interfaces/fluid/vaults/IFluidVaultT1.sol";
-import { FluidWithdrawLiquidityLogic } from "../logic/liquidity/FluidWithdrawLiquidityLogic.sol"; 
+import { IFluidVaultT1 } from "../../../interfaces/protocols/fluid/vaults/IFluidVaultT1.sol";
+import { FluidWithdrawLiquidityLogic } from "../logic/liquidity/FluidWithdrawLiquidityLogic.sol";
 import { FluidLiquidityModel } from "../helpers/FluidLiquidityModel.sol";
 import { FluidVaultTypes } from "../helpers/FluidVaultTypes.sol";
 import { ActionBase } from "../../ActionBase.sol";
 
 /// @title Withdraw assets from Fluid Vault T1 (1_col:1_debt)
 contract FluidVaultT1Withdraw is ActionBase {
-
     /// @param vault The address of the Fluid Vault T1
     /// @param nftId ID of the NFT representing the position
     /// @param amount Amount to withdraw. Pass type(uint256).max to withdraw all.
@@ -37,12 +36,10 @@ contract FluidVaultT1Withdraw is ActionBase {
         params.nftId = _parseParamUint(params.nftId, _paramMapping[1], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
-        params.wrapWithdrawnEth = _parseParamUint(
-            params.wrapWithdrawnEth ? 1 : 0,
-            _paramMapping[4],
-            _subData,
-            _returnValues
-        ) == 1;
+        params.wrapWithdrawnEth =
+            _parseParamUint(
+                    params.wrapWithdrawnEth ? 1 : 0, _paramMapping[4], _subData, _returnValues
+                ) == 1;
 
         (uint256 amount, bytes memory logData) = _withdraw(params);
         emit ActionEvent("FluidVaultT1Withdraw", logData);

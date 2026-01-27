@@ -2,26 +2,36 @@
 
 pragma solidity =0.8.24;
 
+import { IDSProxyFactory } from "../../contracts/interfaces/DS/IDSProxyFactory.sol";
+import { IDSProxy } from "../../contracts/interfaces/DS/IDSProxy.sol";
+import { ISafeProxyFactory } from "../../contracts/interfaces/protocols/safe/ISafeProxyFactory.sol";
+import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
+import { IInstaIndex } from "../../contracts/interfaces/protocols/insta/IInstaIndex.sol";
+import {
+    IAccountImplementation
+} from "../../contracts/interfaces/protocols/summerfi/IAccountImplementation.sol";
+import { IAccountFactory } from "../../contracts/interfaces/protocols/summerfi/IAccountFactory.sol";
+import { IInstaAccountV2 } from "../../contracts/interfaces/protocols/insta/IInstaAccountV2.sol";
+
 import { BaseTest } from "./BaseTest.sol";
+import { RegistryUtils } from "./RegistryUtils.sol";
 import { Addresses } from "../utils/Addresses.sol";
+import { console2 as console } from "forge-std/console2.sol";
 
-import { DSProxyFactoryInterface } from "../../contracts/DS/DSProxyFactoryInterface.sol";
-import { DSProxy } from "../../contracts/DS/DSProxy.sol";
-import { ISafeProxyFactory } from "../../contracts/interfaces/safe/ISafeProxyFactory.sol";
-import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
-import { console2 } from "forge-std/console2.sol";
-
-contract SmartWallet is BaseTest {
-
+contract SmartWallet is BaseTest, RegistryUtils {
     address payable public owner;
     address payable public walletAddr;
     bool public isSafe;
+    bool public isDSA;
+    bool public isDSProxy;
+    bool public isSFProxy;
     bool private safeInitialized;
 
     error SafeTxFailed();
+    error UnsupportedWalletType();
 
     modifier ownerAsSender() {
-        vm.prank(owner);
+        vm.startPrank(owner);
         _;
         vm.stopPrank();
     }
@@ -39,13 +49,35 @@ contract SmartWallet is BaseTest {
         vm.label(walletAddr, "SmartWallet");
     }
 
-    function createDSProxy() public ownerAsSender() returns(address payable) {
-        walletAddr = payable(address(DSProxyFactoryInterface(Addresses.DS_PROXY_FACTORY).build()));
+    function createDSProxy() public ownerAsSender returns (address payable) {
+        walletAddr = payable(address(IDSProxyFactory(Addresses.DS_PROXY_FACTORY).build()));
         isSafe = false;
+        isDSA = false;
+        isDSProxy = true;
+        isSFProxy = false;
         return walletAddr;
     }
 
-    function createSafe() public ownerAsSender() returns(address payable) {
+    function createDSAProxy() public ownerAsSender returns (address payable) {
+        walletAddr = payable(IInstaIndex(Addresses.INSTADAPP_INDEX).build(owner, 2, address(0)));
+        isSafe = false;
+        isDSA = true;
+        isDSProxy = false;
+        isSFProxy = false;
+        return walletAddr;
+    }
+
+    function createSFProxy() public ownerAsSender returns (address payable) {
+        walletAddr = payable(IAccountFactory(Addresses.SF_PROXY_FACTORY).createAccount());
+        vm.label(address(Addresses.SF_PROXY_GUARD), "AccountGuard");
+        isSafe = false;
+        isDSA = false;
+        isDSProxy = false;
+        isSFProxy = true;
+        return walletAddr;
+    }
+
+    function createSafe() public ownerAsSender returns (address payable) {
         if (safeInitialized) return walletAddr;
 
         uint256 saltNonce = block.timestamp;
@@ -64,11 +96,8 @@ contract SmartWallet is BaseTest {
             payable(address(0))
         );
 
-        walletAddr = payable(ISafeProxyFactory(Addresses.SAFE_PROXY_FACTORY).createProxyWithNonce(
-            Addresses.SAFE_SINGLETON,
-            setupData,
-            saltNonce
-        ));
+        walletAddr = payable(ISafeProxyFactory(Addresses.SAFE_PROXY_FACTORY)
+                .createProxyWithNonce(Addresses.SAFE_SINGLETON, setupData, saltNonce));
 
         isSafe = true;
         safeInitialized = true;
@@ -76,46 +105,53 @@ contract SmartWallet is BaseTest {
         return walletAddr;
     }
 
-    function execute(
-        address _target,
-        bytes memory _calldata,
-        uint256 _value
-    ) public ownerAsSender() {
+    function execute(address _target, bytes memory _calldata, uint256 _value) public ownerAsSender {
         if (isSafe) {
             bytes memory signatures = bytes.concat(abi.encode(owner, bytes32(0)), bytes1(0x01));
-            bool success = ISafe(walletAddr).execTransaction(
-                _target, // to
-                _value, // eth value
-                _calldata, // action calldata
-                ISafe.Operation.DelegateCall, // operation
-                0, // safeTxGas
-                0, // baseGas
-                0, // gasPrice
-                address(0), // gasToken
-                payable(0), // refundReceiver
-                signatures // packed signature data ({bytes32 r}{bytes32 s}{uint8 v})
-            );
+            bool success = ISafe(walletAddr)
+                .execTransaction(
+                    _target, // to
+                    _value, // eth value
+                    _calldata, // action calldata
+                    ISafe.Operation.DelegateCall, // operation
+                    0, // safeTxGas
+                    0, // baseGas
+                    0, // gasPrice
+                    address(0), // gasToken
+                    payable(0), // refundReceiver
+                    signatures // packed signature data ({bytes32 r}{bytes32 s}{uint8 v})
+                );
             if (!success) {
                 revert SafeTxFailed();
             }
+        } else if (isDSProxy) {
+            IDSProxy(walletAddr).execute{ value: _value }(_target, _calldata);
+        } else if (isDSA) {
+            string[] memory connectors = new string[](1);
+            connectors[0] = "DEFI-SAVER-A";
+            bytes[] memory connectorsData = new bytes[](1);
+            connectorsData[0] = _calldata;
+
+            IInstaAccountV2(walletAddr).cast{ value: _value }(connectors, connectorsData, owner);
+        } else if (isSFProxy) {
+            address sfProxyEntryPoint = getAddr("SFProxyEntryPoint");
+            address target = sfProxyEntryPoint != address(0) ? sfProxyEntryPoint : _target;
+
+            IAccountImplementation(walletAddr).execute{ value: _value }(target, _calldata);
         } else {
-            DSProxy(walletAddr).execute(_target, _calldata);
+            revert UnsupportedWalletType();
         }
     }
 
-    function logExecute(
-        address _target,
-        bytes memory _calldata,
-        uint256 _value
-    ) public {
+    function logExecute(address _target, bytes memory _calldata, uint256 _value) public {
         uint256 startGas = gasleft();
         execute(_target, _calldata, _value);
         uint256 gasUsed = startGas - gasleft();
-        console2.log("--------- EXECUTING TX FROM WALLET ----------");
-        console2.log("GAS USED: ", gasUsed);
+        console.log("--------- EXECUTING TX FROM WALLET ----------");
+        console.log("GAS USED: ", gasUsed);
     }
 
-    function ownerApprove(address _token, uint256 _amount) public ownerAsSender() {
+    function ownerApprove(address _token, uint256 _amount) public ownerAsSender {
         approve(_token, walletAddr, _amount);
     }
 }

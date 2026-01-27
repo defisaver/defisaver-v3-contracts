@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 require('dotenv-safe').config();
 require('@nomiclabs/hardhat-waffle');
 require('@nomicfoundation/hardhat-verify');
@@ -28,9 +27,12 @@ Dec.set({
 });
 
 const MAX_NODE_COUNT = 22;
-const testNetworks = Object.fromEntries([...Array(MAX_NODE_COUNT).keys()].map((c, i) => [
-    `local${i}`, { url: `http://127.0.0.1:${8545 + i}`, timeout: 10000000, name: 'mainnet' },
-]));
+const testNetworks = Object.fromEntries(
+    [...Array(MAX_NODE_COUNT).keys()].map((c, i) => [
+        `local${i}`,
+        { url: `http://127.0.0.1:${8545 + i}`, timeout: 10000000, name: 'mainnet' },
+    ]),
+);
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
@@ -125,7 +127,7 @@ module.exports = {
             accounts: [process.env.PRIV_KEY_MAINNET],
             name: 'mainnet',
             txType: 2,
-            blockExplorer: 'etherscan',
+            blockExplorer: 'etherscan.io',
             contractVerification: true,
         },
         optimism: {
@@ -133,8 +135,8 @@ module.exports = {
             accounts: [process.env.PRIV_KEY_OPTIMISM],
             chainId: 10,
             name: 'optimistic',
-            txType: 0,
-            blockExplorer: 'etherscan',
+            txType: 2,
+            blockExplorer: 'optimistic.etherscan.io',
             contractVerification: true,
         },
         base: {
@@ -142,8 +144,8 @@ module.exports = {
             accounts: [process.env.PRIV_KEY_BASE],
             chainId: 8453,
             name: 'base',
-            txType: 0,
-            blockExplorer: 'etherscan',
+            txType: 2,
+            blockExplorer: 'basescan.org',
             contractVerification: true,
         },
         arbitrum: {
@@ -152,7 +154,25 @@ module.exports = {
             chainId: 42161,
             name: 'arbitrum',
             txType: 0,
-            blockExplorer: 'arbiscan',
+            blockExplorer: 'arbiscan.io',
+            contractVerification: true,
+        },
+        linea: {
+            url: process.env.LINEA_NODE,
+            accounts: [process.env.PRIV_KEY_LINEA],
+            chainId: 59144,
+            name: 'linea',
+            txType: 0,
+            blockExplorer: 'lineascan.build',
+            contractVerification: true,
+        },
+        plasma: {
+            url: process.env.PLASMA_NODE,
+            accounts: [process.env.PRIV_KEY_PLASMA],
+            chainId: 9745,
+            name: 'plasma',
+            txType: 2,
+            blockExplorer: 'plasmascan.to',
             contractVerification: true,
         },
     },
@@ -165,11 +185,10 @@ module.exports = {
                         enabled: true,
                         runs: 1000,
                     },
-                    evmVersion: 'cancun',
+                    evmVersion: 'cancun', // london used only for Linea
                 },
             },
         ],
-
     },
     paths: {
         sources: './contracts',
@@ -193,6 +212,8 @@ module.exports = {
         Arbitrum: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
         Optimism: '0x4200000000000000000000000000000000000006',
         Base: '0x4200000000000000000000000000000000000006',
+        Linea: '0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f',
+        Plasma: '0x6100E367285b01F48D07953803A2d8dCA5D19873',
     },
 };
 

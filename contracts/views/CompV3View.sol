@@ -3,22 +3,29 @@
 pragma solidity =0.8.24;
 
 import { CompV3Helper } from "../actions/compoundV3/helpers/CompV3Helper.sol";
-import { CompV3PortedFunctions } from "../utils/CompV3PortedFunctions.sol";
-import { DSMath } from "../DS/DSMath.sol";
-import { Exponential } from "../utils/math/Exponential.sol";
-import { IComet } from "../interfaces/compoundV3/IComet.sol";
-import { ICometExt } from "../interfaces/compoundV3/ICometExt.sol";
-import { ICometRewards } from "../interfaces/compoundV3/ICometRewards.sol";
+import { CompV3PortedFunctions } from "../_vendor/compound/CompV3PortedFunctions.sol";
+import { DSMath } from "../_vendor/DS/DSMath.sol";
+import { Exponential } from "../_vendor/compound/Exponential.sol";
+import { IComet } from "../interfaces/protocols/compoundV3/IComet.sol";
+import { ICometExt } from "../interfaces/protocols/compoundV3/ICometExt.sol";
+import { ICometRewards } from "../interfaces/protocols/compoundV3/ICometRewards.sol";
 
 contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions {
-
     address private constant wUSDM_PRICE_FEED = 0xe3a409eD15CD53aFdEFdd191ad945cEC528A2496;
-    uint256 private constant wUSDM_PRICE = 108238800;
+    address private constant wUSDM_PRICE_FEED_ARBI = 0x13cDFB7db5e2F58e122B2e789b59dE13645349C4;
+    address private constant wUSDM_PRICE_FEED_OPTI_ONE = 0x66228d797eb83ecf3465297751f6b1D4d42b7627;
+    address private constant wUSDM_PRICE_FEED_OPTI_TWO = 0x7E86318Cc4bc539043F204B39Ce0ebeD9F0050Dc;
+    uint256 private constant wUSDM_PRICE = 108_238_800;
 
     function cometGetPrice(IComet comet, address _priceFeed) public view returns (uint256) {
         /// @dev This is a temporary fix for the wUSDM price feed. The recorded price is as of 8/8/2025.
         /// We are okay with this price having a discrepancy with the actual price over time and it is here solely to avoid breaking other calls.
-        if (_priceFeed == wUSDM_PRICE_FEED) {
+        if (
+            _priceFeed == wUSDM_PRICE_FEED && block.chainid == 1
+                || _priceFeed == wUSDM_PRICE_FEED_ARBI && block.chainid == 42_161
+                || _priceFeed == wUSDM_PRICE_FEED_OPTI_ONE && block.chainid == 10
+                || _priceFeed == wUSDM_PRICE_FEED_OPTI_TWO && block.chainid == 10
+        ) {
             return wUSDM_PRICE;
         }
         return comet.getPrice(_priceFeed);
@@ -27,40 +34,40 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
     struct LoanData {
         address user;
         address[] collAddr;
-        uint[] collAmounts;
-        uint depositAmount;
-        uint depositValue;
-        uint borrowAmount;
-        uint borrowValue;
-        uint collValue;
+        uint256[] collAmounts;
+        uint256 depositAmount;
+        uint256 depositValue;
+        uint256 borrowAmount;
+        uint256 borrowValue;
+        uint256 collValue;
     }
 
     struct CollateralInfoFull {
         address tokenAddr;
-        uint totalSupply;
-        uint supplyReserved;
-        uint borrowCollateralFactor;
-        uint liquidateCollateralFactor;
-        uint liquidationFactor;
-        uint price;
-        uint supplyCap;
+        uint256 totalSupply;
+        uint256 supplyReserved;
+        uint256 borrowCollateralFactor;
+        uint256 liquidateCollateralFactor;
+        uint256 liquidationFactor;
+        uint256 price;
+        uint256 supplyCap;
     }
 
     struct BaseTokenInfoFull {
         address tokenAddr;
-        uint price;
-        uint supplyIndex;
-        uint borrowIndex;
-        uint trackingSupplyIndex;
-        uint trackingBorrowIndex;
-        uint supplyRate;
-        uint borrowRate;
-        uint totalSupply;
-        uint totalBorrow;
-        uint utilization;
-        uint baseBorrowMin;
-        uint baseTrackingBorrowRewardsSpeed;
-        uint baseTrackingSupplyRewardsSpeed;
+        uint256 price;
+        uint256 supplyIndex;
+        uint256 borrowIndex;
+        uint256 trackingSupplyIndex;
+        uint256 trackingBorrowIndex;
+        uint256 supplyRate;
+        uint256 borrowRate;
+        uint256 totalSupply;
+        uint256 totalBorrow;
+        uint256 utilization;
+        uint256 baseBorrowMin;
+        uint256 baseTrackingBorrowRewardsSpeed;
+        uint256 baseTrackingSupplyRewardsSpeed;
     }
 
     struct GovernanceInfoFull {
@@ -69,30 +76,37 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
         bool isWithdrawPaused;
         bool isAbsorbPaused;
     }
-    
-    function isAllowed(address _market, address _owner, address _manager) public view returns(bool) {
+
+    function isAllowed(address _market, address _owner, address _manager)
+        public
+        view
+        returns (bool)
+    {
         return ICometExt(_market).allowance(_owner, _manager) == 0 ? false : true;
     }
 
-    /// @notice Returns all supported collateral assets 
-    function getAssets(address _market) public view returns(IComet.AssetInfo[] memory assets){
+    /// @notice Returns all supported collateral assets
+    function getAssets(address _market) public view returns (IComet.AssetInfo[] memory assets) {
         uint8 numAssets = IComet(_market).numAssets();
         assets = new IComet.AssetInfo[](numAssets);
 
-        for(uint8 i = 0; i < numAssets; i++){
+        for (uint8 i = 0; i < numAssets; i++) {
             assets[i] = IComet(_market).getAssetInfo(i);
         }
         return assets;
     }
 
-
     /// @notice Fetches all the collateral/debt address and amounts, denominated in usd
     /// @param _users Addresses of the user
     /// @return loans Array of LoanData information
-    function getLoanDataArr(address _market, address[] memory _users) public view returns (LoanData[] memory loans) {
+    function getLoanDataArr(address _market, address[] memory _users)
+        public
+        view
+        returns (LoanData[] memory loans)
+    {
         loans = new LoanData[](_users.length);
 
-        for (uint i = 0; i < _users.length; ++i) {
+        for (uint256 i = 0; i < _users.length; ++i) {
             loans[i] = getLoanData(_market, _users[i]);
         }
     }
@@ -100,14 +114,18 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
     /// @notice Fetches all the collateral/debt address and amounts, denominated in usd
     /// @param _user Address of the user
     /// @return data LoanData information
-    function getLoanData(address _market, address _user) public view returns (LoanData memory data) {
+    function getLoanData(address _market, address _user)
+        public
+        view
+        returns (LoanData memory data)
+    {
         IComet.AssetInfo[] memory assets = getAssets(_market);
         IComet comet = IComet(_market);
 
         data = LoanData({
             user: _user,
             collAddr: new address[](assets.length),
-            collAmounts: new uint[](assets.length),
+            collAmounts: new uint256[](assets.length),
             depositAmount: 0,
             depositValue: 0,
             borrowAmount: 0,
@@ -115,16 +133,16 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
             collValue: 0
         });
 
-        for (uint i = 0; i < assets.length; i++) {
+        for (uint256 i = 0; i < assets.length; i++) {
             address asset = assets[i].asset;
-            address priceFeed = assets[i].priceFeed; 
+            address priceFeed = assets[i].priceFeed;
 
-            uint tokenBalance = comet.collateralBalanceOf(_user,asset);
+            uint256 tokenBalance = comet.collateralBalanceOf(_user, asset);
             data.collAddr[i] = asset;
             data.collAmounts[i] = tokenBalance;
             if (tokenBalance != 0) {
                 data.collAddr[i] = asset;
-                uint value = tokenBalance * cometGetPrice(comet, priceFeed) / assets[i].scale;
+                uint256 value = tokenBalance * cometGetPrice(comet, priceFeed) / assets[i].scale;
                 data.collAmounts[i] = tokenBalance;
                 data.collValue += value;
             }
@@ -132,14 +150,19 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
 
         address usdcPriceFeed = comet.baseTokenPriceFeed();
         data.borrowAmount = comet.borrowBalanceOf(_user);
-        data.borrowValue = comet.borrowBalanceOf(_user) * cometGetPrice(comet, usdcPriceFeed) / comet.priceScale();
+        data.borrowValue =
+            comet.borrowBalanceOf(_user) * cometGetPrice(comet, usdcPriceFeed) / comet.priceScale();
         data.depositAmount = comet.balanceOf(_user);
-        data.depositValue = comet.balanceOf(_user) * cometGetPrice(comet, usdcPriceFeed) / comet.priceScale();
+        data.depositValue =
+            comet.balanceOf(_user) * cometGetPrice(comet, usdcPriceFeed) / comet.priceScale();
 
         return data;
     }
 
-    function getFullCollInfo(address _market, address _tokenAddr) public returns(CollateralInfoFull memory coll) {
+    function getFullCollInfo(address _market, address _tokenAddr)
+        public
+        returns (CollateralInfoFull memory coll)
+    {
         IComet comet = IComet(_market);
 
         IComet.AssetInfo memory assetInfo = comet.getAssetInfoByAddress(_tokenAddr);
@@ -157,12 +180,16 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
         });
     }
 
-    function getFullBaseTokenInfo(address _market) public view returns (BaseTokenInfoFull memory baseToken) {
+    function getFullBaseTokenInfo(address _market)
+        public
+        view
+        returns (BaseTokenInfoFull memory baseToken)
+    {
         IComet comet = IComet(_market);
 
         IComet.TotalsBasic memory basics = comet.totalsBasic();
 
-        uint utilization = comet.getUtilization();
+        uint256 utilization = comet.getUtilization();
 
         baseToken = BaseTokenInfoFull({
             tokenAddr: comet.baseToken(),
@@ -182,11 +209,11 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
         });
     }
 
-    function getFullCollInfos(address _market) public returns(CollateralInfoFull[] memory colls) {
+    function getFullCollInfos(address _market) public returns (CollateralInfoFull[] memory colls) {
         IComet.AssetInfo[] memory assets = getAssets(_market);
         colls = new CollateralInfoFull[](assets.length);
 
-        for (uint i; i < assets.length; ++i) {
+        for (uint256 i; i < assets.length; ++i) {
             colls[i] = getFullCollInfo(_market, assets[i].asset);
         }
     }
@@ -198,7 +225,11 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
         return cometGetPrice(comet, assetInfo.priceFeed);
     }
 
-    function getGovernanceInfoFull(address _market) public view returns (GovernanceInfoFull memory govInfo) {
+    function getGovernanceInfoFull(address _market)
+        public
+        view
+        returns (GovernanceInfoFull memory govInfo)
+    {
         IComet comet = IComet(_market);
 
         govInfo = GovernanceInfoFull({
@@ -209,14 +240,20 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
         });
     }
 
-    function getRewardsOwed(address _market, address _user) public returns (ICometRewards.RewardOwed memory rewardsOwed){
+    function getRewardsOwed(address _market, address _user)
+        public
+        returns (ICometRewards.RewardOwed memory rewardsOwed)
+    {
         return ICometRewards(COMET_REWARDS_ADDR).getRewardOwed(_market, _user);
     }
 
     /// @dev In compV3, only base asset token is used for apy calculations
-    function getApyAfterValuesEstimation(address _market, address _user, uint256 _supplyAmount, uint256 _borrowAmount) 
-        public returns (uint256 utilization, uint256 supplyRate, uint256 borrowRate) 
-    {   
+    function getApyAfterValuesEstimation(
+        address _market,
+        address _user,
+        uint256 _supplyAmount,
+        uint256 _borrowAmount
+    ) public returns (uint256 utilization, uint256 supplyRate, uint256 borrowRate) {
         utilization = IComet(_market).getUtilization();
         supplyRate = IComet(_market).getSupplyRate(utilization);
         borrowRate = IComet(_market).getBorrowRate(utilization);
@@ -230,10 +267,13 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
         IComet.TotalsBasic memory totals = IComet(_market).totalsBasic();
 
         if (_borrowAmount > 0) {
-            int256 presentValue = presentValue(user.principal, totals.baseSupplyIndex, totals.baseBorrowIndex);
+            int256 presentValue =
+                presentValue(user.principal, totals.baseSupplyIndex, totals.baseBorrowIndex);
             int256 balance = presentValue - signed256(_borrowAmount);
-            int104 principalNew = principalValue(balance, totals.baseSupplyIndex, totals.baseBorrowIndex);
-            (uint104 withdrawAmount, uint104 borrowAmount) = withdrawAndBorrowAmount(user.principal, principalNew);
+            int104 principalNew =
+                principalValue(balance, totals.baseSupplyIndex, totals.baseBorrowIndex);
+            (uint104 withdrawAmount, uint104 borrowAmount) =
+                withdrawAndBorrowAmount(user.principal, principalNew);
 
             totals.totalSupplyBase -= withdrawAmount;
             totals.totalBorrowBase += borrowAmount;
@@ -241,10 +281,13 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
             user.principal = principalNew;
         }
         if (_supplyAmount > 0) {
-            int256 presentValue = presentValue(user.principal, totals.baseSupplyIndex, totals.baseBorrowIndex);
+            int256 presentValue =
+                presentValue(user.principal, totals.baseSupplyIndex, totals.baseBorrowIndex);
             int256 balance = presentValue + signed256(_supplyAmount);
-            int104 principalNew = principalValue(balance, totals.baseSupplyIndex, totals.baseBorrowIndex);
-            (uint104 repayAmount, uint104 supplyAmount) = repayAndSupplyAmount(user.principal, principalNew);
+            int104 principalNew =
+                principalValue(balance, totals.baseSupplyIndex, totals.baseBorrowIndex);
+            (uint104 repayAmount, uint104 supplyAmount) =
+                repayAndSupplyAmount(user.principal, principalNew);
 
             totals.totalSupplyBase += supplyAmount;
             totals.totalBorrowBase -= repayAmount;

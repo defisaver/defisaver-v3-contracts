@@ -5,25 +5,25 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { Permission } from "../../auth/Permission.sol";
 import { SubStorage } from "../../core/strategy/SubStorage.sol";
-import { CheckWalletType } from "../../utils/CheckWalletType.sol";
+import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 /// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
-contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType {
+contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, SmartWalletUtils {
+    uint64 public immutable REPAY_BUNDLE_ID;
+    uint64 public immutable BOOST_BUNDLE_ID;
 
-    /// @dev 5% offset acceptable
-    uint256 internal constant RATIO_OFFSET = 50000000000000000;
-    
-    uint64 public immutable REPAY_BUNDLE_ID; 
-    uint64 public immutable BOOST_BUNDLE_ID; 
+    uint64 public immutable REPAY_BUNDLE_EOA_ID;
+    uint64 public immutable BOOST_BUNDLE_EOA_ID;
 
-    constructor(uint64 _repayBundleId, uint64 _boostBundleId) {
-        REPAY_BUNDLE_ID = _repayBundleId;
-        BOOST_BUNDLE_ID = _boostBundleId;
+    enum RatioState {
+        OVER,
+        UNDER
     }
 
-    enum RatioState { OVER, UNDER }
+    /// @dev 5% offset acceptable
+    uint256 internal constant RATIO_OFFSET = 50_000_000_000_000_000;
 
     error WrongSubParams(uint256 minRatio, uint256 maxRatio);
     error RangeTooClose(uint256 ratio, uint256 targetRatio);
@@ -36,26 +36,37 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
         uint128 targetRatioBoost;
         uint128 targetRatioRepay;
         bool boostEnabled;
+        bool isEOA;
+    }
+
+    constructor(
+        uint64 _repayBundleId,
+        uint64 _boostBundleId,
+        uint64 _repayBundleEoaId,
+        uint64 _boostBundleEoaId
+    ) {
+        REPAY_BUNDLE_ID = _repayBundleId;
+        BOOST_BUNDLE_ID = _boostBundleId;
+        REPAY_BUNDLE_EOA_ID = _repayBundleEoaId;
+        BOOST_BUNDLE_EOA_ID = _boostBundleEoaId;
     }
 
     /// @notice Parses input data and subscribes user to repay and boost bundles
     /// @dev Gives wallet permission if needed and registers a new sub
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
-    function subToCompV3Automation(
-        bytes calldata _encodedInput
-    ) public {
-         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission(isDSProxy(address(this)));
+    function subToCompV3Automation(bytes calldata _encodedInput) public {
+        /// @dev Give wallet permission to our auth contract to be able to execute the strategy
+        _givePermissionToAuthContract(_isDSProxy(address(this)));
 
         CompV3SubData memory subData = parseSubData(_encodedInput);
-        StrategySub memory repaySub = formatRepaySub(subData);
+        StrategySub memory repaySub = formatRepaySub(subData, address(this), msg.sender);
         SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(repaySub);
 
         if (subData.boostEnabled) {
             _validateSubData(subData);
 
-            StrategySub memory boostSub = formatBoostSub(subData);
+            StrategySub memory boostSub = formatBoostSub(subData, address(this), msg.sender);
             SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(boostSub);
         }
     }
@@ -63,24 +74,23 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
     /// @notice Calls SubStorage to update the users subscription data
     /// @dev Updating sub data will activate it as well
     /// @dev If we don't have a boost subId, send 0
-    function updateSubData(
-        bytes calldata _encodedInput
-    ) public {
-        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission(isDSProxy(address(this)));
+    function updateSubData(bytes calldata _encodedInput) public {
+        /// @dev Give wallet permission to our auth contract to be able to execute the strategy
+        _givePermissionToAuthContract(_isDSProxy(address(this)));
+
         (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
         CompV3SubData memory subData = parseSubData(_encodedInput[8:]);
 
         // update repay as we must have a subId1, it's ok if it's the same data
-        StrategySub memory repaySub = formatRepaySub(subData);
+        StrategySub memory repaySub = formatRepaySub(subData, address(this), msg.sender);
         SubStorage(SUB_STORAGE_ADDR).updateSubData(subId1, repaySub);
         SubStorage(SUB_STORAGE_ADDR).activateSub(subId1);
 
         if (subData.boostEnabled) {
             _validateSubData(subData);
 
-            StrategySub memory boostSub = formatBoostSub(subData);
+            StrategySub memory boostSub = formatBoostSub(subData, address(this), msg.sender);
 
             // if we don't have a boost bundleId, create one
             if (subId2 == 0) {
@@ -97,11 +107,9 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
     }
 
     /// @notice Activates Repay sub and Boost sub if exists
-    function activateSub(
-        bytes calldata _encodedInput
-    ) public {
-        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission(isDSProxy(address(this)));
+    function activateSub(bytes calldata _encodedInput) public {
+        /// @dev Give wallet permission to our auth contract to be able to execute the strategy
+        _givePermissionToAuthContract(_isDSProxy(address(this)));
         (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
         SubStorage(SUB_STORAGE_ADDR).activateSub(subId1);
@@ -112,9 +120,7 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
     }
 
     /// @notice Deactivates Repay sub and Boost sub if exists
-    function deactivateSub(
-        bytes calldata _encodedInput
-    ) public {
+    function deactivateSub(bytes calldata _encodedInput) public {
         (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
         SubStorage(SUB_STORAGE_ADDR).deactivateSub(subId1);
@@ -141,16 +147,23 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
     }
 
     /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the specialized compV3 sub
-    function formatRepaySub(CompV3SubData memory _subData) public view returns (StrategySub memory repaySub) {
-        repaySub.strategyOrBundleId = REPAY_BUNDLE_ID;
+    function formatRepaySub(CompV3SubData memory _subData, address _wallet, address _eoa)
+        public
+        view
+        returns (StrategySub memory repaySub)
+    {
+        repaySub.strategyOrBundleId = _subData.isEOA ? REPAY_BUNDLE_EOA_ID : REPAY_BUNDLE_ID;
         repaySub.isBundle = true;
 
+        address user = _subData.isEOA ? _eoa : _wallet;
+
         // format data for ratio trigger if currRatio < minRatio = true
-        bytes memory triggerData = abi.encode(address(this), _subData.market, uint256(_subData.minRatio), uint8(RatioState.UNDER));
-        repaySub.triggerData =  new bytes[](1);
+        bytes memory triggerData =
+            abi.encode(user, _subData.market, uint256(_subData.minRatio), uint8(RatioState.UNDER));
+        repaySub.triggerData = new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
-        repaySub.subData =  new bytes32[](4);
+        repaySub.subData = new bytes32[](4);
         repaySub.subData[0] = bytes32(uint256(uint160(_subData.market)));
         repaySub.subData[1] = bytes32(uint256(uint160(_subData.baseToken)));
         repaySub.subData[2] = bytes32(uint256(1)); // ratioState = repay
@@ -158,33 +171,49 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
     }
 
     /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized compV3 sub
-    function formatBoostSub(CompV3SubData memory _subData) public view returns (StrategySub memory boostSub) {
-        boostSub.strategyOrBundleId = BOOST_BUNDLE_ID;
+    function formatBoostSub(CompV3SubData memory _subData, address _wallet, address _eoa)
+        public
+        view
+        returns (StrategySub memory boostSub)
+    {
+        boostSub.strategyOrBundleId = _subData.isEOA ? BOOST_BUNDLE_EOA_ID : BOOST_BUNDLE_ID;
         boostSub.isBundle = true;
 
+        address user = _subData.isEOA ? _eoa : _wallet;
+
         // format data for ratio trigger if currRatio > maxRatio = true
-        bytes memory triggerData = abi.encode(address(this), _subData.market, uint256(_subData.maxRatio), uint8(RatioState.OVER));
-        boostSub.triggerData =  new bytes[](1);
+        bytes memory triggerData =
+            abi.encode(user, _subData.market, uint256(_subData.maxRatio), uint8(RatioState.OVER));
+        boostSub.triggerData = new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 
-        boostSub.subData =  new bytes32[](4);
+        boostSub.subData = new bytes32[](4);
         boostSub.subData[0] = bytes32(uint256(uint160(_subData.market)));
         boostSub.subData[1] = bytes32(uint256(uint160(_subData.baseToken)));
         boostSub.subData[2] = bytes32(uint256(0)); // ratioState = boost
         boostSub.subData[3] = bytes32(uint256(_subData.targetRatioBoost)); // targetRatio
     }
 
-    function parseSubData(bytes calldata _encodedInput) public pure returns (CompV3SubData memory sub) {
+    function parseSubData(bytes calldata _encodedInput)
+        public
+        pure
+        returns (CompV3SubData memory sub)
+    {
         sub.market = address(bytes20(_encodedInput[0:20]));
         sub.baseToken = address(bytes20(_encodedInput[20:40]));
         sub.minRatio = uint128(bytes16(_encodedInput[40:56]));
         sub.maxRatio = uint128(bytes16(_encodedInput[56:72]));
         sub.targetRatioBoost = uint128(bytes16(_encodedInput[72:88]));
         sub.targetRatioRepay = uint128(bytes16(_encodedInput[88:104]));
-        sub.boostEnabled = (bytes1(_encodedInput[104:105])) != bytes1(0x00); // compare to get bool      
+        sub.boostEnabled = (bytes1(_encodedInput[104:105])) != bytes1(0x00); // compare to get bool
+        sub.isEOA = (bytes1(_encodedInput[105:106])) != bytes1(0x00); // compare to get bool
     }
 
-    function parseSubIds(bytes calldata _encodedInput) public pure returns (uint32 subId1, uint32 subId2) {
+    function parseSubIds(bytes calldata _encodedInput)
+        public
+        pure
+        returns (uint32 subId1, uint32 subId2)
+    {
         subId1 = uint32(bytes4(_encodedInput[0:4]));
         subId2 = uint32(bytes4(_encodedInput[4:8]));
     }

@@ -3,8 +3,8 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { ICToken } from "../../interfaces/compound/ICToken.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { ICToken } from "../../interfaces/protocols/compound/ICToken.sol";
 
 /// @title Action that gets debt amount for a single asset on Compound for debtor.
 contract CompGetDebt is ActionBase {
@@ -23,18 +23,19 @@ contract CompGetDebt is ActionBase {
         bytes32[] memory,
         uint8[] memory,
         bytes32[] memory
-    ) public virtual override payable returns (bytes32) {
+    ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        uint256 debtAmount = ICToken(inputData.cTokenAddr).borrowBalanceCurrent(inputData.debtorAddr);
+        uint256 debtAmount =
+            ICToken(inputData.cTokenAddr).borrowBalanceCurrent(inputData.debtorAddr);
         return bytes32(debtAmount);
     }
 
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes memory _callData) public override payable {}
+    function executeActionDirect(bytes memory _callData) public payable override { }
 
     /// @inheritdoc ActionBase
-    function actionType() public virtual override pure returns (uint8) {
+    function actionType() public pure virtual override returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
 

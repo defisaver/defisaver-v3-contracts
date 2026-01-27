@@ -3,8 +3,8 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
-import { ICrvUsdController, ILLAMMA } from "../interfaces/curveusd/ICurveUsd.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
+import { ICrvUsdController, ILLAMMA } from "../interfaces/protocols/curveusd/ICurveUsd.sol";
 
 /// @title Trigger that triggers when a user is in, or %percentage away from soft liquidation
 contract CurveUsdSoftLiquidationTrigger is ITrigger, AdminAuth {
@@ -26,7 +26,11 @@ contract CurveUsdSoftLiquidationTrigger is ITrigger, AdminAuth {
         return percentage <= triggerSubData.percentage;
     }
 
-    function calcPercentage(address _market, address _user) public view returns (uint256 percentage) {
+    function calcPercentage(address _market, address _user)
+        public
+        view
+        returns (uint256 percentage)
+    {
         ICrvUsdController ctrl = ICrvUsdController(_market);
         ILLAMMA amm = ILLAMMA(ctrl.amm());
 
@@ -51,7 +55,7 @@ contract CurveUsdSoftLiquidationTrigger is ITrigger, AdminAuth {
         params = abi.decode(_subData, (SubParams));
     }
 
-    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {}
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
 
     function isChangeable() public pure override returns (bool) {
         return false;

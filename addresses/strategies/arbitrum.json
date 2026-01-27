@@ -1,1140 +1,1182 @@
 [
-  {
-    "name": "AaveV3RepayL2",
-    "id": 0,
-    "isContinuous": true,
-    "triggerIds": [
-      "AaveV3RatioTrigger"
-    ],
-    "actionIds": [
-      "AaveV3Withdraw",
-      "DFSSell",
-      "GasFeeTakerL2",
-      "AaveV3Payback",
-      "AaveV3RatioCheck"
-    ],
-    "paramMapping": [
-      [
-        0,
-        "&3",
-        0,
-        "&proxy",
-        0
-      ],
-      [
-        0,
-        0,
-        "$1",
-        "&proxy",
-        "&proxy"
-      ],
-      [
-        0,
-        "$2",
-        0
-      ],
-      [
-        "$3",
-        "&proxy",
-        0,
-        0,
-        "&3",
-        "&4",
-        0,
-        0
-      ],
-      [
-        "&2",
-        "&1"
-      ]
-    ],
-    "bundleId": 0
-  },
-  {
-    "name": "AaveFLV3RepayL2",
-    "id": 1,
-    "isContinuous": true,
-    "triggerIds": [
-      "AaveV3RatioTrigger"
-    ],
-    "actionIds": [
-      "FLActionL2",
-      "DFSSell",
-      "GasFeeTakerL2",
-      "AaveV3Payback",
-      "AaveV3Withdraw",
-      "AaveV3RatioCheck"
-    ],
-    "paramMapping": [
-      [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
-      ],
-      [
-        0,
-        0,
-        0,
-        "&proxy",
-        "&proxy"
-      ],
-      [
-        0,
-        "$2",
-        0
-      ],
-      [
-        "$3",
-        "&proxy",
-        0,
-        0,
-        "&3",
-        "&4",
-        0,
-        0
-      ],
-      [
-        0,
-        "&3",
-        "$1",
-        0,
-        0
-      ],
-      [
-        "&2",
-        "&1"
-      ]
-    ],
-    "bundleId": 0
-  },
-  {
-    "name": "AaveV3BoostL2",
-    "id": 2,
-    "isContinuous": true,
-    "triggerIds": [
-      "AaveV3RatioTrigger"
-    ],
-    "actionIds": [
-      "AaveV3Borrow",
-      "DFSSell",
-      "GasFeeTakerL2",
-      "AaveV3Supply",
-      "AaveV3RatioCheck"
-    ],
-    "paramMapping": [
-      [
-        0,
-        "&proxy",
-        0,
-        0,
-        "&3",
-        "&4",
-        0,
-        0
-      ],
-      [
-        0,
-        0,
-        "$1",
-        "&proxy",
-        "&proxy"
-      ],
-      [
-        0,
-        "$2",
-        0
-      ],
-      [
-        "$3",
-        "&proxy",
-        0,
-        "&5",
-        "&3",
-        "&4",
-        0,
-        0
-      ],
-      [
-        "&2",
-        "&1"
-      ]
-    ],
-    "bundleId": 1
-  },
-  {
-    "name": "AaveFLV3BoostL2",
-    "id": 3,
-    "isContinuous": true,
-    "triggerIds": [
-      "AaveV3RatioTrigger"
-    ],
-    "actionIds": [
-      "FLActionL2",
-      "DFSSell",
-      "GasFeeTakerL2",
-      "AaveV3Supply",
-      "AaveV3Borrow",
-      "AaveV3RatioCheck"
-    ],
-    "paramMapping": [
-      [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
-      ],
-      [
-        0,
-        0,
-        0,
-        "&proxy",
-        "&proxy"
-      ],
-      [
-        0,
-        "$2",
-        0
-      ],
-      [
-        "$3",
-        "&proxy",
-        0,
-        "&5",
-        "&3",
-        "&4",
-        0,
-        0
-      ],
-      [
-        "$1",
-        0,
-        0,
-        0,
-        "&3",
-        "&4",
-        0,
-        0
-      ],
-      [
-        "&2",
-        "&1"
-      ]
-    ],
-    "bundleId": 1
-  },
-  {
-    "name": "AaveV3CloseToDebtL2",
-    "id": 4,
-    "isContinuous": false,
-    "triggerIds": [
-      "AaveV3QuotePriceTrigger"
-    ],
-    "actionIds": [
-      "AaveV3Withdraw",
-      "DFSSell",
-      "GasFeeTakerL2",
-      "AaveV3Payback",
-      "SendTokenAndUnwrap"
-    ],
-    "paramMapping": [
-      [
-        "&2",
-        0,
-        0,
-        "&proxy",
-        "&5"
-      ],
-      [
-        "&1",
-        "&3",
-        0,
-        "&proxy",
-        "&proxy"
-      ],
-      [
-        "&3",
-        "$2",
-        0
-      ],
-      [
-        0,
-        "&proxy",
-        0,
-        "&4",
-        0,
-        0,
-        "&5",
-        "&5"
-      ],
-      [
-        "&3",
-        "&eoa",
-        0
-      ]
-    ],
-    "bundleId": 2
-  },
-  {
-    "name": "AaveV3FLCloseToDebtL2",
-    "id": 5,
-    "isContinuous": false,
-    "triggerIds": [
-      "AaveV3QuotePriceTrigger"
-    ],
-    "actionIds": [
-      "FLActionL2",
-      "AaveV3Payback",
-      "AaveV3Withdraw",
-      "DFSSell",
-      "GasFeeTakerL2",
-      "SendToken",
-      "SendTokenAndUnwrap"
-    ],
-    "paramMapping": [
-      [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
-      ],
-      [
-        0,
-        "&proxy",
-        0,
-        "&4",
-        0,
-        0,
-        "&5",
-        "&5"
-      ],
-      [
-        "&2",
-        0,
-        0,
-        "&proxy",
-        "&5"
-      ],
-      [
-        "&1",
-        "&3",
-        0,
-        "&proxy",
-        "&proxy"
-      ],
-      [
-        "&3",
-        "$4",
-        0
-      ],
-      [
-        "&3",
-        0,
-        "$1"
-      ],
-      [
-        "&3",
-        "&eoa",
-        0
-      ]
-    ],
-    "bundleId": 2
-  },
-  {
-    "name": "AaveV3CloseToCollL2",
-    "id": 6,
-    "isContinuous": false,
-    "triggerIds": [
-      "AaveV3QuotePriceTrigger"
-    ],
-    "actionIds": [
-      "AaveV3Withdraw",
-      "GasFeeTakerL2",
-      "DFSSell",
-      "AaveV3Payback",
-      "SendTokenAndUnwrap",
-      "SendTokenAndUnwrap"
-    ],
-    "paramMapping": [
-      [
-        "&2",
-        0,
-        0,
-        "&proxy",
-        "&5"
-      ],
-      [
-        "&1",
-        "$1",
-        0
-      ],
-      [
-        "&1",
-        "&3",
-        0,
-        "&proxy",
-        "&proxy"
-      ],
-      [
-        0,
-        "&proxy",
-        0,
-        "&4",
-        0,
-        0,
-        "&5",
-        "&5"
-      ],
-      [
-        "&3",
-        "&eoa",
-        0
-      ],
-      [
-        "&1",
-        "&eoa",
-        0
-      ]
-    ],
-    "bundleId": 3
-  },
-  {
-    "name": "AaveV3FLCloseToCollL2",
-    "id": 7,
-    "isContinuous": false,
-    "triggerIds": [
-      "AaveV3QuotePriceTrigger"
-    ],
-    "actionIds": [
-      "FLActionL2",
-      "AaveV3Payback",
-      "AaveV3Withdraw",
-      "GasFeeTakerL2",
-      "DFSSell",
-      "SendToken",
-      "SendTokenAndUnwrap",
-      "SendTokenAndUnwrap"
-    ],
-    "paramMapping": [
-      [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
-      ],
-      [
-        0,
-        "&proxy",
-        0,
-        "&4",
-        0,
-        0,
-        "&5",
-        "&5"
-      ],
-      [
-        "&2",
-        0,
-        0,
-        "&proxy",
-        "&5"
-      ],
-      [
-        "&1",
-        "$3",
-        0
-      ],
-      [
-        "&1",
-        "&3",
-        0,
-        "&proxy",
-        "&proxy"
-      ],
-      [
-        "&3",
-        0,
-        "$1"
-      ],
-      [
-        "&3",
-        "&eoa",
-        0
-      ],
-      [
-        "&1",
-        "&eoa",
-        0
-      ]
-    ],
-    "bundleId": 3
-  },
-  {
-    "name": "DCAL2Strategy",
-    "id": 8,
-    "isContinuous": true,
-    "triggerIds": [
-      "TimestampTrigger"
-    ],
-    "actionIds": [
-      "DFSSell",
-      "GasFeeTakerL2",
-      "SendTokenAndUnwrap"
-    ],
-    "paramMapping": [
-      [
-        "&1",
-        "&2",
-        "&3",
-        "&eoa",
-        "&proxy"
-      ],
-      [
-        "&2",
-        "$1",
-        0
-      ],
-      [
-        "&2",
-        "&eoa",
-        "$2"
-      ]
-    ]
-  },
-  {
-    "name": "LimitOrderL2Strategy",
-    "id": 9,
-    "isContinuous": false,
-    "triggerIds": [
-      "OffchainPriceTrigger"
-    ],
-    "actionIds": [
-      "LimitSellL2"
-    ],
-    "paramMapping": [
-      [
-        "&1",
-        "&2",
-        "&3",
-        "&eoa",
-        "&eoa"
-      ]
-    ]
-  },
-  {
-    "name": "CompV3RepayL2",
-    "id": 10,
-    "isContinuous": true,
-    "triggerIds": [
-      "CompV3RatioTrigger"
-    ],
-    "actionIds": [
-      "CompV3Withdraw",
-      "DFSSell",
-      "GasFeeTakerL2",
-      "CompV3Payback",
-      "CompV3RatioCheck"
-    ],
-    "paramMapping": [
-      [
-        "&1",
-        "&proxy",
-        0,
-        0,
-        0
-      ],
-      [
-        0,
-        "&2",
-        "$1",
-        "&proxy",
-        "&proxy"
-      ],
-      [
-        "&2",
-        "$2",
-        0
-      ],
-      [
-        "&1",
-        "$3",
-        "&proxy",
-        "&proxy"
-      ],
-      [
-        "&3",
-        "&4",
-        "&1",
-        0
-      ]
-    ],
-    "bundleId": 4
-  },
-  {
-    "name": "CompV3FlRepayL2",
-    "id": 11,
-    "isContinuous": true,
-    "triggerIds": [
-      "CompV3RatioTrigger"
-    ],
-    "actionIds": [
-      "FLAction",
-      "DFSSell",
-      "GasFeeTakerL2",
-      "CompV3Payback",
-      "CompV3Withdraw",
-      "CompV3RatioCheck"
-    ],
-    "paramMapping": [
-      [],
-      [
-        0,
-        "&2",
-        0,
-        "&proxy",
-        "&proxy"
-      ],
-      [
-        "&2",
-        "$2",
-        0
-      ],
-      [
-        "&1",
-        "$3",
-        "&proxy",
-        "&proxy"
-      ],
-      [
-        "&1",
-        0,
-        0,
-        "$1",
-        0
-      ],
-      [
-        "&3",
-        "&4",
-        "&1",
-        0
-      ]
-    ],
-    "bundleId": 4
-  },
-  {
-    "name": "CompV3BoostL2",
-    "id": 12,
-    "isContinuous": true,
-    "triggerIds": [
-      "CompV3RatioTrigger"
-    ],
-    "actionIds": [
-      "CompV3Borrow",
-      "DFSSell",
-      "GasFeeTakerL2",
-      "CompV3Supply",
-      "CompV3RatioCheck"
-    ],
-    "paramMapping": [
-      [
-        "&1",
-        0,
-        "&proxy",
-        0
-      ],
-      [
-        "&2",
-        0,
-        "$1",
-        "&proxy",
-        "&proxy"
-      ],
-      [
-        0,
-        "$2",
-        0
-      ],
-      [
-        "&1",
-        0,
-        "$3",
-        "&proxy",
-        0
-      ],
-      [
-        "&3",
-        "&4",
-        "&1",
-        0
-      ]
-    ],
-    "bundleId": 5
-  },
-  {
-    "name": "CompV3FlBoostL2",
-    "id": 13,
-    "isContinuous": true,
-    "triggerIds": [
-      "CompV3RatioTrigger"
-    ],
-    "actionIds": [
-      "FLAction",
-      "DFSSell",
-      "GasFeeTakerL2",
-      "CompV3Supply",
-      "CompV3Borrow",
-      "CompV3RatioCheck"
-    ],
-    "paramMapping": [
-      [],
-      [
-        "&2",
-        0,
-        0,
-        "&proxy",
-        "&proxy"
-      ],
-      [
-        0,
-        "$2",
-        0
-      ],
-      [
-        "&1",
-        0,
-        "$3",
-        "&proxy",
-        0
-      ],
-      [
-        "&1",
-        "$1",
-        0,
-        0
-      ],
-      [
-        "&3",
-        "&4",
-        "&1",
-        0
-      ]
-    ],
-    "bundleId": 5
-  },
-  {
-    "name": "AaveV3OpenOrderFromCollL2Strategy",
-    "id": 14,
-    "isContinuous": false,
-    "triggerIds": [
-      "AaveV3QuotePriceTrigger"
-    ],
-    "actionIds": [
-      "AaveV3Borrow",
-      "DFSSell",
-      "GasFeeTakerL2",
-      "AaveV3Supply",
-      "AaveV3OpenRatioCheck"
-    ],
-    "paramMapping": [
-      [
-        0,
-        "&proxy",
-        0,
-        "&4",
-        0,
-        "&7",
-        "&5",
-        0
-      ],
-      [
-        "&3",
-        "&1",
-        "$1",
-        "&proxy",
-        "&proxy"
-      ],
-      [
-        "&1",
-        "$2",
-        0
-      ],
-      [
-        "$3",
-        "&proxy",
-        "&2",
-        0,
-        0,
-        "&7",
-        "&5",
-        0
-      ],
-      [
-        "&6",
-        "&5"
-      ]
-    ],
-    "bundleId": 6
-  },
-  {
-    "name": "AaveV3FLOpenOrderFromCollL2Strategy",
-    "id": 15,
-    "isContinuous": false,
-    "triggerIds": [
-      "AaveV3QuotePriceTrigger"
-    ],
-    "actionIds": [
-      "FLAction",
-      "DFSSell",
-      "GasFeeTakerL2",
-      "AaveV3Supply",
-      "AaveV3Borrow",
-      "AaveV3OpenRatioCheck"
-    ],
-    "paramMapping": [
-      [],
-      [
-        "&3",
-        "&1",
-        0,
-        "&proxy",
-        "&proxy"
-      ],
-      [
-        "&1",
-        "$2",
-        0
-      ],
-      [
-        "$3",
-        "&proxy",
-        "&2",
-        0,
-        0,
-        "&7",
-        "&5",
-        0
-      ],
-      [
-        "$1",
-        0,
-        0,
-        "&4",
-        0,
-        "&7",
-        "&5",
-        0
-      ],
-      [
-        "&6",
-        "&5"
-      ]
-    ],
-    "bundleId": 6
-  },
-  {
-    "name": "AaveV3RepayOnPriceL2",
-    "id": 16,
-    "isContinuous": false,
-    "triggerIds": [
-      "AaveV3QuotePriceTrigger"
-    ],
-    "actionIds": [
-      "AaveV3Withdraw",
-      "DFSSell",
-      "GasFeeTakerL2",
-      "AaveV3Payback",
-      "AaveV3OpenRatioCheck"
-    ],
-    "paramMapping": [
-      [
-        "&2",
-        0,
-        0,
-        "&proxy",
-        "&5"
-      ],
-      [
-        "&1",
-        "&3",
-        "$1",
-        "&proxy",
-        "&proxy"
-      ],
-      [
-        "&3",
-        "$2",
-        0
-      ],
-      [
-        "$3",
-        "&proxy",
-        0,
-        "&4",
-        0,
-        "&7",
-        "&5",
-        0
-      ],
-      [
-        "&6",
-        "&5"
-      ]
-    ],
-    "bundleId": 7
-  },
-  {
-    "name": "AaveV3FlRepayOnPriceL2",
-    "id": 17,
-    "isContinuous": false,
-    "triggerIds": [
-      "AaveV3QuotePriceTrigger"
-    ],
-    "actionIds": [
-      "FLAction",
-      "DFSSell",
-      "GasFeeTakerL2",
-      "AaveV3Payback",
-      "AaveV3Withdraw",
-      "AaveV3OpenRatioCheck"
-    ],
-    "paramMapping": [
-      [],
-      [
-        "&1",
-        "&3",
-        0,
-        "&proxy",
-        "&proxy"
-      ],
-      [
-        "&3",
-        "$2",
-        0
-      ],
-      [
-        "$3",
-        "&proxy",
-        0,
-        "&4",
-        0,
-        "&7",
-        "&5",
-        0
-      ],
-      [
-        "&2",
-        0,
-        "$1",
-        0,
-        "&5"
-      ],
-      [
-        "&6",
-        "&5"
-      ]
-    ],
-    "bundleId": 7
-  },
-  {
-    "name": "FluidT1RepayL2Strategy",
-    "id": 18,
-    "isContinuous": true,
-    "triggerIds": [
-      "FluidRatioTrigger"
-    ],
-    "actionIds": [
-      "FluidVaultT1Withdraw",
-      "DFSSell",
-      "GasFeeTakerL2",
-      "FluidVaultT1Payback",
-      "FluidRatioCheck"
-    ],
-    "paramMapping": [
-      [
-        "&2",
-        "&1",
-        0,
-        "&proxy",
-        "&5"
-      ],
-      [
-        0,
-        0,
-        "$1",
-        "&proxy",
-        "&proxy"
-      ],
-      [
-        0,
-        "$2",
-        0
-      ],
-      [
-        "&2",
-        "&1",
-        "$3",
-        "&proxy"
-      ],
-      [
-        "&1",
-        "&3",
-        "&4"
-      ]
-    ],
-    "bundleId": 8
-  },
-  {
-    "name": "FluidT1FLRepayL2Strategy",
-    "id": 19,
-    "isContinuous": true,
-    "triggerIds": [
-      "FluidRatioTrigger"
-    ],
-    "actionIds": [
-      "FLAction",
-      "DFSSell",
-      "GasFeeTakerL2",
-      "FluidVaultT1Adjust",
-      "FluidRatioCheck"
-    ],
-    "paramMapping": [
-      [],
-      [
-        0,
-        0,
-        0,
-        "&proxy",
-        "&proxy"
-      ],
-      [
-        0,
-        "$2",
-        0
-      ],
-      [
-        "&2",
-        "&1",
-        "$1",
-        "$3",
-        "&proxy",
-        0,
-        "&5",
-        "&6",
-        "&7"
-      ],
-      [
-        "&1",
-        "&3",
-        "&4"
-      ]
-    ],
-    "bundleId": 8
-  },
-  {
-    "name": "FluidT1BoostL2Strategy",
-    "id": 20,
-    "isContinuous": true,
-    "triggerIds": [
-      "FluidRatioTrigger"
-    ],
-    "actionIds": [
-      "FluidVaultT1Borrow",
-      "DFSSell",
-      "GasFeeTakerL2",
-      "FluidVaultT1Supply",
-      "FluidRatioCheck"
-    ],
-    "paramMapping": [
-      [
-        "&2",
-        "&1",
-        0,
-        "&proxy",
-        "&5"
-      ],
-      [
-        0,
-        0,
-        "$1",
-        "&proxy",
-        "&proxy"
-      ],
-      [
-        0,
-        "$2",
-        0
-      ],
-      [
-        "&2",
-        "&1",
-        "$3",
-        "&proxy"
-      ],
-      [
-        "&1",
-        "&3",
-        "&4"
-      ]
-    ],
-    "bundleId": 9
-  },
-  {
-    "name": "FluidT1FLBoostL2Strategy",
-    "id": 21,
-    "isContinuous": true,
-    "triggerIds": [
-      "FluidRatioTrigger"
-    ],
-    "actionIds": [
-      "FLAction",
-      "DFSSell",
-      "GasFeeTakerL2",
-      "FluidVaultT1Adjust",
-      "FluidRatioCheck"
-    ],
-    "paramMapping": [
-      [],
-      [
-        0,
-        0,
-        0,
-        "&proxy",
-        "&proxy"
-      ],
-      [
-        0,
-        "$2",
-        0
-      ],
-      [
-        "&2",
-        "&1",
-        "$3",
-        "$1",
-        "&proxy",
-        0,
-        "&5",
-        "&6",
-        "&7"
-      ],
-      [
-        "&1",
-        "&3",
-        "&4"
-      ]
-    ],
-    "bundleId": 9
-  }
+    {
+        "name": "AaveV3RepayL2",
+        "id": 0,
+        "isContinuous": true,
+        "triggerIds": ["AaveV3RatioTrigger"],
+        "actionIds": [
+            "AaveV3Withdraw",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "AaveV3Payback",
+            "AaveV3RatioCheck"
+        ],
+        "paramMapping": [
+            [0, "&3", 0, "&proxy", 0],
+            [0, 0, "$1", "&proxy", "&proxy"],
+            [0, "$2", 0],
+            ["$3", "&proxy", 0, 0, "&3", "&4", 0, 0],
+            ["&2", "&1"]
+        ],
+        "bundleId": 0
+    },
+    {
+        "name": "AaveFLV3RepayL2",
+        "id": 1,
+        "isContinuous": true,
+        "triggerIds": ["AaveV3RatioTrigger"],
+        "actionIds": [
+            "FLActionL2",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "AaveV3Payback",
+            "AaveV3Withdraw",
+            "AaveV3RatioCheck"
+        ],
+        "paramMapping": [
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, "&proxy", "&proxy"],
+            [0, "$2", 0],
+            ["$3", "&proxy", 0, 0, "&3", "&4", 0, 0],
+            [0, "&3", "$1", 0, 0],
+            ["&2", "&1"]
+        ],
+        "bundleId": 0
+    },
+    {
+        "name": "AaveV3BoostL2",
+        "id": 2,
+        "isContinuous": true,
+        "triggerIds": ["AaveV3RatioTrigger"],
+        "actionIds": [
+            "AaveV3Borrow",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "AaveV3Supply",
+            "AaveV3RatioCheck"
+        ],
+        "paramMapping": [
+            [0, "&proxy", 0, 0, "&3", "&4", 0, 0],
+            [0, 0, "$1", "&proxy", "&proxy"],
+            [0, "$2", 0],
+            ["$3", "&proxy", 0, "&5", "&3", "&4", 0, 0],
+            ["&2", "&1"]
+        ],
+        "bundleId": 1
+    },
+    {
+        "name": "AaveFLV3BoostL2",
+        "id": 3,
+        "isContinuous": true,
+        "triggerIds": ["AaveV3RatioTrigger"],
+        "actionIds": [
+            "FLActionL2",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "AaveV3Supply",
+            "AaveV3Borrow",
+            "AaveV3RatioCheck"
+        ],
+        "paramMapping": [
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, "&proxy", "&proxy"],
+            [0, "$2", 0],
+            ["$3", "&proxy", 0, "&5", "&3", "&4", 0, 0],
+            ["$1", 0, 0, 0, "&3", "&4", 0, 0],
+            ["&2", "&1"]
+        ],
+        "bundleId": 1
+    },
+    {
+        "name": "AaveV3CloseToDebtL2",
+        "id": 4,
+        "isContinuous": false,
+        "triggerIds": ["AaveV3QuotePriceTrigger"],
+        "actionIds": [
+            "AaveV3Withdraw",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "AaveV3Payback",
+            "SendTokenAndUnwrap"
+        ],
+        "paramMapping": [
+            ["&2", 0, 0, "&proxy", "&5"],
+            ["&1", "&3", 0, "&proxy", "&proxy"],
+            ["&3", "$2", 0],
+            [0, "&proxy", 0, "&4", 0, 0, "&5", "&5"],
+            ["&3", "&eoa", 0]
+        ],
+        "bundleId": 2
+    },
+    {
+        "name": "AaveV3FLCloseToDebtL2",
+        "id": 5,
+        "isContinuous": false,
+        "triggerIds": ["AaveV3QuotePriceTrigger"],
+        "actionIds": [
+            "FLActionL2",
+            "AaveV3Payback",
+            "AaveV3Withdraw",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "SendToken",
+            "SendTokenAndUnwrap"
+        ],
+        "paramMapping": [
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, "&proxy", 0, "&4", 0, 0, "&5", "&5"],
+            ["&2", 0, 0, "&proxy", "&5"],
+            ["&1", "&3", 0, "&proxy", "&proxy"],
+            ["&3", "$4", 0],
+            ["&3", 0, "$1"],
+            ["&3", "&eoa", 0]
+        ],
+        "bundleId": 2
+    },
+    {
+        "name": "AaveV3CloseToCollL2",
+        "id": 6,
+        "isContinuous": false,
+        "triggerIds": ["AaveV3QuotePriceTrigger"],
+        "actionIds": [
+            "AaveV3Withdraw",
+            "GasFeeTakerL2",
+            "DFSSell",
+            "AaveV3Payback",
+            "SendTokenAndUnwrap",
+            "SendTokenAndUnwrap"
+        ],
+        "paramMapping": [
+            ["&2", 0, 0, "&proxy", "&5"],
+            ["&1", "$1", 0],
+            ["&1", "&3", 0, "&proxy", "&proxy"],
+            [0, "&proxy", 0, "&4", 0, 0, "&5", "&5"],
+            ["&3", "&eoa", 0],
+            ["&1", "&eoa", 0]
+        ],
+        "bundleId": 3
+    },
+    {
+        "name": "AaveV3FLCloseToCollL2",
+        "id": 7,
+        "isContinuous": false,
+        "triggerIds": ["AaveV3QuotePriceTrigger"],
+        "actionIds": [
+            "FLActionL2",
+            "AaveV3Payback",
+            "AaveV3Withdraw",
+            "GasFeeTakerL2",
+            "DFSSell",
+            "SendToken",
+            "SendTokenAndUnwrap",
+            "SendTokenAndUnwrap"
+        ],
+        "paramMapping": [
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, "&proxy", 0, "&4", 0, 0, "&5", "&5"],
+            ["&2", 0, 0, "&proxy", "&5"],
+            ["&1", "$3", 0],
+            ["&1", "&3", 0, "&proxy", "&proxy"],
+            ["&3", 0, "$1"],
+            ["&3", "&eoa", 0],
+            ["&1", "&eoa", 0]
+        ],
+        "bundleId": 3
+    },
+    {
+        "name": "DCAL2Strategy",
+        "id": 8,
+        "isContinuous": true,
+        "triggerIds": ["TimestampTrigger"],
+        "actionIds": ["DFSSell", "GasFeeTakerL2", "SendTokenAndUnwrap"],
+        "paramMapping": [
+            ["&1", "&2", "&3", "&eoa", "&proxy"],
+            ["&2", "$1", 0],
+            ["&2", "&eoa", "$2"]
+        ]
+    },
+    {
+        "name": "LimitOrderL2Strategy",
+        "id": 9,
+        "isContinuous": false,
+        "triggerIds": ["OffchainPriceTrigger"],
+        "actionIds": ["LimitSellL2"],
+        "paramMapping": [["&1", "&2", "&3", "&eoa", "&eoa"]]
+    },
+    {
+        "name": "CompV3RepayL2",
+        "id": 10,
+        "isContinuous": true,
+        "triggerIds": ["CompV3RatioTrigger"],
+        "actionIds": [
+            "CompV3Withdraw",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "CompV3Payback",
+            "CompV3RatioCheck"
+        ],
+        "paramMapping": [
+            ["&1", "&proxy", 0, 0, 0],
+            [0, "&2", "$1", "&proxy", "&proxy"],
+            ["&2", "$2", 0],
+            ["&1", "$3", "&proxy", "&proxy"],
+            ["&3", "&4", "&1", 0]
+        ],
+        "bundleId": 4
+    },
+    {
+        "name": "CompV3FlRepayL2",
+        "id": 11,
+        "isContinuous": true,
+        "triggerIds": ["CompV3RatioTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "CompV3Payback",
+            "CompV3Withdraw",
+            "CompV3RatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            [0, "&2", 0, "&proxy", "&proxy"],
+            ["&2", "$2", 0],
+            ["&1", "$3", "&proxy", "&proxy"],
+            ["&1", 0, 0, "$1", 0],
+            ["&3", "&4", "&1", 0]
+        ],
+        "bundleId": 4
+    },
+    {
+        "name": "CompV3BoostL2",
+        "id": 12,
+        "isContinuous": true,
+        "triggerIds": ["CompV3RatioTrigger"],
+        "actionIds": [
+            "CompV3Borrow",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "CompV3Supply",
+            "CompV3RatioCheck"
+        ],
+        "paramMapping": [
+            ["&1", 0, "&proxy", 0],
+            ["&2", 0, "$1", "&proxy", "&proxy"],
+            [0, "$2", 0],
+            ["&1", 0, "$3", "&proxy", 0],
+            ["&3", "&4", "&1", 0]
+        ],
+        "bundleId": 5
+    },
+    {
+        "name": "CompV3FlBoostL2",
+        "id": 13,
+        "isContinuous": true,
+        "triggerIds": ["CompV3RatioTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "CompV3Supply",
+            "CompV3Borrow",
+            "CompV3RatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&2", 0, 0, "&proxy", "&proxy"],
+            [0, "$2", 0],
+            ["&1", 0, "$3", "&proxy", 0],
+            ["&1", "$1", 0, 0],
+            ["&3", "&4", "&1", 0]
+        ],
+        "bundleId": 5
+    },
+    {
+        "name": "AaveV3OpenOrderFromCollL2Strategy",
+        "id": 14,
+        "isContinuous": false,
+        "triggerIds": ["AaveV3QuotePriceTrigger"],
+        "actionIds": [
+            "AaveV3Borrow",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "AaveV3Supply",
+            "AaveV3OpenRatioCheck"
+        ],
+        "paramMapping": [
+            [0, "&proxy", 0, "&4", 0, "&7", "&5", 0],
+            ["&3", "&1", "$1", "&proxy", "&proxy"],
+            ["&1", "$2", 0],
+            ["$3", "&proxy", "&2", 0, 0, "&7", "&5", 0],
+            ["&6", "&5"]
+        ],
+        "bundleId": 6
+    },
+    {
+        "name": "AaveV3FLOpenOrderFromCollL2Strategy",
+        "id": 15,
+        "isContinuous": false,
+        "triggerIds": ["AaveV3QuotePriceTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "AaveV3Supply",
+            "AaveV3Borrow",
+            "AaveV3OpenRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&3", "&1", 0, "&proxy", "&proxy"],
+            ["&1", "$2", 0],
+            ["$3", "&proxy", "&2", 0, 0, "&7", "&5", 0],
+            ["$1", 0, 0, "&4", 0, "&7", "&5", 0],
+            ["&6", "&5"]
+        ],
+        "bundleId": 6
+    },
+    {
+        "name": "AaveV3RepayOnPriceL2",
+        "id": 16,
+        "isContinuous": false,
+        "triggerIds": ["AaveV3QuotePriceTrigger"],
+        "actionIds": [
+            "AaveV3Withdraw",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "AaveV3Payback",
+            "AaveV3OpenRatioCheck"
+        ],
+        "paramMapping": [
+            ["&2", 0, 0, "&proxy", "&5"],
+            ["&1", "&3", "$1", "&proxy", "&proxy"],
+            ["&3", "$2", 0],
+            ["$3", "&proxy", 0, "&4", 0, "&7", "&5", 0],
+            ["&6", "&5"]
+        ],
+        "bundleId": 7
+    },
+    {
+        "name": "AaveV3FlRepayOnPriceL2",
+        "id": 17,
+        "isContinuous": false,
+        "triggerIds": ["AaveV3QuotePriceTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "AaveV3Payback",
+            "AaveV3Withdraw",
+            "AaveV3OpenRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", "&3", 0, "&proxy", "&proxy"],
+            ["&3", "$2", 0],
+            ["$3", "&proxy", 0, "&4", 0, "&7", "&5", 0],
+            ["&2", 0, "$1", 0, "&5"],
+            ["&6", "&5"]
+        ],
+        "bundleId": 7
+    },
+    {
+        "name": "FluidT1RepayL2Strategy",
+        "id": 18,
+        "isContinuous": true,
+        "triggerIds": ["FluidRatioTrigger"],
+        "actionIds": [
+            "FluidVaultT1Withdraw",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "FluidVaultT1Payback",
+            "FluidRatioCheck"
+        ],
+        "paramMapping": [
+            ["&2", "&1", 0, "&proxy", "&5"],
+            [0, 0, "$1", "&proxy", "&proxy"],
+            [0, "$2", 0],
+            ["&2", "&1", "$3", "&proxy"],
+            ["&1", "&3", "&4"]
+        ],
+        "bundleId": 8
+    },
+    {
+        "name": "FluidT1FLRepayL2Strategy",
+        "id": 19,
+        "isContinuous": true,
+        "triggerIds": ["FluidRatioTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "FluidVaultT1Adjust",
+            "FluidRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            [0, 0, 0, "&proxy", "&proxy"],
+            [0, "$2", 0],
+            ["&2", "&1", "$1", "$3", "&proxy", 0, "&5", "&6", "&7"],
+            ["&1", "&3", "&4"]
+        ],
+        "bundleId": 8
+    },
+    {
+        "name": "FluidT1BoostL2Strategy",
+        "id": 20,
+        "isContinuous": true,
+        "triggerIds": ["FluidRatioTrigger"],
+        "actionIds": [
+            "FluidVaultT1Borrow",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "FluidVaultT1Supply",
+            "FluidRatioCheck"
+        ],
+        "paramMapping": [
+            ["&2", "&1", 0, "&proxy", "&5"],
+            [0, 0, "$1", "&proxy", "&proxy"],
+            [0, "$2", 0],
+            ["&2", "&1", "$3", "&proxy"],
+            ["&1", "&3", "&4"]
+        ],
+        "bundleId": 9
+    },
+    {
+        "name": "FluidT1FLBoostL2Strategy",
+        "id": 21,
+        "isContinuous": true,
+        "triggerIds": ["FluidRatioTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "FluidVaultT1Adjust",
+            "FluidRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            [0, 0, 0, "&proxy", "&proxy"],
+            [0, "$2", 0],
+            ["&2", "&1", "$3", "$1", "&proxy", 0, "&5", "&6", "&7"],
+            ["&1", "&3", "&4"]
+        ],
+        "bundleId": 9
+    },
+    {
+        "name": "CompV3RepayOnPriceL2Strategy",
+        "id": 22,
+        "isContinuous": false,
+        "triggerIds": ["CompV3PriceTrigger"],
+        "actionIds": [
+            "CompV3Withdraw",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "CompV3Payback",
+            "CompV3RatioCheck"
+        ],
+        "paramMapping": [
+            ["&1", "&proxy", "&2", 0, "&6"],
+            ["&2", "&3", "$1", "&proxy", "&proxy"],
+            ["&3", "$2", 0],
+            ["&1", "$3", "&proxy", "&6"],
+            ["&5", "&4", "&1", "&6"]
+        ],
+        "bundleId": 13
+    },
+    {
+        "name": "CompV3FLRepayOnPriceL2Strategy",
+        "id": 23,
+        "isContinuous": false,
+        "triggerIds": ["CompV3PriceTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "CompV3Payback",
+            "CompV3Withdraw",
+            "CompV3RatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&2", "&3", 0, "&proxy", "&proxy"],
+            ["&3", "$2", 0],
+            ["&1", "$3", "&proxy", "&6"],
+            ["&1", 0, "&2", "$1", "&6"],
+            ["&5", "&4", "&1", "&6"]
+        ],
+        "bundleId": 13
+    },
+    {
+        "name": "CompV3BoostOnPriceL2Strategy",
+        "id": 24,
+        "isContinuous": false,
+        "triggerIds": ["CompV3PriceTrigger"],
+        "actionIds": [
+            "CompV3Borrow",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "CompV3Supply",
+            "CompV3RatioCheck"
+        ],
+        "paramMapping": [
+            ["&1", 0, "&proxy", "&6"],
+            ["&3", "&2", "$1", "&proxy", "&proxy"],
+            ["&2", "$2", 0],
+            ["&1", "&2", "$3", "&proxy", "&6"],
+            ["&5", "&4", "&1", "&6"]
+        ],
+        "bundleId": 14
+    },
+    {
+        "name": "CompV3FLBoostOnPriceL2Strategy",
+        "id": 25,
+        "isContinuous": false,
+        "triggerIds": ["CompV3PriceTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "CompV3Supply",
+            "CompV3Borrow",
+            "CompV3RatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&3", "&2", 0, "&proxy", "&proxy"],
+            ["&2", "$2", 0],
+            ["&1", "&2", "$3", "&proxy", "&6"],
+            ["&1", "$1", 0, "&6"],
+            ["&5", "&4", "&1", "&6"]
+        ],
+        "bundleId": 14
+    },
+    {
+        "name": "CompV3FLCloseToDebtL2Strategy",
+        "id": 26,
+        "isContinuous": false,
+        "triggerIds": ["CompV3PriceRangeTrigger"],
+        "actionIds": [
+            "FLAction",
+            "CompV3Payback",
+            "CompV3Withdraw",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "SendTokens"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", 0, "&proxy", "&5"],
+            ["&1", "&proxy", "&2", 0, "&5"],
+            ["&2", "&3", "$3", "&proxy", "&proxy"],
+            ["&3", "$4", 0],
+            ["&3", "&3", 0, "&eoa", "$1", 0]
+        ],
+        "bundleId": 15
+    },
+    {
+        "name": "CompV3FLCloseToCollL2Strategy",
+        "id": 27,
+        "isContinuous": false,
+        "triggerIds": ["CompV3PriceRangeTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "CompV3Payback",
+            "CompV3Withdraw",
+            "GasFeeTakerL2",
+            "SendTokens"
+        ],
+        "paramMapping": [
+            [],
+            ["&2", "&3", 0, "&proxy", "&proxy"],
+            ["&1", "$2", "&proxy", "&5"],
+            ["&1", "&proxy", "&2", 0, "&5"],
+            ["&2", "$4", 0],
+            ["&2", "&2", "&3", 0, "&eoa", "&eoa", "$1", 0, 0]
+        ],
+        "bundleId": 15
+    },
+    {
+        "name": "CompV3EOARepayL2Strategy",
+        "id": 28,
+        "isContinuous": true,
+        "triggerIds": ["CompV3RatioTrigger"],
+        "actionIds": [
+            "CompV3Withdraw",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "CompV3Payback",
+            "CompV3RatioCheck"
+        ],
+        "paramMapping": [
+            ["&1", "&proxy", 0, 0, "&eoa"],
+            [0, "&2", "$1", "&proxy", "&proxy"],
+            ["&2", "$2", 0],
+            ["&1", "$3", "&proxy", "&eoa"],
+            ["&3", "&4", "&1", "&eoa"]
+        ],
+        "bundleId": 16
+    },
+    {
+        "name": "CompV3EOAFlRepayL2Strategy",
+        "id": 29,
+        "isContinuous": true,
+        "triggerIds": ["CompV3RatioTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "CompV3Payback",
+            "CompV3Withdraw",
+            "CompV3RatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            [0, "&2", 0, "&proxy", "&proxy"],
+            ["&2", "$2", 0],
+            ["&1", "$3", "&proxy", "&eoa"],
+            ["&1", 0, 0, "$1", "&eoa"],
+            ["&3", "&4", "&1", "&eoa"]
+        ],
+        "bundleId": 16
+    },
+    {
+        "name": "CompV3EOABoostL2Strategy",
+        "id": 30,
+        "isContinuous": true,
+        "triggerIds": ["CompV3RatioTrigger"],
+        "actionIds": [
+            "CompV3Borrow",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "CompV3Supply",
+            "CompV3RatioCheck"
+        ],
+        "paramMapping": [
+            ["&1", 0, "&proxy", "&eoa"],
+            ["&2", 0, "$1", "&proxy", "&proxy"],
+            [0, "$2", 0],
+            ["&1", 0, "$3", "&proxy", "&eoa"],
+            ["&3", "&4", "&1", "&eoa"]
+        ],
+        "bundleId": 17
+    },
+    {
+        "name": "CompV3EOAFLBoostL2Strategy",
+        "id": 31,
+        "isContinuous": true,
+        "triggerIds": ["CompV3RatioTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "CompV3Supply",
+            "CompV3Borrow",
+            "CompV3RatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&2", 0, 0, "&proxy", "&proxy"],
+            [0, "$2", 0],
+            ["&1", 0, "$3", "&proxy", "&eoa"],
+            ["&1", "$1", 0, "&eoa"],
+            ["&3", "&4", "&1", "&eoa"]
+        ],
+        "bundleId": 17
+    },
+    {
+        "name": "AaveV3GenericRepayL2Strategy",
+        "id": 32,
+        "isContinuous": true,
+        "triggerIds": ["AaveV3RatioTrigger"],
+        "actionIds": [
+            "PullToken",
+            "AaveV3Withdraw",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "AaveV3Payback",
+            "AaveV3RatioCheck"
+        ],
+        "paramMapping": [
+            [0, "&4", 0],
+            [0, 0, "$1", "&proxy", "&3"],
+            [0, 0, "$2", "&proxy", "&proxy"],
+            [0, "$3", 0],
+            ["$4", "&proxy", 0, 0, 0, 0, "&3", "&4"],
+            ["&2", "&1", "&3", "&4"]
+        ],
+        "bundleId": 18
+    },
+    {
+        "name": "AaveV3GenericFLRepayL2Strategy",
+        "id": 33,
+        "isContinuous": true,
+        "triggerIds": ["AaveV3RatioTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "AaveV3Payback",
+            "PullToken",
+            "AaveV3Withdraw",
+            "AaveV3RatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            [0, 0, 0, "&proxy", "&proxy"],
+            [0, "$2", 0],
+            ["$3", "&proxy", 0, 0, 0, 0, "&3", "&4"],
+            [0, "&4", "$1"],
+            [0, 0, "$5", 0, "&3"],
+            ["&2", "&1", "&3", "&4"]
+        ],
+        "bundleId": 18
+    },
+    {
+        "name": "AaveV3GenericBoostL2Strategy",
+        "id": 34,
+        "isContinuous": true,
+        "triggerIds": ["AaveV3RatioTrigger"],
+        "actionIds": [
+            "AaveV3Borrow",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "AaveV3Supply",
+            "AaveV3RatioCheck"
+        ],
+        "paramMapping": [
+            [0, "&proxy", 0, 0, 0, 0, "&3", "&4"],
+            [0, 0, "$1", "&proxy", "&proxy"],
+            [0, "$2", 0],
+            ["$3", "&proxy", 0, 0, 0, 0, "&3", "&4"],
+            ["&2", "&1", "&3", "&4"]
+        ],
+        "bundleId": 19
+    },
+    {
+        "name": "AaveV3GenericFLBoostL2Strategy",
+        "id": 35,
+        "isContinuous": true,
+        "triggerIds": ["AaveV3RatioTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "AaveV3Supply",
+            "AaveV3Borrow",
+            "AaveV3RatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            [0, 0, 0, "&proxy", "&proxy"],
+            [0, "$2", 0],
+            ["$3", "&proxy", 0, 0, 0, 0, "&3", "&4"],
+            ["$1", 0, 0, 0, 0, 0, "&3", "&4"],
+            ["&2", "&1", "&3", "&4"]
+        ],
+        "bundleId": 19
+    },
+    {
+        "name": "AaveV3GenericRepayOnPriceL2Strategy",
+        "id": 36,
+        "isContinuous": false,
+        "triggerIds": ["AaveV3QuotePriceTrigger"],
+        "actionIds": [
+            "PullToken",
+            "AaveV3Withdraw",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "AaveV3Payback",
+            "AaveV3OpenRatioCheck"
+        ],
+        "paramMapping": [
+            [0, "&7", 0],
+            ["&2", 0, "$1", "&proxy", "&5"],
+            ["&1", "&3", "$2", "&proxy", "&proxy"],
+            ["&3", "$3", 0],
+            ["$4", "&proxy", 0, "&4", 0, 0, "&5", "&7"],
+            ["&6", "&5", "&7"]
+        ],
+        "bundleId": 20
+    },
+    {
+        "name": "AaveV3GenericFLRepayOnPriceL2Strategy",
+        "id": 37,
+        "isContinuous": false,
+        "triggerIds": ["AaveV3QuotePriceTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "AaveV3Payback",
+            "PullToken",
+            "AaveV3Withdraw",
+            "AaveV3OpenRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", "&3", 0, "&proxy", "&proxy"],
+            ["&3", "$2", 0],
+            ["$3", "&proxy", 0, "&4", 0, 0, "&5", "&7"],
+            [0, "&7", "$1"],
+            ["&2", 0, "$5", 0, "&5"],
+            ["&6", "&5", "&7"]
+        ],
+        "bundleId": 20
+    },
+    {
+        "name": "AaveV3GenericBoostOnPriceL2Strategy",
+        "id": 38,
+        "isContinuous": false,
+        "triggerIds": ["AaveV3QuotePriceTrigger"],
+        "actionIds": [
+            "AaveV3Borrow",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "AaveV3Supply",
+            "AaveV3OpenRatioCheck"
+        ],
+        "paramMapping": [
+            [0, "&proxy", 0, "&4", 0, 0, "&5", "&7"],
+            ["&3", "&1", "$1", "&proxy", "&proxy"],
+            ["&1", "$2", 0],
+            ["$3", "&proxy", "&2", 0, 0, 0, "&5", "&7"],
+            ["&6", "&5", "&7"]
+        ],
+        "bundleId": 21
+    },
+    {
+        "name": "AaveV3GenericFLBoostOnPriceL2Strategy",
+        "id": 39,
+        "isContinuous": false,
+        "triggerIds": ["AaveV3QuotePriceTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "AaveV3Supply",
+            "AaveV3Borrow",
+            "AaveV3OpenRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&3", "&1", 0, "&proxy", "&proxy"],
+            ["&1", "$2", 0],
+            ["$3", "&proxy", "&2", 0, 0, 0, "&5", "&7"],
+            ["$1", 0, 0, "&4", 0, 0, "&5", "&7"],
+            ["&6", "&5", "&7"]
+        ],
+        "bundleId": 21
+    },
+    {
+        "name": "AaveV3GenericFLCloseToDebtL2Strategy",
+        "id": 40,
+        "isContinuous": false,
+        "triggerIds": ["AaveV3QuotePriceRangeTrigger"],
+        "actionIds": [
+            "FLAction",
+            "AaveV3Payback",
+            "PullToken",
+            "AaveV3Withdraw",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "SendToken",
+            "SendTokenAndUnwrap"
+        ],
+        "paramMapping": [
+            [],
+            [0, "&proxy", 0, "&4", 0, 0, "&6", "&7"],
+            [0, "&7", 0],
+            ["&2", 0, "$3", "&proxy", "&6"],
+            ["&1", "&3", "$4", "&proxy", "&proxy"],
+            ["&3", "$5", 0],
+            ["&3", 0, "$1"],
+            ["&3", "&eoa", 0]
+        ],
+        "bundleId": 22
+    },
+    {
+        "name": "AaveV3GenericFLCloseToCollL2Strategy",
+        "id": 41,
+        "isContinuous": false,
+        "triggerIds": ["AaveV3QuotePriceRangeTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "AaveV3Payback",
+            "PullToken",
+            "AaveV3Withdraw",
+            "GasFeeTakerL2",
+            "SendToken",
+            "SendTokensAndUnwrap"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", "&3", 0, "&proxy", "&proxy"],
+            [0, "&proxy", 0, "&4", 0, 0, "&6", "&7"],
+            [0, "&7", 0],
+            ["&2", 0, "$4", "&proxy", "&6"],
+            ["&1", "$5", 0],
+            ["&1", 0, "$1"],
+            ["&1", "&3", "&eoa", "&eoa", 0, 0]
+        ],
+        "bundleId": 22
+    },
+    {
+        "name": "MorphoBlueRepayL2Strategy",
+        "id": 42,
+        "isContinuous": true,
+        "triggerIds": ["MorphoBlueRatioTrigger"],
+        "actionIds": [
+            "MorphoBlueWithdrawCollateral",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "MorphoBluePayback",
+            "MorphoBlueRatioCheck"
+        ],
+        "paramMapping": [
+            ["&1", "&2", "&3", "&4", "&5", 0, "&8", "&proxy"],
+            ["&2", "&1", "$1", "&proxy", "&proxy"],
+            ["&1", "$2", 0],
+            ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&8"],
+            ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
+        ],
+        "bundleId": 26
+    },
+    {
+        "name": "MorphoBlueFLCollRepayL2Strategy",
+        "id": 43,
+        "isContinuous": true,
+        "triggerIds": ["MorphoBlueRatioTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "MorphoBluePayback",
+            "MorphoBlueWithdrawCollateral",
+            "MorphoBlueRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&2", "&1", 0, "&proxy", "&proxy"],
+            ["&1", "$2", 0],
+            ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&8"],
+            ["&1", "&2", "&3", "&4", "&5", "$1", "&8", 0],
+            ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
+        ],
+        "bundleId": 26
+    },
+    {
+        "name": "MorphoBlueFLDebtRepayL2Strategy",
+        "id": 44,
+        "isContinuous": true,
+        "triggerIds": ["MorphoBlueRatioTrigger"],
+        "actionIds": [
+            "FLAction",
+            "MorphoBluePayback",
+            "MorphoBlueWithdrawCollateral",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "SendTokens",
+            "MorphoBlueRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", "&2", "&3", "&4", "&5", 0, "&proxy", "&8"],
+            ["&1", "&2", "&3", "&4", "&5", 0, "&8", "&proxy"],
+            ["&2", "&1", "$3", "&proxy", "&proxy"],
+            ["&1", "$4", 0],
+            ["&1", "&1", 0, "&eoa", "$1", 0],
+            ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
+        ],
+        "bundleId": 26
+    },
+    {
+        "name": "MorphoBlueBoostL2Strategy",
+        "id": 45,
+        "isContinuous": true,
+        "triggerIds": ["MorphoBlueRatioTrigger"],
+        "actionIds": [
+            "MorphoBlueBorrow",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "MorphoBlueSupplyCollateral",
+            "MorphoBlueRatioCheck"
+        ],
+        "paramMapping": [
+            ["&1", "&2", "&3", "&4", "&5", 0, "&8", "&proxy"],
+            ["&1", "&2", "$1", "&proxy", "&proxy"],
+            ["&2", "$2", 0],
+            ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&8"],
+            ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
+        ],
+        "bundleId": 27
+    },
+    {
+        "name": "MorphoBlueFLCollBoostL2Strategy",
+        "id": 46,
+        "isContinuous": true,
+        "triggerIds": ["MorphoBlueRatioTrigger"],
+        "actionIds": [
+            "FLAction",
+            "MorphoBlueSupplyCollateral",
+            "MorphoBlueBorrow",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "SendTokens",
+            "MorphoBlueRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", "&2", "&3", "&4", "&5", 0, "&proxy", "&8"],
+            ["&1", "&2", "&3", "&4", "&5", 0, "&8", "&proxy"],
+            ["&1", "&2", "$3", "&proxy", "&proxy"],
+            ["&2", "$4", 0],
+            ["&2", "&2", 0, "&eoa", "$1", 0],
+            ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
+        ],
+        "bundleId": 27
+    },
+    {
+        "name": "MorphoBlueFLDebtBoostL2Strategy",
+        "id": 47,
+        "isContinuous": true,
+        "triggerIds": ["MorphoBlueRatioTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "MorphoBlueSupplyCollateral",
+            "MorphoBlueBorrow",
+            "MorphoBlueRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", "&2", 0, "&proxy", "&proxy"],
+            ["&2", "$2", 0],
+            ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&8"],
+            ["&1", "&2", "&3", "&4", "&5", "$1", "&8", 0],
+            ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
+        ],
+        "bundleId": 27
+    },
+    {
+        "name": "MorphoBlueBoostOnTargetPriceL2Strategy",
+        "id": 48,
+        "isContinuous": false,
+        "triggerIds": ["MorphoBluePriceTrigger"],
+        "actionIds": [
+            "MorphoBlueBorrow",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "MorphoBlueSupplyCollateral",
+            "MorphoBlueTargetRatioCheck"
+        ],
+        "paramMapping": [
+            ["&1", "&2", "&3", "&4", "&5", 0, "&7", "&proxy"],
+            ["&1", "&2", "$1", "&proxy", "&proxy"],
+            ["&2", "$2", 0],
+            ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&7"],
+            ["&1", "&2", "&3", "&4", "&5", "&7", "&6"]
+        ],
+        "bundleId": 25
+    },
+    {
+        "name": "MorphoBlueFLBoostOnTargetPriceL2Strategy",
+        "id": 49,
+        "isContinuous": false,
+        "triggerIds": ["MorphoBluePriceTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "MorphoBlueSupplyCollateral",
+            "MorphoBlueBorrow",
+            "MorphoBlueTargetRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", "&2", 0, "&proxy", "&proxy"],
+            ["&2", "$2", 0],
+            ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&7"],
+            ["&1", "&2", "&3", "&4", "&5", "$1", "&7", 0],
+            ["&1", "&2", "&3", "&4", "&5", "&7", "&6"]
+        ],
+        "bundleId": 25
+    },
+    {
+        "name": "AaveV3FLCollateralSwitchL2Strategy",
+        "id": 50,
+        "isContinuous": false,
+        "triggerIds": ["AaveV3QuotePriceTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "AaveV3Supply",
+            "AaveV3Withdraw",
+            "SendToken",
+            "SendTokenAndUnwrap"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", "&3", 0, "&proxy", "&proxy"],
+            ["&3", "$2", 0],
+            ["$3", "&proxy", "&4", 0, 0, "&7", "&5", 0],
+            ["&2", 0, "&6", "&proxy", "&5"],
+            ["&1", 0, "$1"],
+            ["&1", "&eoa", 0]
+        ]
+    },
+    {
+        "name": "MorphoBlueFLCloseToDebtL2Strategy",
+        "id": 51,
+        "isContinuous": false,
+        "triggerIds": ["MorphoBluePriceRangeTrigger"],
+        "actionIds": [
+            "FLAction",
+            "MorphoBluePayback",
+            "MorphoBlueWithdrawCollateral",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "SendToken",
+            "SendTokenAndUnwrap"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", "&2", "&3", "&4", "&5", 0, "&proxy", "&6"],
+            ["&1", "&2", "&3", "&4", "&5", 0, "&6", "&proxy"],
+            ["&2", "&1", "$3", "&proxy", "&proxy"],
+            ["&1", "$4", 0],
+            ["&1", 0, "$1"],
+            ["&1", "&eoa", 0]
+        ],
+        "bundleId": 28
+    },
+    {
+        "name": "MorphoBlueFLCloseToCollL2Strategy",
+        "id": 52,
+        "isContinuous": false,
+        "triggerIds": ["MorphoBluePriceRangeTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "MorphoBluePayback",
+            "MorphoBlueWithdrawCollateral",
+            "GasFeeTakerL2",
+            "SendToken",
+            "SendTokensAndUnwrap"
+        ],
+        "paramMapping": [
+            [],
+            ["&2", "&1", 0, "&proxy", "&proxy"],
+            ["&1", "&2", "&3", "&4", "&5", 0, "&proxy", "&6"],
+            ["&1", "&2", "&3", "&4", "&5", 0, "&6", "&proxy"],
+            ["&2", "$4", 0],
+            ["&2", 0, "$1"],
+            ["&2", "&1", "&eoa", "&eoa", 0, 0]
+        ],
+        "bundleId": 28
+    }
 ]

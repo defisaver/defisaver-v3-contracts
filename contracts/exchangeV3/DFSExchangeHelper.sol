@@ -2,14 +2,13 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../utils/TokenUtils.sol";
-import { SafeERC20 } from "../utils/SafeERC20.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
+import { TokenUtils } from "../utils/token/TokenUtils.sol";
+import { SafeERC20 } from "../_vendor/openzeppelin/SafeERC20.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
 
 contract DFSExchangeHelper {
-    
     using TokenUtils for address;
-    
+
     error InvalidOffchainData();
     error OutOfRangeSlicingError();
     //Order success but amount 0
@@ -17,11 +16,7 @@ contract DFSExchangeHelper {
 
     using SafeERC20 for IERC20;
 
-    function sendLeftover(
-        address _srcAddr,
-        address _destAddr,
-        address payable _to
-    ) internal {
+    function sendLeftover(address _srcAddr, address _destAddr, address payable _to) internal {
         // clean out any eth leftover
         TokenUtils.ETH_ADDR.withdrawTokens(_to, type(uint256).max);
 
@@ -30,7 +25,7 @@ contract DFSExchangeHelper {
     }
 
     function sliceUint(bytes memory bs, uint256 start) internal pure returns (uint256) {
-        if (bs.length < start + 32){
+        if (bs.length < start + 32) {
             revert OutOfRangeSlicingError();
         }
 
@@ -42,11 +37,7 @@ contract DFSExchangeHelper {
         return x;
     }
 
-    function writeUint256(
-        bytes memory _b,
-        uint256 _index,
-        uint256 _input
-    ) internal pure {
+    function writeUint256(bytes memory _b, uint256 _index, uint256 _input) internal pure {
         if (_b.length < _index + 32) {
             revert InvalidOffchainData();
         }

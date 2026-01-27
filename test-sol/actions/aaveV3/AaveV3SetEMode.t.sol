@@ -5,15 +5,14 @@ pragma solidity =0.8.24;
 import { AaveV3SetEMode } from "../../../contracts/actions/aaveV3/AaveV3SetEMode.sol";
 import { AaveV3Supply } from "../../../contracts/actions/aaveV3/AaveV3Supply.sol";
 import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
-import { IL2PoolV3 } from "../../../contracts/interfaces/aaveV3/IL2PoolV3.sol";
-import { DataTypes } from "../../../contracts/interfaces/aaveV3/DataTypes.sol";
+import { IL2PoolV3 } from "../../../contracts/interfaces/protocols/aaveV3/IL2PoolV3.sol";
+import { DataTypes } from "../../../contracts/interfaces/protocols/aaveV3/DataTypes.sol";
 
-import {Addresses } from "../../utils/Addresses.sol";
+import { Addresses } from "../../utils/Addresses.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { AaveV3ExecuteActions } from "../../utils/executeActions/AaveV3ExecuteActions.sol";
 
 contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
-    
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -34,7 +33,7 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkMainnet("AaveV3SetEMode");
-        
+
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
         walletAddr = wallet.walletAddr();
@@ -71,18 +70,14 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
 
     function testFuzz_encode_decode_inputs_no_market(uint8 _categoryId) public view {
         AaveV3SetEMode.Params memory params = AaveV3SetEMode.Params({
-            categoryId: _categoryId,
-            useDefaultMarket: true,
-            market: DEFAULT_AAVE_MARKET
+            categoryId: _categoryId, useDefaultMarket: true, market: DEFAULT_AAVE_MARKET
         });
         _assertParams(params);
     }
 
     function testFuzz_encode_decode_inputs(uint8 _categoryId, address _market) public view {
         AaveV3SetEMode.Params memory params = AaveV3SetEMode.Params({
-            categoryId: _categoryId,
-            useDefaultMarket: false,
-            market: _market
+            categoryId: _categoryId, useDefaultMarket: false, market: _market
         });
         _assertParams(params);
     }
@@ -100,23 +95,15 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
     }
 
     function _setEMode(uint8 _categoryId, bool _isL2Direct) internal {
-
         uint256 categoryIdBefore = pool.getUserEMode(walletAddr);
 
         if (_isL2Direct) {
             AaveV3SetEMode.Params memory params = AaveV3SetEMode.Params({
-                categoryId: _categoryId,
-                useDefaultMarket: true,
-                market: address(0)
+                categoryId: _categoryId, useDefaultMarket: true, market: address(0)
             });
             wallet.execute(address(cut), cut.encodeInputs(params), 0);
-        }
-        else {
-            bytes memory paramsCalldata = aaveV3SetEModeEncode(
-                _categoryId,
-                true,
-                address(0)
-            );
+        } else {
+            bytes memory paramsCalldata = aaveV3SetEModeEncode(_categoryId, true, address(0));
 
             bytes memory _calldata = abi.encodeWithSelector(
                 AaveV3SetEMode.executeAction.selector,

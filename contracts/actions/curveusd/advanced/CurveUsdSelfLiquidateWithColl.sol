@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { CurveUsdHelper } from "../helpers/CurveUsdHelper.sol";
 import { CurveUsdSwapper } from "./CurveUsdSwapper.sol";
-import { ICrvUsdController } from "../../../interfaces/curveusd/ICurveUsd.sol";
+import { ICrvUsdController } from "../../../interfaces/protocols/curveusd/ICurveUsd.sol";
+import { DFSIds } from "../../../utils/DFSIds.sol";
 
 /// @title Liquidates a curveusd position with a given percentage of collateral
 /// @notice This action uses internal swapper to liquidate the position
@@ -42,11 +43,16 @@ contract CurveUsdSelfLiquidateWithColl is ActionBase, CurveUsdHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
-        params.percentage = _parseParamUint(params.percentage, _paramMapping[1], _subData, _returnValues);
-        params.minCrvUsdExpected = _parseParamUint(params.minCrvUsdExpected, _paramMapping[2], _subData, _returnValues);
-        params.swapAmount = _parseParamUint(params.swapAmount, _paramMapping[3], _subData, _returnValues);
-        params.minAmount = _parseParamUint(params.minAmount, _paramMapping[4], _subData, _returnValues);
+        params.controllerAddress =
+            _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
+        params.percentage =
+            _parseParamUint(params.percentage, _paramMapping[1], _subData, _returnValues);
+        params.minCrvUsdExpected =
+            _parseParamUint(params.minCrvUsdExpected, _paramMapping[2], _subData, _returnValues);
+        params.swapAmount =
+            _parseParamUint(params.swapAmount, _paramMapping[3], _subData, _returnValues);
+        params.minAmount =
+            _parseParamUint(params.minAmount, _paramMapping[4], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[5], _subData, _returnValues);
 
         (uint256 generatedAmount, bytes memory logData) = _liquidate(params);
@@ -72,21 +78,26 @@ contract CurveUsdSelfLiquidateWithColl is ActionBase, CurveUsdHelper {
     function _liquidate(Params memory _params) internal returns (uint256, bytes memory) {
         if (_params.swapAmount == 0) revert();
 
-        address curveUsdSwapper = registry.getAddr(CURVE_SWAPPER_ID);
+        address curveUsdSwapper = registry.getAddr(DFSIds.CURVE_SWAPPER);
 
-        uint256[] memory swapData =
-             _setupCurvePath(
-                curveUsdSwapper,
-                _params.additionalData,
-                _params.swapAmount,
-                _params.minAmount,
-                _params.gasUsed,
-                _params.dfsFeeDivider
-            );
-        
+        uint256[] memory swapData = _setupCurvePath(
+            curveUsdSwapper,
+            _params.additionalData,
+            _params.swapAmount,
+            _params.minAmount,
+            _params.gasUsed,
+            _params.dfsFeeDivider
+        );
+
         ICrvUsdController(_params.controllerAddress)
-            .liquidate_extended(address(this), _params.minCrvUsdExpected, _params.percentage, false, curveUsdSwapper, swapData);
-
+            .liquidate_extended(
+                address(this),
+                _params.minCrvUsdExpected,
+                _params.percentage,
+                false,
+                curveUsdSwapper,
+                swapData
+            );
 
         // cleanup after the callback if any funds are left over
         CurveUsdSwapper(curveUsdSwapper).withdrawAll(_params.controllerAddress);
@@ -94,10 +105,7 @@ contract CurveUsdSelfLiquidateWithColl is ActionBase, CurveUsdHelper {
         // send funds to user
         _sendLeftoverFunds(_params.controllerAddress, _params.to);
 
-        return (
-            _params.percentage,
-            abi.encode(_params)
-        );
+        return (_params.percentage, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

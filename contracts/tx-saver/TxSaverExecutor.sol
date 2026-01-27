@@ -5,23 +5,16 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { BotAuthForTxSaver } from "./BotAuthForTxSaver.sol";
 import { CoreHelper } from "../core/helpers/CoreHelper.sol";
-import { DFSRegistry } from "../core/DFSRegistry.sol";
+import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 import { StrategyModel } from "../core/strategy/StrategyModel.sol";
 import { DFSExchangeData } from "../exchangeV3/DFSExchangeData.sol";
-import { ISafe } from "../interfaces/safe/ISafe.sol";
+import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
 import { TxSaverBytesTransientStorage } from "./TxSaverBytesTransientStorage.sol";
+import { DFSIds } from "../utils/DFSIds.sol";
 
-/// @title Main entry point for executing TxSaver transactions signed by users through safe wallet 
-contract TxSaverExecutor is 
-    StrategyModel,
-    AdminAuth,
-    CoreHelper,
-    TxSaverBytesTransientStorage
-{
-    bytes4 public constant BOT_AUTH_ID_FOR_TX_SAVER = bytes4(keccak256("BotAuthForTxSaver"));
-    bytes4 public constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
-
-    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+/// @title Main entry point for executing TxSaver transactions signed by users through safe wallet
+contract TxSaverExecutor is StrategyModel, AdminAuth, CoreHelper, TxSaverBytesTransientStorage {
+    IDFSRegistry private constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     /// Caller must be authorized bot
     error BotNotApproved(address bot);
@@ -61,7 +54,8 @@ contract TxSaverExecutor is
         DFSExchangeData.InjectedExchangeData calldata _injectedExchangeData
     ) external {
         // only authorized bot can call this function
-        if (!BotAuthForTxSaver(registry.getAddr(BOT_AUTH_ID_FOR_TX_SAVER)).isApproved(msg.sender)) {
+        if (!BotAuthForTxSaver(registry.getAddr(DFSIds.BOT_AUTH_FOR_TX_SAVER))
+                .isApproved(msg.sender)) {
             revert BotNotApproved(msg.sender);
         }
 
@@ -88,26 +82,29 @@ contract TxSaverExecutor is
     }
 
     function _executeSafeTx(SafeTxParams memory _params) internal {
-        bool success = ISafe(_params.safe).execTransaction(
-            registry.getAddr(RECIPE_EXECUTOR_ID),
-            0, // value
-            _params.data,
-            ISafe.Operation.DelegateCall,
-            0, // safeTxGas,
-            0, // baseGas
-            0, // gasPrice
-            address(0), // gasToken
-            payable(_params.refundReceiver),
-            _params.signatures 
-        );
+        bool success = ISafe(_params.safe)
+            .execTransaction(
+                registry.getAddr(DFSIds.RECIPE_EXECUTOR),
+                0, // value
+                _params.data,
+                ISafe.Operation.DelegateCall,
+                0, // safeTxGas,
+                0, // baseGas
+                0, // gasPrice
+                address(0), // gasToken
+                payable(_params.refundReceiver),
+                _params.signatures
+            );
         if (!success) {
             revert SafeExecutionError();
         }
     }
 
-    function parseTxSaverSignedData(bytes calldata _data) 
-        public pure returns (Recipe memory recipe, TxSaverSignedData memory txSaverData)
+    function parseTxSaverSignedData(bytes calldata _data)
+        public
+        pure
+        returns (Recipe memory recipe, TxSaverSignedData memory txSaverData)
     {
-        (recipe, txSaverData) = abi.decode(_data[4:], (Recipe, TxSaverSignedData)); 
+        (recipe, txSaverData) = abi.decode(_data[4:], (Recipe, TxSaverSignedData));
     }
 }

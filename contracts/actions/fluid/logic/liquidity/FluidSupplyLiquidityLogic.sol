@@ -2,11 +2,11 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultT1 } from "../../../../interfaces/fluid/vaults/IFluidVaultT1.sol";
-import { IFluidVaultT3 } from "../../../../interfaces/fluid/vaults/IFluidVaultT3.sol";
+import { IFluidVaultT1 } from "../../../../interfaces/protocols/fluid/vaults/IFluidVaultT1.sol";
+import { IFluidVaultT3 } from "../../../../interfaces/protocols/fluid/vaults/IFluidVaultT3.sol";
 import { FluidLiquidityModel } from "../../helpers/FluidLiquidityModel.sol";
 import { FluidVaultTypes } from "../../helpers/FluidVaultTypes.sol";
-import { TokenUtils } from "../../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../../utils/token/TokenUtils.sol";
 import { DFSLib } from "../../../../utils/DFSLib.sol";
 
 /// @title FluidSupplyLiquidityLogic - Implements the supply of tokens to Fluid liquidity layer
@@ -20,9 +20,10 @@ library FluidSupplyLiquidityLogic {
     /// @param _data Supply data
     /// @return nftId NFT id of the position. Used when opening a new position
     /// @return supplyAmount Amount of tokens supplied. Will be the same as the input amount
-    function supply(
-        FluidLiquidityModel.SupplyData memory _data
-    ) internal returns (uint256 nftId, uint256 supplyAmount) {
+    function supply(FluidLiquidityModel.SupplyData memory _data)
+        internal
+        returns (uint256 nftId, uint256 supplyAmount)
+    {
         _data.vaultType.requireLiquidityCollateral();
 
         uint256 msgValue;
@@ -36,7 +37,7 @@ library FluidSupplyLiquidityLogic {
             _data.supplyToken.approveToken(_data.vault, _data.amount);
         }
 
-        (nftId , , ) = _data.vaultType.isT1Vault()
+        (nftId,,) = _data.vaultType.isT1Vault()
             ? IFluidVaultT1(_data.vault).operate{ value: msgValue }(
                 _data.nftId,
                 _data.amount.signed256(),

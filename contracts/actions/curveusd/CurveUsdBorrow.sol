@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { CurveUsdHelper } from "./helpers/CurveUsdHelper.sol";
-import { ICrvUsdController } from "../../interfaces/curveusd/ICurveUsd.sol";
+import { ICrvUsdController } from "../../interfaces/protocols/curveusd/ICurveUsd.sol";
 
 /// @title Action that borrows crvUSD from user's wallet curveusd position
 /// @dev debtAmount must be non-zero
@@ -31,9 +31,11 @@ contract CurveUsdBorrow is ActionBase, CurveUsdHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
+        params.controllerAddress =
+            _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
-        params.debtAmount = _parseParamUint(params.debtAmount, _paramMapping[2], _subData, _returnValues);
+        params.debtAmount =
+            _parseParamUint(params.debtAmount, _paramMapping[2], _subData, _returnValues);
 
         (uint256 generatedAmount, bytes memory logData) = _curveUsdBorrow(params);
         emit ActionEvent("CurveUsdBorrow", logData);
@@ -58,17 +60,14 @@ contract CurveUsdBorrow is ActionBase, CurveUsdHelper {
     function _curveUsdBorrow(Params memory _params) internal returns (uint256, bytes memory) {
         /// @dev see ICrvUsdController natspec
         if (_params.debtAmount == 0) revert ZeroAmountBorrowed();
-        
+
         if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
 
         ICrvUsdController(_params.controllerAddress).borrow_more(0, _params.debtAmount);
 
         CRVUSD_TOKEN_ADDR.withdrawTokens(_params.to, _params.debtAmount);
 
-        return (
-            _params.debtAmount,
-            abi.encode(_params)
-        );
+        return (_params.debtAmount, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

@@ -1,6 +1,4 @@
-const {
-    redeploy,
-} = require('../../utils/utils');
+const { redeploy } = require('../../utils/utils');
 const { changeOwnerTest } = require('./utils-actions-tests');
 
 describe('Change owner', function () {

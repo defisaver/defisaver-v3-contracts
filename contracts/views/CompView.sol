@@ -2,44 +2,43 @@
 
 pragma solidity =0.8.24;
 
-import { InterestRateModel } from "../interfaces/compound/InterestRateModel.sol";
-import { DSMath } from "../DS/DSMath.sol";
-import { Exponential } from "../utils/math/Exponential.sol";
-import { IComptroller } from "../interfaces/compound/IComptroller.sol";
-import { ICToken } from "../interfaces/compound/ICToken.sol";
-import { ICompoundOracle } from "../interfaces/compound/ICompoundOracle.sol";
+import { InterestRateModel } from "../interfaces/protocols/compound/InterestRateModel.sol";
+import { DSMath } from "../_vendor/DS/DSMath.sol";
+import { Exponential } from "../_vendor/compound/Exponential.sol";
+import { IComptroller } from "../interfaces/protocols/compound/IComptroller.sol";
+import { ICToken } from "../interfaces/protocols/compound/ICToken.sol";
+import { ICompoundOracle } from "../interfaces/protocols/compound/ICompoundOracle.sol";
 
 contract CompView is Exponential, DSMath {
-
     struct LoanData {
         address user;
         uint128 ratio;
         address[] collAddr;
         address[] borrowAddr;
-        uint[] collAmounts;
-        uint[] borrowAmounts;
+        uint256[] collAmounts;
+        uint256[] borrowAmounts;
     }
 
     struct TokenInfo {
         address cTokenAddress;
         address underlyingTokenAddress;
-        uint collateralFactor;
-        uint price;
+        uint256 collateralFactor;
+        uint256 price;
     }
 
     struct TokenInfoFull {
         address underlyingTokenAddress;
-        uint supplyRate;
-        uint borrowRate;
-        uint exchangeRate;
-        uint marketLiquidity;
-        uint totalSupply;
-        uint totalBorrow;
-        uint collateralFactor;
-        uint price;
-        uint compBorrowSpeeds;
-        uint compSupplySpeeds;
-        uint borrowCap;
+        uint256 supplyRate;
+        uint256 borrowRate;
+        uint256 exchangeRate;
+        uint256 marketLiquidity;
+        uint256 totalSupply;
+        uint256 totalBorrow;
+        uint256 collateralFactor;
+        uint256 price;
+        uint256 compBorrowSpeeds;
+        uint256 compSupplySpeeds;
+        uint256 borrowCap;
         bool canMint;
         bool canBorrow;
     }
@@ -55,7 +54,7 @@ contract CompView is Exponential, DSMath {
         uint256 liquidityAdded;
         uint256 liquidityTaken;
     }
-    
+
     struct EstimatedRates {
         address cTokenAddr;
         uint256 supplyRate;
@@ -67,38 +66,38 @@ contract CompView is Exponential, DSMath {
 
     IComptroller public constant comp = IComptroller(0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B);
 
-    function getSafetyRatio(address _user) public view returns (uint) {
+    function getSafetyRatio(address _user) public view returns (uint256) {
         // For each asset the account is in
         address[] memory assets = comp.getAssetsIn(_user);
         address oracleAddr = comp.oracle();
 
+        uint256 sumCollateral = 0;
+        uint256 sumBorrow = 0;
 
-        uint sumCollateral = 0;
-        uint sumBorrow = 0;
-
-        for (uint i = 0; i < assets.length; i++) {
+        for (uint256 i = 0; i < assets.length; i++) {
             address asset = assets[i];
 
-            (, uint cTokenBalance, uint borrowBalance, uint exchangeRateMantissa)
-                                        = ICToken(asset).getAccountSnapshot(_user);
+            (, uint256 cTokenBalance, uint256 borrowBalance, uint256 exchangeRateMantissa) =
+                ICToken(asset).getAccountSnapshot(_user);
 
             Exp memory oraclePrice;
 
             if (cTokenBalance != 0 || borrowBalance != 0) {
-                oraclePrice = Exp({mantissa: ICompoundOracle(oracleAddr).getUnderlyingPrice(asset)});
+                oraclePrice =
+                    Exp({ mantissa: ICompoundOracle(oracleAddr).getUnderlyingPrice(asset) });
             }
 
             // Sum up collateral in Usd
             if (cTokenBalance != 0) {
+                (, uint256 collFactorMantissa) = comp.markets(address(asset));
 
-                (, uint collFactorMantissa) = comp.markets(address(asset));
-
-                Exp memory collateralFactor = Exp({mantissa: collFactorMantissa});
-                Exp memory exchangeRate = Exp({mantissa: exchangeRateMantissa});
+                Exp memory collateralFactor = Exp({ mantissa: collFactorMantissa });
+                Exp memory exchangeRate = Exp({ mantissa: exchangeRateMantissa });
 
                 (, Exp memory tokensToUsd) = mulExp3(collateralFactor, exchangeRate, oraclePrice);
 
-                (, sumCollateral) = mulScalarTruncateAddUInt(tokensToUsd, cTokenBalance, sumCollateral);
+                (, sumCollateral) =
+                    mulScalarTruncateAddUInt(tokensToUsd, cTokenBalance, sumCollateral);
             }
 
             // Sum up debt in Usd
@@ -109,14 +108,13 @@ contract CompView is Exponential, DSMath {
 
         if (sumBorrow == 0) return type(uint256).max;
 
-        uint borrowPowerUsed = (sumBorrow * 10**18) / sumCollateral;
+        uint256 borrowPowerUsed = (sumBorrow * 10 ** 18) / sumCollateral;
         return wdiv(1e18, borrowPowerUsed);
     }
 
-
     /// @notice Calcualted the ratio of coll/debt for a compound user
     /// @param _user Address of the user
-    function getRatio(address _user) public view returns (uint) {
+    function getRatio(address _user) public view returns (uint256) {
         // For each asset the account is in
         return getSafetyRatio(_user);
     }
@@ -124,11 +122,11 @@ contract CompView is Exponential, DSMath {
     /// @notice Fetches Compound prices for tokens
     /// @param _cTokens Arr. of cTokens for which to get the prices
     /// @return prices Array of prices
-    function getPrices(address[] memory _cTokens) public view returns (uint[] memory prices) {
-        prices = new uint[](_cTokens.length);
+    function getPrices(address[] memory _cTokens) public view returns (uint256[] memory prices) {
+        prices = new uint256[](_cTokens.length);
         address oracleAddr = comp.oracle();
 
-        for (uint i = 0; i < _cTokens.length; ++i) {
+        for (uint256 i = 0; i < _cTokens.length; ++i) {
             prices[i] = ICompoundOracle(oracleAddr).getUnderlyingPrice(_cTokens[i]);
         }
     }
@@ -136,10 +134,14 @@ contract CompView is Exponential, DSMath {
     /// @notice Fetches Compound collateral factors for tokens
     /// @param _cTokens Arr. of cTokens for which to get the coll. factors
     /// @return collFactors Array of coll. factors
-    function getCollFactors(address[] memory _cTokens) public view returns (uint[] memory collFactors) {
-        collFactors = new uint[](_cTokens.length);
+    function getCollFactors(address[] memory _cTokens)
+        public
+        view
+        returns (uint256[] memory collFactors)
+    {
+        collFactors = new uint256[](_cTokens.length);
 
-        for (uint i = 0; i < _cTokens.length; ++i) {
+        for (uint256 i = 0; i < _cTokens.length; ++i) {
             (, collFactors[i]) = comp.markets(_cTokens[i]);
         }
     }
@@ -156,28 +158,29 @@ contract CompView is Exponential, DSMath {
             ratio: 0,
             collAddr: new address[](assets.length),
             borrowAddr: new address[](assets.length),
-            collAmounts: new uint[](assets.length),
-            borrowAmounts: new uint[](assets.length)
+            collAmounts: new uint256[](assets.length),
+            borrowAmounts: new uint256[](assets.length)
         });
 
-        uint collPos = 0;
-        uint borrowPos = 0;
+        uint256 collPos = 0;
+        uint256 borrowPos = 0;
 
-        for (uint i = 0; i < assets.length; i++) {
+        for (uint256 i = 0; i < assets.length; i++) {
             address asset = assets[i];
 
-            (, uint cTokenBalance, uint borrowBalance, uint exchangeRateMantissa)
-                                        = ICToken(asset).getAccountSnapshot(_user);
+            (, uint256 cTokenBalance, uint256 borrowBalance, uint256 exchangeRateMantissa) =
+                ICToken(asset).getAccountSnapshot(_user);
 
             Exp memory oraclePrice;
 
             if (cTokenBalance != 0 || borrowBalance != 0) {
-                oraclePrice = Exp({mantissa: ICompoundOracle(oracleAddr).getUnderlyingPrice(asset)});
+                oraclePrice =
+                    Exp({ mantissa: ICompoundOracle(oracleAddr).getUnderlyingPrice(asset) });
             }
 
             // Sum up collateral in Usd
             if (cTokenBalance != 0) {
-                Exp memory exchangeRate = Exp({mantissa: exchangeRateMantissa});
+                Exp memory exchangeRate = Exp({ mantissa: exchangeRateMantissa });
                 (, Exp memory tokensToUsd) = mulExp(exchangeRate, oraclePrice);
 
                 data.collAddr[collPos] = asset;
@@ -198,22 +201,25 @@ contract CompView is Exponential, DSMath {
         return data;
     }
 
-    function getTokenBalances(address _user, address[] memory _cTokens) public view returns (uint[] memory balances, uint[] memory borrows) {
-        balances = new uint[](_cTokens.length);
-        borrows = new uint[](_cTokens.length);
+    function getTokenBalances(address _user, address[] memory _cTokens)
+        public
+        view
+        returns (uint256[] memory balances, uint256[] memory borrows)
+    {
+        balances = new uint256[](_cTokens.length);
+        borrows = new uint256[](_cTokens.length);
 
-        for (uint i = 0; i < _cTokens.length; i++) {
+        for (uint256 i = 0; i < _cTokens.length; i++) {
             address asset = _cTokens[i];
 
-            (, uint cTokenBalance, uint borrowBalance, uint exchangeRateMantissa)
-                                        = ICToken(asset).getAccountSnapshot(_user);
+            (, uint256 cTokenBalance, uint256 borrowBalance, uint256 exchangeRateMantissa) =
+                ICToken(asset).getAccountSnapshot(_user);
 
-            Exp memory exchangeRate = Exp({mantissa: exchangeRateMantissa});
+            Exp memory exchangeRate = Exp({ mantissa: exchangeRateMantissa });
             (, balances[i]) = mulScalarTruncate(exchangeRate, cTokenBalance);
 
             borrows[i] = borrowBalance;
         }
-
     }
 
     /// @notice Fetches all the collateral/debt address and amounts, denominated in usd
@@ -222,7 +228,7 @@ contract CompView is Exponential, DSMath {
     function getLoanDataArr(address[] memory _users) public view returns (LoanData[] memory loans) {
         loans = new LoanData[](_users.length);
 
-        for (uint i = 0; i < _users.length; ++i) {
+        for (uint256 i = 0; i < _users.length; ++i) {
             loans[i] = getLoanData(_users[i]);
         }
     }
@@ -230,10 +236,10 @@ contract CompView is Exponential, DSMath {
     /// @notice Calcualted the ratio of coll/debt for a compound user
     /// @param _users Addresses of the user
     /// @return ratios Array of ratios
-    function getRatios(address[] memory _users) public view returns (uint[] memory ratios) {
-        ratios = new uint[](_users.length);
+    function getRatios(address[] memory _users) public view returns (uint256[] memory ratios) {
+        ratios = new uint256[](_users.length);
 
-        for (uint i = 0; i < _users.length; ++i) {
+        for (uint256 i = 0; i < _users.length; ++i) {
             ratios[i] = getSafetyRatio(_users[i]);
         }
     }
@@ -241,12 +247,15 @@ contract CompView is Exponential, DSMath {
     /// @notice Information about cTokens
     /// @param _cTokenAddresses Array of cTokens addresses
     /// @return tokens Array of cTokens infomartion
-    function getTokensInfo(address[] memory _cTokenAddresses) public returns(TokenInfo[] memory tokens) {
+    function getTokensInfo(address[] memory _cTokenAddresses)
+        public
+        returns (TokenInfo[] memory tokens)
+    {
         tokens = new TokenInfo[](_cTokenAddresses.length);
         address oracleAddr = comp.oracle();
 
-        for (uint i = 0; i < _cTokenAddresses.length; ++i) {
-            (, uint collFactor) = comp.markets(_cTokenAddresses[i]);
+        for (uint256 i = 0; i < _cTokenAddresses.length; ++i) {
+            (, uint256 collFactor) = comp.markets(_cTokenAddresses[i]);
 
             tokens[i] = TokenInfo({
                 cTokenAddress: _cTokenAddresses[i],
@@ -260,12 +269,15 @@ contract CompView is Exponential, DSMath {
     /// @notice Information about cTokens
     /// @param _cTokenAddresses Array of cTokens addresses
     /// @return tokens Array of cTokens infomartion
-    function getFullTokensInfo(address[] memory _cTokenAddresses) public returns(TokenInfoFull[] memory tokens) {
+    function getFullTokensInfo(address[] memory _cTokenAddresses)
+        public
+        returns (TokenInfoFull[] memory tokens)
+    {
         tokens = new TokenInfoFull[](_cTokenAddresses.length);
         address oracleAddr = comp.oracle();
 
-        for (uint i = 0; i < _cTokenAddresses.length; ++i) {
-            (, uint collFactor) = comp.markets(_cTokenAddresses[i]);
+        for (uint256 i = 0; i < _cTokenAddresses.length; ++i) {
+            (, uint256 collFactor) = comp.markets(_cTokenAddresses[i]);
             ICToken cToken = ICToken(_cTokenAddresses[i]);
 
             tokens[i] = TokenInfoFull({
@@ -298,14 +310,16 @@ contract CompView is Exponential, DSMath {
         }
     }
 
-    function getApyAfterValuesEstimation(LiquidityChangeParams[] memory _params) public returns (EstimatedRates[] memory retVal)
-    {   
+    function getApyAfterValuesEstimation(LiquidityChangeParams[] memory _params)
+        public
+        returns (EstimatedRates[] memory retVal)
+    {
         retVal = new EstimatedRates[](_params.length);
 
         for (uint256 i = 0; i < _params.length; ++i) {
             ICToken cToken = ICToken(_params[i].cTokenAddr);
             InterestRateModel interestRateModel = cToken.interestRateModel();
-    
+
             cToken.accrueInterest();
 
             uint256 totalBorrowsCurrent = cToken.totalBorrowsCurrent();
@@ -324,7 +338,7 @@ contract CompView is Exponential, DSMath {
 
                 if (_params[i].liquidityAdded >= totalBorrowsCurrent) {
                     totalBorrowsCurrent = 0;
-                } else {    
+                } else {
                     totalBorrowsCurrent -= _params[i].liquidityAdded;
                 }
             }
@@ -337,7 +351,7 @@ contract CompView is Exponential, DSMath {
                 totalReserves,
                 cToken.reserveFactorMantissa()
             );
-            
+
             uint256 estimatedBorrowRate = _getEstimatedBorrowRate(
                 address(interestRateModel),
                 cToken.borrowRatePerBlock(),
@@ -353,7 +367,7 @@ contract CompView is Exponential, DSMath {
             });
         }
     }
-    
+
     function _getEstimatedSupplyRate(
         address _interestRateModel,
         uint256 _currSupplyRate,
@@ -373,7 +387,7 @@ contract CompView is Exponential, DSMath {
                 _reserveFactor
             )
         );
-        
+
         if (!success || data.length == 0) return supplyRate;
 
         if (data.length == 32) {
@@ -395,13 +409,10 @@ contract CompView is Exponential, DSMath {
 
         (bool success, bytes memory data) = _interestRateModel.staticcall(
             abi.encodeWithSelector(
-                InterestRateModel.getBorrowRate.selector,
-                _underlying,
-                _borrows,
-                _reserves
+                InterestRateModel.getBorrowRate.selector, _underlying, _borrows, _reserves
             )
         );
-        
+
         if (!success || data.length == 0) return borrowRate;
 
         if (data.length == 32) {

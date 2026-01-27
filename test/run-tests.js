@@ -1,13 +1,9 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable guard-for-in */
 const { exec } = require('child_process');
 const events = require('events');
 const fs = require('fs');
 const { exit } = require('process');
 
 function getTestFiles(dir, files_) {
-    // eslint-disable-next-line no-param-reassign
     files_ = files_ || [];
     const files = fs.readdirSync(dir);
     for (const i in files) {
@@ -36,16 +32,9 @@ class TestRunner extends events.EventEmitter {
         this.retries = 0;
         this.liveNodes = 0;
         this.startEpoch = 0;
-        this.on(
-            'NodeReady',
-            this.nodeReadyListener,
-        ).on(
-            'NodeClosed',
-            this.nodeClosedListener,
-        ).on(
-            'TestClosed',
-            this.testClosedListener,
-        );
+        this.on('NodeReady', this.nodeReadyListener)
+            .on('NodeClosed', this.nodeClosedListener)
+            .on('TestClosed', this.testClosedListener);
     }
 
     nodeReadyListener(nodeHandle, id) {
@@ -71,9 +60,7 @@ class TestRunner extends events.EventEmitter {
     testClosedListener(nodeHandle, testHandle, test, id) {
         if (testHandle.exitCode === 0) {
             this.passed++;
-            // eslint-disable-next-line no-param-reassign
             test.endTime = Date.now();
-            // eslint-disable-next-line no-param-reassign
             test.time = Math.ceil((test.endTime - test.startTime) / 1000);
             this.passedTests.push(test);
             this.emit('NodeReady', nodeHandle, id);
@@ -84,7 +71,6 @@ class TestRunner extends events.EventEmitter {
             this.pendingTests.push(test);
         } else if (test.retries > 0) {
             this.retries++;
-            // eslint-disable-next-line no-param-reassign
             test.retries--;
             this.pendingTests.push(test);
             this.emit('NodeReady', nodeHandle, id);
@@ -96,16 +82,17 @@ class TestRunner extends events.EventEmitter {
     }
 
     run(nodeCount, testFileNames) {
-        this.pendingTests = testFileNames.map((e) => Object({
-            retries: MAX_RETRIES,
-            fileName: e,
-        }));
+        this.pendingTests = testFileNames.map((e) =>
+            Object({
+                retries: MAX_RETRIES,
+                fileName: e,
+            }),
+        );
         this.total = this.pendingTests.length;
         this.startEpoch = Date.now();
 
         const min = (a, b) => (a > b ? b : a);
         if (nodeCount > min(this.total, MAX_NODE_COUNT)) {
-            // eslint-disable-next-line no-param-reassign
             nodeCount = min(this.total, MAX_NODE_COUNT);
         }
         for (let i = 0; i < nodeCount; i++) {
@@ -117,9 +104,7 @@ class TestRunner extends events.EventEmitter {
 
     startNode(id) {
         this.liveNodes++;
-        const nodeHandle = exec(
-            `npx hardhat node --port ${8545 + id}`,
-        ).on(
+        const nodeHandle = exec(`npx hardhat node --port ${8545 + id}`).on(
             'close',
             (code, signal) => this.emit('NodeClosed', id, signal),
         );
@@ -129,25 +114,20 @@ class TestRunner extends events.EventEmitter {
     }
 
     startTest(nodeHandle, id, test) {
-        // eslint-disable-next-line no-param-reassign
         test.startTime = Date.now();
         const runner = this;
         const testHandle = exec(
             `npx hardhat test --network local${id} ${test.fileName}`,
             (error, stdout) => {
-                // eslint-disable-next-line no-param-reassign
                 test.output = stdout;
                 if (error) {
                     console.log(error);
                     console.log(stdout);
                 }
             },
-        ).on(
-            'close',
-            function () {
-                runner.emit('TestClosed', nodeHandle, this, test, id);
-            },
-        );
+        ).on('close', function () {
+            runner.emit('TestClosed', nodeHandle, this, test, id);
+        });
         return testHandle;
     }
 
@@ -160,7 +140,15 @@ class TestRunner extends events.EventEmitter {
     finish() {
         const comp = (a, b) => (a.fileName > b.fileName ? 1 : -1);
         this.passedTests.sort(comp).forEach((e) => console.log(e.output));
-        this.passedTests.sort((a, b) => b.time - a.time).forEach((e) => console.log(`${e.fileName.padEnd(32)}\tretries: ${MAX_RETRIES - e.retries}\ttime: ${e.time}`));
+        this.passedTests
+            .sort((a, b) => b.time - a.time)
+            .forEach((e) =>
+                console.log(
+                    `${e.fileName.padEnd(32)}\tretries: ${MAX_RETRIES - e.retries}\ttime: ${
+                        e.time
+                    }`,
+                ),
+            );
         console.log(`${this.passed}/${this.total} tests passed`);
         if (this.total !== this.passed) exit(1);
         exit(0);
@@ -174,4 +162,4 @@ class TestRunner extends events.EventEmitter {
     let nodeCount = DEFAULT_NODE_COUNT;
     if (process.argv.length > 2) nodeCount = process.argv[2];
     runner.run(nodeCount, testFileNames);
-}());
+})();

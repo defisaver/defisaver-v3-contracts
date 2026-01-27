@@ -2,16 +2,15 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { ReentrancyGuard } from "../../utils/ReentrancyGuard.sol";
+import { ReentrancyGuard } from "../../_vendor/openzeppelin/ReentrancyGuard.sol";
 import { IERC3156FlashBorrower } from "../../interfaces/flashloan/IERC3156FlashBorrower.sol";
 import { IERC3156FlashLender } from "../../interfaces/flashloan/IERC3156FlashLender.sol";
 
 import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
-import { IDSProxy } from "../../interfaces/IDSProxy.sol";
-import { IFLParamGetter } from "../../interfaces/IFLParamGetter.sol";
+import { IFLParamGetter } from "../../interfaces/flashloan/IFLParamGetter.sol";
 import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 import { FLHelper } from "./helpers/FLHelper.sol";
 
@@ -25,12 +24,12 @@ contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower, IFlashLo
         bytes32[] memory,
         uint8[] memory,
         bytes32[] memory
-    ) public override payable returns (bytes32) {
+    ) public payable override returns (bytes32) {
         FlashLoanParams memory params = parseInputs(_callData);
 
         if (params.flParamGetterAddr != address(0)) {
-            (, uint256[] memory amounts,) =
-                IFLParamGetter(params.flParamGetterAddr).getFlashLoanParams(params.flParamGetterData);
+            (, uint256[] memory amounts,) = IFLParamGetter(params.flParamGetterAddr)
+                .getFlashLoanParams(params.flParamGetterData);
 
             params.amounts[0] = amounts[0];
         }
@@ -40,10 +39,10 @@ contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower, IFlashLo
     }
 
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes memory _callData) public override payable {}
+    function executeActionDirect(bytes memory _callData) public payable override { }
 
     /// @inheritdoc ActionBase
-    function actionType() public override pure returns (uint8) {
+    function actionType() public pure override returns (uint8) {
         return uint8(ActionType.FL_ACTION);
     }
 
@@ -51,12 +50,8 @@ contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower, IFlashLo
     /// @param _amount Amount of DAI to FL
     /// @param _taskData Rest of the data we have in the task
     function _flMaker(uint256 _amount, bytes memory _taskData) internal returns (uint256) {
-        IERC3156FlashLender(DSS_FLASH_ADDR).flashLoan(
-            IERC3156FlashBorrower(address(this)),
-            DAI_ADDR,
-            _amount,
-            _taskData
-        );
+        IERC3156FlashLender(DSS_FLASH_ADDR)
+            .flashLoan(IERC3156FlashBorrower(address(this)), DAI_ADDR, _amount, _taskData);
 
         emit ActionEvent("FLMaker", abi.encode(_amount));
         return _amount;
@@ -79,9 +74,12 @@ contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower, IFlashLo
 
         uint256 paybackAmount = _amount + _fee;
 
-        _executeRecipe(wallet, isDSProxy(wallet), currRecipe, paybackAmount);
+        _executeRecipe(wallet, _getWalletType(wallet), currRecipe, paybackAmount);
 
-        require(_token.getBalance(address(this)) == paybackAmount + balanceBefore, "Wrong payback amount");
+        require(
+            _token.getBalance(address(this)) == paybackAmount + balanceBefore,
+            "Wrong payback amount"
+        );
 
         _token.approveToken(DSS_FLASH_ADDR, paybackAmount);
         return CALLBACK_SUCCESS;

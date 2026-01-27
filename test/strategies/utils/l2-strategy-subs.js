@@ -1,11 +1,5 @@
-/* eslint-disable max-len */
 const automationSdk = require('@defisaver/automation-sdk');
-const {
-    subToAaveV3Proxy,
-    updateAaveProxy,
-    subToStrategy,
-    subToCompV3ProxyL2,
-} = require('./utils-strategies');
+const { subToAaveV3Proxy, updateAaveProxy, subToStrategy } = require('./utils-strategies');
 
 const subAaveV3L2AutomationStrategy = async (
     proxy,
@@ -68,7 +62,6 @@ const updateAaveV3L2AutomationStrategy = async (
     const subId = await updateAaveProxy(proxy, subInput);
 
     if (subId2 === '0' && boostEnabled === true) {
-        // eslint-disable-next-line no-param-reassign
         subId2 = subId;
     }
 
@@ -91,7 +84,10 @@ const subAaveV3CloseBundle = async (
         baseTokenAddress: triggerBaseAsset,
         quoteTokenAddress: triggerQuoteAsset,
         price: targetPrice,
-        ratioState: (priceState === 1) ? automationSdk.enums.RatioState.UNDER : automationSdk.enums.RatioState.OVER,
+        ratioState:
+            priceState === 1
+                ? automationSdk.enums.RatioState.UNDER
+                : automationSdk.enums.RatioState.OVER,
     };
     const subData = {
         collAsset: _collAsset,
@@ -111,47 +107,8 @@ const subAaveV3CloseBundle = async (
     return { subId, strategySub };
 };
 
-const subToCompV3L2AutomationStrategy = async (
-    proxy,
-    market,
-    baseToken,
-    minRatio,
-    maxRatio,
-    optimalRatioBoost,
-    optimalRatioRepay,
-    boostEnabled,
-) => {
-    const subInput = automationSdk.strategySubService.compoundV3L2Encode.leverageManagement(
-        market,
-        baseToken,
-        minRatio,
-        maxRatio,
-        optimalRatioBoost,
-        optimalRatioRepay,
-        boostEnabled,
-    );
-
-    const subId = await subToCompV3ProxyL2(proxy, [subInput]);
-
-    let subId1 = '0';
-    let subId2 = '0';
-
-    if (boostEnabled) {
-        subId1 = (parseInt(subId, 10) - 1).toString();
-        subId2 = subId;
-    } else {
-        subId1 = subId;
-        subId2 = '0';
-    }
-
-    console.log('Subs: ', subId1, subId2);
-
-    return { firstSub: subId1, secondSub: subId2 };
-};
-
 module.exports = {
     subAaveV3L2AutomationStrategy,
     updateAaveV3L2AutomationStrategy,
     subAaveV3CloseBundle,
-    subToCompV3L2AutomationStrategy,
 };

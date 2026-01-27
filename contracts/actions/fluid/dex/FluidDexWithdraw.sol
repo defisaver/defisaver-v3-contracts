@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVault } from "../../../interfaces/fluid/vaults/IFluidVault.sol";
+import { IFluidVault } from "../../../interfaces/protocols/fluid/vaults/IFluidVault.sol";
 import { FluidHelper } from "../helpers/FluidHelper.sol";
 import { FluidDexModel } from "../helpers/FluidDexModel.sol";
 import { FluidLiquidityModel } from "../helpers/FluidLiquidityModel.sol";
@@ -10,7 +10,7 @@ import { FluidWithdrawLiquidityLogic } from "../logic/liquidity/FluidWithdrawLiq
 import { FluidWithdrawDexLogic } from "../logic/dex/FluidWithdrawDexLogic.sol";
 import { FluidVaultTypes } from "../helpers/FluidVaultTypes.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Withdraw tokens from Fluid DEX vault (T2, T3, T4)
 contract FluidDexWithdraw is ActionBase, FluidHelper {
@@ -45,41 +45,24 @@ contract FluidDexWithdraw is ActionBase, FluidHelper {
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
         params.nftId = _parseParamUint(params.nftId, _paramMapping[2], _subData, _returnValues);
 
-        params.withdrawAmount = _parseParamUint(
-            params.withdrawAmount,
-            _paramMapping[3],
-            _subData,
-            _returnValues
-        );
+        params.withdrawAmount =
+            _parseParamUint(params.withdrawAmount, _paramMapping[3], _subData, _returnValues);
         params.withdrawVariableData.collAmount0 = _parseParamUint(
-            params.withdrawVariableData.collAmount0,
-            _paramMapping[4],
-            _subData,
-            _returnValues
+            params.withdrawVariableData.collAmount0, _paramMapping[4], _subData, _returnValues
         );
         params.withdrawVariableData.collAmount1 = _parseParamUint(
-            params.withdrawVariableData.collAmount1,
-            _paramMapping[5],
-            _subData,
-            _returnValues
+            params.withdrawVariableData.collAmount1, _paramMapping[5], _subData, _returnValues
         );
         params.withdrawVariableData.maxCollShares = _parseParamUint(
-            params.withdrawVariableData.maxCollShares,
-            _paramMapping[6],
-            _subData,
-            _returnValues
+            params.withdrawVariableData.maxCollShares, _paramMapping[6], _subData, _returnValues
         );
         params.withdrawVariableData.minCollToWithdraw = _parseParamUint(
-            params.withdrawVariableData.minCollToWithdraw,
-            _paramMapping[7],
-            _subData,
-            _returnValues
+            params.withdrawVariableData.minCollToWithdraw, _paramMapping[7], _subData, _returnValues
         );
-        params.wrapWithdrawnEth = _parseParamUint(
-            params.wrapWithdrawnEth ? 1 : 0,
-            _paramMapping[8],
-            _subData, _returnValues
-        ) == 1;
+        params.wrapWithdrawnEth =
+            _parseParamUint(
+                    params.wrapWithdrawnEth ? 1 : 0, _paramMapping[8], _subData, _returnValues
+                ) == 1;
 
         (uint256 sharesBurnedOrTokenWithdrawn, bytes memory logData) = _withdraw(params);
         emit ActionEvent("FluidDexWithdraw", logData);

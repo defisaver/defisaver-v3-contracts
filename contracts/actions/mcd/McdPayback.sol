@@ -2,13 +2,13 @@
 
 pragma solidity =0.8.24;
 
-import { IManager } from "../../interfaces/mcd/IManager.sol";
-import { IDaiJoin } from "../../interfaces/mcd/IDaiJoin.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { IManager } from "../../interfaces/protocols/mcd/IManager.sol";
+import { IDaiJoin } from "../../interfaces/protocols/mcd/IDaiJoin.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { McdHelper } from "./helpers/McdHelper.sol";
-import { ICropper } from "../../interfaces/mcd/ICropper.sol";
-import { ICdpRegistry } from "../../interfaces/mcd/ICdpRegistry.sol";
+import { ICropper } from "../../interfaces/protocols/mcd/ICropper.sol";
+import { ICdpRegistry } from "../../interfaces/protocols/mcd/ICdpRegistry.sol";
 
 /// @title Payback dai debt for a Maker vault
 contract McdPayback is ActionBase, McdHelper {
@@ -33,30 +33,13 @@ contract McdPayback is ActionBase, McdHelper {
         bytes32[] memory _returnValues
     ) public payable override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
-        inputData.vaultId = _parseParamUint(
-            inputData.vaultId,
-            _paramMapping[0],
-            _subData,
-            _returnValues
-        );
-        inputData.amount = _parseParamUint(
-            inputData.amount,
-            _paramMapping[1],
-            _subData,
-            _returnValues
-        );
-        inputData.from = _parseParamAddr(
-            inputData.from,
-            _paramMapping[2],
-            _subData,
-            _returnValues
-        );
-        inputData.mcdManager = _parseParamAddr(
-            inputData.mcdManager,
-            _paramMapping[3],
-            _subData,
-            _returnValues
-        );
+        inputData.vaultId =
+            _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
+        inputData.from = _parseParamAddr(inputData.from, _paramMapping[2], _subData, _returnValues);
+        inputData.mcdManager =
+            _parseParamAddr(inputData.mcdManager, _paramMapping[3], _subData, _returnValues);
 
         bytes memory logData = _mcdPayback(inputData);
         emit ActionEvent("McdPayback", logData);
@@ -110,18 +93,13 @@ contract McdPayback is ActionBase, McdHelper {
         uint256 daiVatBalance = vat.dai(_urn);
 
         _mcdManager.frob(
-            _vaultId,
-            0,
-            normalizePaybackAmount(address(vat), daiVatBalance, _urn, _ilk)
+            _vaultId, 0, normalizePaybackAmount(address(vat), daiVatBalance, _urn, _ilk)
         );
     }
 
-    function _cropperPayback(
-        uint256 _vaultId,
-        address _urn,
-        bytes32 _ilk,
-        uint256 _amount
-    ) internal {
+    function _cropperPayback(uint256 _vaultId, address _urn, bytes32 _ilk, uint256 _amount)
+        internal
+    {
         address owner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
         IDaiJoin(DAI_JOIN_ADDR).join(owner, _amount);
 
@@ -130,14 +108,15 @@ contract McdPayback is ActionBase, McdHelper {
         // Allows cropper to access to proxy"s DAI balance in the vat
         vat.hope(CROPPER);
         // Paybacks debt to the CDP
-        ICropper(CROPPER).frob(
-            _ilk,
-            owner,
-            owner,
-            owner,
-            0,
-            normalizePaybackAmount(address(vat), daiVatBalance, _urn, _ilk)
-        );
+        ICropper(CROPPER)
+            .frob(
+                _ilk,
+                owner,
+                owner,
+                owner,
+                0,
+                normalizePaybackAmount(address(vat), daiVatBalance, _urn, _ilk)
+            );
         // Denies cropper to access to proxy"s DAI balance in the vat after execution
         vat.nope(CROPPER);
     }
@@ -145,5 +124,4 @@ contract McdPayback is ActionBase, McdHelper {
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
     }
-
 }

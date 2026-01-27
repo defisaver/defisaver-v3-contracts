@@ -2,19 +2,20 @@
 
 pragma solidity =0.8.24;
 
+import { IStrategyStorage } from "../../interfaces/core/IStrategyStorage.sol";
 import { StrategyModel } from "./StrategyModel.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 
 /// @title StrategyStorage - Record of all the Strategies created
-contract StrategyStorage is StrategyModel, AdminAuth {
-
+contract StrategyStorage is StrategyModel, AdminAuth, IStrategyStorage {
     Strategy[] public strategies;
     bool public openToPublic = false;
 
-    error NoAuthToCreateStrategy(address,bool);
+    error NoAuthToCreateStrategy(address, bool);
+
     event StrategyCreated(uint256 indexed strategyId);
 
-    modifier onlyAuthCreators {
+    modifier onlyAuthCreators() {
         if (adminVault.owner() != msg.sender && openToPublic == false) {
             revert NoAuthToCreateStrategy(msg.sender, openToPublic);
         }
@@ -35,15 +36,17 @@ contract StrategyStorage is StrategyModel, AdminAuth {
         bytes4[] memory _actionIds,
         uint8[][] memory _paramMapping,
         bool _continuous
-    ) public onlyAuthCreators returns (uint256) {
-        strategies.push(Strategy({
+    ) public override onlyAuthCreators returns (uint256) {
+        strategies.push(
+            Strategy({
                 name: _name,
                 creator: msg.sender,
                 triggerIds: _triggerIds,
                 actionIds: _actionIds,
                 paramMapping: _paramMapping,
-                continuous : _continuous
-        }));
+                continuous: _continuous
+            })
+        );
 
         emit StrategyCreated(strategies.length - 1);
 
@@ -53,34 +56,39 @@ contract StrategyStorage is StrategyModel, AdminAuth {
     /// @notice Switch to determine if bundles can be created by anyone
     /// @dev Callable only by the owner
     /// @param _openToPublic Flag if true anyone can create bundles
-    function changeEditPermission(bool _openToPublic) public onlyOwner {
+    function changeEditPermission(bool _openToPublic) public override onlyOwner {
         openToPublic = _openToPublic;
     }
 
     ////////////////////////////// VIEW METHODS /////////////////////////////////
 
-    function getStrategy(uint _strategyId) public view returns (Strategy memory) {
+    function getStrategy(uint256 _strategyId) public view override returns (Strategy memory) {
         return strategies[_strategyId];
     }
-    function getStrategyCount() public view returns (uint256) {
+
+    function getStrategyCount() public view override returns (uint256) {
         return strategies.length;
     }
 
-    function getPaginatedStrategies(uint _page, uint _perPage) public view returns (Strategy[] memory) {
+    function getPaginatedStrategies(uint256 _page, uint256 _perPage)
+        public
+        view
+        override
+        returns (Strategy[] memory)
+    {
         Strategy[] memory strategiesPerPage = new Strategy[](_perPage);
 
-        uint start = _page * _perPage;
-        uint end = start + _perPage;
+        uint256 start = _page * _perPage;
+        uint256 end = start + _perPage;
 
         end = (end > strategies.length) ? strategies.length : end;
 
-        uint count = 0;
-        for (uint i = start; i < end; i++) {
+        uint256 count = 0;
+        for (uint256 i = start; i < end; i++) {
             strategiesPerPage[count] = strategies[i];
             count++;
         }
 
         return strategiesPerPage;
     }
-
 }

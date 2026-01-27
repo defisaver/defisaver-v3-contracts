@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const hre = require('hardhat');
 const { getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
@@ -9,9 +8,7 @@ const {
     redeploy,
     fetchAmountinUSDPrice,
 } = require('../../utils/utils');
-const {
-    supplyComp, borrowComp, paybackComp, withdrawComp,
-} = require('../../utils/actions');
+const { supplyComp, borrowComp, paybackComp, withdrawComp } = require('../../utils/actions');
 
 const COMPTROLLER_ADDR = '0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B';
 const cTokens = {
@@ -34,7 +31,9 @@ const compV2ApyAfterValuesTest = async () => {
             [senderAcc] = await hre.ethers.getSigners();
             wallet = await getProxy(senderAcc.address);
             compV2ViewContract = await redeploy('CompView');
-            const tokenInfos = await compV2ViewContract.callStatic.getFullTokensInfo(Object.values(cTokens));
+            const tokenInfos = await compV2ViewContract.callStatic.getFullTokensInfo(
+                Object.values(cTokens),
+            );
             tokenInfos.forEach((tokenInfo, index) => {
                 if (!tokenInfo.canMint) {
                     cantSupplyTokens[Object.keys(cTokens)[index]] = true;
@@ -53,8 +52,11 @@ const compV2ApyAfterValuesTest = async () => {
 
         for (let i = 0; i < Object.keys(cTokens).length; i++) {
             for (let j = 0; j < Object.keys(cTokens).length; j++) {
-                if (i === j || cantSupplyTokens[Object.keys(cTokens)[i]] || cantBorrowTokens[Object.keys(cTokens)[j]]) {
-                    // eslint-disable-next-line no-continue
+                if (
+                    i === j ||
+                    cantSupplyTokens[Object.keys(cTokens)[i]] ||
+                    cantBorrowTokens[Object.keys(cTokens)[j]]
+                ) {
                     continue;
                 }
                 const collAsset = getAssetInfo(Object.keys(cTokens)[i]);
@@ -64,9 +66,18 @@ const compV2ApyAfterValuesTest = async () => {
                 const borrowCToken = cTokens[borrowAsset.symbol];
 
                 it(`... should estimate supply and borrow rates when opening position [coll: ${collAsset.symbol} debt: ${borrowAsset.symbol}]`, async () => {
-                    const collCTokenContract = await hre.ethers.getContractAt('ICToken', collCToken);
-                    const borrowCTokenContract = await hre.ethers.getContractAt('ICToken', borrowCToken);
-                    const comptroller = await hre.ethers.getContractAt('IComptroller', COMPTROLLER_ADDR);
+                    const collCTokenContract = await hre.ethers.getContractAt(
+                        'ICToken',
+                        collCToken,
+                    );
+                    const borrowCTokenContract = await hre.ethers.getContractAt(
+                        'ICToken',
+                        borrowCToken,
+                    );
+                    const comptroller = await hre.ethers.getContractAt(
+                        'IComptroller',
+                        COMPTROLLER_ADDR,
+                    );
 
                     const maxBorrowCap = await comptroller.borrowCaps(borrowCToken);
 
@@ -101,7 +112,8 @@ const compV2ApyAfterValuesTest = async () => {
                         },
                     ];
 
-                    const result = await compV2ViewContract.callStatic.getApyAfterValuesEstimation(params);
+                    const result =
+                        await compV2ViewContract.callStatic.getApyAfterValuesEstimation(params);
 
                     const estimatedStateAfter = {
                         collAssetSupplyRate: result[0].supplyRate,
@@ -117,12 +129,7 @@ const compV2ApyAfterValuesTest = async () => {
                         supplyAmount,
                         senderAcc.address,
                     );
-                    await borrowComp(
-                        wallet,
-                        borrowCToken,
-                        borrowAmount,
-                        senderAcc.address,
-                    );
+                    await borrowComp(wallet, borrowCToken, borrowAmount, senderAcc.address);
                     await paybackComp(
                         wallet,
                         borrowCToken,
@@ -130,25 +137,36 @@ const compV2ApyAfterValuesTest = async () => {
                         paybackAmount,
                         senderAcc.address,
                     );
-                    await withdrawComp(
-                        wallet,
-                        collCToken,
-                        withdrawAmount,
-                        senderAcc.address,
-                    );
+                    await withdrawComp(wallet, collCToken, withdrawAmount, senderAcc.address);
 
                     const stateAfter = {
-                        collAssetSupplyRate: await collCTokenContract.callStatic.supplyRatePerBlock(),
-                        collAssetBorrowRate: await collCTokenContract.callStatic.borrowRatePerBlock(),
-                        borrowAssetSupplyRate: await borrowCTokenContract.callStatic.supplyRatePerBlock(),
-                        borrowAssetBorrowRate: await borrowCTokenContract.callStatic.borrowRatePerBlock(),
+                        collAssetSupplyRate:
+                            await collCTokenContract.callStatic.supplyRatePerBlock(),
+                        collAssetBorrowRate:
+                            await collCTokenContract.callStatic.borrowRatePerBlock(),
+                        borrowAssetSupplyRate:
+                            await borrowCTokenContract.callStatic.supplyRatePerBlock(),
+                        borrowAssetBorrowRate:
+                            await borrowCTokenContract.callStatic.borrowRatePerBlock(),
                     };
 
                     // tolerate up to 6 last decimal places in difference
-                    expect(stateAfter.collAssetSupplyRate).to.be.closeTo(estimatedStateAfter.collAssetSupplyRate, 1e6);
-                    expect(stateAfter.collAssetBorrowRate).to.be.closeTo(estimatedStateAfter.collAssetBorrowRate, 1e6);
-                    expect(stateAfter.borrowAssetSupplyRate).to.be.closeTo(estimatedStateAfter.borrowAssetSupplyRate, 1e6);
-                    expect(stateAfter.borrowAssetBorrowRate).to.be.closeTo(estimatedStateAfter.borrowAssetBorrowRate, 1e6);
+                    expect(stateAfter.collAssetSupplyRate).to.be.closeTo(
+                        estimatedStateAfter.collAssetSupplyRate,
+                        1e6,
+                    );
+                    expect(stateAfter.collAssetBorrowRate).to.be.closeTo(
+                        estimatedStateAfter.collAssetBorrowRate,
+                        1e6,
+                    );
+                    expect(stateAfter.borrowAssetSupplyRate).to.be.closeTo(
+                        estimatedStateAfter.borrowAssetSupplyRate,
+                        1e6,
+                    );
+                    expect(stateAfter.borrowAssetBorrowRate).to.be.closeTo(
+                        estimatedStateAfter.borrowAssetBorrowRate,
+                        1e6,
+                    );
                 });
             }
         }
