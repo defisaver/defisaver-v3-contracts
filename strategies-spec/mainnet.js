@@ -6932,6 +6932,670 @@ const createMorphoBlueFLCloseToDebtStrategy = () => {
     return morphoBlueFLCloseToDebtStrategy.encodeForDsProxyCall();
 };
 
+const createAaveV4RepayStrategy = () => {
+    const s = new dfs.Strategy('AaveV4RepayStrategy');
+
+    s.addSubSlot('&spoke', 'address');
+    s.addSubSlot('&user', 'address');
+    s.addSubSlot('&ratioState', 'uint256');
+    s.addSubSlot('&targetRatio', 'uint256');
+
+    const trigger = new dfs.triggers.AaveV4RatioTrigger('0', '0', '0', '0');
+    s.addTrigger(trigger);
+
+    const withdraw = new dfs.actions.aaveV4.AaveV4WithdrawAction(
+        '&spoke',
+        '&user',
+        '&proxy',
+        '%collAssetId', // Sent by backend.
+        '%amount', // Sent by backend.
+    );
+    const sell = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collAsset', // Sent by backend.
+            '%debtAsset', // Sent by backend.
+            '$1',
+            '%exchangeWrapper', // Sent by backend.
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const takeFee = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // Sent by backend.
+        '%debtAsset', // Sent by backend.
+        '$2',
+    );
+    const payback = new dfs.actions.aaveV4.AaveV4PaybackAction(
+        '&spoke',
+        '&user',
+        '&proxy',
+        '%debtAssetId', // Sent by backend.
+        '$3',
+    );
+    const check = new dfs.actions.checkers.AaveV4RatioCheckAction(
+        '&ratioState',
+        '&targetRatio',
+        '&spoke',
+        '&user',
+    );
+
+    s.addActions([withdraw, sell, takeFee, payback, check]);
+
+    return s.encodeForDsProxyCall();
+};
+const createAaveV4FLRepayStrategy = () => {
+    const s = new dfs.Strategy('AaveV4FLRepayStrategy');
+
+    s.addSubSlot('&spoke', 'address');
+    s.addSubSlot('&user', 'address');
+    s.addSubSlot('&ratioState', 'uint256');
+    s.addSubSlot('&targetRatio', 'uint256');
+
+    const trigger = new dfs.triggers.AaveV4RatioTrigger('0', '0', '0', '0');
+    s.addTrigger(trigger);
+
+    const fl = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%collAsset'], // Sent by backend.
+            ['%flAmount'], // Sent by backend.
+        ),
+    );
+    const sell = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collAsset', // Sent by backend.
+            '%debtAsset', // Sent by backend.
+            '%flAmount', // Sent by backend.
+            '%exchangeWrapper', // Sent by backend.
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const takeFee = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // Sent by backend.
+        '%debtAsset', // Sent by backend.
+        '$2',
+    );
+    const payback = new dfs.actions.aaveV4.AaveV4PaybackAction(
+        '&spoke',
+        '&user',
+        '&proxy',
+        '%debtAssetId', // Sent by backend.
+        '$3',
+    );
+    const withdraw = new dfs.actions.aaveV4.AaveV4WithdrawAction(
+        '&spoke',
+        '&user',
+        '%flAddr', // Sent by backend.
+        '%collAssetId', // Sent by backend.
+        '$1',
+    );
+    const check = new dfs.actions.checkers.AaveV4RatioCheckAction(
+        '&ratioState',
+        '&targetRatio',
+        '&spoke',
+        '&user',
+    );
+
+    s.addActions([fl, sell, takeFee, payback, withdraw, check]);
+
+    return s.encodeForDsProxyCall();
+};
+const createAaveV4BoostStrategy = () => {
+    const s = new dfs.Strategy('AaveV4BoostStrategy');
+
+    s.addSubSlot('&spoke', 'address');
+    s.addSubSlot('&user', 'address');
+    s.addSubSlot('&ratioState', 'uint256');
+    s.addSubSlot('&targetRatio', 'uint256');
+
+    const aaveV4RatioTrigger = new dfs.triggers.AaveV4RatioTrigger('0', '0', '0', '0');
+    s.addTrigger(aaveV4RatioTrigger);
+
+    const borrow = new dfs.actions.aaveV4.AaveV4BorrowAction(
+        '&spoke',
+        '&user',
+        '&proxy',
+        '%debtAssetId', // Sent by backend.
+        '%amount', // Sent by backend.
+    );
+    const sell = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%debtAsset', // Sent by backend.
+            '%collAsset', // Sent by backend.
+            '$1',
+            '%exchangeWrapper', // Sent by backend.
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const takeFee = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // Sent by backend.
+        '%collAsset', // Sent by backend.
+        '$2',
+    );
+    const supply = new dfs.actions.aaveV4.AaveV4SupplyAction(
+        '&spoke',
+        '&user',
+        '&proxy',
+        '%collAssetId', // Sent by backend.
+        '$3',
+        '%true', // Sent by backend. Hardcode to true (useAsCollateral)
+    );
+    const check = new dfs.actions.checkers.AaveV4RatioCheckAction(
+        '&ratioState',
+        '&targetRatio',
+        '&spoke',
+        '&user',
+    );
+
+    s.addActions([borrow, sell, takeFee, supply, check]);
+
+    return s.encodeForDsProxyCall();
+};
+const createAaveV4FLBoostStrategy = () => {
+    const s = new dfs.Strategy('AaveV4FLBoostStrategy');
+
+    s.addSubSlot('&spoke', 'address');
+    s.addSubSlot('&user', 'address');
+    s.addSubSlot('&ratioState', 'uint256');
+    s.addSubSlot('&targetRatio', 'uint256');
+
+    const aaveV4RatioTrigger = new dfs.triggers.AaveV4RatioTrigger('0', '0', '0', '0');
+    s.addTrigger(aaveV4RatioTrigger);
+
+    const fl = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%debtAsset'], // Sent by backend.
+            ['%flAmount'], // Sent by backend.
+        ),
+    );
+    const sell = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%debtAsset', // Sent by backend.
+            '%collAsset', // Sent by backend.
+            '%flAmount', // Sent by backend.
+            '%exchangeWrapper', // Sent by backend.
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const takeFee = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // Sent by backend.
+        '%collAsset', // Sent by backend.
+        '$2',
+    );
+    const supply = new dfs.actions.aaveV4.AaveV4SupplyAction(
+        '&spoke',
+        '&user',
+        '&proxy',
+        '%collAssetId', // Sent by backend.
+        '$3',
+        '%true', // Sent by backend. Hardcode to true (useAsCollateral)
+    );
+    const borrow = new dfs.actions.aaveV4.AaveV4BorrowAction(
+        '&spoke',
+        '&user',
+        '%flAddr', // Sent by backend.
+        '%debtAssetId', // Sent by backend.
+        '$1',
+    );
+    const check = new dfs.actions.checkers.AaveV4RatioCheckAction(
+        '&ratioState',
+        '&targetRatio',
+        '&spoke',
+        '&user',
+    );
+
+    s.addActions([fl, sell, takeFee, supply, borrow, check]);
+
+    return s.encodeForDsProxyCall();
+};
+
+const createAaveV4RepayOnPriceStrategy = () => {
+    const s = new dfs.Strategy('AaveV4RepayOnPriceStrategy');
+
+    s.addSubSlot('&spoke', 'address');
+    s.addSubSlot('&user', 'address');
+    s.addSubSlot('&collAsset', 'address');
+    s.addSubSlot('&collAssetId', 'uint256');
+    s.addSubSlot('&debtAsset', 'address');
+    s.addSubSlot('&debtAssetId', 'uint256');
+    s.addSubSlot('&ratioState', 'uint256');
+    s.addSubSlot('&targetRatio', 'uint256');
+
+    const trigger = new dfs.triggers.AaveV4QuotePriceTrigger('0', '0', '0', '0', '0');
+    s.addTrigger(trigger);
+
+    const storeRatio = new dfs.actions.aaveV4.AaveV4StoreRatioAction('&spoke', '&user');
+
+    const withdraw = new dfs.actions.aaveV4.AaveV4WithdrawAction(
+        '&spoke',
+        '&user',
+        '&proxy',
+        '&collAssetId',
+        '%amount', // Sent by backend.
+    );
+    const sell = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collAsset',
+            '&debtAsset',
+            '$2',
+            '%exchangeWrapper', // Sent by backend.
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const takeFee = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // Sent by backend.
+        '&debtAsset',
+        '$3',
+    );
+    const payback = new dfs.actions.aaveV4.AaveV4PaybackAction(
+        '&spoke',
+        '&user',
+        '&proxy',
+        '&debtAssetId',
+        '$4',
+    );
+    const check = new dfs.actions.checkers.AaveV4RatioCheckAction(
+        '&ratioState',
+        '&targetRatio',
+        '&spoke',
+        '&user',
+    );
+
+    s.addActions([storeRatio, withdraw, sell, takeFee, payback, check]);
+
+    return s.encodeForDsProxyCall();
+};
+const createAaveV4FLRepayOnPriceStrategy = () => {
+    const s = new dfs.Strategy('AaveV4FLRepayOnPriceStrategy');
+
+    s.addSubSlot('&spoke', 'address');
+    s.addSubSlot('&user', 'address');
+    s.addSubSlot('&collAsset', 'address');
+    s.addSubSlot('&collAssetId', 'uint256');
+    s.addSubSlot('&debtAsset', 'address');
+    s.addSubSlot('&debtAssetId', 'uint256');
+    s.addSubSlot('&ratioState', 'uint256');
+    s.addSubSlot('&targetRatio', 'uint256');
+
+    const trigger = new dfs.triggers.AaveV4QuotePriceTrigger('0', '0', '0', '0', '0');
+    s.addTrigger(trigger);
+
+    const fl = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%collAsset'], // Sent by backend.
+            ['%flAmount'], // Sent by backend.
+        ),
+    );
+
+    const storeRatio = new dfs.actions.aaveV4.AaveV4StoreRatioAction('&spoke', '&user');
+
+    const sell = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collAsset',
+            '&debtAsset',
+            '%flAmount', // Sent by backend.
+            '%exchangeWrapper', // Sent by backend.
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const takeFee = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // Sent by backend.
+        '&debtAsset',
+        '$3',
+    );
+    const payback = new dfs.actions.aaveV4.AaveV4PaybackAction(
+        '&spoke',
+        '&user',
+        '&proxy',
+        '&debtAssetId',
+        '$4',
+    );
+    const withdraw = new dfs.actions.aaveV4.AaveV4WithdrawAction(
+        '&spoke',
+        '&user',
+        '%flAddr', // Sent by backend.
+        '&collAssetId',
+        '$1',
+    );
+    const check = new dfs.actions.checkers.AaveV4RatioCheckAction(
+        '&ratioState',
+        '&targetRatio',
+        '&spoke',
+        '&user',
+    );
+
+    s.addActions([fl, storeRatio, sell, takeFee, payback, withdraw, check]);
+
+    return s.encodeForDsProxyCall();
+};
+const createAaveV4BoostOnPriceStrategy = () => {
+    const s = new dfs.Strategy('AaveV4BoostOnPriceStrategy');
+
+    s.addSubSlot('&spoke', 'address');
+    s.addSubSlot('&user', 'address');
+    s.addSubSlot('&collAsset', 'address');
+    s.addSubSlot('&collAssetId', 'uint256');
+    s.addSubSlot('&debtAsset', 'address');
+    s.addSubSlot('&debtAssetId', 'uint256');
+    s.addSubSlot('&ratioState', 'uint256');
+    s.addSubSlot('&targetRatio', 'uint256');
+
+    const trigger = new dfs.triggers.AaveV4QuotePriceTrigger('0', '0', '0', '0', '0');
+    s.addTrigger(trigger);
+
+    const storeRatio = new dfs.actions.aaveV4.AaveV4StoreRatioAction('&spoke', '&user');
+
+    const borrow = new dfs.actions.aaveV4.AaveV4BorrowAction(
+        '&spoke',
+        '&user',
+        '&proxy',
+        '&debtAssetId',
+        '%amount', // Sent by backend.
+    );
+    const sell = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&debtAsset',
+            '&collAsset',
+            '$2',
+            '%exchangeWrapper', // Sent by backend.
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const takeFee = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // Sent by backend.
+        '&collAsset',
+        '$3',
+    );
+    const supply = new dfs.actions.aaveV4.AaveV4SupplyAction(
+        '&spoke',
+        '&user',
+        '&proxy',
+        '&collAssetId',
+        '$4',
+        '%true', // Sent by backend. Hardcode to true (useAsCollateral)
+    );
+    const check = new dfs.actions.checkers.AaveV4RatioCheckAction(
+        '&ratioState',
+        '&targetRatio',
+        '&spoke',
+        '&user',
+    );
+
+    s.addActions([storeRatio, borrow, sell, takeFee, supply, check]);
+
+    return s.encodeForDsProxyCall();
+};
+const createAaveV4FLBoostOnPriceStrategy = () => {
+    const s = new dfs.Strategy('AaveV4FLBoostOnPriceStrategy');
+
+    s.addSubSlot('&spoke', 'address');
+    s.addSubSlot('&user', 'address');
+    s.addSubSlot('&collAsset', 'address');
+    s.addSubSlot('&collAssetId', 'uint256');
+    s.addSubSlot('&debtAsset', 'address');
+    s.addSubSlot('&debtAssetId', 'uint256');
+    s.addSubSlot('&ratioState', 'uint256');
+    s.addSubSlot('&targetRatio', 'uint256');
+
+    const trigger = new dfs.triggers.AaveV4QuotePriceTrigger('0', '0', '0', '0', '0');
+    s.addTrigger(trigger);
+
+    const fl = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%debtAsset'], // Sent by backend.
+            ['%flAmount'], // Sent by backend.
+        ),
+    );
+
+    const storeRatio = new dfs.actions.aaveV4.AaveV4StoreRatioAction('&spoke', '&user');
+
+    const sell = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&debtAsset',
+            '&collAsset',
+            '%flAmount', // Sent by backend.
+            '%exchangeWrapper', // Sent by backend.
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const takeFee = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // Sent by backend.
+        '&collAsset',
+        '$3',
+    );
+    const supply = new dfs.actions.aaveV4.AaveV4SupplyAction(
+        '&spoke',
+        '&user',
+        '&proxy',
+        '&collAssetId',
+        '$4',
+        '%true', // Sent by backend. Hardcode to true (useAsCollateral)
+    );
+    const borrow = new dfs.actions.aaveV4.AaveV4BorrowAction(
+        '&spoke',
+        '&user',
+        '%flAddr', // Sent by backend.
+        '&debtAssetId',
+        '$1',
+    );
+    const check = new dfs.actions.checkers.AaveV4RatioCheckAction(
+        '&ratioState',
+        '&targetRatio',
+        '&spoke',
+        '&user',
+    );
+
+    s.addActions([fl, storeRatio, sell, takeFee, supply, borrow, check]);
+
+    return s.encodeForDsProxyCall();
+};
+
+const createAaveV4FLCloseToDebtStrategy = () => {
+    const s = new dfs.Strategy('AaveV4FLCloseToDebtStrategy');
+
+    s.addSubSlot('&spoke', 'address');
+    s.addSubSlot('&user', 'address');
+    s.addSubSlot('&collAsset', 'address');
+    s.addSubSlot('&collAssetId', 'uint256');
+    s.addSubSlot('&debtAsset', 'address');
+    s.addSubSlot('&debtAssetId', 'uint256');
+    // Only used by backend to determine which action to call.
+    s.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8');
+
+    const trigger = new dfs.triggers.AaveV4QuotePriceRangeTrigger('0', '0', '0', '0', '0');
+    s.addTrigger(trigger);
+
+    const fl = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%debtAsset'], // Sent by backend.
+            ['%flAmount'], // Sent by backend.
+        ),
+    );
+    const payback = new dfs.actions.aaveV4.AaveV4PaybackAction(
+        '&spoke',
+        '&user',
+        '&proxy',
+        '&debtAssetId',
+        '%uint(max)', // Max uint amount. Sent by backend.
+    );
+    const withdraw = new dfs.actions.aaveV4.AaveV4WithdrawAction(
+        '&spoke',
+        '&user',
+        '&proxy',
+        '&collAssetId',
+        '%uint(max)', // Max uint amount. Sent by backend.
+    );
+    const sell = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collAsset',
+            '&debtAsset',
+            '$3',
+            '%exchangeWrapper', // Sent by backend.
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const takeFee = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // Sent by backend.
+        '&debtAsset',
+        '$4',
+    );
+    const returnFl = new dfs.actions.basic.SendTokenAction(
+        '&debtAsset',
+        '%flAddr', // Sent by backend.
+        '$1',
+    );
+    const returnDebt = new dfs.actions.basic.SendTokenAndUnwrapAction(
+        '&debtAsset',
+        '&eoa',
+        '%uint(max)', // Max uint amount. Sent by backend.
+    );
+
+    s.addActions([fl, payback, withdraw, sell, takeFee, returnFl, returnDebt]);
+
+    return s.encodeForDsProxyCall();
+};
+const createAaveV4FLCloseToCollStrategy = () => {
+    const s = new dfs.Strategy('AaveV4FLCloseToCollStrategy');
+
+    s.addSubSlot('&spoke', 'address');
+    s.addSubSlot('&user', 'address');
+    s.addSubSlot('&collAsset', 'address');
+    s.addSubSlot('&collAssetId', 'uint256');
+    s.addSubSlot('&debtAsset', 'address');
+    s.addSubSlot('&debtAssetId', 'uint256');
+    // Only used by backend to determine which action to call.
+    s.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8');
+
+    const trigger = new dfs.triggers.AaveV4QuotePriceRangeTrigger('0', '0', '0', '0', '0');
+    s.addTrigger(trigger);
+
+    const fl = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%collAsset'], // Sent by backend.
+            ['%flAmount'], // Sent by backend.
+        ),
+    );
+    const sell = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collAsset',
+            '&debtAsset',
+            '%flAmount', // Sent by backend.
+            '%exchangeWrapper', // Sent by backend.
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const payback = new dfs.actions.aaveV4.AaveV4PaybackAction(
+        '&spoke',
+        '&user',
+        '&proxy',
+        '&debtAssetId',
+        '%uint(max)', // Max uint amount. Sent by backend.
+    );
+    const withdraw = new dfs.actions.aaveV4.AaveV4WithdrawAction(
+        '&spoke',
+        '&user',
+        '&proxy',
+        '&collAssetId',
+        '%uint(max)', // Max uint amount. Sent by backend.
+    );
+    const takeFee = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // Sent by backend.
+        '&collAsset',
+        '$4',
+    );
+    const returnFl = new dfs.actions.basic.SendTokenAction(
+        '&collAsset',
+        '%flAddr', // Sent by backend.
+        '$1',
+    );
+    const returnTokens = new dfs.actions.basic.SendTokensAndUnwrapAction(
+        ['&collAsset', '&debtAsset'],
+        ['&eoa', '&eoa'],
+        [
+            '%uint(max)', // Max uint amount. Sent by backend.
+            '%uint(max)', // Max uint amount. Sent by backend.
+        ],
+    );
+
+    s.addActions([fl, sell, payback, withdraw, takeFee, returnFl, returnTokens]);
+
+    return s.encodeForDsProxyCall();
+};
+
+const createAaveV4FLCollateralSwitchStrategy = () => {
+    const s = new dfs.Strategy('AaveV4FLCollateralSwitchStrategy');
+
+    s.addSubSlot('&spoke', 'address');
+    s.addSubSlot('&user', 'address');
+    s.addSubSlot('&fromAsset', 'address');
+    s.addSubSlot('&fromAssetId', 'uint256');
+    s.addSubSlot('&toAsset', 'address');
+    s.addSubSlot('&toAssetId', 'uint256');
+    s.addSubSlot('&amountToSwitch', 'uint256');
+
+    const trigger = new dfs.triggers.AaveV4QuotePriceTrigger('0', '0', '0', '0', '0');
+    s.addTrigger(trigger);
+
+    const fl = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%fromAsset'], // Sent by backend.
+            ['%flAmount'], // Sent by backend.
+        ),
+    );
+    const sell = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&fromAsset',
+            '&toAsset',
+            '%flAmount', // Sent by backend.
+            '%exchangeWrapper', // Sent by backend.
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const takeFee = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // Sent by backend.
+        '&toAsset',
+        '$2',
+    );
+    const supply = new dfs.actions.aaveV4.AaveV4SupplyAction(
+        '&spoke',
+        '&user',
+        '&proxy',
+        '&toAssetId',
+        '$3',
+        '%true', // Sent by backend. Hardcode to true (useAsCollateral)
+    );
+    const withdraw = new dfs.actions.aaveV4.AaveV4WithdrawAction(
+        '&spoke',
+        '&user',
+        '&proxy',
+        '&fromAssetId',
+        '&amountToSwitch',
+    );
+    const returnFl = new dfs.actions.basic.SendTokenAction(
+        '&fromAsset',
+        '%flAddr', // Sent by backend.
+        '$1',
+    );
+    const returnAnyDust = new dfs.actions.basic.SendTokenAndUnwrapAction(
+        '&fromAsset',
+        '&eoa',
+        '%max(uint)', // Sent by backend.
+    );
+
+    s.addActions([fl, sell, takeFee, supply, withdraw, returnFl, returnAnyDust]);
+
+    return s.encodeForDsProxyCall();
+};
+
 module.exports = {
     createRepayStrategy,
     createFLRepayStrategy,
@@ -7046,4 +7710,15 @@ module.exports = {
     createSparkGenericFLCloseToDebtStrategy,
     createMorphoBlueFLCloseToCollStrategy,
     createMorphoBlueFLCloseToDebtStrategy,
+    createAaveV4RepayStrategy,
+    createAaveV4FLRepayStrategy,
+    createAaveV4BoostStrategy,
+    createAaveV4FLBoostStrategy,
+    createAaveV4RepayOnPriceStrategy,
+    createAaveV4FLRepayOnPriceStrategy,
+    createAaveV4BoostOnPriceStrategy,
+    createAaveV4FLBoostOnPriceStrategy,
+    createAaveV4FLCloseToDebtStrategy,
+    createAaveV4FLCloseToCollStrategy,
+    createAaveV4FLCollateralSwitchStrategy,
 };

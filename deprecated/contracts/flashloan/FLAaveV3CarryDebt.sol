@@ -27,12 +27,12 @@ contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanB
     error CreditDelegationAllowanceLeftError(uint256 amountLeft);
 
     /// @inheritdoc ActionBase
-    function executeAction(bytes memory _callData, bytes32[] memory, uint8[] memory, bytes32[] memory)
-        public
-        payable
-        override
-        returns (bytes32)
-    {
+    function executeAction(
+        bytes memory _callData,
+        bytes32[] memory,
+        uint8[] memory,
+        bytes32[] memory
+    ) public payable override returns (bytes32) {
         FlashLoanParams memory flData = parseInputs(_callData);
 
         // check to make sure modes are not 0
@@ -44,8 +44,8 @@ contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanB
 
         // if we want to get on chain info about FL params
         if (flData.flParamGetterAddr != address(0)) {
-            (flData.tokens, flData.amounts, flData.modes) =
-                IFLParamGetter(flData.flParamGetterAddr).getFlashLoanParams(flData.flParamGetterData);
+            (flData.tokens, flData.amounts, flData.modes) = IFLParamGetter(flData.flParamGetterAddr)
+                .getFlashLoanParams(flData.flParamGetterData);
         }
 
         bytes memory recipeData = flData.recipeData;
@@ -53,13 +53,16 @@ contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanB
 
         // revert if some credit delegation allowance is left
         for (uint256 i = 0; i < flData.tokens.length; ++i) {
-            DataTypes.ReserveData memory reserveData = IPoolV3(AAVE_V3_LENDING_POOL).getReserveData(flData.tokens[i]);
+            DataTypes.ReserveData memory reserveData =
+                IPoolV3(AAVE_V3_LENDING_POOL).getReserveData(flData.tokens[i]);
 
-            address debtToken = DataTypes.InterestRateMode(flData.modes[i]) == DataTypes.InterestRateMode.VARIABLE
+            address debtToken = DataTypes.InterestRateMode(flData.modes[i])
+                    == DataTypes.InterestRateMode.VARIABLE
                 ? reserveData.variableDebtTokenAddress
                 : reserveData.stableDebtTokenAddress;
 
-            uint256 creditDelegationAllowance = IDebtToken(debtToken).borrowAllowance(flData.onBehalfOf, address(this));
+            uint256 creditDelegationAllowance =
+                IDebtToken(debtToken).borrowAllowance(flData.onBehalfOf, address(this));
 
             if (creditDelegationAllowance > 0) {
                 revert CreditDelegationAllowanceLeftError(creditDelegationAllowance);
@@ -82,7 +85,10 @@ contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanB
     /// @notice Gets a Fl from AaveV3 and returns back the execution to the action address
     /// @param _flData All the amounts/tokens and related aave fl data
     /// @param _params Rest of the data we have in the recipe
-    function _flAaveV3(FlashLoanParams memory _flData, bytes memory _params) internal returns (uint256) {
+    function _flAaveV3(FlashLoanParams memory _flData, bytes memory _params)
+        internal
+        returns (uint256)
+    {
         IPoolV3(AAVE_V3_LENDING_POOL)
             .flashLoan(
                 address(this),
@@ -95,7 +101,8 @@ contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanB
             );
 
         emit ActionEvent(
-            "FLAaveV3CarryDebt", abi.encode(_flData.tokens, _flData.amounts, _flData.modes, _flData.onBehalfOf)
+            "FLAaveV3CarryDebt",
+            abi.encode(_flData.tokens, _flData.amounts, _flData.modes, _flData.onBehalfOf)
         );
 
         return _flData.amounts[0];
@@ -129,7 +136,11 @@ contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanB
         return true;
     }
 
-    function parseInputs(bytes memory _callData) public pure returns (FlashLoanParams memory inputData) {
+    function parseInputs(bytes memory _callData)
+        public
+        pure
+        returns (FlashLoanParams memory inputData)
+    {
         inputData = abi.decode(_callData, (FlashLoanParams));
     }
 

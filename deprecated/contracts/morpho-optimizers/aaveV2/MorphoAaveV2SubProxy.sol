@@ -9,7 +9,13 @@ import { SmartWalletUtils } from "../../../utils/SmartWalletUtils.sol";
 import { StrategyModel } from "../../../core/strategy/StrategyModel.sol";
 import { CoreHelper } from "../../../core/helpers/CoreHelper.sol";
 
-contract MorphoAaveV2SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, SmartWalletUtils {
+contract MorphoAaveV2SubProxy is
+    StrategyModel,
+    AdminAuth,
+    CoreHelper,
+    Permission,
+    SmartWalletUtils
+{
     uint64 public immutable REPAY_BUNDLE_ID;
     uint64 public immutable BOOST_BUNDLE_ID;
 
@@ -59,7 +65,9 @@ contract MorphoAaveV2SubProxy is StrategyModel, AdminAuth, CoreHelper, Permissio
     /// @notice Calls SubStorage to update the users subscription data
     /// @dev Updating sub data will activate it as well
     /// @dev If we don't have a boost subId send as 0
-    function updateSubData(uint32 _subId1, uint32 _subId2, MorphoAaveV2SubData calldata _subData) public {
+    function updateSubData(uint32 _subId1, uint32 _subId2, MorphoAaveV2SubData calldata _subData)
+        public
+    {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
         _giveAuthContractPermission(_getWalletType(address(this)));
 
@@ -133,7 +141,8 @@ contract MorphoAaveV2SubProxy is StrategyModel, AdminAuth, CoreHelper, Permissio
         repaySub.isBundle = true;
 
         // format data for ratio trigger if currRatio < minRatio = true
-        bytes memory triggerData = abi.encode(_wallet, uint256(_subData.minRatio), uint8(RatioState.UNDER));
+        bytes memory triggerData =
+            abi.encode(_wallet, uint256(_subData.minRatio), uint8(RatioState.UNDER));
         repaySub.triggerData = new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
@@ -152,7 +161,8 @@ contract MorphoAaveV2SubProxy is StrategyModel, AdminAuth, CoreHelper, Permissio
         boostSub.isBundle = true;
 
         // format data for ratio trigger if currRatio > maxRatio = true
-        bytes memory triggerData = abi.encode(_wallet, uint256(_subData.maxRatio), uint8(RatioState.OVER));
+        bytes memory triggerData =
+            abi.encode(_wallet, uint256(_subData.maxRatio), uint8(RatioState.OVER));
         boostSub.triggerData = new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 
