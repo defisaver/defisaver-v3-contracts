@@ -58,4 +58,9 @@ interface IDexSmartDebtOracle {
         external
         view
         returns (address colDebtOracle_, bool colDebtInvert_);
+
+    function getDexSmartDebtOracleData()
+        external
+        view
+        returns (address colDebtOracle_, bool colDebtInvert_, uint8 colDebtDecimals_);
 }

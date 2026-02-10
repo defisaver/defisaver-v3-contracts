@@ -695,7 +695,14 @@ contract FluidView is FluidRatioHelper {
         try IDexSmartCollOracle(_vaultOracle).dexSmartColSharesRates() returns (uint256, uint256) {
             return _vaultOracle;
         } catch {
-            (smartCollOracle,) = IDexSmartDebtOracle(_vaultOracle).getDexColDebtOracleData();
+            try IDexSmartDebtOracle(_vaultOracle).getDexColDebtOracleData() returns (
+                address colDebtOracle, bool
+            ) {
+                smartCollOracle = colDebtOracle;
+            } catch {
+                /// @dev Some old deprecated T4 vaults use this function signature
+                (smartCollOracle,,) = IDexSmartDebtOracle(_vaultOracle).getDexSmartDebtOracleData();
+            }
         }
     }
 
