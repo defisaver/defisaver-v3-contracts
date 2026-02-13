@@ -27,8 +27,6 @@ contract AaveView is AaveHelper, DSMath {
         0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFF; // prettier-ignore
     uint256 constant RESERVE_FACTOR_START_BIT_POSITION = 64;
 
-    address constant REN_ADDRESS_MAINNET = 0x408e41876cCCDC0F92210600ef50372656052a38;
-
     using TokenUtils for address;
     using WadRayMath for uint256;
 
@@ -215,7 +213,7 @@ contract AaveView is AaveHelper, DSMath {
             (address aToken,,) = dataProvider.getReserveTokensAddresses(_tokenAddresses[i]);
 
             uint256 price = 0;
-            if (_tokenAddresses[i] != REN_ADDRESS_MAINNET) {
+            if (_tokenAddresses[i] != REN_TOKEN_ADDR) {
                 price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddresses[i]);
             }
 
@@ -258,7 +256,7 @@ contract AaveView is AaveHelper, DSMath {
         (address aToken,,) = _dataProvider.getReserveTokensAddresses(_token);
 
         uint256 price = 0;
-        if (_token != REN_ADDRESS_MAINNET) {
+        if (_token != REN_TOKEN_ADDR) {
             price = IPriceOracleGetterAave(_priceOracleAddress).getAssetPrice(_token);
         }
 
@@ -343,7 +341,7 @@ contract AaveView is AaveHelper, DSMath {
             ) = dataProvider.getUserReserveData(reserve, _user);
 
             uint256 price = 0;
-            if (reserve != REN_ADDRESS_MAINNET) {
+            if (reserve != REN_TOKEN_ADDR) {
                 price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(reserve);
             }
 
