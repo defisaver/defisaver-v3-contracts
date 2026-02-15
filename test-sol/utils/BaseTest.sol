@@ -53,6 +53,13 @@ contract BaseTest is Config {
         vm.selectFork(mainnetFork);
     }
 
+    function forkAaveV4DevNet() internal {
+        string memory aaveV4DevNetRpc =
+            "https://virtual.mainnet-aave.us-east.rpc.tenderly.co/dbaa58ab-597b-4bcd-ae6a-b8e50f716146";
+        uint256 aaveV4DevNetFork = vm.createFork(aaveV4DevNetRpc);
+        vm.selectFork(aaveV4DevNetFork);
+    }
+
     function forkOptimismLatest() internal {
         string memory optimismRpc = vm.envString("OPTIMISM_NODE");
         uint256 optimismFork = vm.createFork(optimismRpc);
