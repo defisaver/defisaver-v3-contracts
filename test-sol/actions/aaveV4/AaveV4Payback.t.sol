@@ -100,7 +100,7 @@ contract TestAaveV4Payback is AaveV4TestBase {
         uint256 paybackAmount = _useMaxUint256 ? userDebtBefore : _borrowedAmount / 2;
 
         // Give tokens to sender (slightly more)
-        uint256 topUpAmount = _borrowedAmount * 100 / 99;
+        uint256 topUpAmount = _useMaxUint256 ? userDebtBefore : (_borrowedAmount * 105 / 100);
         give(underlying, sender, topUpAmount);
         approveAsSender(sender, underlying, walletAddr, topUpAmount);
 
