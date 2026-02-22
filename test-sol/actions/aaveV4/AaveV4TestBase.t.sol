@@ -15,14 +15,14 @@ import { console2 } from "forge-std/console2.sol";
 contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
     uint256 internal constant RAY = 1e27;
 
-    address internal constant CORE_HUB = 0xaD905aD5EA5B98cD50AE40Cfe368344686a21366;
-    address internal constant CORE_SPOKE = 0xBa97c5E52cd5BC3D7950Ae70779F8FfE92d40CdC;
-    uint256 internal constant CORE_RESERVE_ID_WETH = 0;
-    uint256 internal constant CORE_RESERVE_ID_WSTETH = 1;
-    uint256 internal constant CORE_RESERVE_ID_WBTC = 2;
-    uint256 internal constant CORE_RESERVE_ID_CBBTC = 3;
-    uint256 internal constant CORE_RESERVE_ID_USDT = 4;
-    uint256 internal constant CORE_RESERVE_ID_USDC = 5;
+    address internal constant CORE_HUB = 0x3Ed2C9829FBCab6015E331a0352F8ae148217D70;
+    address internal constant CORE_SPOKE = 0x46539e9123A18c427e6b4DFF114c28CF405Cb023;
+    uint256 internal constant CORE_RESERVE_ID_WETH = 8;
+    uint256 internal constant CORE_RESERVE_ID_WSTETH = 9;
+    uint256 internal constant CORE_RESERVE_ID_WBTC = 11;
+    uint256 internal constant CORE_RESERVE_ID_CBBTC = 12;
+    uint256 internal constant CORE_RESERVE_ID_USDT = 0;
+    uint256 internal constant CORE_RESERVE_ID_USDC = 1;
 
     struct AaveV4TestPair {
         address spoke;
@@ -34,8 +34,8 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
         retVal = new AaveV4TestPair[](1);
         retVal[0] = AaveV4TestPair({
             spoke: CORE_SPOKE,
-            collReserveId: CORE_RESERVE_ID_USDC,
-            debtReserveId: CORE_RESERVE_ID_WETH
+            collReserveId: CORE_RESERVE_ID_WETH,
+            debtReserveId: CORE_RESERVE_ID_USDC
         });
     }
 
@@ -121,14 +121,16 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
         view
         returns (bool)
     {
-        if (_reserve.paused || _reserve.frozen) {
-            console2.log("Reserve is paused or frozen, skipping test");
+        ISpoke.ReserveConfig memory reserveConfig =
+            ISpoke(_spoke).getReserveConfig(_reserve.assetId);
+        if (reserveConfig.paused || reserveConfig.frozen) {
+            console2.log("Reserve is halted or frozen, skipping test");
             return false;
         }
 
         IHub.SpokeData memory spokeData = IHub(_reserve.hub).getSpoke(_reserve.assetId, _spoke);
-        if (!spokeData.active || spokeData.paused) {
-            console2.log("Spoke is paused or inactive, skipping test");
+        if (!spokeData.active || spokeData.halted) {
+            console2.log("Spoke is halted or inactive, skipping test");
             return false;
         }
 
@@ -150,14 +152,16 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
         view
         returns (bool)
     {
-        if (_reserve.paused || _reserve.frozen || !_reserve.borrowable) {
+        ISpoke.ReserveConfig memory reserveConfig =
+            ISpoke(_spoke).getReserveConfig(_reserve.assetId);
+        if (reserveConfig.paused || reserveConfig.frozen || !reserveConfig.borrowable) {
             console2.log("Reserve is paused or frozen or not borrowable, skipping test");
             return false;
         }
 
         IHub.SpokeData memory spokeData = IHub(_reserve.hub).getSpoke(_reserve.assetId, _spoke);
-        if (!spokeData.active || spokeData.paused) {
-            console2.log("Spoke is paused or inactive, skipping test");
+        if (!spokeData.active || spokeData.halted) {
+            console2.log("Spoke is halted or inactive, skipping test");
             return false;
         }
 

@@ -51,9 +51,9 @@ contract AaveV4View {
     /// @dev avgCollateralFactor The weighted average collateral factor of the user position, expressed in WAD.
     /// @dev healthFactor The health factor of the user position, expressed in WAD. 1e18 represents a health factor of 1.00.
     /// @dev totalCollateralInUsd The total collateral value of the user position, expressed in units of base currency. 1e26 represents 1 USD.
-    /// @dev totalDebtInUsd The total debt value of the user position, expressed in units of base currency. 1e26 represents 1 USD.
+    /// @dev totalDebtInUsdRay The total debt value of the user position, expressed in units of base currency and scaled by RAY. 1e26 represents 1 USD.
     /// @dev activeCollateralCount The number of active collateral reserves.
-    /// @dev borrowedCount The number of borrowed reserves.
+    /// @dev borrowCount The number of borrowed reserves.
     /// @dev reserves The user's reserve data.
     struct LoanData {
         address user;
@@ -61,9 +61,9 @@ contract AaveV4View {
         uint256 avgCollateralFactor;
         uint256 healthFactor;
         uint256 totalCollateralInUsd;
-        uint256 totalDebtInUsd;
+        uint256 totalDebtInUsdRay;
         uint256 activeCollateralCount;
-        uint256 borrowedCount;
+        uint256 borrowCount;
         UserReserveData[] reserves;
     }
 
@@ -80,7 +80,7 @@ contract AaveV4View {
         bool reserveFrozen; // True if the reserve is frozen for given spoke.
         bool borrowable; // True if the reserve is borrowable.
         bool spokeActive; // True if the spoke is active for this reserve and hub.
-        bool spokePaused; // True if the spoke is paused for this reserve and hub.
+        bool spokeHalted; // True if the spoke is halted for this reserve and hub.
         // --------------------------
         uint256 userSupplied; // The amount of user-supplied assets, expressed in asset units.
         uint256 userDrawn; // The amount of user-drawn assets, expressed in asset units.
@@ -122,9 +122,9 @@ contract AaveV4View {
         uint256 avgCollateralFactor;
         uint256 healthFactor;
         uint256 totalCollateralInUsd;
-        uint256 totalDebtInUsd;
+        uint256 totalDebtInUsdRay;
         uint256 activeCollateralCount;
-        uint256 borrowedCount;
+        uint256 borrowCount;
         UserReserveDataFull[] reserves;
     }
 
@@ -159,7 +159,7 @@ contract AaveV4View {
     /// @dev borrowCap The borrow cap of the spoke, expressed in asset units.
     /// @dev deficitRay The deficit reported by a spoke for a given asset, expressed in asset units and scaled by RAY.
     /// @dev spokeActive True if the spoke is active for this reserve.
-    /// @dev spokePaused True if the spoke is paused for this reserve.
+    /// @dev spokeHalted True if the spoke is halted for this reserve.
     struct ReserveDataFull {
         address underlying;
         address hub;
@@ -181,7 +181,7 @@ contract AaveV4View {
         uint256 borrowCap;
         uint256 deficitRay;
         bool spokeActive;
-        bool spokePaused;
+        bool spokeHalted;
     }
 
     /// @notice Spoke data.
@@ -326,9 +326,9 @@ contract AaveV4View {
             avgCollateralFactor: userAccountData.avgCollateralFactor,
             healthFactor: userAccountData.healthFactor,
             totalCollateralInUsd: userAccountData.totalCollateralValue,
-            totalDebtInUsd: userAccountData.totalDebtValue,
+            totalDebtInUsdRay: userAccountData.totalDebtValueRay,
             activeCollateralCount: userAccountData.activeCollateralCount,
-            borrowedCount: userAccountData.borrowedCount,
+            borrowCount: userAccountData.borrowCount,
             reserves: new UserReserveData[](reserveCount)
         });
 
@@ -353,9 +353,9 @@ contract AaveV4View {
             avgCollateralFactor: userAccountData.avgCollateralFactor,
             healthFactor: userAccountData.healthFactor,
             totalCollateralInUsd: userAccountData.totalCollateralValue,
-            totalDebtInUsd: userAccountData.totalDebtValue,
+            totalDebtInUsdRay: userAccountData.totalDebtValueRay,
             activeCollateralCount: userAccountData.activeCollateralCount,
-            borrowedCount: userAccountData.borrowedCount,
+            borrowCount: userAccountData.borrowCount,
             reserves: new UserReserveDataFull[](reserveCount)
         });
 
@@ -485,31 +485,30 @@ contract AaveV4View {
         view
         returns (ReserveDataFull memory reserveData)
     {
-        ISpoke spoke = ISpoke(_spoke);
-        ISpoke.Reserve memory reserve = spoke.getReserve(_reserveId);
-        ISpoke.DynamicReserveConfig memory config =
-            spoke.getDynamicReserveConfig(_reserveId, reserve.dynamicConfigKey);
+        ISpoke.Reserve memory reserve = ISpoke(_spoke).getReserve(_reserveId);
+        ISpoke.ReserveConfig memory reserveConfig = ISpoke(_spoke).getReserveConfig(_reserveId);
+        ISpoke.DynamicReserveConfig memory dynamicReserveConfig =
+            ISpoke(_spoke).getDynamicReserveConfig(_reserveId, reserve.dynamicConfigKey);
 
-        IHub hub = IHub(reserve.hub);
-        IHub.SpokeData memory spokeData = hub.getSpoke(reserve.assetId, _spoke);
-        (uint256 totalDrawn, uint256 totalPremium) = hub.getSpokeOwed(reserve.assetId, _spoke);
-
-        uint256 maxCap = hub.MAX_ALLOWED_SPOKE_CAP();
+        IHub.SpokeData memory spokeData = IHub(reserve.hub).getSpoke(reserve.assetId, _spoke);
+        (uint256 totalDrawn, uint256 totalPremium) =
+            IHub(reserve.hub).getSpokeOwed(reserve.assetId, _spoke);
+        uint256 maxCap = IHub(reserve.hub).MAX_ALLOWED_SPOKE_CAP();
 
         reserveData = ReserveDataFull({
             underlying: reserve.underlying,
             hub: reserve.hub,
             assetId: reserve.assetId,
             decimals: reserve.decimals,
-            paused: reserve.paused,
-            frozen: reserve.frozen,
-            borrowable: reserve.borrowable,
+            paused: reserveConfig.paused,
+            frozen: reserveConfig.frozen,
+            borrowable: reserveConfig.borrowable,
             collateralRisk: reserve.collateralRisk,
-            collateralFactor: config.collateralFactor,
-            maxLiquidationBonus: config.maxLiquidationBonus,
-            liquidationFee: config.liquidationFee,
+            collateralFactor: dynamicReserveConfig.collateralFactor,
+            maxLiquidationBonus: dynamicReserveConfig.maxLiquidationBonus,
+            liquidationFee: dynamicReserveConfig.liquidationFee,
             price: getReservePrice(_spoke, _reserveId),
-            totalSupplied: hub.getSpokeAddedAssets(reserve.assetId, _spoke),
+            totalSupplied: IHub(reserve.hub).getSpokeAddedAssets(reserve.assetId, _spoke),
             totalDrawn: totalDrawn,
             totalPremium: totalPremium,
             totalDebt: totalDrawn + totalPremium,
@@ -521,7 +520,7 @@ contract AaveV4View {
                 : type(uint256).max,
             deficitRay: spokeData.deficitRay,
             spokeActive: spokeData.active,
-            spokePaused: spokeData.paused
+            spokeHalted: spokeData.halted
         });
     }
 
@@ -537,18 +536,13 @@ contract AaveV4View {
         );
 
         (uint256 drawn, uint256 premium) = spoke.getUserDebt(_reserveId, _user);
-
-        // TODO: Uncomment
-        // (bool isUsingAsCollateral, bool isBorrowing) = spoke.getUserReserveStatus(_reserveId, _user)
-        uint256 supplied = spoke.getUserSuppliedAssets(_reserveId, _user);
-        bool isUsingAsCollateral = supplied > 0;
-        bool isBorrowing = (drawn + premium) > 0;
+        (bool isUsingAsCollateral, bool isBorrowing) = spoke.getUserReserveStatus(_reserveId, _user);
 
         return UserReserveData({
             reserveId: _reserveId,
             assetId: reserve.assetId,
             underlying: reserve.underlying,
-            supplied: supplied,
+            supplied: spoke.getUserSuppliedAssets(_reserveId, _user),
             drawn: drawn,
             premium: premium,
             totalDebt: drawn + premium,
@@ -567,29 +561,27 @@ contract AaveV4View {
     {
         ISpoke spoke = ISpoke(_spoke);
         ISpoke.Reserve memory reserve = spoke.getReserve(_reserveId);
+        ISpoke.ReserveConfig memory reserveConfig = spoke.getReserveConfig(_reserveId);
 
         data.reserveId = _reserveId;
         data.underlying = reserve.underlying;
         data.price = getReservePrice(_spoke, _reserveId);
         data.decimals = reserve.decimals;
 
-        data.reservePaused = reserve.paused;
-        data.reserveFrozen = reserve.frozen;
-        data.borrowable = reserve.borrowable;
+        data.reservePaused = reserveConfig.paused;
+        data.reserveFrozen = reserveConfig.frozen;
+        data.borrowable = reserveConfig.borrowable;
 
         data.userSupplied = spoke.getUserSuppliedAssets(_reserveId, _user);
         (data.userDrawn, data.userPremium) = spoke.getUserDebt(_reserveId, _user);
         data.userTotalDebt = data.userDrawn + data.userPremium;
 
-        // TODO: Uncomment
-        //(data.isUsingAsCollateral, data.isBorrowing) = spoke.getUserReserveStatus(_reserveId, _user);
-        data.isUsingAsCollateral = data.userSupplied > 0;
-        data.isBorrowing = data.userTotalDebt > 0;
+        (data.isUsingAsCollateral, data.isBorrowing) = spoke.getUserReserveStatus(_reserveId, _user);
 
         data.collateralRisk = reserve.collateralRisk;
 
         {
-            uint24 userKey = spoke.getUserPosition(_reserveId, _user).dynamicConfigKey;
+            uint32 userKey = spoke.getUserPosition(_reserveId, _user).dynamicConfigKey;
             ISpoke.DynamicReserveConfig memory userCfg =
                 spoke.getDynamicReserveConfig(_reserveId, userKey);
             data.userCollateralFactor = userCfg.collateralFactor;
@@ -608,22 +600,22 @@ contract AaveV4View {
         data.hub = reserve.hub;
         data.hubAssetId = reserve.assetId;
 
-        IHub hub = IHub(reserve.hub);
-        data.hubLiquidity = hub.getAssetLiquidity(reserve.assetId);
-        data.drawnRate = uint96(hub.getAssetDrawnRate(reserve.assetId));
-        data.drawnIndex = uint120(hub.getAssetDrawnIndex(reserve.assetId));
+        data.hubLiquidity = IHub(data.hub).getAssetLiquidity(reserve.assetId);
+        data.drawnRate = uint96(IHub(data.hub).getAssetDrawnRate(reserve.assetId));
+        data.drawnIndex = uint120(IHub(data.hub).getAssetDrawnIndex(reserve.assetId));
 
-        data.spokeTotalSupplied = hub.getSpokeAddedAssets(reserve.assetId, _spoke);
-        (data.spokeTotalDrawn, data.spokeTotalPremium) = hub.getSpokeOwed(reserve.assetId, _spoke);
+        data.spokeTotalSupplied = IHub(data.hub).getSpokeAddedAssets(reserve.assetId, _spoke);
+        (data.spokeTotalDrawn, data.spokeTotalPremium) =
+            IHub(data.hub).getSpokeOwed(reserve.assetId, _spoke);
         data.spokeTotalDebt = data.spokeTotalDrawn + data.spokeTotalPremium;
 
         {
-            IHub.SpokeData memory hubSpokeData = hub.getSpoke(reserve.assetId, _spoke);
+            IHub.SpokeData memory hubSpokeData = IHub(data.hub).getSpoke(reserve.assetId, _spoke);
             data.spokeActive = hubSpokeData.active;
-            data.spokePaused = hubSpokeData.paused;
+            data.spokeHalted = hubSpokeData.halted;
             data.spokeDeficitRay = hubSpokeData.deficitRay;
 
-            uint40 maxCap = hub.MAX_ALLOWED_SPOKE_CAP();
+            uint40 maxCap = IHub(data.hub).MAX_ALLOWED_SPOKE_CAP();
             data.spokeSupplyCap = hubSpokeData.addCap != maxCap
                 ? uint256(hubSpokeData.addCap) * (10 ** reserve.decimals)
                 : type(uint256).max;
@@ -653,8 +645,7 @@ contract AaveV4View {
         returns (HubAssetData memory hubAssetData)
     {
         IHub hub = IHub(_hub);
-        // TODO: Use IHub.Asset instead
-        IHub.AssetDataOld memory asset = hub.getAsset(_assetId);
+        IHub.Asset memory asset = hub.getAsset(_assetId);
 
         (uint256 totalDrawn, uint256 totalPremium) = hub.getAssetOwed(_assetId);
 
@@ -675,7 +666,7 @@ contract AaveV4View {
             irStrategy: asset.irStrategy,
             reinvestmentController: asset.reinvestmentController,
             feeReceiver: asset.feeReceiver,
-            deficitRay: asset.deficit // TODO: Change to deficitRay
+            deficitRay: asset.deficitRay
         });
     }
 }

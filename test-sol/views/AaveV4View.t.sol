@@ -204,9 +204,9 @@ contract TestAaveV4View is AaveV4TestBase {
         console2.log("avgCollateralFactor:", loanData.avgCollateralFactor);
         console2.log("healthFactor:", loanData.healthFactor);
         console2.log("totalCollateralInUsd:", loanData.totalCollateralInUsd);
-        console2.log("totalDebtInUsd:", loanData.totalDebtInUsd);
+        console2.log("totalDebtInUsdRay:", loanData.totalDebtInUsdRay);
         console2.log("activeCollateralCount:", loanData.activeCollateralCount);
-        console2.log("borrowedCount:", loanData.borrowedCount);
+        console2.log("borrowCount:", loanData.borrowCount);
         console2.log("reserves:", loanData.reserves.length);
         _logSeparator();
         for (uint256 i = 0; i < loanData.reserves.length; i++) {
@@ -238,7 +238,7 @@ contract TestAaveV4View is AaveV4TestBase {
         console2.log("borrowCap:", reserveData.borrowCap);
         console2.log("deficitRay:", reserveData.deficitRay);
         console2.log("spokeActive:", reserveData.spokeActive);
-        console2.log("spokePaused:", reserveData.spokePaused);
+        console2.log("spokeHalted:", reserveData.spokeHalted);
     }
 
     function _logSpokeData(AaveV4View.SpokeData memory spokeData) internal pure {

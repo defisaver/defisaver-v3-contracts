@@ -21,13 +21,12 @@ interface IHub {
     /// @dev decimals The number of decimals of the underlying asset.
     /// @dev addedShares The total shares added across all spokes.
     /// @dev swept The outstanding liquidity which has been invested by the reinvestment controller, expressed in asset units.
-    /// @dev realizedPremiumRay The interest-free premium already accrued across all spokes, expressed in asset units and scaled by RAY.
     /// @dev premiumOffsetRay The total premium offset across all spokes, used to calculate the premium, expressed in asset units and scaled by RAY.
     /// @dev drawnShares The total drawn shares across all spokes.
     /// @dev premiumShares The total premium shares across all spokes.
     /// @dev liquidityFee The protocol fee charged on drawn and premium liquidity growth, expressed in BPS.
     /// @dev drawnIndex The drawn index which monotonically increases according to the drawn rate, expressed in RAY.
-    /// @dev drawnRate The rate at which drawn assets grows, expressed in RAY.
+    /// @dev drawnRate The rate at which drawn assets grow, expressed in RAY.
     /// @dev lastUpdateTimestamp The timestamp of the last accrual.
     /// @dev underlying The address of the underlying asset.
     /// @dev irStrategy The address of the interest rate strategy.
@@ -42,9 +41,7 @@ interface IHub {
         uint120 addedShares;
         uint120 swept;
         //
-        uint200 realizedPremiumRay;
-        //
-        uint200 premiumOffsetRay;
+        int200 premiumOffsetRay;
         //
         uint120 drawnShares;
         uint120 premiumShares;
@@ -63,37 +60,6 @@ interface IHub {
         address feeReceiver;
         //
         uint200 deficitRay;
-    }
-
-    // TODO: Remove later (Part of current devnet deployment)
-    struct AssetDataOld {
-        uint120 liquidity;
-        uint120 realizedFees;
-        uint8 decimals;
-        //
-        uint120 deficit;
-        uint120 swept;
-        //
-        uint120 realizedPremium;
-        uint120 premiumOffset;
-        //
-        uint16 liquidityFee;
-        uint120 drawnShares;
-        uint120 premiumShares;
-        //
-        uint120 drawnIndex;
-        uint96 drawnRate;
-        uint40 lastUpdateTimestamp;
-        //
-        address underlying;
-        //
-        address irStrategy;
-        //
-        address reinvestmentController;
-        //
-        address feeReceiver;
-        //
-        uint120 addedShares;
     }
 
     /// @notice Asset configuration. Subset of the `Asset` struct.
@@ -108,28 +74,25 @@ interface IHub {
     /// @dev drawnShares The drawn shares of a spoke for a given asset.
     /// @dev premiumShares The premium shares of a spoke for a given asset.
     /// @dev premiumOffsetRay The premium offset of a spoke for a given asset, used to calculate the premium, expressed in asset units and scaled by RAY.
-    /// @dev realizedPremiumRay The interest-free premium already accrued for a spoke for a given asset, expressed in asset units and scaled by RAY.
     /// @dev addedShares The added shares of a spoke for a given asset.
     /// @dev addCap The maximum amount that can be added by a spoke, expressed in whole assets (not scaled by decimals). A value of `MAX_ALLOWED_SPOKE_CAP` indicates no cap.
     /// @dev drawCap The maximum amount that can be drawn by a spoke, expressed in whole assets (not scaled by decimals). A value of `MAX_ALLOWED_SPOKE_CAP` indicates no cap.
     /// @dev riskPremiumThreshold The maximum ratio of premium to drawn shares a spoke can have, expressed in BPS. A value of `MAX_RISK_PREMIUM_THRESHOLD` indicates no threshold.
-    /// @dev active True if the spoke is prevented from performing any actions.
-    /// @dev paused True if the spoke is prevented from performing actions that instantly update the liquidity.
+    /// @dev active False if the spoke is prevented from performing any actions.
+    /// @dev halted True if the spoke is prevented from performing any user-facing actions.
     /// @dev deficitRay The deficit reported by a spoke for a given asset, expressed in asset units and scaled by RAY.
     struct SpokeData {
         uint120 drawnShares;
         uint120 premiumShares;
         //
-        uint200 premiumOffsetRay;
-        //
-        uint200 realizedPremiumRay;
+        int200 premiumOffsetRay;
         //
         uint120 addedShares;
         uint40 addCap;
         uint40 drawCap;
         uint24 riskPremiumThreshold;
         bool active;
-        bool paused;
+        bool halted;
         //
         uint200 deficitRay;
     }
@@ -140,20 +103,23 @@ interface IHub {
         uint40 drawCap;
         uint24 riskPremiumThreshold;
         bool active;
-        bool paused;
+        bool halted;
     }
 
-    /// @notice Changes to premium owed accounting.
-    /// @dev sharesDelta The change in premium shares.
-    /// @dev offsetDeltaRay The change in premium offset, expressed in asset units and scaled by RAY.
-    /// @dev accruedPremiumRay The accrued premium, expressed in asset units and scaled by RAY.
-    /// @dev restoredPremiumRay The restored premium, expressed in asset units and scaled by RAY.
-    struct PremiumDelta {
-        int256 sharesDelta;
-        int256 offsetDeltaRay;
-        uint256 accruedPremiumRay;
-        uint256 restoredPremiumRay;
-    }
+    /**
+     *
+     *
+     *
+     *          WRITE OPERATIONS
+     *
+     *
+     *
+     */
+    /// @notice Updates the configuration of a spoke for a specific asset.
+    /// @param assetId The identifier of the asset.
+    /// @param spoke The address of the spoke to update.
+    /// @param config The new configuration for the spoke.
+    function updateSpokeConfig(uint256 assetId, address spoke, SpokeConfig calldata config) external;
 
     /**
      *
@@ -266,8 +232,7 @@ interface IHub {
     /// @param assetId The identifier of the asset.
     /// @return The amount of premium shares owed to the asset.
     /// @return The premium offset of the asset, expressed in asset units and scaled by RAY.
-    /// @return The realized premium of the asset, expressed in asset units and scaled by RAY.
-    function getAssetPremiumData(uint256 assetId) external view returns (uint256, uint256, uint256);
+    function getAssetPremiumData(uint256 assetId) external view returns (uint256, int256);
 
     /// @notice Returns the amount of available liquidity for the specified asset.
     /// @param assetId The identifier of the asset.
@@ -323,22 +288,21 @@ interface IHub {
     /// @param spoke The address of the spoke.
     /// @return The amount of premium shares.
     /// @return The premium offset, expressed in asset units and scaled by RAY.
-    /// @return The realized premium, expressed in asset units and scaled by RAY.
     function getSpokePremiumData(uint256 assetId, address spoke)
         external
         view
-        returns (uint256, uint256, uint256);
-
-    /// @notice Returns the amount of a given spoke's deficit with full precision for the specified asset.
-    /// @param assetId The identifier of the asset.
-    /// @param spoke The address of the spoke.
-    /// @return The amount of deficit, expressed in asset units and scaled by RAY.
-    function getSpokeDeficitRay(uint256 assetId, address spoke) external view returns (uint256);
+        returns (uint256, int256);
 
     /// @notice Returns whether the underlying is listed as an asset.
     /// @param underlying The address of the underlying asset.
     /// @return True if the underlying asset is listed.
     function isUnderlyingListed(address underlying) external view returns (bool);
+
+    /// @notice Returns the asset identifier for the specified underlying asset.
+    /// @dev Reverts with `AssetNotListed` if the underlying is not listed.
+    /// @param underlying The address of the underlying asset.
+    /// @return The `assetId` of the underlying asset.
+    function getAssetId(address underlying) external view returns (uint256);
 
     /// @notice Returns the number of listed assets.
     /// @return The number of listed assets.
@@ -348,7 +312,7 @@ interface IHub {
     /// @dev `drawnIndex`, `drawnRate` and `lastUpdateTimestamp` can be outdated due to passage of time.
     /// @param assetId The identifier of the asset.
     /// @return The asset struct.
-    function getAsset(uint256 assetId) external view returns (AssetDataOld memory); // TODO: Replace with Asset
+    function getAsset(uint256 assetId) external view returns (Asset memory);
 
     /// @notice Returns the asset configuration for the specified asset.
     /// @param assetId The identifier of the asset.
@@ -366,7 +330,7 @@ interface IHub {
     /// @return The amount of liquidity swept.
     function getAssetSwept(uint256 assetId) external view returns (uint256);
 
-    /// @notice Returns the current drawn rate for the specified asset.
+    /// @notice Calculates the current drawn rate for the specified asset.
     /// @param assetId The identifier of the asset.
     /// @return The current drawn rate of the asset.
     function getAssetDrawnRate(uint256 assetId) external view returns (uint256);
@@ -421,7 +385,6 @@ interface IHub {
     /// @return The maximum risk premium threshold, expressed in BPS.
     function MAX_RISK_PREMIUM_THRESHOLD() external view returns (uint24);
 
-    function updateSpokeConfig(uint256 assetId, address spoke, SpokeConfig calldata config) external;
-
+    /// @notice Returns the current authority.
     function authority() external view returns (address);
 }
