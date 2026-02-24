@@ -9,7 +9,7 @@ import {
 } from "../../../../contracts/interfaces/protocols/aaveV3/IStaticATokenV2.sol";
 import { UmbrellaStake } from "../../../../contracts/actions/aaveV3/umbrella/UmbrellaStake.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
-import { Addresses } from "../../../utils/Addresses.sol";
+import { Addresses } from "../../../utils/helpers/MainnetAddresses.sol";
 
 import { TestUmbrellaCommon } from "./UmbrellaCommon.t.sol";
 

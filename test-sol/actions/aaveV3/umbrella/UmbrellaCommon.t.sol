@@ -7,7 +7,7 @@ import { IAToken } from "../../../../contracts/interfaces/protocols/aave/IAToken
 import { IL2PoolV3 } from "../../../../contracts/interfaces/protocols/aaveV3/IL2PoolV3.sol";
 import { AaveV3Helper } from "../../../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
-import { Addresses } from "../../../utils/Addresses.sol";
+import { Addresses } from "../../../utils/helpers/MainnetAddresses.sol";
 import { ActionsUtils } from "../../../utils/ActionsUtils.sol";
 import { BaseTest } from "../../../utils/BaseTest.sol";
 

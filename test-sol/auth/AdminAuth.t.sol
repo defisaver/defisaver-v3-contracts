@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../../contracts/auth/AdminAuth.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
-import { Addresses } from "../utils/Addresses.sol";
+import { Addresses } from "../utils/helpers/MainnetAddresses.sol";
 
 contract TestCore_AdminAuth is AdminAuth, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////

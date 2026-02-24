@@ -9,7 +9,7 @@ import { AdminAuth } from "../../contracts/auth/AdminAuth.sol";
 import { CoreHelper } from "../../contracts/core/helpers/CoreHelper.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
-import { Addresses } from "../utils/Addresses.sol";
+import { Addresses } from "../utils/helpers/MainnetAddresses.sol";
 
 contract TestCore_BundleStorage is BaseTest, CoreHelper {
     /*//////////////////////////////////////////////////////////////////////////

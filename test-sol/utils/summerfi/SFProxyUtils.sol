@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { IAccountGuard } from "../../../contracts/interfaces/protocols/summerfi/IAccountGuard.sol";
 import { RegistryUtils } from "../RegistryUtils.sol";
-import { Addresses } from "../Addresses.sol";
+import { Addresses } from "../helpers/MainnetAddresses.sol";
 
 contract SFProxyUtils is RegistryUtils {
     function _whitelistAnyAddr(address _addr) internal {

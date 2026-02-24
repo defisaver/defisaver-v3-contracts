@@ -9,7 +9,7 @@ import { TokenPriceHelper } from "../../contracts/utils/token/TokenPriceHelper.s
 import { TokenPriceHelperL2 } from "../../contracts/utils/token/TokenPriceHelperL2.sol";
 import { TokenUtils } from "../../contracts/utils/token/TokenUtils.sol";
 
-import { Addresses } from "../utils/Addresses.sol";
+import { Addresses } from "./helpers/MainnetAddresses.sol";
 
 contract Tokens is Test {
     using stdStorage for StdStorage;

@@ -6,7 +6,7 @@ import { IPendleMarket } from "../../../contracts/interfaces/protocols/pendle/IP
 import { PendleTokenRedeem } from "contracts/actions/pendle/PendleTokenRedeem.sol";
 import { IERC20 } from "../../../contracts/interfaces/token/IERC20.sol";
 import { IERC4626 } from "../../../contracts/interfaces/token/IERC4626.sol";
-import { Addresses } from "../../utils/Addresses.sol";
+import { Addresses } from "../../utils/helpers/MainnetAddresses.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";

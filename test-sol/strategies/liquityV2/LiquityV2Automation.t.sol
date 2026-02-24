@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
-import { Addresses } from "../../utils/Addresses.sol";
+import { Addresses } from "../../utils/helpers/MainnetAddresses.sol";
 
 import { IERC20 } from "../../../contracts/interfaces/token/IERC20.sol";
 import {

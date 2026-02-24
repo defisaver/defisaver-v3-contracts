@@ -10,7 +10,7 @@ import {
 import { UmbrellaStake } from "../../../../contracts/actions/aaveV3/umbrella/UmbrellaStake.sol";
 import { UmbrellaUnstake } from "../../../../contracts/actions/aaveV3/umbrella/UmbrellaUnstake.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
-import { Addresses } from "../../../utils/Addresses.sol";
+import { Addresses } from "../../../utils/helpers/MainnetAddresses.sol";
 import { TestUmbrellaCommon } from "./UmbrellaCommon.t.sol";
 
 contract TestUmbrellaUnstake is TestUmbrellaCommon {

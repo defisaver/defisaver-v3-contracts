@@ -29,7 +29,7 @@ import { FLAction } from "../../../contracts/actions/flashloan/FLAction.sol";
 import { SendToken } from "../../../contracts/actions/utils/SendToken.sol";
 import { DFSSell } from "../../../contracts/actions/exchange/DFSSell.sol";
 import { SFProxyEntryPoint } from "../../../contracts/actions/summerfi/SFProxyEntryPoint.sol";
-import { Addresses } from "../Addresses.sol";
+import { Addresses } from "../helpers/MainnetAddresses.sol";
 import {
     SFProxyFactoryHelper
 } from "../../../contracts/utils/addresses/sfProxyFactory/SFProxyFactoryHelper.sol";

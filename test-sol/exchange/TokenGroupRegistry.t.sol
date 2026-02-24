@@ -3,7 +3,7 @@ pragma solidity =0.8.24;
 
 import { TokenGroupRegistry } from "../../contracts/exchangeV3/registries/TokenGroupRegistry.sol";
 
-import { Addresses } from "../utils/Addresses.sol";
+import { Addresses } from "../utils/helpers/MainnetAddresses.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
 
 contract TestTokenGroupRegistry is BaseTest, TokenGroupRegistry {

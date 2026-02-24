@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { BaseTest } from "../utils/BaseTest.sol";
-import { Addresses } from "../utils/Addresses.sol";
+import { Addresses } from "../utils/helpers/MainnetAddresses.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
 import {
     StrategyTriggerViewNoRevert

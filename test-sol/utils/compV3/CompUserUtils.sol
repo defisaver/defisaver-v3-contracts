@@ -2,7 +2,7 @@
 pragma solidity =0.8.24;
 
 import { UserWallet } from "../UserWallet.sol";
-import { Addresses } from "../../utils/Addresses.sol";
+import { Addresses } from "../helpers/MainnetAddresses.sol";
 import { CompV3SubProxy } from "../../../contracts/actions/compoundV3/CompV3SubProxy.sol";
 
 contract CompUserUtils is UserWallet {

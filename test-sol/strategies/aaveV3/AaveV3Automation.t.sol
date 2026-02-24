@@ -25,7 +25,7 @@ import {
 } from "../../../contracts/interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
 import { IPoolV3 } from "../../../contracts/interfaces/protocols/aaveV3/IPoolV3.sol";
 import { AaveV3RatioTrigger } from "../../../contracts/triggers/AaveV3RatioTrigger.sol";
-import { Addresses } from "../../utils/Addresses.sol";
+import { Addresses } from "../../utils/helpers/MainnetAddresses.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 import { BundleBuilder } from "../../utils/BundleBuilder.sol";
 import { RegistryUtils } from "../../utils/RegistryUtils.sol";

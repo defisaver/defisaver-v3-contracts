@@ -8,7 +8,7 @@ import { RenzoHelper } from "../../../contracts/actions/renzo/helpers/RenzoHelpe
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
-import { Addresses } from "../../utils/Addresses.sol";
+import { Addresses } from "../../utils/helpers/MainnetAddresses.sol";
 
 contract TestRenzoStake is BaseTest, ActionsUtils, RenzoHelper {
     /*//////////////////////////////////////////////////////////////////////////

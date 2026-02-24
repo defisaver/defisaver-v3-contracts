@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { SendTokensAndUnwrap } from "../../../contracts/actions/utils/SendTokensAndUnwrap.sol";
-import { Addresses } from "../../utils/Addresses.sol";
+import { Addresses } from "../../utils/helpers/MainnetAddresses.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";

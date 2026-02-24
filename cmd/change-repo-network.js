@@ -118,6 +118,18 @@ async function changeNetworkNameForAddresses(oldNetwork, newNetwork) {
     );
 }
 
+async function changeTestAddressesImport(oldNetwork, newNetwork) {
+    const files = getAllFiles('./test-sol').filter((f) => f.endsWith('.sol'));
+    for (const file of files) {
+        const content = fs.readFileSync(file).toString();
+        const updated = content.replaceAll(`${oldNetwork}Addresses`, `${newNetwork}Addresses`);
+        if (updated !== content) {
+            console.log(file);
+            fs.writeFileSync(file, updated);
+        }
+    }
+}
+
 async function excludeCancunSpecificChanges(oldNetwork, newNetwork) {
     const targetFiles = [
         'contracts/actions/checkers/CompV3RatioCheck.sol',
@@ -175,6 +187,8 @@ async function main() {
         console.log(`Changing repo network from ${oldNetworkName} to ${newNetworkName}...`);
         await changeNetworkNameForAddresses(oldNetworkName, newNetworkName);
         console.log('✓ Updated network names in contract files');
+        await changeTestAddressesImport(oldNetworkName, newNetworkName);
+        console.log('✓ Updated test-sol address imports');
         await changeWethAddress(oldNetworkName, newNetworkName);
         console.log('✓ Updated WETH addresses');
         await changeHardhatConfig(oldNetworkName, newNetworkName);

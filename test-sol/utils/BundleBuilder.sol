@@ -3,7 +3,7 @@ pragma solidity =0.8.24;
 
 import { BundleStorage } from "../../contracts/core/strategy/BundleStorage.sol";
 import { IAdminVault } from "../../contracts/interfaces/auth/IAdminVault.sol";
-import { Addresses } from "./Addresses.sol";
+import { Addresses } from "./helpers/MainnetAddresses.sol";
 import { CheatCodes } from "./CheatCodes.sol";
 
 contract BundleBuilder is CheatCodes {

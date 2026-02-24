@@ -13,7 +13,7 @@ import {
 } from "../../../contracts/interfaces/protocols/aaveV3/IAaveProtocolDataProvider.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
-import { Addresses } from "../../utils/Addresses.sol";
+import { Addresses } from "../../utils/helpers/MainnetAddresses.sol";
 import { AaveV3ExecuteActions } from "../../utils/executeActions/AaveV3ExecuteActions.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
