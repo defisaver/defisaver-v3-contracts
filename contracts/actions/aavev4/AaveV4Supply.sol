@@ -3,11 +3,22 @@
 pragma solidity =0.8.24;
 
 import { ISpoke } from "../../interfaces/protocols/aaveV4/ISpoke.sol";
+import {
+    ISupplyRepayPositionManager
+} from "../../interfaces/protocols/aaveV4/ISupplyRepayPositionManager.sol";
+import {
+    IConfigPositionManager
+} from "../../interfaces/protocols/aaveV4/IConfigPositionManager.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { AaveV4Helper } from "./helpers/AaveV4Helper.sol";
 
 /// @title AaveV4Supply
-contract AaveV4Supply is ActionBase {
+/// @dev When supplying on behalf of another address the SupplyRepayPositionManager has to be enabled for 'onBehalf' address.
+/// @dev When setting reserve as collateral on behalf of another address:
+///      - ConfigPositionManager has to be enabled for 'onBehalf' address.
+///      - Wallet itself has to be given approval to set collateral on behalf of 'onBehalf' address.
+contract AaveV4Supply is ActionBase, AaveV4Helper {
     using TokenUtils for address;
 
     /// @param spoke Address of the spoke.
@@ -69,15 +80,32 @@ contract AaveV4Supply is ActionBase {
     function _supply(Params memory _params) internal returns (uint256, bytes memory) {
         ISpoke spoke = ISpoke(_params.spoke);
         address underlying = spoke.getReserve(_params.reserveId).underlying;
+
         _params.onBehalf = _params.onBehalf == address(0) ? address(this) : _params.onBehalf;
-
         _params.amount = underlying.pullTokensIfNeeded(_params.from, _params.amount);
-        underlying.approveToken(_params.spoke, _params.amount);
 
-        (, _params.amount) = spoke.supply(_params.reserveId, _params.amount, _params.onBehalf);
+        bool supplyForSmartWallet = _params.onBehalf == address(this);
 
-        if (_params.useAsCollateral) {
-            spoke.setUsingAsCollateral(_params.reserveId, true, _params.onBehalf);
+        if (supplyForSmartWallet) {
+            underlying.approveToken(_params.spoke, _params.amount);
+            (, _params.amount) = spoke.supply(_params.reserveId, _params.amount, _params.onBehalf);
+
+            if (_params.useAsCollateral) {
+                spoke.setUsingAsCollateral(_params.reserveId, true, _params.onBehalf);
+            }
+        } else {
+            underlying.approveToken(SUPPLY_REPAY_POSITION_MANAGER, _params.amount);
+            (, _params.amount) = ISupplyRepayPositionManager(SUPPLY_REPAY_POSITION_MANAGER)
+                .supplyOnBehalfOf(
+                    _params.spoke, _params.reserveId, _params.amount, _params.onBehalf
+                );
+
+            if (_params.useAsCollateral) {
+                IConfigPositionManager(CONFIG_POSITION_MANAGER)
+                    .setUsingAsCollateralOnBehalfOf(
+                        _params.spoke, _params.reserveId, true, _params.onBehalf
+                    );
+            }
         }
 
         return (_params.amount, abi.encode(_params));

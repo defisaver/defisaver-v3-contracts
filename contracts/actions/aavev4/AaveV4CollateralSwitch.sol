@@ -3,13 +3,17 @@
 pragma solidity =0.8.24;
 
 import { ISpoke } from "../../interfaces/protocols/aaveV4/ISpoke.sol";
+import {
+    IConfigPositionManager
+} from "../../interfaces/protocols/aaveV4/IConfigPositionManager.sol";
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { AaveV4Helper } from "./helpers/AaveV4Helper.sol";
 
 /// @title AaveV4CollateralSwitch
-contract AaveV4CollateralSwitch is ActionBase {
-    using TokenUtils for address;
-
+/// @dev When switching collateral on behalf of another address:
+///      - ConfigPositionManager has to be enabled for 'onBehalf' address.
+///      - Wallet itself has to be given approval to switch collateral on behalf of 'onBehalf' address.
+contract AaveV4CollateralSwitch is ActionBase, AaveV4Helper {
     /// @param spoke Address of the spoke.
     /// @param onBehalf Address to switch collateral on behalf of. Defaults to the user's wallet if not provided.
     /// @param reserveId Reserve id.
@@ -62,8 +66,18 @@ contract AaveV4CollateralSwitch is ActionBase {
     //////////////////////////////////////////////////////////////*/
     function _collateralSwitch(Params memory _params) internal returns (bytes memory) {
         _params.onBehalf = _params.onBehalf == address(0) ? address(this) : _params.onBehalf;
-        ISpoke(_params.spoke)
-            .setUsingAsCollateral(_params.reserveId, _params.useAsCollateral, _params.onBehalf);
+
+        bool collateralSwitchForSmartWallet = _params.onBehalf == address(this);
+
+        if (collateralSwitchForSmartWallet) {
+            ISpoke(_params.spoke)
+                .setUsingAsCollateral(_params.reserveId, _params.useAsCollateral, _params.onBehalf);
+        } else {
+            IConfigPositionManager(CONFIG_POSITION_MANAGER)
+                .setUsingAsCollateralOnBehalfOf(
+                    _params.spoke, _params.reserveId, _params.useAsCollateral, _params.onBehalf
+                );
+        }
 
         return abi.encode(_params);
     }

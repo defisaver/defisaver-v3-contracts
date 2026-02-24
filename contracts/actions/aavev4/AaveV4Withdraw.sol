@@ -3,11 +3,18 @@
 pragma solidity =0.8.24;
 
 import { ISpoke } from "../../interfaces/protocols/aaveV4/ISpoke.sol";
+import {
+    IAllowancePositionManager
+} from "../../interfaces/protocols/aaveV4/IAllowancePositionManager.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { AaveV4Helper } from "./helpers/AaveV4Helper.sol";
 
 /// @title AaveV4Withdraw
-contract AaveV4Withdraw is ActionBase {
+/// @dev When withdrawing on behalf of another address:
+///      - AllowancePositionManager has to be enabled for 'onBehalf' address.
+///      - Wallet itself has to be given approval to withdraw on behalf of 'onBehalf' address.
+contract AaveV4Withdraw is ActionBase, AaveV4Helper {
     using TokenUtils for address;
 
     /// @param spoke Address of the spoke.
@@ -65,7 +72,16 @@ contract AaveV4Withdraw is ActionBase {
         address underlying = spoke.getReserve(_params.reserveId).underlying;
         _params.onBehalf = _params.onBehalf == address(0) ? address(this) : _params.onBehalf;
 
-        (, _params.amount) = spoke.withdraw(_params.reserveId, _params.amount, _params.onBehalf);
+        bool withdrawForSmartWallet = _params.onBehalf == address(this);
+
+        if (withdrawForSmartWallet) {
+            (, _params.amount) = spoke.withdraw(_params.reserveId, _params.amount, _params.onBehalf);
+        } else {
+            (, _params.amount) = IAllowancePositionManager(ALLOWANCE_POSITION_MANAGER)
+                .withdrawOnBehalfOf(
+                    _params.spoke, _params.reserveId, _params.amount, _params.onBehalf
+                );
+        }
 
         underlying.withdrawTokens(_params.to, _params.amount);
 
