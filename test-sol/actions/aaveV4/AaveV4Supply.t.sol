@@ -112,7 +112,7 @@ contract TestAaveV4Supply is AaveV4TestBase {
     function _supply(AaveV4TestPair memory _testPair, TestConfig memory _testConfig) internal {
         ISpoke spoke = ISpoke(_testPair.spoke);
         ISpoke.Reserve memory reserve = spoke.getReserve(_testPair.collReserveId);
-        uint256 supplyAmount = amountInUSDPrice(reserve.underlying, 10);
+        uint256 supplyAmount = _amountInUSDPrice(_testPair.spoke, _testPair.collReserveId, 10);
 
         if (!_isValidSupply(_testPair.spoke, supplyAmount, reserve)) return;
 

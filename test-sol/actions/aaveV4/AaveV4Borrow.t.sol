@@ -91,7 +91,7 @@ contract TestAaveV4Borrow is AaveV4TestBase {
         ISpoke spoke = ISpoke(_spoke);
         ISpoke.Reserve memory reserve = spoke.getReserve(_reserveId);
         address underlying = reserve.underlying;
-        uint256 borrowAmount = amountInUSDPrice(underlying, _amountUsd);
+        uint256 borrowAmount = _amountInUSDPrice(_spoke, _reserveId, _amountUsd);
 
         if (!_isValidBorrow(_spoke, borrowAmount, reserve)) {
             console2.log("Invalid borrow. Check caps and reserve/spoke status.");

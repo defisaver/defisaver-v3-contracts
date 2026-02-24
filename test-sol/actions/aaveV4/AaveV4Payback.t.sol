@@ -75,9 +75,8 @@ contract TestAaveV4Payback is AaveV4TestBase {
                 continue;
             }
 
-            address underlying =
-                ISpoke(testPair.spoke).getReserve(testPair.debtReserveId).underlying;
-            uint256 borrowAmount = amountInUSDPrice(underlying, borrowAmountUsd);
+            uint256 borrowAmount =
+                _amountInUSDPrice(testPair.spoke, testPair.debtReserveId, borrowAmountUsd);
 
             _payback(testPair.spoke, testPair.debtReserveId, borrowAmount, _testConfig);
 

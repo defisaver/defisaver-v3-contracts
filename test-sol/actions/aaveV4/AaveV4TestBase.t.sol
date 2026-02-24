@@ -4,12 +4,14 @@ pragma solidity =0.8.24;
 
 import { ISpoke } from "../../../contracts/interfaces/protocols/aaveV4/ISpoke.sol";
 import { IHub } from "../../../contracts/interfaces/protocols/aaveV4/IHub.sol";
+import { IAaveV4Oracle } from "../../../contracts/interfaces/protocols/aaveV4/IAaveV4Oracle.sol";
 import {
     IConfigPositionManager
 } from "../../../contracts/interfaces/protocols/aaveV4/IConfigPositionManager.sol";
 import {
     IAllowancePositionManager
 } from "../../../contracts/interfaces/protocols/aaveV4/IAllowancePositionManager.sol";
+import { IERC20 } from "../../../contracts/interfaces/token/IERC20.sol";
 import { ExecuteActionsBase } from "../../utils/executeActions/ExecuteActionsBase.sol";
 import { AaveV4Helper } from "../../../contracts/actions/aaveV4/helpers/AaveV4Helper.sol";
 import { AaveV4RatioHelper } from "../../../contracts/actions/aavev4/helpers/AaveV4RatioHelper.sol";
@@ -37,10 +39,25 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
     }
 
     function getTestPairs() internal pure returns (AaveV4TestPair[] memory retVal) {
-        retVal = new AaveV4TestPair[](1);
+        retVal = new AaveV4TestPair[](4);
         retVal[0] = AaveV4TestPair({
             spoke: CORE_SPOKE,
             collReserveId: CORE_RESERVE_ID_WETH,
+            debtReserveId: CORE_RESERVE_ID_USDC
+        });
+        retVal[1] = AaveV4TestPair({
+            spoke: CORE_SPOKE,
+            collReserveId: CORE_RESERVE_ID_WSTETH,
+            debtReserveId: CORE_RESERVE_ID_WETH
+        });
+        retVal[2] = AaveV4TestPair({
+            spoke: CORE_SPOKE,
+            collReserveId: CORE_RESERVE_ID_USDC,
+            debtReserveId: CORE_RESERVE_ID_WETH
+        });
+        retVal[3] = AaveV4TestPair({
+            spoke: CORE_SPOKE,
+            collReserveId: CORE_RESERVE_ID_WBTC,
             debtReserveId: CORE_RESERVE_ID_USDC
         });
     }
@@ -82,7 +99,8 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
         address sender = _wallet.owner();
         ISpoke.Reserve memory reserve = ISpoke(_testPair.spoke).getReserve(_testPair.collReserveId);
         address underlying = reserve.underlying;
-        uint256 supplyAmount = amountInUSDPrice(underlying, _supplyAmountInUSD);
+        uint256 supplyAmount =
+            _amountInUSDPrice(_testPair.spoke, _testPair.collReserveId, _supplyAmountInUSD);
 
         if (!_isValidSupply(_testPair.spoke, supplyAmount, reserve)) return false;
 
@@ -122,7 +140,7 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
         address walletAddr = _wallet.walletAddr();
         address sender = _wallet.owner();
 
-        uint256 borrowAmount = amountInUSDPrice(reserve.underlying, _borrowAmountInUSD);
+        uint256 borrowAmount = _amountInUSDPrice(_spoke, _reserveId, _borrowAmountInUSD);
 
         if (!_isValidBorrow(_spoke, borrowAmount, reserve)) {
             console2.log("Invalid borrow. Check caps and reserve/spoke status.");
@@ -174,6 +192,18 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
         IAllowancePositionManager(ALLOWANCE_POSITION_MANAGER)
             .approveWithdraw(address(_spoke), _reserveId, _walletAddr, type(uint256).max);
         vm.stopPrank();
+    }
+
+    function _amountInUSDPrice(address _spoke, uint256 _reserveId, uint256 _amountUSD)
+        internal
+        view
+        returns (uint256)
+    {
+        IAaveV4Oracle oracle = IAaveV4Oracle(ISpoke(_spoke).ORACLE());
+        uint256 price = oracle.getReservePrice(_reserveId);
+        uint256 oracleDecimals = oracle.DECIMALS();
+        uint256 tokenDecimals = IERC20(ISpoke(_spoke).getReserve(_reserveId).underlying).decimals();
+        return (_amountUSD * 10 ** (tokenDecimals + oracleDecimals)) / price;
     }
 
     function _isValidSupply(address _spoke, uint256 _amount, ISpoke.Reserve memory _reserve)
