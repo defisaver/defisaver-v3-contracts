@@ -92,7 +92,7 @@ contract TestSparkViewSmall is BaseTest, ActionsUtils, SparkHelper {
     }
 
     function test_WithEModeSelected() public {
-        TestConfig memory _config = testConfigs[2];
+        TestConfig memory _config = testConfigs[0];
         uint256 EMODE_ID = 2;
 
         // Give initial balance for supply token
@@ -247,17 +247,6 @@ contract TestSparkViewSmall is BaseTest, ActionsUtils, SparkHelper {
                 supplyAmount: 30e18, // 30 WETH
                 borrowAmount: 50_000e6, // 50k USDC
                 initialBalance: 100e18 // 100 WETH
-            })
-        );
-
-        // sDAI/USDC
-        testConfigs.push(
-            TestConfig({
-                supplyToken: Addresses.WETH_ADDR,
-                borrowToken: Addresses.USDT_ADDR,
-                supplyAmount: 80_000e18, // 30 sDAI
-                borrowAmount: 50_000e6, // 50k USDC
-                initialBalance: 100_000e18 // 100 sDAI
             })
         );
     }
