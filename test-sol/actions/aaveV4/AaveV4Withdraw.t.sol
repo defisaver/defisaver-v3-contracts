@@ -21,6 +21,12 @@ contract TestAaveV4Withdraw is AaveV4TestBase {
     address walletAddr;
     address sender;
 
+    struct TestConfig {
+        bool isDirect;
+        bool takeMaxUint256;
+        bool isEoa;
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
@@ -38,18 +44,22 @@ contract TestAaveV4Withdraw is AaveV4TestBase {
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_withdraw_part_of_collateral() public {
-        bool isDirect = false;
-        bool takeMaxUint256 = false;
-        _baseTest(isDirect, takeMaxUint256);
+        _baseTest(TestConfig({ isDirect: false, takeMaxUint256: false, isEoa: false }));
     }
 
     function test_withdraw_all_collateral() public {
-        bool isDirect = true;
-        bool takeMaxUint256 = true;
-        _baseTest(isDirect, takeMaxUint256);
+        _baseTest(TestConfig({ isDirect: true, takeMaxUint256: true, isEoa: false }));
     }
 
-    function _baseTest(bool _isDirect, bool _takeMaxUint256) internal {
+    function test_withdraw_part_of_collateral_eoa() public {
+        _baseTest(TestConfig({ isDirect: false, takeMaxUint256: false, isEoa: true }));
+    }
+
+    function test_withdraw_all_collateral_eoa() public {
+        _baseTest(TestConfig({ isDirect: true, takeMaxUint256: true, isEoa: true }));
+    }
+
+    function _baseTest(TestConfig memory _testConfig) internal {
         AaveV4TestPair[] memory tests = getTestPairs();
         for (uint256 i = 0; i < tests.length; ++i) {
             uint256 snapshotId = vm.snapshotState();
@@ -58,12 +68,12 @@ contract TestAaveV4Withdraw is AaveV4TestBase {
 
             uint256 supplyAmountUsd = 10;
 
-            if (!_executeAaveV4Supply(testPair, supplyAmountUsd, sender, wallet)) {
+            if (!_executeAaveV4Supply(testPair, supplyAmountUsd, wallet, _testConfig.isEoa)) {
                 console2.log("Failed to supply assets. Check caps and reserve/spoke status.");
                 continue;
             }
 
-            _withdraw(testPair.spoke, testPair.collReserveId, _isDirect, _takeMaxUint256);
+            _withdraw(testPair.spoke, testPair.collReserveId, _testConfig);
 
             vm.revertToState(snapshotId);
         }
@@ -72,41 +82,47 @@ contract TestAaveV4Withdraw is AaveV4TestBase {
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function _withdraw(address _spoke, uint256 _reserveId, bool _isDirect, bool _takeMaxUint256)
-        internal
-    {
-        address underlying = ISpoke(_spoke).getReserve(_reserveId).underlying;
-        uint256 positionSuppliedAssets =
-            ISpoke(_spoke).getUserSuppliedAssets(_reserveId, walletAddr);
+    function _withdraw(address _spoke, uint256 _reserveId, TestConfig memory _testConfig) internal {
+        ISpoke spoke = ISpoke(_spoke);
+        address underlying = spoke.getReserve(_reserveId).underlying;
+        address onBehalf = _testConfig.isEoa ? sender : walletAddr;
+
+        if (_testConfig.isEoa) {
+            _enableEoaAllowancePositionManager(spoke, sender, walletAddr, _reserveId);
+        }
+
+        uint256 positionSuppliedAssets = spoke.getUserSuppliedAssets(_reserveId, onBehalf);
         uint256 withdrawAmount =
-            _takeMaxUint256 ? positionSuppliedAssets : positionSuppliedAssets / 2;
+            _testConfig.takeMaxUint256 ? positionSuppliedAssets : positionSuppliedAssets / 2;
+
         bytes memory executeActionCallData = executeActionCalldata(
             aaveV4WithdrawEncode(
                 _spoke,
-                walletAddr,
+                onBehalf,
                 sender,
                 _reserveId,
-                _takeMaxUint256 ? type(uint256).max : withdrawAmount
+                _testConfig.takeMaxUint256 ? type(uint256).max : withdrawAmount
             ),
-            _isDirect
+            _testConfig.isDirect
         );
 
+        // Before.
         uint256 senderBalanceBefore = balanceOf(underlying, sender);
 
+        // Execute.
         wallet.execute(address(cut), executeActionCallData, 0);
 
+        // After.
         uint256 senderBalanceAfter = balanceOf(underlying, sender);
-        uint256 walletBalanceAfter = balanceOf(underlying, walletAddr);
-        uint256 positionSuppliedAssetsAfter =
-            ISpoke(_spoke).getUserSuppliedAssets(_reserveId, walletAddr);
+        uint256 positionSuppliedAssetsAfter = spoke.getUserSuppliedAssets(_reserveId, onBehalf);
 
-        if (_takeMaxUint256) {
-            assertEq(walletBalanceAfter, 0);
-            assertApproxEqAbs(senderBalanceAfter, senderBalanceBefore + withdrawAmount, 1);
+        // Assert.
+        assertEq(balanceOf(underlying, walletAddr), 0);
+        assertApproxEqAbs(senderBalanceAfter, senderBalanceBefore + withdrawAmount, 1);
+
+        if (_testConfig.takeMaxUint256) {
             assertEq(positionSuppliedAssetsAfter, 0);
         } else {
-            assertEq(walletBalanceAfter, 0);
-            assertApproxEqAbs(senderBalanceAfter, senderBalanceBefore + withdrawAmount, 1);
             assertApproxEqAbs(positionSuppliedAssetsAfter, withdrawAmount, 1);
         }
     }

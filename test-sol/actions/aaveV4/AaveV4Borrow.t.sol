@@ -21,6 +21,11 @@ contract TestAaveV4Borrow is AaveV4TestBase {
     address walletAddr;
     address sender;
 
+    struct TestConfig {
+        bool isDirect;
+        bool isEoa;
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
@@ -38,16 +43,22 @@ contract TestAaveV4Borrow is AaveV4TestBase {
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_borrow() public {
-        bool isDirect = false;
-        _baseTest(isDirect);
+        _baseTest(TestConfig({ isDirect: false, isEoa: false }));
     }
 
     function test_borrow_direct() public {
-        bool isDirect = true;
-        _baseTest(isDirect);
+        _baseTest(TestConfig({ isDirect: true, isEoa: false }));
     }
 
-    function _baseTest(bool _isDirect) internal {
+    function test_borrow_eoa() public {
+        _baseTest(TestConfig({ isDirect: false, isEoa: true }));
+    }
+
+    function test_borrow_direct_eoa() public {
+        _baseTest(TestConfig({ isDirect: true, isEoa: true }));
+    }
+
+    function _baseTest(TestConfig memory _testConfig) internal {
         AaveV4TestPair[] memory tests = getTestPairs();
         for (uint256 i = 0; i < tests.length; ++i) {
             uint256 snapshotId = vm.snapshotState();
@@ -56,14 +67,13 @@ contract TestAaveV4Borrow is AaveV4TestBase {
 
             uint256 supplyAmountUsd = 1000;
 
-            // Supply collateral first
-            if (!_executeAaveV4Supply(testPair, supplyAmountUsd, sender, wallet)) {
+            if (!_executeAaveV4Supply(testPair, supplyAmountUsd, wallet, _testConfig.isEoa)) {
                 console2.log("Failed to supply assets. Check caps and reserve/spoke status.");
                 continue;
             }
 
             uint256 borrowAmountUsd = 100;
-            _borrow(testPair.spoke, testPair.debtReserveId, borrowAmountUsd, _isDirect);
+            _borrow(testPair.spoke, testPair.debtReserveId, borrowAmountUsd, _testConfig);
 
             vm.revertToState(snapshotId);
         }
@@ -72,10 +82,14 @@ contract TestAaveV4Borrow is AaveV4TestBase {
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function _borrow(address _spoke, uint256 _reserveId, uint256 _amountUsd, bool _isDirect)
-        internal
-    {
-        ISpoke.Reserve memory reserve = ISpoke(_spoke).getReserve(_reserveId);
+    function _borrow(
+        address _spoke,
+        uint256 _reserveId,
+        uint256 _amountUsd,
+        TestConfig memory _testConfig
+    ) internal {
+        ISpoke spoke = ISpoke(_spoke);
+        ISpoke.Reserve memory reserve = spoke.getReserve(_reserveId);
         address underlying = reserve.underlying;
         uint256 borrowAmount = amountInUSDPrice(underlying, _amountUsd);
 
@@ -84,20 +98,30 @@ contract TestAaveV4Borrow is AaveV4TestBase {
             return;
         }
 
+        address onBehalf = _testConfig.isEoa ? sender : walletAddr;
+
+        if (_testConfig.isEoa) {
+            _enableEoaAllowancePositionManager(spoke, sender, walletAddr, _reserveId);
+        }
+
         bytes memory executeActionCallData = executeActionCalldata(
-            aaveV4BorrowEncode(_spoke, walletAddr, sender, _reserveId, borrowAmount), _isDirect
+            aaveV4BorrowEncode(_spoke, onBehalf, sender, _reserveId, borrowAmount),
+            _testConfig.isDirect
         );
 
+        // Before.
         uint256 senderBalanceBefore = balanceOf(underlying, sender);
-        uint256 positionDebtBefore = ISpoke(_spoke).getUserTotalDebt(_reserveId, walletAddr);
+        uint256 positionDebtBefore = spoke.getUserTotalDebt(_reserveId, onBehalf);
 
+        // Execute.
         wallet.execute(address(cut), executeActionCallData, 0);
 
-        uint256 walletBalanceAfter = balanceOf(underlying, walletAddr);
+        // After.
         uint256 senderBalanceAfter = balanceOf(underlying, sender);
-        uint256 positionDebtAfter = ISpoke(_spoke).getUserTotalDebt(_reserveId, walletAddr);
+        uint256 positionDebtAfter = spoke.getUserTotalDebt(_reserveId, onBehalf);
 
-        assertEq(walletBalanceAfter, 0);
+        // Assert.
+        assertEq(balanceOf(underlying, walletAddr), 0);
         assertApproxEqAbs(senderBalanceAfter, senderBalanceBefore + borrowAmount, 1);
         assertApproxEqAbs(positionDebtAfter, positionDebtBefore + borrowAmount, 1);
     }

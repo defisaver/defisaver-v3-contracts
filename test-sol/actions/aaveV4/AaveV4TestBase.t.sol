@@ -4,6 +4,12 @@ pragma solidity =0.8.24;
 
 import { ISpoke } from "../../../contracts/interfaces/protocols/aaveV4/ISpoke.sol";
 import { IHub } from "../../../contracts/interfaces/protocols/aaveV4/IHub.sol";
+import {
+    IConfigPositionManager
+} from "../../../contracts/interfaces/protocols/aaveV4/IConfigPositionManager.sol";
+import {
+    IAllowancePositionManager
+} from "../../../contracts/interfaces/protocols/aaveV4/IAllowancePositionManager.sol";
 import { ExecuteActionsBase } from "../../utils/executeActions/ExecuteActionsBase.sol";
 import { AaveV4Helper } from "../../../contracts/actions/aaveV4/helpers/AaveV4Helper.sol";
 import { AaveV4RatioHelper } from "../../../contracts/actions/aavev4/helpers/AaveV4RatioHelper.sol";
@@ -43,18 +49,21 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
         AaveV4TestPair memory _testPair,
         uint256 _supplyAmountInUSD,
         uint256 _borrowAmountInUSD,
-        address _sender,
-        SmartWallet _wallet
+        SmartWallet _wallet,
+        bool _isEoaPosition
     ) internal returns (bool success) {
-        // Supply collateral
-        if (!_executeAaveV4Supply(_testPair, _supplyAmountInUSD, _sender, _wallet)) {
+        if (!_executeAaveV4Supply(_testPair, _supplyAmountInUSD, _wallet, _isEoaPosition)) {
             console2.log("Failed to supply assets. Check caps and reserve/spoke status.");
             return false;
         }
 
-        // Borrow debt
         if (!_executeAaveV4Borrow(
-                _testPair.spoke, _testPair.debtReserveId, _borrowAmountInUSD, _sender, _wallet
+                _testPair.spoke,
+                _testPair.debtReserveId,
+                _borrowAmountInUSD,
+                _wallet.owner(), // to -> where to send the borrowed assets
+                _wallet,
+                _isEoaPosition
             )) {
             console2.log("Failed to borrow assets. Check caps and reserve/spoke status.");
             return false;
@@ -66,24 +75,34 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
     function _executeAaveV4Supply(
         AaveV4TestPair memory _testPair,
         uint256 _supplyAmountInUSD,
-        address _sender,
-        SmartWallet _wallet
+        SmartWallet _wallet,
+        bool _isEoaPosition
     ) internal returns (bool success) {
+        address walletAddr = _wallet.walletAddr();
+        address sender = _wallet.owner();
         ISpoke.Reserve memory reserve = ISpoke(_testPair.spoke).getReserve(_testPair.collReserveId);
         address underlying = reserve.underlying;
-        address walletAddr = _wallet.walletAddr();
         uint256 supplyAmount = amountInUSDPrice(underlying, _supplyAmountInUSD);
 
         if (!_isValidSupply(_testPair.spoke, supplyAmount, reserve)) return false;
 
-        give(underlying, _sender, supplyAmount);
-        approveAsSender(_sender, underlying, walletAddr, supplyAmount);
+        if (_isEoaPosition) {
+            _enableEoaSupplyPositionManagers(ISpoke(_testPair.spoke), sender, walletAddr);
+        }
+
+        give(underlying, sender, supplyAmount);
+        approveAsSender(sender, underlying, walletAddr, supplyAmount);
 
         bytes memory executeActionCallData = executeActionCalldata(
             aaveV4SupplyEncode(
-                _testPair.spoke, walletAddr, _sender, _testPair.collReserveId, supplyAmount, true
+                _testPair.spoke,
+                _isEoaPosition ? sender : walletAddr, // onBehalf
+                sender,
+                _testPair.collReserveId,
+                supplyAmount,
+                true // useAsCollateral
             ),
-            true
+            true // isDirect
         );
 
         _wallet.execute(address(new AaveV4Supply()), executeActionCallData, 0);
@@ -96,10 +115,12 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
         uint256 _reserveId,
         uint256 _borrowAmountInUSD,
         address _to,
-        SmartWallet _wallet
+        SmartWallet _wallet,
+        bool _isEoaPosition
     ) internal returns (bool success) {
         ISpoke.Reserve memory reserve = ISpoke(_spoke).getReserve(_reserveId);
         address walletAddr = _wallet.walletAddr();
+        address sender = _wallet.owner();
 
         uint256 borrowAmount = amountInUSDPrice(reserve.underlying, _borrowAmountInUSD);
 
@@ -108,12 +129,51 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
             return false;
         }
 
+        if (_isEoaPosition) {
+            _enableEoaAllowancePositionManager(ISpoke(_spoke), sender, walletAddr, _reserveId);
+        }
+
         bytes memory executeActionCallData = executeActionCalldata(
-            aaveV4BorrowEncode(_spoke, walletAddr, _to, _reserveId, borrowAmount), true
+            aaveV4BorrowEncode(
+                _spoke,
+                _isEoaPosition ? sender : walletAddr, // onBehalf
+                _to,
+                _reserveId,
+                borrowAmount
+            ),
+            true // isDirect
         );
 
         _wallet.execute(address(new AaveV4Borrow()), executeActionCallData, 0);
+
         success = true;
+    }
+
+    function _enableEoaSupplyPositionManagers(ISpoke _spoke, address _eoa, address _walletAddr)
+        internal
+    {
+        vm.startPrank(_eoa);
+        _spoke.setUserPositionManager(SUPPLY_REPAY_POSITION_MANAGER, true);
+        _spoke.setUserPositionManager(CONFIG_POSITION_MANAGER, true);
+        IConfigPositionManager(CONFIG_POSITION_MANAGER)
+            .setCanUpdateUsingAsCollateralPermission(address(_spoke), _walletAddr, true);
+        vm.stopPrank();
+    }
+
+    function _enableEoaAllowancePositionManager(
+        ISpoke _spoke,
+        address _eoa,
+        address _walletAddr,
+        uint256 _reserveId
+    ) internal {
+        vm.startPrank(_eoa);
+        _spoke.setUserPositionManager(ALLOWANCE_POSITION_MANAGER, true);
+        // Use type(uint256).max for test purposes.
+        IAllowancePositionManager(ALLOWANCE_POSITION_MANAGER)
+            .approveBorrow(address(_spoke), _reserveId, _walletAddr, type(uint256).max);
+        IAllowancePositionManager(ALLOWANCE_POSITION_MANAGER)
+            .approveWithdraw(address(_spoke), _reserveId, _walletAddr, type(uint256).max);
+        vm.stopPrank();
     }
 
     function _isValidSupply(address _spoke, uint256 _amount, ISpoke.Reserve memory _reserve)

@@ -21,6 +21,12 @@ contract TestAaveV4Payback is AaveV4TestBase {
     address walletAddr;
     address sender;
 
+    struct TestConfig {
+        bool isDirect;
+        bool useMaxUint256;
+        bool isEoa;
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
@@ -38,18 +44,22 @@ contract TestAaveV4Payback is AaveV4TestBase {
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_payback_partial() public {
-        bool isDirect = false;
-        bool useMaxUint256 = false;
-        _baseTest(isDirect, useMaxUint256);
+        _baseTest(TestConfig({ isDirect: false, useMaxUint256: false, isEoa: false }));
     }
 
     function test_payback_full_direct() public {
-        bool isDirect = true;
-        bool useMaxUint256 = true;
-        _baseTest(isDirect, useMaxUint256);
+        _baseTest(TestConfig({ isDirect: true, useMaxUint256: true, isEoa: false }));
     }
 
-    function _baseTest(bool _isDirect, bool _useMaxUint256) internal {
+    function test_payback_partial_eoa() public {
+        _baseTest(TestConfig({ isDirect: false, useMaxUint256: false, isEoa: true }));
+    }
+
+    function test_payback_full_direct_eoa() public {
+        _baseTest(TestConfig({ isDirect: true, useMaxUint256: true, isEoa: true }));
+    }
+
+    function _baseTest(TestConfig memory _testConfig) internal {
         AaveV4TestPair[] memory tests = getTestPairs();
         for (uint256 i = 0; i < tests.length; ++i) {
             uint256 snapshotId = vm.snapshotState();
@@ -59,9 +69,9 @@ contract TestAaveV4Payback is AaveV4TestBase {
             uint256 supplyAmountUsd = 500;
             uint256 borrowAmountUsd = 100;
 
-            // Supply collateral
-            if (!_executeAaveV4Supply(testPair, supplyAmountUsd, sender, wallet)) {
-                console2.log("Failed to supply assets. Check caps and reserve/spoke status.");
+            if (!_executeAaveV4Open(
+                    testPair, supplyAmountUsd, borrowAmountUsd, wallet, _testConfig.isEoa
+                )) {
                 continue;
             }
 
@@ -69,17 +79,7 @@ contract TestAaveV4Payback is AaveV4TestBase {
                 ISpoke(testPair.spoke).getReserve(testPair.debtReserveId).underlying;
             uint256 borrowAmount = amountInUSDPrice(underlying, borrowAmountUsd);
 
-            // Borrow debt
-            if (!_executeAaveV4Borrow(
-                    testPair.spoke, testPair.debtReserveId, borrowAmountUsd, sender, wallet
-                )) {
-                console2.log("Failed to borrow assets. Check caps and reserve/spoke status.");
-                continue;
-            }
-
-            _payback(
-                testPair.spoke, testPair.debtReserveId, borrowAmount, _isDirect, _useMaxUint256
-            );
+            _payback(testPair.spoke, testPair.debtReserveId, borrowAmount, _testConfig);
 
             vm.revertToState(snapshotId);
         }
@@ -92,41 +92,42 @@ contract TestAaveV4Payback is AaveV4TestBase {
         address _spoke,
         uint256 _reserveId,
         uint256 _borrowedAmount,
-        bool _isDirect,
-        bool _useMaxUint256
+        TestConfig memory _testConfig
     ) internal {
-        address underlying = ISpoke(_spoke).getReserve(_reserveId).underlying;
-        uint256 userDebtBefore = ISpoke(_spoke).getUserTotalDebt(_reserveId, walletAddr);
-        uint256 paybackAmount = _useMaxUint256 ? userDebtBefore : _borrowedAmount / 2;
+        ISpoke spoke = ISpoke(_spoke);
+        address underlying = spoke.getReserve(_reserveId).underlying;
+        address onBehalf = _testConfig.isEoa ? sender : walletAddr;
 
-        // Give tokens to sender (slightly more)
-        uint256 topUpAmount = _useMaxUint256 ? userDebtBefore : (_borrowedAmount * 105 / 100);
+        uint256 userDebtBefore = spoke.getUserTotalDebt(_reserveId, onBehalf);
+        uint256 paybackAmount = _testConfig.useMaxUint256 ? userDebtBefore : _borrowedAmount / 2;
+
+        uint256 topUpAmount =
+            _testConfig.useMaxUint256 ? userDebtBefore : (_borrowedAmount * 105 / 100);
         give(underlying, sender, topUpAmount);
         approveAsSender(sender, underlying, walletAddr, topUpAmount);
 
         bytes memory executeActionCallData = executeActionCalldata(
             aaveV4PaybackEncode(
                 _spoke,
-                walletAddr,
+                onBehalf,
                 sender,
                 _reserveId,
-                _useMaxUint256 ? type(uint256).max : paybackAmount
+                _testConfig.useMaxUint256 ? type(uint256).max : paybackAmount
             ),
-            _isDirect
+            _testConfig.isDirect
         );
 
         uint256 senderBalanceBefore = balanceOf(underlying, sender);
 
         wallet.execute(address(cut), executeActionCallData, 0);
 
-        uint256 walletBalanceAfter = balanceOf(underlying, walletAddr);
-        uint256 userDebtAfter = ISpoke(_spoke).getUserTotalDebt(_reserveId, walletAddr);
+        uint256 userDebtAfter = spoke.getUserTotalDebt(_reserveId, onBehalf);
         uint256 senderBalanceAfter = balanceOf(underlying, sender);
 
-        assertEq(walletBalanceAfter, 0);
+        assertEq(balanceOf(underlying, walletAddr), 0);
         assertEq(senderBalanceAfter, senderBalanceBefore - paybackAmount);
 
-        if (_useMaxUint256) {
+        if (_testConfig.useMaxUint256) {
             assertEq(userDebtAfter, 0);
         } else {
             assertApproxEqAbs(userDebtAfter, userDebtBefore - paybackAmount, 1);

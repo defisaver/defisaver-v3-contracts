@@ -49,7 +49,7 @@ contract TestAaveV4StoreRatio is AaveV4TestBase {
 
             AaveV4TestPair memory testPair = tests[i];
 
-            if (!_executeAaveV4Open(testPair, 500, 100, sender, wallet)) {
+            if (!_executeAaveV4Open(testPair, 500, 100, wallet, false)) {
                 console2.log(
                     "Failed to open Aave V4 position. Check caps and reserve/spoke status."
                 );

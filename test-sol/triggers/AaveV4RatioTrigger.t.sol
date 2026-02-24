@@ -116,7 +116,7 @@ contract TestAaveV4RatioTrigger is AaveV4TestBase {
             uint256 snapshotId = vm.snapshotState();
 
             // Supply collateral.
-            if (!_executeAaveV4Supply(tests[i], _tc.supplyAmountUsd, sender, wallet)) {
+            if (!_executeAaveV4Supply(tests[i], _tc.supplyAmountUsd, wallet, false)) {
                 console2.log("Failed to supply assets. Check caps and reserve/spoke status.");
                 continue;
             }
@@ -124,7 +124,12 @@ contract TestAaveV4RatioTrigger is AaveV4TestBase {
             // When there is no debt, ratio should be max uint256. In that case avoid borrowing.
             if (!_tc.isMaxUintRatio) {
                 if (!_executeAaveV4Borrow(
-                        tests[i].spoke, tests[i].debtReserveId, _tc.borrowAmountUsd, sender, wallet
+                        tests[i].spoke,
+                        tests[i].debtReserveId,
+                        _tc.borrowAmountUsd,
+                        sender,
+                        wallet,
+                        false
                     )) {
                     console2.log("Failed to borrow assets. Check caps and reserve/spoke status.");
                     continue;

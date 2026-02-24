@@ -22,6 +22,11 @@ contract TestAaveV4CollateralSwitch is AaveV4TestBase {
     address walletAddr;
     address sender;
 
+    struct TestConfig {
+        bool isDirect;
+        bool isEoa;
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
@@ -39,26 +44,31 @@ contract TestAaveV4CollateralSwitch is AaveV4TestBase {
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_switch_collateral() public {
-        bool isDirect = false;
-        _baseTest(isDirect);
+        _baseTest(TestConfig({ isDirect: false, isEoa: false }));
     }
 
     function test_switch_collateral_direct() public {
-        bool isDirect = true;
-        _baseTest(isDirect);
+        _baseTest(TestConfig({ isDirect: true, isEoa: false }));
     }
 
-    function _baseTest(bool _isDirect) internal {
+    function test_switch_collateral_eoa() public {
+        _baseTest(TestConfig({ isDirect: false, isEoa: true }));
+    }
+
+    function test_switch_collateral_direct_eoa() public {
+        _baseTest(TestConfig({ isDirect: true, isEoa: true }));
+    }
+
+    function _baseTest(TestConfig memory _testConfig) internal {
         AaveV4TestPair[] memory tests = getTestPairs();
         for (uint256 i = 0; i < tests.length; ++i) {
             uint256 snapshotId = vm.snapshotState();
 
             AaveV4TestPair memory testPair = tests[i];
 
-            // This will active the reserve as collateral by default.
-            _executeAaveV4Supply(testPair, 10, sender, wallet);
+            _executeAaveV4Supply(testPair, 10, wallet, _testConfig.isEoa);
 
-            _switch(testPair.spoke, testPair.collReserveId, _isDirect, false);
+            _switch(testPair.spoke, testPair.collReserveId, _testConfig);
 
             vm.revertToState(snapshotId);
         }
@@ -67,16 +77,16 @@ contract TestAaveV4CollateralSwitch is AaveV4TestBase {
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function _switch(address _spoke, uint256 _reserveId, bool _isDirect, bool _useAsCollateral)
-        internal
-    {
+    function _switch(address _spoke, uint256 _reserveId, TestConfig memory _testConfig) internal {
+        address onBehalf = _testConfig.isEoa ? sender : walletAddr;
+
         bytes memory executeActionCallData = executeActionCalldata(
-            aaveV4CollateralSwitchEncode(_spoke, walletAddr, _reserveId, _useAsCollateral),
-            _isDirect
+            aaveV4CollateralSwitchEncode(_spoke, onBehalf, _reserveId, false), _testConfig.isDirect
         );
+
         wallet.execute(address(cut), executeActionCallData, 0);
-        ISpoke.UserAccountData memory userAccountData =
-            ISpoke(_spoke).getUserAccountData(walletAddr);
-        assertEq(userAccountData.activeCollateralCount, _useAsCollateral ? 1 : 0);
+
+        ISpoke.UserAccountData memory userAccountData = ISpoke(_spoke).getUserAccountData(onBehalf);
+        assertEq(userAccountData.activeCollateralCount, 0);
     }
 }

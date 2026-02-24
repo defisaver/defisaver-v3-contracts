@@ -14,4 +14,14 @@ interface IConfigPositionManager {
         bool usingAsCollateral,
         address onBehalfOf
     ) external;
+
+    /// @notice Sets the using as collateral permission for a delegatee.
+    /// @param spoke The address of the spoke.
+    /// @param delegatee The address of the delegatee.
+    /// @param permission The new permission status.
+    function setCanUpdateUsingAsCollateralPermission(
+        address spoke,
+        address delegatee,
+        bool permission
+    ) external;
 }
