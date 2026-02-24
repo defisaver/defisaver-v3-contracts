@@ -88,7 +88,7 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
 
         REPAY_AMOUNT_WETH = amountInUSDPrice(Addresses.WETH_ADDR, 1000);
         INITIAL_COLLATERAL_WETH_AMOUNT = amountInUSDPrice(Addresses.WETH_ADDR, 15_000);

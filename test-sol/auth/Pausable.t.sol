@@ -24,7 +24,7 @@ contract TestCore_Pausable is Pausable, BaseTest {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
         pausable = new PausableContract();
     }
 

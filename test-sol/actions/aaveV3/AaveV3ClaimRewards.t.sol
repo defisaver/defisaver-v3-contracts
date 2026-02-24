@@ -28,7 +28,7 @@ contract TestAaveV3ClaimRewards is AaveV3Helper, ActionsUtils, BaseTest {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("AaveV3ClaimRewards");
+        forkFromEnv("AaveV3ClaimRewards");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

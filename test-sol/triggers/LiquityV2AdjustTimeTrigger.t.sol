@@ -46,7 +46,7 @@ contract TestLiquityV2AdjustTimeTrigger is LiquityV2ExecuteActions {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

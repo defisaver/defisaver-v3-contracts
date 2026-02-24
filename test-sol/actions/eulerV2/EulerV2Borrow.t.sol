@@ -37,7 +37,7 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("EulerV2Borrow");
+        forkFromEnv("EulerV2Borrow");
         initTestPairs("EulerV2");
 
         wallet = new SmartWallet(bob);

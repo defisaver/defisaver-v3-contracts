@@ -16,7 +16,7 @@ contract TestTokenGroupRegistry is BaseTest, TokenGroupRegistry {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("TokenGroupRegistry");
+        forkFromEnv("TokenGroupRegistry");
 
         cut = new TokenGroupRegistry();
 

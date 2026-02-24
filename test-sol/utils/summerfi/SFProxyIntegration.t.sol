@@ -95,7 +95,7 @@ contract SFProxyIntegration is
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
         // forkArbitrumLatest();
         // forkBaseLatest();
         // forkOptimismLatest();

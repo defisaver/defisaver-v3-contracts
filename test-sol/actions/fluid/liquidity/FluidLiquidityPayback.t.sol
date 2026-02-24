@@ -47,7 +47,7 @@ contract TestFluidLiquidityPayback is FluidTestBase {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("FluidLiquidityPayback");
+        forkFromEnv("FluidLiquidityPayback");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

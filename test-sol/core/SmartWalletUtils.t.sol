@@ -17,7 +17,7 @@ contract TestCore_SmartWalletUtils is BaseTest {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
         cut = new MockSmartWalletUtils();
     }
 

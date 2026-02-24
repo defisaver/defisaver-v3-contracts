@@ -18,7 +18,7 @@ contract TestCompV3RatioTrigger is BaseTest {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("CompV3RatioTrigger");
+        forkFromEnv("CompV3RatioTrigger");
         cut = new CompV3RatioTrigger();
     }
 

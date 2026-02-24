@@ -16,7 +16,7 @@ contract TestCore_AdminAuth is AdminAuth, BaseTest {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
         cut = new AdminAuth();
     }
 

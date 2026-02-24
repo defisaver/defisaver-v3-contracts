@@ -27,7 +27,7 @@ contract TestEtherFiStake is BaseTest, ActionsUtils, EtherFiHelper {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("EtherFiStake");
+        forkFromEnv("EtherFiStake");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

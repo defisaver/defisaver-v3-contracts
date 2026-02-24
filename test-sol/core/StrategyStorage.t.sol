@@ -25,7 +25,7 @@ contract TestCore_StrategyStorage is BaseTest {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
         cut = new StrategyStorage();
     }
 

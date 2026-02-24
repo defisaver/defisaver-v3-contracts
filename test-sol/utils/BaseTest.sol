@@ -14,6 +14,8 @@ contract BaseTest is Config {
     address internal constant charlie = address(0xcc);
     address internal constant jane = address(0x11);
 
+    error UnsupportedChain(string chain);
+
     using SafeERC20 for IERC20;
 
     bool private configInitialized;
@@ -38,51 +40,53 @@ contract BaseTest is Config {
         _initConfigIfNeeded();
     }
 
-    function forkMainnet(string memory testName) internal {
+    function forkFromEnv(string memory testName) internal {
+        string memory chain = vm.envString("CHAIN");
+        string memory rpc = _getRpcForChain(chain);
+        bool isForkLatest = bytes(testName).length == 0;
+
         _initConfigIfNeeded();
+        uint256 blockNumber;
+        // if fork is latest then we send blockNumber = 0
+        if (!isForkLatest) {
+            blockNumber = getBlockNumberForTestIfExist(testName);
+        }
 
-        uint256 blockNumber = getBlockNumberForTestIfExist(testName);
-        string memory mainnetRpc = vm.envString("ETHEREUM_NODE");
-        uint256 mainnetFork = vm.createFork(mainnetRpc, blockNumber);
-        vm.selectFork(mainnetFork);
-    }
-
-    function forkMainnetLatest() internal {
-        string memory mainnetRpc = vm.envString("ETHEREUM_NODE");
-        uint256 mainnetFork = vm.createFork(mainnetRpc);
-        vm.selectFork(mainnetFork);
-    }
-
-    function forkOptimismLatest() internal {
-        string memory optimismRpc = vm.envString("OPTIMISM_NODE");
-        uint256 optimismFork = vm.createFork(optimismRpc);
-        vm.selectFork(optimismFork);
-    }
-
-    function forkBaseLatest() internal {
-        string memory baseRpc = vm.envString("BASE_NODE");
-        uint256 baseFork = vm.createFork(baseRpc);
-        vm.selectFork(baseFork);
-    }
-
-    function forkArbitrumLatest() internal {
-        string memory arbitrumRpc = vm.envString("ARBITRUM_NODE");
-        uint256 arbitrumFork = vm.createFork(arbitrumRpc);
-        vm.selectFork(arbitrumFork);
+        _fork(rpc, blockNumber);
     }
 
     function forkLocalAnvil() internal {
         string memory anvilRpc = "http://localhost:8545";
-        uint256 anvilFork = vm.createFork(anvilRpc);
-        vm.selectFork(anvilFork);
+        _fork(anvilRpc, 0);
     }
 
     function forkTenderly() internal {
         string memory tenderlyForkId = vm.envString("FORK_ID");
         string memory base = "https://virtual.mainnet.rpc.tenderly.co/";
         string memory forkUrl = string(abi.encodePacked(base, tenderlyForkId));
-        uint256 tenderlyFork = vm.createFork(forkUrl);
-        vm.selectFork(tenderlyFork);
+        _fork(forkUrl, 0);
+    }
+
+    function _fork(string memory rpc, uint256 blockNumber) internal {
+        uint256 fork = blockNumber == 0 ? vm.createFork(rpc) : vm.createFork(rpc, blockNumber);
+        vm.selectFork(fork);
+    }
+
+    function _getRpcForChain(string memory chain) internal view returns (string memory) {
+        if (keccak256(bytes(chain)) == keccak256("mainnet")) {
+            return vm.envString("ETHEREUM_NODE");
+        } else if (keccak256(bytes(chain)) == keccak256("arbitrum")) {
+            return vm.envString("ARBITRUM_NODE");
+        } else if (keccak256(bytes(chain)) == keccak256("optimism")) {
+            return vm.envString("OPTIMISM_NODE");
+        } else if (keccak256(bytes(chain)) == keccak256("base")) {
+            return vm.envString("BASE_NODE");
+        } else if (keccak256(bytes(chain)) == keccak256("linea")) {
+            return vm.envString("LINEA_NODE");
+        } else if (keccak256(bytes(chain)) == keccak256("plasma")) {
+            return vm.envString("PLASMA_NODE");
+        }
+        revert UnsupportedChain(chain);
     }
 
     function approve(address _token, address _to, uint256 _amount) internal {

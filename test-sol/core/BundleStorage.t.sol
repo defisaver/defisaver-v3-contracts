@@ -28,7 +28,7 @@ contract TestCore_BundleStorage is BaseTest, CoreHelper {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
         cut = new BundleStorage();
         strategyStorage = StrategyStorage(STRATEGY_STORAGE_ADDR);
     }

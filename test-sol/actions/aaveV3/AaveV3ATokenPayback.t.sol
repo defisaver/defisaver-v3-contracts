@@ -26,7 +26,7 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("AaveV3ATokenPayback");
+        forkFromEnv("AaveV3ATokenPayback");
         initTestPairs("AaveV3");
 
         wallet = new SmartWallet(bob);

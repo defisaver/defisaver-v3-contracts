@@ -45,7 +45,7 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("AaveV3CollateralSwitch");
+        forkFromEnv("AaveV3CollateralSwitch");
 
         wallet = new SmartWallet(bob);
         walletAddr = wallet.walletAddr();

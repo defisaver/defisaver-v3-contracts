@@ -33,7 +33,7 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("AaveV3Supply");
+        forkFromEnv("AaveV3Supply");
         initTestPairs("AaveV3");
 
         wallet = new SmartWallet(bob);

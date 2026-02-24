@@ -33,7 +33,7 @@ contract TestCore_RecipeExecutor is ActionsUtils, RegistryUtils, BaseTest, SFPro
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
 
         SmartWallet safeWallet = new SmartWallet(bob);
 

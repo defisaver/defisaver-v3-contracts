@@ -29,7 +29,7 @@ contract TestAaveV3DelegateCredit is AaveV3Helper, ActionsUtils, BaseTest {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("AaveV3DelegateCredit");
+        forkFromEnv("AaveV3DelegateCredit");
         initTestPairs("AaveV3");
 
         wallet = new SmartWallet(bob);

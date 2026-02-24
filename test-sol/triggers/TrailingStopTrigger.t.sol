@@ -24,7 +24,7 @@ contract TestTrailingStopTrigger is BaseTest, DSMath, MainnetUtilAddresses {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("TrailingStopTrigger");
+        forkFromEnv("TrailingStopTrigger");
         cut = new TrailingStopTrigger();
 
         // set mock price feed

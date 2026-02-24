@@ -55,7 +55,7 @@ contract TestLiquityV2SPDeposit is LiquityV2ExecuteActions, LiquityV2Utils {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("LiquityV2SPDeposit");
+        forkFromEnv("LiquityV2SPDeposit");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

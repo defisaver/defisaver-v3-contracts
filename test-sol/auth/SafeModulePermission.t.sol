@@ -27,7 +27,7 @@ contract TestCore_SafeModulePermission is MockSafeModulePermission, BaseTest {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
 
         wallet = new SmartWallet(bob);
         walletAddr = wallet.createSafe();

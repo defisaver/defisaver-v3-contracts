@@ -18,7 +18,7 @@ contract TestCore_BotAuth is BaseTest {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("BotAuth");
+        forkFromEnv("BotAuth");
         cut = new BotAuth();
     }
 

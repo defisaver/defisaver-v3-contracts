@@ -32,7 +32,7 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("AaveV3SetEMode");
+        forkFromEnv("AaveV3SetEMode");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

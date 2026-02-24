@@ -75,7 +75,7 @@ contract TestLiquityV2Automation is LiquityV2ExecuteActions, LiquityV2Utils {
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         // fork
-        forkMainnet("LiquityV2Automation");
+        forkFromEnv("LiquityV2Automation");
 
         // basic setup
         wallet = new SmartWallet(bob);

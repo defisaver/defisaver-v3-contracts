@@ -38,7 +38,7 @@ contract TestLiquityV2Supply is LiquityV2ExecuteActions {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("LiquityV2Supply");
+        forkFromEnv("LiquityV2Supply");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

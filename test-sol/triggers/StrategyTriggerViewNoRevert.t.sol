@@ -21,7 +21,7 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRever
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("StrategyTriggerViewNoRevert");
+        forkFromEnv("StrategyTriggerViewNoRevert");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

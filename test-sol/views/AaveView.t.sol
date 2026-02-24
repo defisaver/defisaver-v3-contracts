@@ -25,7 +25,7 @@ contract TestAaveView is BaseTest {
         0x0100000000000000000000000000000000000000000000000000000000000000;
 
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
         cut = new AaveView();
     }
 

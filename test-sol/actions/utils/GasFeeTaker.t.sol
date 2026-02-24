@@ -30,7 +30,7 @@ contract TestGasFeeTaker is BaseTest, GasFeeTaker {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("GasFeeTaker");
+        forkFromEnv("GasFeeTaker");
         cut = new GasFeeTaker();
     }
 

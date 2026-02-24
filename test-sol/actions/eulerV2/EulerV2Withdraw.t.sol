@@ -28,7 +28,7 @@ contract TestEulerV2Withdraw is EulerV2TestHelper {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("EulerV2Withdraw");
+        forkFromEnv("EulerV2Withdraw");
         initTestPairs("EulerV2");
 
         wallet = new SmartWallet(bob);

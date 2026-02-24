@@ -42,7 +42,7 @@ contract TestPendleTokenRedeem is BaseTest, ActionsUtils {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("PendleTokenRedeem");
+        forkFromEnv("PendleTokenRedeem");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

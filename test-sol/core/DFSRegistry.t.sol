@@ -23,7 +23,7 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
         cut = new DFSRegistry();
     }
 

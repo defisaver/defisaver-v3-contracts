@@ -17,7 +17,7 @@ contract TestChainLinkPriceTrigger is BaseTest, TokenPriceHelper {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("ChainlinkPriceTrigger");
+        forkFromEnv("ChainlinkPriceTrigger");
         cut = new ChainLinkPriceTrigger();
     }
 

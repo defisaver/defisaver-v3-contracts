@@ -27,7 +27,7 @@ contract TestRenzoStake is BaseTest, ActionsUtils, RenzoHelper {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("RenzoStake");
+        forkFromEnv("RenzoStake");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
