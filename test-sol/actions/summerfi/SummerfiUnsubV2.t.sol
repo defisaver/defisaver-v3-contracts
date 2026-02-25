@@ -36,7 +36,7 @@ contract SummerfiUnsubV2Test is BaseTest, ActionsUtils, RegistryUtils, SFProxyUt
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("SummerfiUnsubV2");
 
         cut = new SummerfiUnsubV2();
         recipeExecutor = new RecipeExecutor();
