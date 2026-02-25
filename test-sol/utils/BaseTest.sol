@@ -49,7 +49,7 @@ contract BaseTest is Config {
         uint256 blockNumber;
         // if fork is latest then we send blockNumber = 0
         if (!isForkLatest) {
-            blockNumber = getBlockNumberForTestIfExist(testName);
+            blockNumber = getBlockNumberForChainAndTest(chain, testName);
         }
 
         _fork(rpc, blockNumber);

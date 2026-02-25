@@ -8,16 +8,16 @@ library Addresses {
     address public constant DAI_ADDR = 0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1;
     address public constant USDC_ADDR = 0xaf88d065e77c8cC2239327C5EDb3A432268e5831;
     address public constant USDT_ADDR = 0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9;
-    address internal constant WSTETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address internal constant WSTETH_ADDR = 0x5979D7b546E38E414F7E9822514be443A4800529;
     address internal constant STETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant WBTC_ADDR = 0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f;
     address public constant RENBTC_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant BANNED_TOKEN_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant YFI_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant MKR_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address public constant LUSD_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant LUSD_ADDR = 0x93b346b6BC2548dA6A1E7d98E9a421B42541425b;
     address public constant LINK_ADDR = 0xf97f4df75117a78c1A5a0DBb814Af92458539FB4;
-    address public constant AAVE_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant AAVE_ADDR = 0xba5DdD1f9d7F570dc94a51479a000E3BCE967196;
     address public constant GHO_TOKEN = 0x7dfF72693f6A4149b17e7C6314655f6A9F7c8B33;
     address public constant USDE_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant EUSDE_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
@@ -50,9 +50,9 @@ library Addresses {
     // Other
     address public constant DS_PROXY_FACTORY = 0x5a15566417e6C1c9546523066500bDDBc53F88C7;
     address public constant COMET_USDC = 0x9c4ec768c28520B50860ea7a15bd7213a9fF58bf; // This is USDC, not USDC_E
-    address public constant SAFE_PROXY_FACTORY = 0xeEdfce96C2D257a4c67b711998Bb65E32E288f66;
+    address public constant SAFE_PROXY_FACTORY = 0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67;
     address public constant SAFE_SINGLETON = 0x41675C099F32341bf84BFc5382aF534df5C7461a;
-    address public constant UNISWAP_ROUTER = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
+    address public constant UNISWAP_ROUTER = 0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24; // V3 -> 0xE592427A0AEce92De3Edee1F18E0157C05861564
     address public constant UNI_V2_WRAPPER = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant UNI_V3_WRAPPER = 0x37236458C59F4dCF17b96Aa67FC07Bbf5578d873;
     // InstaDapp

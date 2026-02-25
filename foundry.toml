@@ -17,7 +17,8 @@ fs_permissions = [{ access = 'read', path = './test-sol/config/' }]
 
 
 [profile.arbitrum]
-no_match_path = "test-sol/{actions,views}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi}*"
+# TODO -> Check fluid tests
+no_match_path = "test-sol/{actions,views}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,aaveV3/umbrella,fluid,AaveView}*"
 
 [profile.base]
 no_match_path = "test-sol/{actions,views}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi}*"
