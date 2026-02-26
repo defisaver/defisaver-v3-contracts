@@ -14,6 +14,12 @@ const {
 const { executeAction } = require('./actions');
 
 const { createStrategy, createBundle } = require('../strategies/utils/utils-strategies');
+
+const EOA_ACC_INDEX = 2;
+
+const SUPPLY_REPAY_POSITION_MANAGER = '0x8675fBc9B6F8F3097c4C151A7a4838AFE23AB020';
+const ALLOWANCE_POSITION_MANAGER = '0x063A6DFe3a02Ae18afDF293c86c76A8A6665Cb60';
+const CONFIG_POSITION_MANAGER = '0x22a0Ee581644f55E1deB487804Ec9b4188B41457';
 const {
     createAaveV4RepayStrategy,
     createAaveV4FLRepayStrategy,
@@ -180,6 +186,95 @@ const openAaveV4ProxyPosition = async (
     console.log('AaveV4ProxyPosition opened');
 };
 
+const openAaveV4EoaPosition = async (
+    eoaAddr,
+    collReserveId,
+    debtReserveId,
+    collAmountInUSD,
+    debtAmountInUSD,
+    spoke = addrs[network].AAVE_V4_CORE_SPOKE,
+) => {
+    const eoaSigner = await hre.ethers.getSigner(eoaAddr);
+    const spokeContract = await hre.ethers.getContractAt('ISpoke', spoke);
+
+    const collReserve = await getReserveData(spoke, collReserveId);
+    const debtReserve = await getReserveData(spoke, debtReserveId);
+
+    const collAmount = await fetchAmountInUSDPriceByAddress(
+        collReserve.underlying,
+        collReserve.decimals,
+        collAmountInUSD,
+    );
+    const debtAmount = await fetchAmountInUSDPriceByAddress(
+        debtReserve.underlying,
+        debtReserve.decimals,
+        debtAmountInUSD,
+    );
+
+    await setBalance(collReserve.underlying, eoaAddr, collAmount);
+    await approve(collReserve.underlying, spoke, eoaSigner);
+
+    await spokeContract.connect(eoaSigner).supply(collReserveId, collAmount, eoaAddr);
+    await spokeContract.connect(eoaSigner).setUsingAsCollateral(collReserveId, true, eoaAddr);
+    await spokeContract.connect(eoaSigner).borrow(debtReserveId, debtAmount, eoaAddr);
+    console.log('AaveV4EoaPosition opened');
+};
+
+const enableAaveV4EoaPositionManagers = async (
+    eoaSigner,
+    proxyAddr,
+    spoke,
+    {
+        approveBorrowReserveIds = [],
+        approveWithdrawReserveIds = [],
+        enableConfigManager = false,
+    } = {},
+) => {
+    const spokeContract = await hre.ethers.getContractAt('ISpoke', spoke);
+
+    await spokeContract
+        .connect(eoaSigner)
+        .setUserPositionManager(SUPPLY_REPAY_POSITION_MANAGER, true);
+
+    const needsAllowanceManager =
+        approveBorrowReserveIds.length > 0 || approveWithdrawReserveIds.length > 0;
+
+    if (needsAllowanceManager) {
+        await spokeContract
+            .connect(eoaSigner)
+            .setUserPositionManager(ALLOWANCE_POSITION_MANAGER, true);
+
+        const allowancePM = await hre.ethers.getContractAt(
+            'IAllowancePositionManager',
+            ALLOWANCE_POSITION_MANAGER,
+        );
+        for (const reserveId of approveBorrowReserveIds) {
+            await allowancePM
+                .connect(eoaSigner)
+                .approveBorrow(spoke, reserveId, proxyAddr, hre.ethers.constants.MaxUint256);
+        }
+        for (const reserveId of approveWithdrawReserveIds) {
+            await allowancePM
+                .connect(eoaSigner)
+                .approveWithdraw(spoke, reserveId, proxyAddr, hre.ethers.constants.MaxUint256);
+        }
+    }
+
+    if (enableConfigManager) {
+        await spokeContract
+            .connect(eoaSigner)
+            .setUserPositionManager(CONFIG_POSITION_MANAGER, true);
+
+        const configPM = await hre.ethers.getContractAt(
+            'IConfigPositionManager',
+            CONFIG_POSITION_MANAGER,
+        );
+        await configPM
+            .connect(eoaSigner)
+            .setCanUpdateUsingAsCollateralPermission(spoke, proxyAddr, true);
+    }
+};
+
 const redeployAaveV4Contracts = async () => {
     const isFork = isNetworkFork();
     await redeploy('AaveV4Supply', isFork);
@@ -221,6 +316,7 @@ const getUserSuppliedAmount = async (spoke, user, reserveId) => {
 };
 
 module.exports = {
+    EOA_ACC_INDEX,
     AAVE_V4_AUTOMATION_TEST_PAIRS,
     CORE_RESERVE_ID_USDT,
     deployAaveV4RepayBundle,
@@ -231,6 +327,8 @@ module.exports = {
     deployAaveV4FLCollateralSwitchStrategy,
     getReserveData,
     openAaveV4ProxyPosition,
+    openAaveV4EoaPosition,
+    enableAaveV4EoaPositionManagers,
     redeployAaveV4Contracts,
     getUserAccountData,
     getSafetyRatio,

@@ -25,12 +25,15 @@ const {
     redeployAaveV4Contracts,
     AAVE_V4_AUTOMATION_TEST_PAIRS,
     openAaveV4ProxyPosition,
+    openAaveV4EoaPosition,
+    enableAaveV4EoaPositionManagers,
     getSafetyRatio,
     deployAaveV4FLCollateralSwitchStrategy,
     getUserAccountData,
     getAaveV4AssetPrice,
     getUserSuppliedAmount,
     CORE_RESERVE_ID_USDT,
+    EOA_ACC_INDEX,
 } = require('../../utils/aaveV4');
 
 const { topUp } = require('../../../scripts/utils/fork');
@@ -41,6 +44,7 @@ const runCollateralSwitchTests = () => {
     describe('AaveV4 Collateral Switch Strategies Tests', () => {
         let snapshotId;
         let senderAcc;
+        let eoaAcc;
         let proxy;
         let botAcc;
         let strategyExecutor;
@@ -54,11 +58,13 @@ const runCollateralSwitchTests = () => {
 
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
+            eoaAcc = (await hre.ethers.getSigners())[EOA_ACC_INDEX];
 
             if (isFork) {
                 await topUp(senderAcc.address);
                 await topUp(getOwnerAddr());
                 await topUp(botAcc.address);
+                await topUp(eoaAcc.address);
             }
 
             proxy = await getProxy(senderAcc.address);
@@ -81,32 +87,55 @@ const runCollateralSwitchTests = () => {
             await revertToSnapshot(snapshotId);
         });
 
-        const baseTest = async (pair, isMaxUint256Switch, swithReserveId, swithAssetSymbol) => {
+        const baseTest = async (
+            pair,
+            isMaxUint256Switch,
+            swithReserveId,
+            swithAssetSymbol,
+            isEoa = false,
+        ) => {
             const collAmountInUSD = '1000';
             const debtAmountInUSD = '300';
             const triggerPrice = '0'; // Should trigger if price > 0
             const collAsset = getAssetInfo(pair.collSymbol, chainIds[network]);
             const switchAsset = getAssetInfo(swithAssetSymbol, chainIds[network]);
 
+            const positionOwner = isEoa ? eoaAcc.address : proxy.address;
+
             /*//////////////////////////////////////////////////////////////
                                     OPEN POSITION
             //////////////////////////////////////////////////////////////*/
-            await openAaveV4ProxyPosition(
-                proxy,
-                senderAcc.address,
-                pair.collReserveId,
-                pair.debtReserveId,
-                collAmountInUSD,
-                debtAmountInUSD,
-                pair.spoke,
-            );
+            if (isEoa) {
+                await openAaveV4EoaPosition(
+                    eoaAcc.address,
+                    pair.collReserveId,
+                    pair.debtReserveId,
+                    collAmountInUSD,
+                    debtAmountInUSD,
+                    pair.spoke,
+                );
+                await enableAaveV4EoaPositionManagers(eoaAcc, proxy.address, pair.spoke, {
+                    approveWithdrawReserveIds: [pair.collReserveId],
+                    enableConfigManager: true,
+                });
+            } else {
+                await openAaveV4ProxyPosition(
+                    proxy,
+                    senderAcc.address,
+                    pair.collReserveId,
+                    pair.debtReserveId,
+                    collAmountInUSD,
+                    debtAmountInUSD,
+                    pair.spoke,
+                );
+            }
 
             /*//////////////////////////////////////////////////////////////
                                   GET POSITION DATA
             //////////////////////////////////////////////////////////////*/
-            const ratioBefore = await getSafetyRatio(pair.spoke, proxy.address);
+            const ratioBefore = await getSafetyRatio(pair.spoke, positionOwner);
             console.log('ratioBefore', ratioBefore);
-            const userAccountData = await getUserAccountData(pair.spoke, proxy.address);
+            const userAccountData = await getUserAccountData(pair.spoke, positionOwner);
             const collPrice = await getAaveV4AssetPrice(pair.spoke, pair.collReserveId);
             const switchAssetPrice = await getAaveV4AssetPrice(pair.spoke, swithReserveId);
             const fullCollateralAmount = userAccountData.totalCollateralValue
@@ -121,7 +150,7 @@ const runCollateralSwitchTests = () => {
             const { subId, strategySub } = await subAaveV4FLCollateralSwitchStrategy(
                 strategyId,
                 proxy,
-                proxy.address,
+                positionOwner,
                 pair.spoke,
                 collAsset.address,
                 pair.collReserveId,
@@ -136,7 +165,7 @@ const runCollateralSwitchTests = () => {
                                   CALCULATE EXCHANGE AMOUNT
             //////////////////////////////////////////////////////////////*/
             const exchangeAmount = isMaxUint256Switch
-                ? fullCollateralAmount.mul(99).div(100) // To handle any fees and rounding errors
+                ? fullCollateralAmount.mul(99).div(100)
                 : partialCollateralAmount;
             const exchangeObject = await formatMockExchangeObjUsingExistingPrices(
                 collAsset,
@@ -162,12 +191,12 @@ const runCollateralSwitchTests = () => {
             const proxyToAssetBalanceBefore = await balanceOf(switchAsset.address, proxy.address);
             const positionFromCollateralBalanceBefore = await getUserSuppliedAmount(
                 pair.spoke,
-                proxy.address,
+                positionOwner,
                 pair.collReserveId,
             );
             const positionToCollateralBalanceBefore = await getUserSuppliedAmount(
                 pair.spoke,
-                proxy.address,
+                positionOwner,
                 swithReserveId,
             );
 
@@ -194,12 +223,12 @@ const runCollateralSwitchTests = () => {
             const proxyToAssetBalanceAfter = await balanceOf(switchAsset.address, proxy.address);
             const positionFromCollateralBalanceAfter = await getUserSuppliedAmount(
                 pair.spoke,
-                proxy.address,
+                positionOwner,
                 pair.collReserveId,
             );
             const positionToCollateralBalanceAfter = await getUserSuppliedAmount(
                 pair.spoke,
-                proxy.address,
+                positionOwner,
                 swithReserveId,
             );
 
@@ -226,15 +255,18 @@ const runCollateralSwitchTests = () => {
         for (let i = 0; i < AAVE_V4_AUTOMATION_TEST_PAIRS.length; ++i) {
             const pair = AAVE_V4_AUTOMATION_TEST_PAIRS[i];
             it('... should execute aaveV4 SW full amount FL collateral switch strategy', async () => {
-                const isMaxUint256Switch = true;
-                // TODO: Hardcode for now like this to avoid caps
-                await baseTest(pair, isMaxUint256Switch, CORE_RESERVE_ID_USDT, 'USDT');
+                await baseTest(pair, true, CORE_RESERVE_ID_USDT, 'USDT');
             });
             it(`... should execute aaveV4 SW partial amount FL collateral switch strategy for ${pair.collSymbol} /
                 ${pair.debtSymbol} pair on ${pair.spokeName} spoke`, async () => {
-                const isMaxUint256Switch = false;
-                // TODO: Hardcode for now like this to avoid caps
-                await baseTest(pair, isMaxUint256Switch, CORE_RESERVE_ID_USDT, 'USDT');
+                await baseTest(pair, false, CORE_RESERVE_ID_USDT, 'USDT');
+            });
+            it('... should execute aaveV4 EOA full amount FL collateral switch strategy', async () => {
+                await baseTest(pair, true, CORE_RESERVE_ID_USDT, 'USDT', true);
+            });
+            it(`... should execute aaveV4 EOA partial amount FL collateral switch strategy for ${pair.collSymbol} /
+                ${pair.debtSymbol} pair on ${pair.spokeName} spoke`, async () => {
+                await baseTest(pair, false, CORE_RESERVE_ID_USDT, 'USDT', true);
             });
         }
     }).timeout(1400000);

@@ -25,9 +25,12 @@ const {
     deployAaveV4CloseBundle,
     AAVE_V4_AUTOMATION_TEST_PAIRS,
     openAaveV4ProxyPosition,
+    openAaveV4EoaPosition,
+    enableAaveV4EoaPositionManagers,
     getSafetyRatio,
     getUserAccountData,
     getAaveV4AssetPrice,
+    EOA_ACC_INDEX,
 } = require('../../utils/aaveV4');
 const { getOwnerAddr, chainIds, balanceOf } = require('../../utils/utils');
 const { topUp } = require('../../../scripts/utils/fork');
@@ -41,6 +44,7 @@ const runCloseTests = () => {
     describe('AaveV4 Close Strategies Tests', () => {
         let snapshotId;
         let senderAcc;
+        let eoaAcc;
         let proxy;
         let botAcc;
         let strategyExecutor;
@@ -54,11 +58,13 @@ const runCloseTests = () => {
 
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
+            eoaAcc = (await hre.ethers.getSigners())[EOA_ACC_INDEX];
 
             if (isFork) {
                 await topUp(senderAcc.address);
                 await topUp(getOwnerAddr());
                 await topUp(botAcc.address);
+                await topUp(eoaAcc.address);
             }
 
             proxy = await getProxy(senderAcc.address);
@@ -81,27 +87,43 @@ const runCloseTests = () => {
             await revertToSnapshot(snapshotId);
         });
 
-        const baseTest = async (pair, config) => {
+        const baseTest = async (pair, config, isEoa = false) => {
             const collAsset = getAssetInfo(pair.collSymbol, chainIds[network]);
             const debtAsset = getAssetInfo(pair.debtSymbol, chainIds[network]);
 
-            await openAaveV4ProxyPosition(
-                proxy,
-                senderAcc.address,
-                pair.collReserveId,
-                pair.debtReserveId,
-                '1000',
-                '300',
-                pair.spoke,
-            );
+            const positionOwner = isEoa ? eoaAcc.address : proxy.address;
 
-            const ratioBefore = await getSafetyRatio(pair.spoke, proxy.address);
+            if (isEoa) {
+                await openAaveV4EoaPosition(
+                    eoaAcc.address,
+                    pair.collReserveId,
+                    pair.debtReserveId,
+                    '1000',
+                    '300',
+                    pair.spoke,
+                );
+                await enableAaveV4EoaPositionManagers(eoaAcc, proxy.address, pair.spoke, {
+                    approveWithdrawReserveIds: [pair.collReserveId],
+                });
+            } else {
+                await openAaveV4ProxyPosition(
+                    proxy,
+                    senderAcc.address,
+                    pair.collReserveId,
+                    pair.debtReserveId,
+                    '1000',
+                    '300',
+                    pair.spoke,
+                );
+            }
+
+            const ratioBefore = await getSafetyRatio(pair.spoke, positionOwner);
             console.log('ratioBefore', ratioBefore);
 
             const { subId, strategySub } = await subAaveV4CloseOnPrice(
                 bundleId,
                 proxy,
-                proxy.address,
+                positionOwner,
                 pair.spoke,
                 collAsset.address,
                 pair.collReserveId,
@@ -130,7 +152,7 @@ const runCloseTests = () => {
             await addBalancerFlLiquidity(collAsset.address);
             await addBalancerFlLiquidity(debtAsset.address);
 
-            const userAccountData = await getUserAccountData(pair.spoke, proxy.address);
+            const userAccountData = await getUserAccountData(pair.spoke, positionOwner);
             const scaling = hre.ethers.utils.parseUnits('1', 26);
             const collAmountInUSD = userAccountData.totalCollateralValue.div(scaling);
             const debtAmountInUSD = userAccountData.totalDebtValueRay.div(scaling);
@@ -142,7 +164,6 @@ const runCloseTests = () => {
 
             if (closeToDebt) {
                 console.log('Closing to debt');
-                // Close to debt: flash loan debt asset, sell collateral to repay
                 const sellAmount = userAccountData.totalCollateralValue
                     .mul(hre.ethers.BigNumber.from(10).pow(collAsset.decimals))
                     .div(collPrice.mul(hre.ethers.BigNumber.from(10).pow(18)));
@@ -174,7 +195,6 @@ const runCloseTests = () => {
                 );
             } else {
                 console.log('Closing to collateral');
-                // Close to collateral: flash loan collateral asset, sell to get debt asset
                 const flAmount = userAccountData.totalDebtValueRay
                     .mul(hre.ethers.BigNumber.from(10).pow(collAsset.decimals))
                     .div(collPrice.mul(hre.ethers.BigNumber.from(10).pow(45)))
@@ -208,7 +228,7 @@ const runCloseTests = () => {
             expect(proxyCollBalanceAfter).to.be.eq(proxyCollBalanceBefore);
             expect(proxyDebtBalanceAfter).to.be.eq(proxyDebtBalanceBefore);
 
-            const ratioAfter = await getSafetyRatio(pair.spoke, proxy.address);
+            const ratioAfter = await getSafetyRatio(pair.spoke, positionOwner);
             console.log('ratioAfter', ratioAfter);
         };
 
@@ -227,6 +247,10 @@ const runCloseTests = () => {
                 it(`... should execute aaveV4 SW Close ${strategyTypeName} strategy for ${pair.collSymbol} /
                     ${pair.debtSymbol} pair on ${pair.spokeName} spoke`, async () => {
                     await baseTest(pair, config);
+                });
+                it(`... should execute aaveV4 EOA Close ${strategyTypeName} strategy for ${pair.collSymbol} /
+                    ${pair.debtSymbol} pair on ${pair.spokeName} spoke`, async () => {
+                    await baseTest(pair, config, true);
                 });
             }
         }

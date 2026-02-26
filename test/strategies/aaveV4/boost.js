@@ -24,7 +24,10 @@ const {
     deployAaveV4BoostBundle,
     AAVE_V4_AUTOMATION_TEST_PAIRS,
     openAaveV4ProxyPosition,
+    openAaveV4EoaPosition,
+    enableAaveV4EoaPositionManagers,
     getSafetyRatio,
+    EOA_ACC_INDEX,
 } = require('../../utils/aaveV4');
 const { getOwnerAddr, chainIds, balanceOf } = require('../../utils/utils');
 const { topUp } = require('../../../scripts/utils/fork');
@@ -35,6 +38,7 @@ const runBoostTests = () => {
     describe('AaveV4 Boost Strategies Tests', () => {
         let snapshotId;
         let senderAcc;
+        let eoaAcc;
         let proxy;
         let botAcc;
         let strategyExecutor;
@@ -48,11 +52,13 @@ const runBoostTests = () => {
 
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
+            eoaAcc = (await hre.ethers.getSigners())[EOA_ACC_INDEX];
 
             if (isFork) {
                 await topUp(senderAcc.address);
                 await topUp(getOwnerAddr());
                 await topUp(botAcc.address);
+                await topUp(eoaAcc.address);
             }
 
             proxy = await getProxy(senderAcc.address);
@@ -75,7 +81,7 @@ const runBoostTests = () => {
             await revertToSnapshot(snapshotId);
         });
 
-        const baseTest = async (pair, isFLStrategy) => {
+        const baseTest = async (pair, isFLStrategy, isEoa = false) => {
             const collAmountInUSD = '1000';
             const debtAmountInUSD = '300';
             const boostAmountInUSD = '100';
@@ -85,23 +91,39 @@ const runBoostTests = () => {
             const collAsset = getAssetInfo(pair.collSymbol, chainIds[network]);
             const debtAsset = getAssetInfo(pair.debtSymbol, chainIds[network]);
 
-            await openAaveV4ProxyPosition(
-                proxy,
-                senderAcc.address,
-                pair.collReserveId,
-                pair.debtReserveId,
-                collAmountInUSD,
-                debtAmountInUSD,
-                pair.spoke,
-            );
+            const positionOwner = isEoa ? eoaAcc.address : proxy.address;
 
-            const ratioBefore = await getSafetyRatio(pair.spoke, proxy.address);
+            if (isEoa) {
+                await openAaveV4EoaPosition(
+                    eoaAcc.address,
+                    pair.collReserveId,
+                    pair.debtReserveId,
+                    collAmountInUSD,
+                    debtAmountInUSD,
+                    pair.spoke,
+                );
+                await enableAaveV4EoaPositionManagers(eoaAcc, proxy.address, pair.spoke, {
+                    approveBorrowReserveIds: [pair.debtReserveId],
+                });
+            } else {
+                await openAaveV4ProxyPosition(
+                    proxy,
+                    senderAcc.address,
+                    pair.collReserveId,
+                    pair.debtReserveId,
+                    collAmountInUSD,
+                    debtAmountInUSD,
+                    pair.spoke,
+                );
+            }
+
+            const ratioBefore = await getSafetyRatio(pair.spoke, positionOwner);
             console.log('ratioBefore', ratioBefore);
 
             const { subId, strategySub } = await subAaveV4LeverageManagement(
                 bundleId,
                 proxy,
-                proxy.address,
+                positionOwner,
                 pair.spoke,
                 automationSdk.enums.RatioState.OVER,
                 targetRatioBoost,
@@ -165,7 +187,7 @@ const runBoostTests = () => {
             expect(proxyCollBalanceAfter).to.be.eq(proxyCollBalanceBefore);
             expect(proxyDebtBalanceAfter).to.be.eq(proxyDebtBalanceBefore);
 
-            const ratioAfter = await getSafetyRatio(pair.spoke, proxy.address);
+            const ratioAfter = await getSafetyRatio(pair.spoke, positionOwner);
             console.log('ratioAfter', ratioAfter);
             expect(ratioAfter).to.be.lt(ratioBefore);
         };
@@ -174,13 +196,19 @@ const runBoostTests = () => {
             const pair = AAVE_V4_AUTOMATION_TEST_PAIRS[i];
             it(`... should execute aaveV4 SW boost strategy for ${pair.collSymbol} /
             ${pair.debtSymbol} pair on ${pair.spokeName} spoke`, async () => {
-                const isFLStrategy = false;
-                await baseTest(pair, isFLStrategy);
+                await baseTest(pair, false);
             });
             it(`... should execute aaveV4 SW FL boost strategy for ${pair.collSymbol} /
             ${pair.debtSymbol} pair on ${pair.spokeName} spoke`, async () => {
-                const isFLStrategy = true;
-                await baseTest(pair, isFLStrategy);
+                await baseTest(pair, true);
+            });
+            it(`... should execute aaveV4 EOA boost strategy for ${pair.collSymbol} /
+            ${pair.debtSymbol} pair on ${pair.spokeName} spoke`, async () => {
+                await baseTest(pair, false, true);
+            });
+            it(`... should execute aaveV4 EOA FL boost strategy for ${pair.collSymbol} /
+            ${pair.debtSymbol} pair on ${pair.spokeName} spoke`, async () => {
+                await baseTest(pair, true, true);
             });
         }
     });
