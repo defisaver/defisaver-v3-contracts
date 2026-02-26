@@ -86,21 +86,28 @@ contract AaveV4Supply is ActionBase, AaveV4Helper {
 
         bool supplyForSmartWallet = _params.onBehalf == address(this);
 
+        // Supply tokens.
+        // -------------------------------
         if (supplyForSmartWallet) {
             underlying.approveToken(_params.spoke, _params.amount);
             (, _params.amount) = spoke.supply(_params.reserveId, _params.amount, _params.onBehalf);
-
-            if (_params.useAsCollateral) {
-                spoke.setUsingAsCollateral(_params.reserveId, true, _params.onBehalf);
-            }
         } else {
             underlying.approveToken(SUPPLY_REPAY_POSITION_MANAGER, _params.amount);
             (, _params.amount) = ISupplyRepayPositionManager(SUPPLY_REPAY_POSITION_MANAGER)
                 .supplyOnBehalfOf(
                     _params.spoke, _params.reserveId, _params.amount, _params.onBehalf
                 );
+        }
 
-            if (_params.useAsCollateral) {
+        // Enable as collateral if needed.
+        // -------------------------------
+        (bool isUsingAsCollateral,) =
+            spoke.getUserReserveStatus(_params.reserveId, _params.onBehalf);
+
+        if (_params.useAsCollateral && !isUsingAsCollateral) {
+            if (supplyForSmartWallet) {
+                spoke.setUsingAsCollateral(_params.reserveId, true, _params.onBehalf);
+            } else {
                 IConfigPositionManager(CONFIG_POSITION_MANAGER)
                     .setUsingAsCollateralOnBehalfOf(
                         _params.spoke, _params.reserveId, true, _params.onBehalf
