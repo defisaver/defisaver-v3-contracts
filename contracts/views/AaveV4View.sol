@@ -5,9 +5,14 @@ pragma solidity =0.8.24;
 import { ISpoke } from "../interfaces/protocols/aaveV4/ISpoke.sol";
 import { IHub } from "../interfaces/protocols/aaveV4/IHub.sol";
 import { IAaveV4Oracle } from "../interfaces/protocols/aaveV4/IAaveV4Oracle.sol";
+import { IConfigPositionManager } from "../interfaces/protocols/aaveV4/IConfigPositionManager.sol";
+import { ITakerPositionManager } from "../interfaces/protocols/aaveV4/ITakerPositionManager.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
+
+import { AaveV4Helper } from "../actions/aaveV4/helpers/AaveV4Helper.sol";
 
 /// @title Helper contract to aggregate data from AaveV4 protocol
-contract AaveV4View {
+contract AaveV4View is AaveV4Helper {
     /**
      *
      *
@@ -238,6 +243,47 @@ contract AaveV4View {
         uint256 deficitRay;
     }
 
+    /// @notice EOA reserve approval data.
+    /// @dev reserveId The identifier of the reserve.
+    /// @dev underlying The address of the underlying asset.
+    /// @dev delegateeBorrowApproval The approval of the delegatee to borrow on behalf of the user.
+    /// @dev delegateeWithdrawApproval The approval of the delegatee to withdraw on behalf of the user.
+    /// @dev eoaReserveBalance The EOA's balance of the reserve.
+    struct EOAReserveApprovalData {
+        uint256 reserveId;
+        address underlying;
+        uint256 delegateeBorrowApproval;
+        uint256 delegateeWithdrawApproval;
+        uint256 eoaReserveBalance;
+    }
+
+    /// @notice EOA approval data.
+    /// @dev EOA The address of the eoa.
+    /// @dev proxy The address of the proxy which acts on behalf of the EOA (delegatee).
+    /// @dev spoke The address of the spoke.
+    /// @dev giverPositionManagerEnabled Whether the supply/payback manager is enabled globally for the user.
+    /// @dev takerPositionManagerEnabled Whether the withdraw/borrow manager is enabled globally for the user.
+    /// @dev configPositionManagerEnabled Whether the config manager is enabled globally for the user.
+    /// @dev giverPositionManagerEnabled Whether the delegatee can set using as collateral on behalf of the user.
+    /// @dev canUpdateUserRiskPremium Whether the delegatee can update user risk premium on behalf of the user.
+    /// @dev canUpdateUserDynamicConfig Whether the delegatee can update user dynamic config on behalf of the user.
+    /// @dev reserveApprovals The approval data for each reserve inside the spoke.
+    struct EOAApprovalData {
+        address eoa;
+        address proxy;
+        address spoke;
+        // --------------------------
+        bool giverPositionManagerEnabled;
+        bool takerPositionManagerEnabled;
+        bool configPositionManagerEnabled;
+        // --------------------------
+        bool canSetUsingAsCollateral;
+        bool canUpdateUserRiskPremium;
+        bool canUpdateUserDynamicConfig;
+        // --------------------------
+        EOAReserveApprovalData[] reserveApprovals;
+    }
+
     /**
      *
      *
@@ -452,6 +498,44 @@ contract AaveV4View {
         spokes = new address[](spokeCount);
         for (uint256 i = 0; i < spokeCount; ++i) {
             spokes[i] = hub.getSpokeAddress(_assetId, i);
+        }
+    }
+
+    function getEOAApprovalsAndBalances(address _eoa, address _proxy, address _spoke)
+        public
+        view
+        returns (EOAApprovalData memory data)
+    {
+        ISpoke spoke = ISpoke(_spoke);
+        uint256 reserveCount = spoke.getReserveCount();
+
+        data.eoa = _eoa;
+        data.proxy = _proxy;
+        data.spoke = _spoke;
+
+        data.giverPositionManagerEnabled = spoke.isPositionManager(_eoa, GIVER_POSITION_MANAGER);
+        data.takerPositionManagerEnabled = spoke.isPositionManager(_eoa, TAKER_POSITION_MANAGER);
+        data.configPositionManagerEnabled = spoke.isPositionManager(_eoa, CONFIG_POSITION_MANAGER);
+
+        IConfigPositionManager.ConfigPermissionValues memory configPerms = IConfigPositionManager(
+                CONFIG_POSITION_MANAGER
+            ).getConfigPermissions(_spoke, _proxy, _eoa);
+        data.canSetUsingAsCollateral = configPerms.canSetUsingAsCollateral;
+        data.canUpdateUserRiskPremium = configPerms.canUpdateUserRiskPremium;
+        data.canUpdateUserDynamicConfig = configPerms.canUpdateUserDynamicConfig;
+
+        data.reserveApprovals = new EOAReserveApprovalData[](reserveCount);
+        ITakerPositionManager takerPM = ITakerPositionManager(TAKER_POSITION_MANAGER);
+
+        for (uint256 i = 0; i < reserveCount; ++i) {
+            ISpoke.Reserve memory reserve = spoke.getReserve(i);
+            data.reserveApprovals[i] = EOAReserveApprovalData({
+                reserveId: i,
+                underlying: reserve.underlying,
+                delegateeBorrowApproval: takerPM.borrowAllowance(_spoke, i, _eoa, _proxy),
+                delegateeWithdrawApproval: takerPM.withdrawAllowance(_spoke, i, _eoa, _proxy),
+                eoaReserveBalance: IERC20(reserve.underlying).balanceOf(_eoa)
+            });
         }
     }
 

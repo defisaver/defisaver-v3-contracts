@@ -49,4 +49,26 @@ interface ITakerPositionManager {
     function borrowOnBehalfOf(address spoke, uint256 reserveId, uint256 amount, address onBehalfOf)
         external
         returns (uint256, uint256);
+
+    /// @notice Returns the withdraw allowance for a spender on behalf of an owner.
+    /// @param spoke The address of the spoke.
+    /// @param reserveId The identifier of the reserve.
+    /// @param owner The address of the owner.
+    /// @param spender The address of the spender.
+    /// @return The amount of withdraw allowance.
+    function withdrawAllowance(address spoke, uint256 reserveId, address owner, address spender)
+        external
+        view
+        returns (uint256);
+
+    /// @notice Returns the credit delegation allowance for a spender on behalf of an owner.
+    /// @param spoke The address of the spoke.
+    /// @param reserveId The identifier of the reserve.
+    /// @param owner The address of the owner.
+    /// @param spender The address of the spender.
+    /// @return The amount of credit delegation allowance.
+    function borrowAllowance(address spoke, uint256 reserveId, address owner, address spender)
+        external
+        view
+        returns (uint256);
 }

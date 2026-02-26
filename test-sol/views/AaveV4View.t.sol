@@ -185,6 +185,13 @@ contract TestAaveV4View is AaveV4TestBase {
         }
     }
 
+    function test_get_eoa_approvals_and_balances() public view {
+        address proxy = address(0x1234);
+        AaveV4View.EOAApprovalData memory data =
+            cut.getEOAApprovalsAndBalances(TEST_USER, proxy, CORE_SPOKE);
+        _logEOAApprovalData(data);
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
@@ -282,5 +289,27 @@ contract TestAaveV4View is AaveV4TestBase {
         console2.log("reinvestmentController:", data.reinvestmentController);
         console2.log("feeReceiver:", data.feeReceiver);
         console2.log("deficitRay:", data.deficitRay);
+    }
+
+    function _logEOAApprovalData(AaveV4View.EOAApprovalData memory data) internal pure {
+        console2.log("eoa:", data.eoa);
+        console2.log("proxy:", data.proxy);
+        console2.log("spoke:", data.spoke);
+        console2.log("giverPositionManagerEnabled:", data.giverPositionManagerEnabled);
+        console2.log("takerPositionManagerEnabled:", data.takerPositionManagerEnabled);
+        console2.log("configPositionManagerEnabled:", data.configPositionManagerEnabled);
+        console2.log("canSetUsingAsCollateral:", data.canSetUsingAsCollateral);
+        console2.log("canUpdateUserRiskPremium:", data.canUpdateUserRiskPremium);
+        console2.log("canUpdateUserDynamicConfig:", data.canUpdateUserDynamicConfig);
+        _logSeparator();
+        for (uint256 i = 0; i < data.reserveApprovals.length; i++) {
+            AaveV4View.EOAReserveApprovalData memory r = data.reserveApprovals[i];
+            console2.log("reserveId:", r.reserveId);
+            console2.log("underlying:", r.underlying);
+            console2.log("delegateeBorrowApproval:", r.delegateeBorrowApproval);
+            console2.log("delegateeWithdrawApproval:", r.delegateeWithdrawApproval);
+            console2.log("eoaReserveBalance:", r.eoaReserveBalance);
+            _logSeparator();
+        }
     }
 }
