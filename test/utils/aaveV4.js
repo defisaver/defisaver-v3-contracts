@@ -28,16 +28,16 @@ const {
     createAaveV4FLCloseToCollStrategy,
 } = require('../../strategies-spec/mainnet');
 
-const CORE_RESERVE_ID_USDC = 5;
-const CORE_RESERVE_ID_WETH = 0;
-const CORE_RESERVE_ID_USDT = 4;
+const CORE_RESERVE_ID_USDC = 1;
+const CORE_RESERVE_ID_WETH = 8;
+const CORE_RESERVE_ID_USDT = 0;
 
 const AAVE_V4_AUTOMATION_TEST_PAIRS = [
     {
-        collSymbol: 'USDC',
-        debtSymbol: 'WETH',
-        collReserveId: CORE_RESERVE_ID_USDC,
-        debtReserveId: CORE_RESERVE_ID_WETH,
+        collSymbol: 'WETH',
+        debtSymbol: 'USDC',
+        collReserveId: CORE_RESERVE_ID_WETH,
+        debtReserveId: CORE_RESERVE_ID_USDC,
         spoke: addrs[network].AAVE_V4_CORE_SPOKE,
         spokeName: 'CORE',
     },

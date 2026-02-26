@@ -6,8 +6,8 @@ async function main() {
     const senderAcc = (await hre.ethers.getSigners())[0];
     await topUp(senderAcc.address, network);
 
-    const coreHub = '0xaD905aD5EA5B98cD50AE40Cfe368344686a21366';
-    const coreSpoke = '0xBa97c5E52cd5BC3D7950Ae70779F8FfE92d40CdC';
+    const coreHub = '0x3Ed2C9829FBCab6015E331a0352F8ae148217D70';
+    const coreSpoke = '0x46539e9123A18c427e6b4DFF114c28CF405Cb023';
     const authority = '0x56D22D619355ab10B80933c7F50569d95576D003';
 
     const hub = await hre.ethers.getContractAt('IHub', coreHub);

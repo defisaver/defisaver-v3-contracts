@@ -6,7 +6,7 @@ async function main() {
     const senderAcc = (await hre.ethers.getSigners())[0];
     await topUp(senderAcc.address, network);
 
-    const coreSpoke = '0xBa97c5E52cd5BC3D7950Ae70779F8FfE92d40CdC';
+    const coreSpoke = '0x46539e9123A18c427e6b4DFF114c28CF405Cb023';
     const spoke = await hre.ethers.getContractAt('ISpoke', coreSpoke);
     const reserveCount = await spoke.getReserveCount();
 
@@ -14,13 +14,15 @@ async function main() {
         const reserve = await spoke.getReserve(i);
         const underlying = reserve.underlying;
         console.log('Underlying:', underlying);
-        if (underlying === '0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf') {
-            continue; // topUp fails for cbBTC, skip for now
-        }
         const amount = hre.ethers.utils.parseUnits('1000000', reserve.decimals);
-        await setBalance(underlying, senderAcc.address, amount);
-        await approve(underlying, spoke.address, senderAcc);
-        await spoke.supply(i, amount, senderAcc.address, { gasLimit: 3000000 });
+
+        try {
+            await setBalance(underlying, senderAcc.address, amount);
+            await approve(underlying, spoke.address, senderAcc);
+            await spoke.supply(i, amount, senderAcc.address, { gasLimit: 3000000 });
+        } catch (error) {
+            console.error('Failed to add liquidity for reserve', underlying, i);
+        }
     }
 }
 

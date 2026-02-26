@@ -71,12 +71,12 @@ const addrs = {
         STRATEGY_STORAGE_ADDR: '0xF52551F95ec4A2B4299DcC42fbbc576718Dbf933',
         BUNDLE_STORAGE_ADDR: '0x223c6aDE533851Df03219f6E3D8B763Bd47f84cf',
         ZEROX_WRAPPER: '0x11e048f19844B7bAa6D9eA4a20eD4fACF7b757b2',
-        STRATEGY_EXECUTOR_ADDR: '0xFaa763790b26E7ea354373072baB02e680Eeb07F',
+        STRATEGY_EXECUTOR_ADDR: '0x8278DA54b4A47c0f6F4a0a4b00B6f31678f30181',
         REFILL_CALLER: '0x33fDb79aFB4456B604f376A45A546e7ae700e880',
         MORPHO_BLUE_VIEW: '0x10B621823D4f3E85fBDF759e252598e4e097C1fd',
         FLUID_VAULT_T1_RESOLVER_ADDR: '0x814c8C7ceb1411B364c2940c4b9380e739e06686',
         COMP_V3_SUB_PROXY_ADDR: '0x2f62a2ec44ed48dd5f2d56b308558ac065e8b794',
-        AAVE_V4_CORE_SPOKE: '0xBa97c5E52cd5BC3D7950Ae70779F8FfE92d40CdC',
+        AAVE_V4_CORE_SPOKE: '0x46539e9123A18c427e6b4DFF114c28CF405Cb023',
         BOLD_ADDR: '0x6440f144b7e50D6a8439336510312d2F54beB01D',
         INSTADAPP_INDEX: '0x2971AdFa57b20E5a416aE5a708A8655A9c74f723',
         INSTADAPP_CONNECTORS_V2: '0x97b0B3A8bDeFE8cB9563a3c610019Ad10DB8aD11',
@@ -553,7 +553,9 @@ const setStorageAt = async (address, index, value) => {
         prefix = 'tenderly';
     }
 
-    await hre.ethers.provider.send(`${prefix}_setStorageAt`, [address, index, value]);
+    const paddedIndex = hre.ethers.utils.hexZeroPad(index, 32);
+
+    await hre.ethers.provider.send(`${prefix}_setStorageAt`, [address, paddedIndex, value]);
     await hre.ethers.provider.send('evm_mine', []); // Just mines to the next block
 };
 

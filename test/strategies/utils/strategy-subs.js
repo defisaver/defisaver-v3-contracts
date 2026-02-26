@@ -1274,6 +1274,7 @@ const subAaveV4LeverageManagementOnPrice = async (
     debtAssetId,
     targetRatio,
     price,
+    priceState,
     ratioState,
 ) => {
     const strategySub = automationSdk.strategySubService.aaveV4Encode.leverageManagementOnPrice(
@@ -1286,6 +1287,7 @@ const subAaveV4LeverageManagementOnPrice = async (
         debtAssetId,
         targetRatio,
         price,
+        priceState,
         ratioState,
     );
     const subId = await subToStrategy(proxy, strategySub);

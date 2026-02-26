@@ -48,7 +48,8 @@ const runCloseTests = () => {
         let flAddr;
         let bundleId;
 
-        before(async () => {
+        before(async function () {
+            this.timeout(300000);
             const isFork = isNetworkFork();
 
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -132,7 +133,7 @@ const runCloseTests = () => {
             const userAccountData = await getUserAccountData(pair.spoke, proxy.address);
             const scaling = hre.ethers.utils.parseUnits('1', 26);
             const collAmountInUSD = userAccountData.totalCollateralValue.div(scaling);
-            const debtAmountInUSD = userAccountData.totalDebtValue.div(scaling);
+            const debtAmountInUSD = userAccountData.totalDebtValueRay.div(scaling);
             console.log('collAmountInUSD', collAmountInUSD);
             console.log('debtAmountInUSD', debtAmountInUSD);
 
@@ -155,9 +156,9 @@ const runCloseTests = () => {
                     mockWrapper,
                 );
 
-                const flAmount = userAccountData.totalDebtValue
+                const flAmount = userAccountData.totalDebtValueRay
                     .mul(hre.ethers.BigNumber.from(10).pow(debtAsset.decimals))
-                    .div(debtPrice.mul(hre.ethers.BigNumber.from(10).pow(18)))
+                    .div(debtPrice.mul(hre.ethers.BigNumber.from(10).pow(45)))
                     .mul(100)
                     .div(99);
 
@@ -174,9 +175,9 @@ const runCloseTests = () => {
             } else {
                 console.log('Closing to collateral');
                 // Close to collateral: flash loan collateral asset, sell to get debt asset
-                const flAmount = userAccountData.totalDebtValue
+                const flAmount = userAccountData.totalDebtValueRay
                     .mul(hre.ethers.BigNumber.from(10).pow(collAsset.decimals))
-                    .div(collPrice.mul(hre.ethers.BigNumber.from(10).pow(18)))
+                    .div(collPrice.mul(hre.ethers.BigNumber.from(10).pow(45)))
                     .mul(100)
                     .div(99);
 

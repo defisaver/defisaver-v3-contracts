@@ -48,7 +48,8 @@ const runBoostOnPriceTests = () => {
         let flAddr;
         let bundleId;
 
-        before(async () => {
+        before(async function () {
+            this.timeout(300000);
             const isFork = isNetworkFork();
 
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -114,6 +115,7 @@ const runBoostOnPriceTests = () => {
                 pair.debtReserveId,
                 targetRatioBoost,
                 triggerPrice,
+                automationSdk.enums.RatioState.OVER,
                 automationSdk.enums.RatioState.OVER,
             );
 

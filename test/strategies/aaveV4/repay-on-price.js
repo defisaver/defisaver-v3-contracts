@@ -48,7 +48,8 @@ const runRepayOnPriceTests = () => {
         let flAddr;
         let bundleId;
 
-        before(async () => {
+        before(async function () {
+            this.timeout(300000);
             const isFork = isNetworkFork();
 
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -114,6 +115,7 @@ const runRepayOnPriceTests = () => {
                 pair.debtReserveId,
                 targetRatioRepay,
                 triggerPrice,
+                automationSdk.enums.RatioState.UNDER,
                 automationSdk.enums.RatioState.UNDER,
             );
 
