@@ -17,8 +17,8 @@ const { createStrategy, createBundle } = require('../strategies/utils/utils-stra
 
 const EOA_ACC_INDEX = 2;
 
-const SUPPLY_REPAY_POSITION_MANAGER = '0x8675fBc9B6F8F3097c4C151A7a4838AFE23AB020';
-const ALLOWANCE_POSITION_MANAGER = '0x063A6DFe3a02Ae18afDF293c86c76A8A6665Cb60';
+const GIVER_POSITION_MANAGER = '0x8675fBc9B6F8F3097c4C151A7a4838AFE23AB020';
+const TAKER_POSITION_MANAGER = '0x063A6DFe3a02Ae18afDF293c86c76A8A6665Cb60';
 const CONFIG_POSITION_MANAGER = '0x22a0Ee581644f55E1deB487804Ec9b4188B41457';
 const {
     createAaveV4RepayStrategy,
@@ -232,21 +232,17 @@ const enableAaveV4EoaPositionManagers = async (
 ) => {
     const spokeContract = await hre.ethers.getContractAt('ISpoke', spoke);
 
-    await spokeContract
-        .connect(eoaSigner)
-        .setUserPositionManager(SUPPLY_REPAY_POSITION_MANAGER, true);
+    await spokeContract.connect(eoaSigner).setUserPositionManager(GIVER_POSITION_MANAGER, true);
 
     const needsAllowanceManager =
         approveBorrowReserveIds.length > 0 || approveWithdrawReserveIds.length > 0;
 
     if (needsAllowanceManager) {
-        await spokeContract
-            .connect(eoaSigner)
-            .setUserPositionManager(ALLOWANCE_POSITION_MANAGER, true);
+        await spokeContract.connect(eoaSigner).setUserPositionManager(TAKER_POSITION_MANAGER, true);
 
         const allowancePM = await hre.ethers.getContractAt(
-            'IAllowancePositionManager',
-            ALLOWANCE_POSITION_MANAGER,
+            'ITakerPositionManager',
+            TAKER_POSITION_MANAGER,
         );
         for (const reserveId of approveBorrowReserveIds) {
             await allowancePM

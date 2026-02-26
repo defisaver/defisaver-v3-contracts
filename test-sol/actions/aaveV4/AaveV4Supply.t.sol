@@ -165,7 +165,7 @@ contract TestAaveV4Supply is AaveV4TestBase {
         internal
     {
         vm.startPrank(_eoa);
-        _spoke.setUserPositionManager(SUPPLY_REPAY_POSITION_MANAGER, true);
+        _spoke.setUserPositionManager(GIVER_POSITION_MANAGER, true);
         if (_useAsCollateral) {
             _spoke.setUserPositionManager(CONFIG_POSITION_MANAGER, true);
             IConfigPositionManager(CONFIG_POSITION_MANAGER)

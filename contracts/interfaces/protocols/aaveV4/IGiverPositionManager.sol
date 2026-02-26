@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-interface ISupplyRepayPositionManager {
+interface IGiverPositionManager {
     /// @notice Executes a supply on behalf of a user.
     /// @param spoke The address of the spoke.
     /// @param reserveId The identifier of the reserve.

@@ -9,8 +9,8 @@ import {
     IConfigPositionManager
 } from "../../../contracts/interfaces/protocols/aaveV4/IConfigPositionManager.sol";
 import {
-    IAllowancePositionManager
-} from "../../../contracts/interfaces/protocols/aaveV4/IAllowancePositionManager.sol";
+    ITakerPositionManager
+} from "../../../contracts/interfaces/protocols/aaveV4/ITakerPositionManager.sol";
 import { IERC20 } from "../../../contracts/interfaces/token/IERC20.sol";
 import { ExecuteActionsBase } from "../../utils/executeActions/ExecuteActionsBase.sol";
 import { AaveV4Helper } from "../../../contracts/actions/aaveV4/helpers/AaveV4Helper.sol";
@@ -148,7 +148,7 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
         }
 
         if (_isEoaPosition) {
-            _enableEoaAllowancePositionManager(ISpoke(_spoke), sender, walletAddr, _reserveId);
+            _enableEoaTakerPositionManager(ISpoke(_spoke), sender, walletAddr, _reserveId);
         }
 
         bytes memory executeActionCallData = executeActionCalldata(
@@ -171,25 +171,25 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
         internal
     {
         vm.startPrank(_eoa);
-        _spoke.setUserPositionManager(SUPPLY_REPAY_POSITION_MANAGER, true);
+        _spoke.setUserPositionManager(GIVER_POSITION_MANAGER, true);
         _spoke.setUserPositionManager(CONFIG_POSITION_MANAGER, true);
         IConfigPositionManager(CONFIG_POSITION_MANAGER)
             .setCanUpdateUsingAsCollateralPermission(address(_spoke), _walletAddr, true);
         vm.stopPrank();
     }
 
-    function _enableEoaAllowancePositionManager(
+    function _enableEoaTakerPositionManager(
         ISpoke _spoke,
         address _eoa,
         address _walletAddr,
         uint256 _reserveId
     ) internal {
         vm.startPrank(_eoa);
-        _spoke.setUserPositionManager(ALLOWANCE_POSITION_MANAGER, true);
+        _spoke.setUserPositionManager(TAKER_POSITION_MANAGER, true);
         // Use type(uint256).max for test purposes.
-        IAllowancePositionManager(ALLOWANCE_POSITION_MANAGER)
+        ITakerPositionManager(TAKER_POSITION_MANAGER)
             .approveBorrow(address(_spoke), _reserveId, _walletAddr, type(uint256).max);
-        IAllowancePositionManager(ALLOWANCE_POSITION_MANAGER)
+        ITakerPositionManager(TAKER_POSITION_MANAGER)
             .approveWithdraw(address(_spoke), _reserveId, _walletAddr, type(uint256).max);
         vm.stopPrank();
     }

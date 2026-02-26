@@ -3,15 +3,13 @@
 pragma solidity =0.8.24;
 
 import { ISpoke } from "../../interfaces/protocols/aaveV4/ISpoke.sol";
-import {
-    ISupplyRepayPositionManager
-} from "../../interfaces/protocols/aaveV4/ISupplyRepayPositionManager.sol";
+import { IGiverPositionManager } from "../../interfaces/protocols/aaveV4/IGiverPositionManager.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { AaveV4Helper } from "./helpers/AaveV4Helper.sol";
 
 /// @title AaveV4Payback
-/// @dev When paying back on behalf of another address the SupplyRepayPositionManager has to be enabled for 'onBehalf' address.
+/// @dev When paying back on behalf of another address the GiverPositionManager has to be enabled for 'onBehalf' address.
 contract AaveV4Payback is ActionBase, AaveV4Helper {
     using TokenUtils for address;
 
@@ -81,8 +79,8 @@ contract AaveV4Payback is ActionBase, AaveV4Helper {
             underlying.approveToken(_params.spoke, _params.amount);
             (, _params.amount) = spoke.repay(_params.reserveId, _params.amount, _params.onBehalf);
         } else {
-            underlying.approveToken(SUPPLY_REPAY_POSITION_MANAGER, _params.amount);
-            (, _params.amount) = ISupplyRepayPositionManager(SUPPLY_REPAY_POSITION_MANAGER)
+            underlying.approveToken(GIVER_POSITION_MANAGER, _params.amount);
+            (, _params.amount) = IGiverPositionManager(GIVER_POSITION_MANAGER)
                 .repayOnBehalfOf(_params.spoke, _params.reserveId, _params.amount, _params.onBehalf);
         }
 

@@ -101,7 +101,7 @@ contract TestAaveV4Borrow is AaveV4TestBase {
         address onBehalf = _testConfig.isEoa ? sender : walletAddr;
 
         if (_testConfig.isEoa) {
-            _enableEoaAllowancePositionManager(spoke, sender, walletAddr, _reserveId);
+            _enableEoaTakerPositionManager(spoke, sender, walletAddr, _reserveId);
         }
 
         bytes memory executeActionCallData = executeActionCalldata(

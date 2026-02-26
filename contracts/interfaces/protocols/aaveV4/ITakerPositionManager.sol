@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-interface IAllowancePositionManager {
+interface ITakerPositionManager {
     /// @notice Executes a supply on behalf of a user.
     /// @notice Approves a spender to withdraw assets from the specified reserve.
     /// @dev Using `type(uint256).max` as the amount results in an infinite approval, so the allowance is never decreased.

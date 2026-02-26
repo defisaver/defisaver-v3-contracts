@@ -3,9 +3,7 @@
 pragma solidity =0.8.24;
 
 import { ISpoke } from "../../interfaces/protocols/aaveV4/ISpoke.sol";
-import {
-    ISupplyRepayPositionManager
-} from "../../interfaces/protocols/aaveV4/ISupplyRepayPositionManager.sol";
+import { IGiverPositionManager } from "../../interfaces/protocols/aaveV4/IGiverPositionManager.sol";
 import {
     IConfigPositionManager
 } from "../../interfaces/protocols/aaveV4/IConfigPositionManager.sol";
@@ -14,7 +12,7 @@ import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { AaveV4Helper } from "./helpers/AaveV4Helper.sol";
 
 /// @title AaveV4Supply
-/// @dev When supplying on behalf of another address the SupplyRepayPositionManager has to be enabled for 'onBehalf' address.
+/// @dev When supplying on behalf of another address the GiverPositionManager has to be enabled for 'onBehalf' address.
 /// @dev When setting reserve as collateral on behalf of another address:
 ///      - ConfigPositionManager has to be enabled for 'onBehalf' address.
 ///      - Wallet itself has to be given approval to set collateral on behalf of 'onBehalf' address.
@@ -92,8 +90,8 @@ contract AaveV4Supply is ActionBase, AaveV4Helper {
             underlying.approveToken(_params.spoke, _params.amount);
             (, _params.amount) = spoke.supply(_params.reserveId, _params.amount, _params.onBehalf);
         } else {
-            underlying.approveToken(SUPPLY_REPAY_POSITION_MANAGER, _params.amount);
-            (, _params.amount) = ISupplyRepayPositionManager(SUPPLY_REPAY_POSITION_MANAGER)
+            underlying.approveToken(GIVER_POSITION_MANAGER, _params.amount);
+            (, _params.amount) = IGiverPositionManager(GIVER_POSITION_MANAGER)
                 .supplyOnBehalfOf(
                     _params.spoke, _params.reserveId, _params.amount, _params.onBehalf
                 );
