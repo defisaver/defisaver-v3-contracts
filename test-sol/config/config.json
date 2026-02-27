@@ -9,7 +9,6 @@
         "plasma": 15091553
     },
 
-    "AaveV3ATokenPayback": { "mainnet": 21973355 },
     "SparkViewSmall": { "mainnet": 23764256 },
     "PendleTokenRedeem": { "mainnet": 22875735 },
     "StrategyTriggerViewNoRevert": { "mainnet": 22595730 },
