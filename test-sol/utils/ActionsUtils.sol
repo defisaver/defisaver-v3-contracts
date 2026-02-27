@@ -111,6 +111,7 @@ import { AaveV4StoreRatio } from "../../contracts/actions/aaveV4/AaveV4StoreRati
 import { AaveV4RatioCheck } from "../../contracts/actions/checkers/AaveV4RatioCheck.sol";
 import { SummerfiUnsub } from "../../contracts/actions/summerfi/SummerfiUnsub.sol";
 import { SummerfiUnsubV2 } from "../../contracts/actions/summerfi/SummerfiUnsubV2.sol";
+import { TokenizedVaultAdapter } from "../../contracts/actions/utils/TokenizedVaultAdapter.sol";
 
 contract ActionsUtils {
     // @dev Change this value if we ever need to add more parameters to any action.
@@ -1518,6 +1519,26 @@ contract ActionsUtils {
                 triggerIds: _triggerIds,
                 triggerData: _triggerData,
                 removeAllowance: _removeAllowance
+            })
+        );
+    }
+
+    function tokenizedVaultAdapterEncode(
+        uint256 _amount,
+        uint256 _minOutOrMaxIn,
+        address _vaultAddress,
+        address _from,
+        address _to,
+        TokenizedVaultAdapter.OperationId _operationId
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            TokenizedVaultAdapter.Params({
+                amount: _amount,
+                minOutOrMaxIn: _minOutOrMaxIn,
+                vaultAddress: _vaultAddress,
+                from: _from,
+                to: _to,
+                operationId: _operationId
             })
         );
     }
