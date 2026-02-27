@@ -37,10 +37,10 @@ test-plasma:
 	node ./cmd/change-repo-network.js $(or $(FROM),Mainnet) Plasma
 	FOUNDRY_PROFILE=plasma forge test
 
-# test-all runs tests on all chains in order. 
+# test-all runs tests on all chains in order; one failure does not stop the rest
 test-all: test-mainnet
-	$(MAKE) test-arbitrum FROM=Mainnet && \
-	$(MAKE) test-base FROM=Arbitrum && \
-	$(MAKE) test-linea FROM=Base && \
-	$(MAKE) test-optimism FROM=Linea && \
+	$(MAKE) test-arbitrum FROM=Mainnet; \
+	$(MAKE) test-base FROM=Arbitrum; \
+	$(MAKE) test-linea FROM=Base; \
+	$(MAKE) test-optimism FROM=Linea; \
 	$(MAKE) test-plasma FROM=Optimism
