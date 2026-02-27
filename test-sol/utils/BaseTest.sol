@@ -41,18 +41,25 @@ contract BaseTest is Config {
     }
 
     function forkFromEnv(string memory testName) internal {
-        string memory chain = vm.envString("CHAIN");
+        _initConfigIfNeeded();
+        string memory chain = _chainFromProfile();
         string memory rpc = _getRpcForChain(chain);
         bool isForkLatest = bytes(testName).length == 0;
 
-        _initConfigIfNeeded();
         uint256 blockNumber;
-        // if fork is latest then we send blockNumber = 0
         if (!isForkLatest) {
             blockNumber = getBlockNumberForChainAndTest(chain, testName);
         }
 
         _fork(rpc, blockNumber);
+    }
+
+    function _chainFromProfile() internal view returns (string memory) {
+        string memory profile = vm.envOr("FOUNDRY_PROFILE", string("default"));
+        if (keccak256(bytes(profile)) == keccak256("default")) {
+            return "mainnet";
+        }
+        return profile;
     }
 
     function forkLocalAnvil() internal {
