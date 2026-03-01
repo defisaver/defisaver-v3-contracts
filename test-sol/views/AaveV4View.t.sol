@@ -4,6 +4,10 @@ pragma solidity =0.8.24;
 
 import { AaveV4View } from "../../contracts/views/AaveV4View.sol";
 import { AaveV4TestBase } from "../actions/aaveV4/AaveV4TestBase.t.sol";
+import {
+    ITokenizationSpoke
+} from "../../contracts/interfaces/protocols/aaveV4/ITokenizationSpoke.sol";
+import { IERC20 } from "../../contracts/interfaces/token/IERC20.sol";
 import { console2 } from "forge-std/console2.sol";
 
 contract TestAaveV4View is AaveV4TestBase {
@@ -192,6 +196,29 @@ contract TestAaveV4View is AaveV4TestBase {
         _logEOAApprovalData(data);
     }
 
+    function test_get_tokenization_spokes_data() public {
+        address USDC_PRIME = 0x0A0507F7A1129892b5cf74b8B4e911442c466b87;
+        ITokenizationSpoke ts = ITokenizationSpoke(USDC_PRIME);
+        address usdc = ts.asset();
+
+        uint256 depositAmount = 1000 * (10 ** IERC20(usdc).decimals());
+        give(usdc, bob, depositAmount);
+
+        vm.startPrank(bob);
+        IERC20(usdc).approve(USDC_PRIME, depositAmount);
+        ts.deposit(depositAmount, bob);
+        vm.stopPrank();
+
+        address[] memory spokes = new address[](1);
+        spokes[0] = USDC_PRIME;
+
+        AaveV4View.TokenizationSpokeData[] memory data = cut.getTokenizationSpokesData(spokes, bob);
+        for (uint256 i = 0; i < data.length; i++) {
+            _logTokenizationSpokeData(data[i]);
+            _logSeparator();
+        }
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
@@ -289,6 +316,30 @@ contract TestAaveV4View is AaveV4TestBase {
         console2.log("reinvestmentController:", data.reinvestmentController);
         console2.log("feeReceiver:", data.feeReceiver);
         console2.log("deficitRay:", data.deficitRay);
+    }
+
+    function _logTokenizationSpokeData(AaveV4View.TokenizationSpokeData memory data) internal pure {
+        console2.log("--- Asset ---");
+        console2.log("underlyingAsset:", data.underlyingAsset);
+        console2.log("assetId:", data.assetId);
+        console2.log("decimals:", data.decimals);
+        console2.log("--- Spoke ---");
+        console2.log("spoke:", data.spoke);
+        console2.log("spokeActive:", data.spokeActive);
+        console2.log("spokeHalted:", data.spokeHalted);
+        console2.log("spokeDepositCap:", data.spokeDepositCap);
+        console2.log("spokeTotalAssets:", data.spokeTotalAssets);
+        console2.log("spokeTotalShares:", data.spokeTotalShares);
+        console2.log("--- Hub ---");
+        console2.log("hub:", data.hub);
+        console2.log("hubLiquidity:", data.hubLiquidity);
+        console2.log("hubDrawnRate:", data.hubDrawnRate);
+        console2.log("convertToShares:", data.convertToShares);
+        console2.log("convertToAssets:", data.convertToAssets);
+        console2.log("--- User ---");
+        console2.log("user:", data.user);
+        console2.log("userSuppliedAssets:", data.userSuppliedAssets);
+        console2.log("userSuppliedShares:", data.userSuppliedShares);
     }
 
     function _logEOAApprovalData(AaveV4View.EOAApprovalData memory data) internal pure {

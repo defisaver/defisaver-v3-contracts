@@ -4,6 +4,7 @@ pragma solidity =0.8.24;
 
 import { ISpoke } from "../interfaces/protocols/aaveV4/ISpoke.sol";
 import { IHub } from "../interfaces/protocols/aaveV4/IHub.sol";
+import { ITokenizationSpoke } from "../interfaces/protocols/aaveV4/ITokenizationSpoke.sol";
 import { IAaveV4Oracle } from "../interfaces/protocols/aaveV4/IAaveV4Oracle.sol";
 import { IConfigPositionManager } from "../interfaces/protocols/aaveV4/IConfigPositionManager.sol";
 import { ITakerPositionManager } from "../interfaces/protocols/aaveV4/ITakerPositionManager.sol";
@@ -23,53 +24,32 @@ contract AaveV4View is AaveV4Helper {
      *
      */
     /// @notice User reserve data.
-    /// @dev reserveId The identifier of the reserve. Doesn't have to match the assetId in the Hub.
-    /// @dev assetId The identifier of the asset in the Hub.
-    /// @dev underlying The address of the underlying asset.
-    /// @dev supplied The amount of supplied assets, expressed in asset units.
-    /// @dev drawn The amount of user-drawn assets, expressed in asset units.
-    /// @dev premium The amount of user-premium assets, expressed in asset units.
-    /// @dev totalDebt The total amount of user-debt (drawn + premium), expressed in asset units.
-    /// @dev collateralFactor The collateral factor of the reserve, expressed in BPS. (E.g 8500 = 85%).
-    /// @dev maxLiquidationBonus The maximum extra amount of collateral given to the liquidator as bonus, expressed in BPS. 10000 represents 0.00% bonus. E.g 10500 = 5% bonus.
-    /// @dev liquidationFee The protocol fee charged on liquidations, taken from the collateral bonus given to the liquidator, expressed in BPS. (E.g 1000 = 10%)
-    /// @dev isUsingAsCollateral True if the reserve is being used as collateral.
-    /// @dev isBorrowing True if the reserve is being borrowed.
     struct UserReserveData {
-        uint256 reserveId;
-        uint16 assetId;
-        address underlying;
-        uint256 supplied;
-        uint256 drawn;
-        uint256 premium;
-        uint256 totalDebt;
-        uint16 collateralFactor;
-        uint32 maxLiquidationBonus;
-        uint16 liquidationFee;
-        bool isUsingAsCollateral;
-        bool isBorrowing;
+        uint256 reserveId; // The identifier of the reserve. Doesn't have to match the assetId in the Hub.
+        uint16 assetId; // The identifier of the asset in the Hub.
+        address underlying; // The address of the underlying asset.
+        uint256 supplied; // The amount of supplied assets, expressed in asset units.
+        uint256 drawn; // The amount of user-drawn assets, expressed in asset units.
+        uint256 premium; // The amount of user-premium assets, expressed in asset units.
+        uint256 totalDebt; // The total amount of user-debt (drawn + premium), expressed in asset units.
+        uint16 collateralFactor; // The collateral factor of the reserve, expressed in BPS. (E.g 8500 = 85%).
+        uint32 maxLiquidationBonus; // The maximum extra amount of collateral given to the liquidator as bonus, expressed in BPS. 10000 represents 0.00% bonus. E.g 10500 = 5% bonus.
+        uint16 liquidationFee; // The protocol fee charged on liquidations, taken from the collateral bonus given to the liquidator, expressed in BPS. (E.g 1000 = 10%)
+        bool isUsingAsCollateral; // True if the reserve is being used as collateral.
+        bool isBorrowing; // True if the reserve is being borrowed.
     }
 
     /// @notice Loan data with reserves data.
-    /// @dev user The address of the user.
-    /// @dev riskPremium The risk premium of the user position, expressed in BPS.
-    /// @dev avgCollateralFactor The weighted average collateral factor of the user position, expressed in WAD.
-    /// @dev healthFactor The health factor of the user position, expressed in WAD. 1e18 represents a health factor of 1.00.
-    /// @dev totalCollateralInUsd The total collateral value of the user position, expressed in units of base currency. 1e26 represents 1 USD.
-    /// @dev totalDebtInUsdRay The total debt value of the user position, expressed in units of base currency and scaled by RAY. 1e26 represents 1 USD.
-    /// @dev activeCollateralCount The number of active collateral reserves.
-    /// @dev borrowCount The number of borrowed reserves.
-    /// @dev reserves The user's reserve data.
     struct LoanData {
-        address user;
-        uint256 riskPremium;
-        uint256 avgCollateralFactor;
-        uint256 healthFactor;
-        uint256 totalCollateralInUsd;
-        uint256 totalDebtInUsdRay;
-        uint256 activeCollateralCount;
-        uint256 borrowCount;
-        UserReserveData[] reserves;
+        address user; // The address of the user.
+        uint256 riskPremium; // The risk premium of the user position, expressed in BPS.
+        uint256 avgCollateralFactor; // The weighted average collateral factor of the user position, expressed in WAD.
+        uint256 healthFactor; // The health factor of the user position, expressed in WAD. 1e18 represents a health factor of 1.00.
+        uint256 totalCollateralInUsd; // The total collateral value of the user position, expressed in units of base currency. 1e26 represents 1 USD.
+        uint256 totalDebtInUsdRay; // The total debt value of the user position, expressed in units of base currency and scaled by RAY. 1e26 represents 1 USD.
+        uint256 activeCollateralCount; // The number of active collateral reserves.
+        uint256 borrowCount; // The number of borrowed reserves.
+        UserReserveData[] reserves; // The user's reserve data.
     }
 
     /// @notice Same as regular UserReserveData, but with full reserve data
@@ -134,154 +114,118 @@ contract AaveV4View is AaveV4Helper {
     }
 
     /// @notice Minimal reserve data.
-    /// @dev underlying The address of the underlying asset.
-    /// @dev collateralFactor The collateral factor of the reserve, expressed in BPS. (E.g 8500 = 85%).
-    /// @dev price The price of the underlying asset, expressed in oracle decimals.
     struct ReserveData {
-        address underlying;
-        uint16 collateralFactor;
-        uint256 price;
+        address underlying; // The address of the underlying asset.
+        uint16 collateralFactor; // The collateral factor of the reserve, expressed in BPS. (E.g 8500 = 85%).
+        uint256 price; // The price of the underlying asset, expressed in oracle decimals.
     }
 
     /// @notice Full reserve data.
-    /// @dev underlying The address of the underlying asset.
-    /// @dev hub The address of the associated Hub.
-    /// @dev assetId The identifier of the asset in the Hub.
-    /// @dev decimals The number of decimals of the underlying asset.
-    /// @dev paused True if all actions are prevented for the reserve.
-    /// @dev frozen True if new activity is prevented for the reserve.
-    /// @dev borrowable True if the reserve is borrowable.
-    /// @dev collateralRisk The risk associated with a collateral asset, expressed in BPS. (E.g 1500 = 15%)
-    /// @dev collateralFactor The collateral factor of the reserve, expressed in BPS. (E.g 8500 = 85%).
-    /// @dev maxLiquidationBonus The maximum extra amount of collateral given to the liquidator as bonus, expressed in BPS. 10000 represents 0.00% bonus. E.g 10500 = 5% bonus.
-    /// @dev liquidationFee The protocol fee charged on liquidations, taken from the collateral bonus given to the liquidator, expressed in BPS. (E.g 1000 = 10%)
-    /// @dev price The price of the underlying asset, expressed in oracle decimals.
-    /// @dev totalSupplied The total amount of spoke-supplied assets, expressed in asset units.
-    /// @dev totalDrawn The total amount of spoke-drawn assets, expressed in asset units.
-    /// @dev totalPremium The total amount of spoke-premium assets, expressed in asset units.
-    /// @dev totalDebt The total amount of spoke-debt (drawn + premium), expressed in asset units.
-    /// @dev supplyCap The supply cap of the spoke, expressed in asset units.
-    /// @dev borrowCap The borrow cap of the spoke, expressed in asset units.
-    /// @dev deficitRay The deficit reported by a spoke for a given asset, expressed in asset units and scaled by RAY.
-    /// @dev spokeActive True if the spoke is active for this reserve.
-    /// @dev spokeHalted True if the spoke is halted for this reserve.
     struct ReserveDataFull {
-        address underlying;
-        address hub;
-        uint16 assetId;
-        uint8 decimals;
-        bool paused;
-        bool frozen;
-        bool borrowable;
-        uint24 collateralRisk;
-        uint16 collateralFactor;
-        uint32 maxLiquidationBonus;
-        uint16 liquidationFee;
-        uint256 price;
-        uint256 totalSupplied;
-        uint256 totalDrawn;
-        uint256 totalPremium;
-        uint256 totalDebt;
-        uint256 supplyCap;
-        uint256 borrowCap;
-        uint256 deficitRay;
-        bool spokeActive;
-        bool spokeHalted;
+        address underlying; // The address of the underlying asset.
+        address hub; // The address of the associated Hub.
+        uint16 assetId; // The identifier of the asset in the Hub.
+        uint8 decimals; // The number of decimals of the underlying asset.
+        bool paused; // True if all actions are prevented for the reserve.
+        bool frozen; // True if new activity is prevented for the reserve.
+        bool borrowable; // True if the reserve is borrowable.
+        uint24 collateralRisk; // The risk associated with a collateral asset, expressed in BPS. (E.g 1500 = 15%)
+        uint16 collateralFactor; // The collateral factor of the reserve, expressed in BPS. (E.g 8500 = 85%).
+        uint32 maxLiquidationBonus; // The maximum extra amount of collateral given to the liquidator as bonus, expressed in BPS. 10000 represents 0.00% bonus. E.g 10500 = 5% bonus.
+        uint16 liquidationFee; // The protocol fee charged on liquidations, taken from the collateral bonus given to the liquidator, expressed in BPS. (E.g 1000 = 10%)
+        uint256 price; // The price of the underlying asset, expressed in oracle decimals.
+        uint256 totalSupplied; // The total amount of spoke-supplied assets, expressed in asset units.
+        uint256 totalDrawn; // The total amount of spoke-drawn assets, expressed in asset units.
+        uint256 totalPremium; // The total amount of spoke-premium assets, expressed in asset units.
+        uint256 totalDebt; // The total amount of spoke-debt (drawn + premium), expressed in asset units.
+        uint256 supplyCap; // The supply cap of the spoke, expressed in asset units.
+        uint256 borrowCap; // The borrow cap of the spoke, expressed in asset units.
+        uint256 deficitRay; // The deficit reported by a spoke for a given asset, expressed in asset units and scaled by RAY.
+        bool spokeActive; // True if the spoke is active for this reserve.
+        bool spokeHalted; // True if the spoke is halted for this reserve.
     }
 
     /// @notice Spoke data.
-    /// @dev targetHealthFactor The ideal health factor to restore a user position during liquidation, expressed in WAD.
-    /// @dev healthFactorForMaxBonus The health factor under which liquidation bonus is maximum, expressed in WAD.
-    /// @dev liquidationBonusFactor The value multiplied by `maxLiquidationBonus` to compute the minimum liquidation bonus, expressed in BPS.
-    /// @dev oracle The address of the oracle.
-    /// @dev oracleDecimals The number of decimals of the oracle.
-    /// @dev reserveCount The number of reserves in the spoke.
     struct SpokeData {
-        uint128 targetHealthFactor;
-        uint64 healthFactorForMaxBonus;
-        uint16 liquidationBonusFactor;
-        address oracle;
-        uint256 oracleDecimals;
-        uint256 reserveCount;
+        uint128 targetHealthFactor; // The ideal health factor to restore a user position during liquidation, expressed in WAD.
+        uint64 healthFactorForMaxBonus; // The health factor under which liquidation bonus is maximum, expressed in WAD.
+        uint16 liquidationBonusFactor; // The value multiplied by `maxLiquidationBonus` to compute the minimum liquidation bonus, expressed in BPS.
+        address oracle; // The address of the oracle.
+        uint256 oracleDecimals; // The number of decimals of the oracle.
+        uint256 reserveCount; // The number of reserves in the spoke.
     }
 
     /// @notice Asset data from the Hub.
-    /// @dev assetId The identifier of the asset in the Hub.
-    /// @dev decimals The number of decimals of the underlying asset.
-    /// @dev underlying The address of the underlying asset.
-    /// @dev liquidity The liquidity available to be accessed, expressed in asset units.
-    /// @dev totalSupplied The total amount of supplied assets, expressed in asset units.
-    /// @dev totalDrawn The total amount of drawn assets, expressed in asset units.
-    /// @dev totalPremium The total amount of premium assets, expressed in asset units.
-    /// @dev totalDebt The total amount of debt (drawn + premium), expressed in asset units.
-    /// @dev swept The outstanding liquidity which has been invested by the reinvestment controller, expressed in asset units.
-    /// @dev liquidityFee The protocol fee charged on drawn and premium liquidity growth, expressed in BPS.
-    /// @dev drawnIndex The drawn index which monotonically increases according to the drawn rate, expressed in RAY.
-    /// @dev drawnRate The rate at which drawn assets grows, expressed in RAY.
-    /// @dev lastUpdateTimestamp The timestamp of the last accrual.
-    /// @dev irStrategy The address of the interest rate strategy.
-    /// @dev reinvestmentController The address of the reinvestment controller.
-    /// @dev feeReceiver The address of the fee receiver spoke.
-    /// @dev deficitRay The amount of outstanding bad debt across all spokes, expressed in asset units and scaled by RAY.
     struct HubAssetData {
-        uint16 assetId;
-        uint8 decimals;
-        address underlying;
-        uint256 liquidity;
-        uint256 totalSupplied;
-        uint256 totalDrawn;
-        uint256 totalPremium;
-        uint256 totalDebt;
-        uint256 swept;
-        uint16 liquidityFee;
-        uint120 drawnIndex;
-        uint96 drawnRate;
-        uint40 lastUpdateTimestamp;
-        address irStrategy;
-        address reinvestmentController;
-        address feeReceiver;
-        uint256 deficitRay;
+        uint16 assetId; // The identifier of the asset in the Hub.
+        uint8 decimals; // The number of decimals of the underlying asset.
+        address underlying; // The address of the underlying asset.
+        uint256 liquidity; // The liquidity available to be accessed, expressed in asset units.
+        uint256 totalSupplied; // The total amount of spoke-supplied assets, expressed in asset units.
+        uint256 totalDrawn; // The total amount of drawn assets, expressed in asset units.
+        uint256 totalPremium; // The total amount of premium assets, expressed in asset units.
+        uint256 totalDebt; // The total amount of debt (drawn + premium), expressed in asset units.
+        uint256 swept; // The outstanding liquidity which has been invested by the reinvestment controller, expressed in asset units.
+        uint16 liquidityFee; // The protocol fee charged on drawn and premium liquidity growth, expressed in BPS.
+        uint120 drawnIndex; // The drawn index which monotonically increases according to the drawn rate, expressed in RAY.
+        uint96 drawnRate; // The rate at which drawn assets grows, expressed in RAY.
+        uint40 lastUpdateTimestamp; // The timestamp of the last accrual.
+        address irStrategy; // The address of the interest rate strategy.
+        address reinvestmentController; // The address of the reinvestment controller.
+        address feeReceiver; // The address of the fee receiver spoke.
+        uint256 deficitRay; // The amount of outstanding bad debt across all spokes, expressed in asset units and scaled by RAY.
     }
 
     /// @notice EOA reserve approval data.
-    /// @dev reserveId The identifier of the reserve.
-    /// @dev underlying The address of the underlying asset.
-    /// @dev delegateeBorrowApproval The approval of the delegatee to borrow on behalf of the user.
-    /// @dev delegateeWithdrawApproval The approval of the delegatee to withdraw on behalf of the user.
-    /// @dev eoaReserveBalance The EOA's balance of the reserve.
     struct EOAReserveApprovalData {
-        uint256 reserveId;
-        address underlying;
-        uint256 delegateeBorrowApproval;
-        uint256 delegateeWithdrawApproval;
-        uint256 eoaReserveBalance;
+        uint256 reserveId; // The identifier of the reserve.
+        address underlying; // The address of the underlying asset.
+        uint256 delegateeBorrowApproval; // The approval of the delegatee to borrow on behalf of the user.
+        uint256 delegateeWithdrawApproval; // The approval of the delegatee to withdraw on behalf of the user.
+        uint256 eoaReserveBalance; // The EOA's balance of the reserve.
     }
 
     /// @notice EOA approval data.
-    /// @dev EOA The address of the eoa.
-    /// @dev proxy The address of the proxy which acts on behalf of the EOA (delegatee).
-    /// @dev spoke The address of the spoke.
-    /// @dev giverPositionManagerEnabled Whether the supply/payback manager is enabled globally for the user.
-    /// @dev takerPositionManagerEnabled Whether the withdraw/borrow manager is enabled globally for the user.
-    /// @dev configPositionManagerEnabled Whether the config manager is enabled globally for the user.
-    /// @dev giverPositionManagerEnabled Whether the delegatee can set using as collateral on behalf of the user.
-    /// @dev canUpdateUserRiskPremium Whether the delegatee can update user risk premium on behalf of the user.
-    /// @dev canUpdateUserDynamicConfig Whether the delegatee can update user dynamic config on behalf of the user.
-    /// @dev reserveApprovals The approval data for each reserve inside the spoke.
     struct EOAApprovalData {
-        address eoa;
-        address proxy;
-        address spoke;
+        address eoa; // The address of the EOA.
+        address proxy; // The address of the proxy which acts on behalf of the EOA (delegatee).
+        address spoke; // The address of the spoke.
         // --------------------------
-        bool giverPositionManagerEnabled;
-        bool takerPositionManagerEnabled;
-        bool configPositionManagerEnabled;
+        bool giverPositionManagerEnabled; // True if the supply/payback manager is enabled globally for the user.
+        bool takerPositionManagerEnabled; // True if the withdraw/borrow manager is enabled globally for the user.
+        bool configPositionManagerEnabled; // True if the config manager is enabled globally for the user.
         // --------------------------
-        bool canSetUsingAsCollateral;
-        bool canUpdateUserRiskPremium;
-        bool canUpdateUserDynamicConfig;
+        bool canSetUsingAsCollateral; // True if the delegatee can set using as collateral on behalf of the user.
+        bool canUpdateUserRiskPremium; // True if the delegatee can update user risk premium on behalf of the user.
+        bool canUpdateUserDynamicConfig; // True if the delegatee can update user dynamic config on behalf of the user.
         // --------------------------
-        EOAReserveApprovalData[] reserveApprovals;
+        EOAReserveApprovalData[] reserveApprovals; // The approval data for each reserve inside the spoke.
+    }
+
+    /// @notice Tokenization spoke data with optional user data.
+    /// @dev Tokenization spoke is ERC4626 compliant wrapper to tokenize one listed asset of the connected Hub.
+    struct TokenizationSpokeData {
+        // ---- Asset ----
+        address underlyingAsset; // The address of the underlying asset.
+        uint256 assetId; // The identifier of the asset in the Hub.
+        uint8 decimals; // The number of decimals of the underlying asset.
+        // ---- Spoke ----
+        address spoke; // The address of the spoke.
+        bool spokeActive; // True if the spoke is active.
+        bool spokeHalted; // True if the spoke is halted.
+        uint256 spokeDepositCap; // The deposit cap of the spoke, expressed in asset units.
+        uint256 spokeTotalAssets; // The total amount of spoke-supplied assets, expressed in asset units.
+        uint256 spokeTotalShares; // The total amount of spoke-supplied shares, expressed in shares.
+        // ---- Hub ----
+        address hub; // The address of the associated Hub.
+        uint256 hubLiquidity; // The liquidity available to be accessed, expressed in asset units.
+        uint96 hubDrawnRate; // The rate at which drawn assets grows, expressed in RAY.
+        uint256 convertToShares; // The conversion rate from assets to shares expressed in asset units.
+        uint256 convertToAssets; // The conversion rate from shares to assets expressed in asset units.
+        // ---- User ---- (Optional)
+        address user; // The address of the user.
+        uint256 userSuppliedAssets; // The amount of user-supplied assets, expressed in asset units.
+        uint256 userSuppliedShares; // The amount of user-supplied shares, expressed in asset units.
     }
 
     /**
@@ -537,6 +481,49 @@ contract AaveV4View is AaveV4Helper {
                 eoaReserveBalance: IERC20(reserve.underlying).balanceOf(_eoa)
             });
         }
+    }
+
+    function getTokenizationSpokesData(address[] calldata _spokes, address _user)
+        public
+        view
+        returns (TokenizationSpokeData[] memory spokeData)
+    {
+        spokeData = new TokenizationSpokeData[](_spokes.length);
+        for (uint256 i = 0; i < _spokes.length; ++i) {
+            spokeData[i] = getTokenizationSpokeData(_spokes[i], _user);
+        }
+    }
+
+    function getTokenizationSpokeData(address _spoke, address _user)
+        public
+        view
+        returns (TokenizationSpokeData memory spokeData)
+    {
+        ITokenizationSpoke ts = ITokenizationSpoke(_spoke);
+        spokeData.spoke = _spoke;
+        spokeData.hub = ts.hub();
+        spokeData.assetId = ts.assetId();
+
+        IHub.Asset memory hubAsset = IHub(spokeData.hub).getAsset(spokeData.assetId);
+        IHub.SpokeConfig memory tsConfig =
+            IHub(spokeData.hub).getSpokeConfig(spokeData.assetId, _spoke);
+
+        spokeData.underlyingAsset = hubAsset.underlying;
+        spokeData.decimals = hubAsset.decimals;
+        spokeData.spokeTotalAssets = ts.totalAssets();
+        spokeData.spokeTotalShares = ts.totalSupply();
+        spokeData.spokeActive = tsConfig.active;
+        spokeData.spokeHalted = tsConfig.halted;
+        spokeData.spokeDepositCap = tsConfig.addCap != IHub(spokeData.hub).MAX_ALLOWED_SPOKE_CAP()
+            ? tsConfig.addCap * (10 ** spokeData.decimals)
+            : type(uint256).max;
+        spokeData.hubLiquidity = hubAsset.liquidity;
+        spokeData.hubDrawnRate = hubAsset.drawnRate;
+        spokeData.convertToShares = ts.convertToShares(10 ** spokeData.decimals);
+        spokeData.convertToAssets = ts.convertToAssets(10 ** spokeData.decimals);
+        spokeData.user = _user;
+        spokeData.userSuppliedShares = IERC20(_spoke).balanceOf(_user);
+        spokeData.userSuppliedAssets = ts.convertToAssets(spokeData.userSuppliedShares);
     }
 
     /**

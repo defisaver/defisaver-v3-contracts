@@ -6,7 +6,6 @@ import { ISpoke } from "../../../contracts/interfaces/protocols/aaveV4/ISpoke.so
 import { SmartWallet } from "test-sol/utils/SmartWallet.sol";
 import { AaveV4Payback } from "../../../contracts/actions/aaveV4/AaveV4Payback.sol";
 import { AaveV4TestBase } from "./AaveV4TestBase.t.sol";
-import { console2 } from "forge-std/console2.sol";
 
 contract TestAaveV4Payback is AaveV4TestBase {
     /*//////////////////////////////////////////////////////////////////////////
