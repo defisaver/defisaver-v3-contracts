@@ -30,7 +30,8 @@ contract SparkSetEMode is ActionBase, SparkHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
+                params.categoryId = uint8(_parseParamUint(uint256(params.categoryId), _paramMapping[0], _subData, _returnValues));
+        params.market = _parseParamAddr(params.market, _paramMapping[1], _subData, _returnValues);
 
         (uint256 categoryId, bytes memory logData) = _setEmode(params.market, params.categoryId);
         emit ActionEvent("SparkSetEMode", logData);
