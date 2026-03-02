@@ -178,6 +178,20 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
         vm.stopPrank();
     }
 
+    function _enableEoaRefreshPremiumPositionManager(
+        ISpoke _spoke,
+        address _eoa,
+        address _walletAddr
+    ) internal {
+        vm.startPrank(_eoa);
+        _spoke.setUserPositionManager(CONFIG_POSITION_MANAGER, true);
+        IConfigPositionManager(CONFIG_POSITION_MANAGER)
+            .setCanUpdateUserRiskPremiumPermission(address(_spoke), _walletAddr, true);
+        IConfigPositionManager(CONFIG_POSITION_MANAGER)
+            .setCanUpdateUserDynamicConfigPermission(address(_spoke), _walletAddr, true);
+        vm.stopPrank();
+    }
+
     function _enableEoaTakerPositionManager(
         ISpoke _spoke,
         address _eoa,

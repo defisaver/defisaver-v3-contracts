@@ -107,6 +107,7 @@ import { AaveV4Withdraw } from "../../contracts/actions/aaveV4/AaveV4Withdraw.so
 import { AaveV4Borrow } from "../../contracts/actions/aaveV4/AaveV4Borrow.sol";
 import { AaveV4Payback } from "../../contracts/actions/aaveV4/AaveV4Payback.sol";
 import { AaveV4CollateralSwitch } from "../../contracts/actions/aaveV4/AaveV4CollateralSwitch.sol";
+import { AaveV4RefreshPremium } from "../../contracts/actions/aaveV4/AaveV4RefreshPremium.sol";
 import { AaveV4StoreRatio } from "../../contracts/actions/aaveV4/AaveV4StoreRatio.sol";
 import { AaveV4RatioCheck } from "../../contracts/actions/checkers/AaveV4RatioCheck.sol";
 import { SummerfiUnsub } from "../../contracts/actions/summerfi/SummerfiUnsub.sol";
@@ -1473,6 +1474,20 @@ contract ActionsUtils {
                 onBehalf: _onBehalf,
                 reserveId: _reserveId,
                 useAsCollateral: _useAsCollateral
+            })
+        );
+    }
+
+    function aaveV4RefreshPremiumEncode(
+        address _spoke,
+        address _onBehalf,
+        bool _refreshDynamicReserveConfig
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            AaveV4RefreshPremium.Params({
+                spoke: _spoke,
+                onBehalf: _onBehalf,
+                refreshDynamicReserveConfig: _refreshDynamicReserveConfig
             })
         );
     }
