@@ -41,6 +41,6 @@ test-plasma:
 test-all: test-mainnet
 	$(MAKE) test-arbitrum FROM=Mainnet; \
 	$(MAKE) test-base FROM=Arbitrum; \
-	$(MAKE) test-linea FROM=Base; \
-	$(MAKE) test-optimism FROM=Linea; \
-	$(MAKE) test-plasma FROM=Optimism
+	$(MAKE) test-optimism FROM=Base; \
+	$(MAKE) test-linea FROM=Optimism; \
+	$(MAKE) test-plasma FROM=Linea

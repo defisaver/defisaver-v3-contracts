@@ -196,7 +196,7 @@ async function excludeCancunSpecificChanges(oldNetwork, newNetwork) {
 async function main() {
     try {
         console.log(`Changing repo network from ${oldNetworkName} to ${newNetworkName}...`);
-        await changeNetworkNameForAddresses(oldNetworkName, newNetworkName);
+        await changeNetworkNameForAddresses(newNetworkName);
         console.log('✓ Updated network names in contract files');
         await changeTestAddressesImport(newNetworkName);
         console.log('✓ Updated test-sol address imports');
