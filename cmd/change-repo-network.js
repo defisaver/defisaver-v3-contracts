@@ -5,6 +5,14 @@ const path = require('path');
 const { chainIds } = require('../test/utils/utils');
 const hardhatSettings = require('../hardhat.config');
 
+const KNOWN_NETWORKS = ['Mainnet', 'Arbitrum', 'Optimism', 'Base', 'Linea', 'Plasma'];
+
+// Matches {Network}{Anything}Addresses
+// Not preceded by a letter (prevents mid-word matches).
+// \w* covers both "MainnetAddresses" (empty middle) and "MainnetFluidAddresses".
+const networkAddressesRgx = () =>
+    new RegExp(`(?<![a-zA-Z])(${KNOWN_NETWORKS.join('|')})(\\w*Addresses)`, 'g');
+
 if (process.argv.length !== 4) {
     console.error('Usage: change-repo-network <oldNetwork> <newNetwork>');
     process.exit(1);
@@ -93,7 +101,7 @@ async function changeHardhatConfig(oldNetwork, newNetwork) {
     fs.writeFileSync(configPath, updatedContent);
 }
 
-async function changeNetworkNameForAddresses(oldNetwork, newNetwork) {
+async function changeNetworkNameForAddresses(newNetwork) {
     const files = getAllFiles('./contracts');
     await Promise.all(
         files.map(async (file) => {
@@ -111,18 +119,21 @@ async function changeNetworkNameForAddresses(oldNetwork, newNetwork) {
                 if (rewrite) {
                     console.log(file);
                     const contractContent = (await fs.readFileSync(file.toString())).toString();
-                    fs.writeFileSync(file, contractContent.replaceAll(oldNetwork, newNetwork));
+                    fs.writeFileSync(
+                        file,
+                        contractContent.replace(networkAddressesRgx(), `${newNetwork}$2`),
+                    );
                 }
             }
         }),
     );
 }
 
-async function changeTestAddressesImport(oldNetwork, newNetwork) {
+async function changeTestAddressesImport(newNetwork) {
     const files = getAllFiles('./test-sol').filter((f) => f.endsWith('.sol'));
     for (const file of files) {
         const content = fs.readFileSync(file).toString();
-        const updated = content.replaceAll(`${oldNetwork}Addresses`, `${newNetwork}Addresses`);
+        const updated = content.replace(networkAddressesRgx(), `${newNetwork}$2`);
         if (updated !== content) {
             console.log(file);
             fs.writeFileSync(file, updated);
@@ -187,7 +198,7 @@ async function main() {
         console.log(`Changing repo network from ${oldNetworkName} to ${newNetworkName}...`);
         await changeNetworkNameForAddresses(oldNetworkName, newNetworkName);
         console.log('✓ Updated network names in contract files');
-        await changeTestAddressesImport(oldNetworkName, newNetworkName);
+        await changeTestAddressesImport(newNetworkName);
         console.log('✓ Updated test-sol address imports');
         await changeWethAddress(oldNetworkName, newNetworkName);
         console.log('✓ Updated WETH addresses');
