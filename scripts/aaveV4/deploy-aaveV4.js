@@ -26,6 +26,7 @@ async function main() {
     const aaveV4RatioTrigger = await redeploy('AaveV4RatioTrigger', true);
     const aaveV4QuotePriceTrigger = await redeploy('AaveV4QuotePriceTrigger', true);
     const aaveV4QuotePriceRangeTrigger = await redeploy('AaveV4QuotePriceRangeTrigger', true);
+    const aaveV4RefreshPremium = await redeploy('AaveV4RefreshPremium', true);
 
     console.log('AaveV4View:', aaveV4View.address);
     console.log('AaveV4Supply:', aaveV4Supply.address);
@@ -38,6 +39,7 @@ async function main() {
     console.log('AaveV4RatioTrigger:', aaveV4RatioTrigger.address);
     console.log('AaveV4QuotePriceTrigger:', aaveV4QuotePriceTrigger.address);
     console.log('AaveV4QuotePriceRangeTrigger:', aaveV4QuotePriceRangeTrigger.address);
+    console.log('AaveV4RefreshPremium:', aaveV4RefreshPremium.address);
 
     const repayBundle = await deployAaveV4RepayBundle();
     const boostBundle = await deployAaveV4BoostBundle();
@@ -45,6 +47,12 @@ async function main() {
     const boostOnPriceBundle = await deployAaveV4BoostOnPriceBundle();
     const closeBundle = await deployAaveV4CloseBundle();
     const flCollateralSwitchStrategy = await deployAaveV4FLCollateralSwitchStrategy();
+    const eoaRepayBundle = await deployAaveV4RepayBundle();
+    const eoaBoostBundle = await deployAaveV4BoostBundle();
+    const eoaRepayOnPriceBundle = await deployAaveV4RepayOnPriceBundle();
+    const eoaBoostOnPriceBundle = await deployAaveV4BoostOnPriceBundle();
+    const eoaCloseBundle = await deployAaveV4CloseBundle();
+    const eoaFLCollateralSwitchStrategy = await deployAaveV4FLCollateralSwitchStrategy();
 
     console.log('Repay Bundle:', repayBundle);
     console.log('Boost Bundle:', boostBundle);
@@ -52,6 +60,12 @@ async function main() {
     console.log('Boost On Price Bundle:', boostOnPriceBundle);
     console.log('Close Bundle:', closeBundle);
     console.log('FL Collateral Switch Strategy ID:', flCollateralSwitchStrategy);
+    console.log('EOA Repay Bundle:', eoaRepayBundle);
+    console.log('EOA Boost Bundle:', eoaBoostBundle);
+    console.log('EOA Repay On Price Bundle:', eoaRepayOnPriceBundle);
+    console.log('EOA Boost On Price Bundle:', eoaBoostOnPriceBundle);
+    console.log('EOA Close Bundle:', eoaCloseBundle);
+    console.log('EOA FL Collateral Switch Strategy ID:', eoaFLCollateralSwitchStrategy);
 }
 
 main().catch((error) => {
