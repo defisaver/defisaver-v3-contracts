@@ -17,21 +17,21 @@ fs_permissions = [{ access = 'read', path = './test-sol/config/' }]
 
 
 [profile.arbitrum]
-# TODO -> Check fluid tests
-no_match_path = "test-sol/{actions,views}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,aaveV3/umbrella,fluid,AaveView}*"
+# TODO -> Check fluid tests, MorphoTokenWrap not on L2s, not sure if skip here or skip in setUp()
+no_match_path = "test-sol/{actions,views,triggers}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve,aaveV3/umbrella,fluid,AaveView,MorphoTokenWrap}*"
 
 [profile.base]
-no_match_path = "test-sol/{actions,views}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi}*"
+no_match_path = "test-sol/{actions,views,triggers}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve}*"
 
 [profile.optimism]
-no_match_path = "test-sol/{actions,views}/*{eulerV2,etherFi,fluid,Fluid,gho,liquityV2,morpho-blue,Morpho,pendle,renzo,sky,Sky,Spark,summerfi}*"
+no_match_path = "test-sol/{actions,views,triggers}/*{eulerV2,etherFi,fluid,Fluid,gho,liquityV2,morpho-blue,Morpho,pendle,renzo,sky,Sky,Spark,summerfi,Curve}*"
 
 [profile.linea]
-no_match_path = "test-sol/{actions,views}/*{eulerV2,etherFi,fluid,Fluid,gho,liquityV2,morpho-blue,Morpho,pendle,renzo,sky,Sky,Spark,summerfi}*"
+no_match_path = "test-sol/{actions,views,triggers}/*{eulerV2,etherFi,fluid,Fluid,gho,liquityV2,morpho-blue,Morpho,pendle,renzo,sky,Sky,Spark,summerfi,Curve}*"
 evm_version = "london"
 
 [profile.plasma]
-no_match_path = "test-sol/{actions,views}/*{eulerV2,etherFi,fluid,Fluid,gho,liquityV2,morpho-blue,Morpho,pendle,renzo,sky,Sky,Spark,summerfi}*"
+no_match_path = "test-sol/{actions,views,triggers}/*{eulerV2,etherFi,fluid,Fluid,gho,liquityV2,morpho-blue,Morpho,pendle,renzo,sky,Sky,Spark,summerfi,Curve}*"
 
 
 # Formatting -> https://getfoundry.sh/config/reference/formatter/
