@@ -34,6 +34,7 @@ async function main() {
             await hub.updateSpokeConfig(reserve.assetId, coreSpoke, spokeConfig);
         }
     }
+    console.log('AaveV4 caps set successfully');
 }
 
 main().catch((error) => {

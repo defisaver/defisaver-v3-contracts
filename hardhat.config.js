@@ -82,12 +82,12 @@ module.exports = {
             chainId: 1,
         },
         fork: {
-            url: `https://virtual.mainnet.rpc.tenderly.co/${process.env.FORK_ID}`,
+            url: `https://virtual.mainnet.us-east.rpc.tenderly.co/${process.env.FORK_ID}`, // TODO:AaveV4: Return back to https://virtual.mainnet.rpc.tenderly.co/${process.env.FORK_ID} once live.
             timeout: 1000000,
             type: 'tenderly',
             name: 'mainnet',
             hardfork: 'cancun',
-            chainId: 1,
+            chainId: 123456789, // TODO:AaveV4: Return back to chainId: 1 once live.
         },
         hardhat: {
             chains: {

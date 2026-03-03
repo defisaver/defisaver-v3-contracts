@@ -55,7 +55,7 @@ contract BaseTest is Config {
 
     function forkAaveV4DevNet() internal {
         string memory aaveV4DevNetRpc =
-            "https://virtual.mainnet-aave.us-east.rpc.tenderly.co/dbaa58ab-597b-4bcd-ae6a-b8e50f716146";
+            "https://virtual.mainnet-aave.us-east.rpc.tenderly.co/38393fd3-0a79-4e60-b8cc-c6bb5903454a";
         uint256 aaveV4DevNetFork = vm.createFork(aaveV4DevNetRpc);
         vm.selectFork(aaveV4DevNetFork);
     }

@@ -24,6 +24,8 @@ async function main() {
             console.error('Failed to add liquidity for reserve', underlying, i);
         }
     }
+
+    console.log('Finished adding liquidity');
 }
 
 main().catch((error) => {
