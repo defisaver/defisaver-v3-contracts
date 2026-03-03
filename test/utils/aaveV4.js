@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 const hre = require('hardhat');
 const dfs = require('@defisaver/sdk');
 
@@ -48,6 +49,102 @@ const AAVE_V4_AUTOMATION_TEST_PAIRS = [
         spokeName: 'CORE',
     },
 ];
+
+const deployAndLogAllStrategiesAndBundles = async () => {
+    const isFork = isNetworkFork();
+    await openStrategyAndBundleStorage(isFork);
+
+    const repayStrategy = createAaveV4RepayStrategy();
+    const flRepayStrategy = createAaveV4FLRepayStrategy();
+    const boostStrategy = createAaveV4BoostStrategy();
+    const flBoostStrategy = createAaveV4FLBoostStrategy();
+    const repayOnPriceStrategy = createAaveV4RepayOnPriceStrategy();
+    const flRepayOnPriceStrategy = createAaveV4FLRepayOnPriceStrategy();
+    const boostOnPriceStrategy = createAaveV4BoostOnPriceStrategy();
+    const flBoostOnPriceStrategy = createAaveV4FLBoostOnPriceStrategy();
+    const closeToDebtStrategy = createAaveV4FLCloseToDebtStrategy();
+    const closeToCollStrategy = createAaveV4FLCloseToCollStrategy();
+    const flCollateralSwitchStrategy = createAaveV4FLCollateralSwitchStrategy();
+
+    const continuous = true;
+    const nonContinuous = false;
+    const repayStrategyId = await createStrategy(...repayStrategy, continuous);
+    const flRepayStrategyId = await createStrategy(...flRepayStrategy, continuous);
+    const boostStrategyId = await createStrategy(...boostStrategy, continuous);
+    const flBoostStrategyId = await createStrategy(...flBoostStrategy, continuous);
+    const repayOnPriceStrategyId = await createStrategy(...repayOnPriceStrategy, nonContinuous);
+    const flRepayOnPriceStrategyId = await createStrategy(...flRepayOnPriceStrategy, nonContinuous);
+    const boostOnPriceStrategyId = await createStrategy(...boostOnPriceStrategy, nonContinuous);
+    const flBoostOnPriceStrategyId = await createStrategy(...flBoostOnPriceStrategy, nonContinuous);
+    const closeToDebtStrategyId = await createStrategy(...closeToDebtStrategy, nonContinuous);
+    const closeToCollStrategyId = await createStrategy(...closeToCollStrategy, nonContinuous);
+    const flCollateralSwitchStrategyId = await createStrategy(
+        ...flCollateralSwitchStrategy,
+        nonContinuous,
+    );
+    const flEoaCollateralSwitchStrategyId = await createStrategy(
+        ...flCollateralSwitchStrategy,
+        nonContinuous,
+    );
+
+    const repayBundle = await createBundle([repayStrategyId, flRepayStrategyId]);
+    const boostBundle = await createBundle([boostStrategyId, flBoostStrategyId]);
+    const repayOnPriceBundle = await createBundle([
+        repayOnPriceStrategyId,
+        flRepayOnPriceStrategyId,
+    ]);
+    const boostOnPriceBundle = await createBundle([
+        boostOnPriceStrategyId,
+        flBoostOnPriceStrategyId,
+    ]);
+    const closeBundle = await createBundle([closeToDebtStrategyId, closeToCollStrategyId]);
+    const eoaRepayBundle = await createBundle([repayStrategyId, flRepayStrategyId]);
+    const eoaBoostBundle = await createBundle([boostStrategyId, flBoostStrategyId]);
+    const eoaRepayOnPriceBundle = await createBundle([
+        repayOnPriceStrategyId,
+        flRepayOnPriceStrategyId,
+    ]);
+    const eoaBoostOnPriceBundle = await createBundle([
+        boostOnPriceStrategyId,
+        flBoostOnPriceStrategyId,
+    ]);
+    const eoaCloseBundle = await createBundle([closeToDebtStrategyId, closeToCollStrategyId]);
+
+    console.log('AaveV4 Repay Bundle:', repayBundle);
+    console.log('------AaveV4RepayStrategyID:', repayStrategyId);
+    console.log('------AaveV4FLRepayStrategyID:', flRepayStrategyId);
+    console.log('AaveV4 Boost Bundle:', boostBundle);
+    console.log('------AaveV4BoostStrategyID:', boostStrategyId);
+    console.log('------AaveV4FLBoostStrategyID:', flBoostStrategyId);
+    console.log('AaveV4 Repay On Price Bundle:', repayOnPriceBundle);
+    console.log('------AaveV4RepayOnPriceStrategyID:', repayOnPriceStrategyId);
+    console.log('------AaveV4FLRepayOnPriceStrategyID:', flRepayOnPriceStrategyId);
+    console.log('AaveV4 Boost On Price Bundle:', boostOnPriceBundle);
+    console.log('------AaveV4BoostOnPriceStrategyID:', boostOnPriceStrategyId);
+    console.log('------AaveV4FLBoostOnPriceStrategyID:', flBoostOnPriceStrategyId);
+    console.log('AaveV4 Close Bundle:', closeBundle);
+    console.log('------AaveV4CloseToDebtStrategyID:', closeToDebtStrategyId);
+    console.log('------AaveV4CloseToCollStrategyID:', closeToCollStrategyId);
+    console.log('AaveV4 FL Collateral Switch Strategy:', flCollateralSwitchStrategyId);
+    console.log('/n');
+    console.log('EOA Repay Bundle:', eoaRepayBundle);
+    console.log('------AaveV4RepayStrategyID:', repayStrategyId);
+    console.log('------AaveV4FLRepayStrategyID:', flRepayStrategyId);
+    console.log('EOA Boost Bundle:', eoaBoostBundle);
+    console.log('------AaveV4BoostStrategyID:', boostStrategyId);
+    console.log('------AaveV4FLBoostStrategyID:', flBoostStrategyId);
+    console.log('EOA Repay On Price Bundle:', eoaRepayOnPriceBundle);
+    console.log('------AaveV4RepayOnPriceStrategyID:', repayOnPriceStrategyId);
+    console.log('------AaveV4FLRepayOnPriceStrategyID:', flRepayOnPriceStrategyId);
+    console.log('EOA Boost On Price Bundle:', eoaBoostOnPriceBundle);
+    console.log('------AaveV4BoostOnPriceStrategyID:', boostOnPriceStrategyId);
+    console.log('------AaveV4FLBoostOnPriceStrategyID:', flBoostOnPriceStrategyId);
+    console.log('EOA Close Bundle:', eoaCloseBundle);
+    console.log('------AaveV4CloseToDebtStrategyID:', closeToDebtStrategyId);
+    console.log('------AaveV4CloseToCollStrategyID:', closeToCollStrategyId);
+    console.log('EOA FL Collateral Switch Strategy:', flEoaCollateralSwitchStrategyId);
+    console.log('/n');
+};
 
 const deployAaveV4RepayBundle = async () => {
     const isFork = isNetworkFork();
@@ -330,4 +427,5 @@ module.exports = {
     getSafetyRatio,
     getAaveV4AssetPrice,
     getUserSuppliedAmount,
+    deployAndLogAllStrategiesAndBundles,
 };
