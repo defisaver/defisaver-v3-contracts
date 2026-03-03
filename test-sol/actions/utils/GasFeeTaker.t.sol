@@ -8,80 +8,91 @@ import {
     IPriceOracleGetterAave
 } from "../../../contracts/interfaces/protocols/aaveV2/IPriceOracleGetterAave.sol";
 import { GasFeeTaker } from "../../../contracts/actions/fee/GasFeeTaker.sol";
-
+import { GasFeeTakerL2 } from "../../../contracts/actions/fee/GasFeeTakerL2.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { console } from "forge-std/console.sol";
 
-contract TestGasFeeTaker is BaseTest, GasFeeTaker {
+import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
+
+contract TestGasFeeTaker is BaseTest, GasFeeTaker, AaveV3Helper {
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
     GasFeeTaker cut;
-
+    GasFeeTakerL2 cutL2;
     /*//////////////////////////////////////////////////////////////////////////
                                     VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
-    address internal matic = 0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0;
     address internal aDAI = 0x028171bCA77440897B824Ca71D1c56caC55b68A3; //doesn't have chainlink oracle price
-    address internal wbtc = 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599;
-    address internal AAVE_V2_MARKET = 0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5;
 
     /*//////////////////////////////////////////////////////////////////////////
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkFromEnv("GasFeeTaker");
+        forkFromEnv("");
+
         cut = new GasFeeTaker();
+        cutL2 = new GasFeeTakerL2();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                       TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function testGetWbtcPrice() public view {
-        uint256 price = cut.getPriceInUSD(wbtc);
-
-        console.log(price);
-    }
-
-    function testGetMaticPrice() public view {
-        uint256 price = cut.getPriceInUSD(matic);
-
-        console.log(price);
-    }
-
-    function testWBTCPrice() public view {
-        uint256 price = cut.getPriceInETH(wbtc);
+        uint256 price =
+            block.chainid == 1 ? cut.getPriceInUSD(WBTC_ADDR) : cutL2.getPriceInUSD(WBTC_ADDR);
 
         address priceOracleAddress =
-            ILendingPoolAddressesProviderV2(AAVE_V2_MARKET).getPriceOracle();
-
-        uint256 aavePrice = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(wbtc);
+            ILendingPoolAddressesProviderV2(DEFAULT_AAVE_MARKET).getPriceOracle();
+        uint256 aavePrice = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(WBTC_ADDR);
 
         console.log(price);
         console.log(aavePrice);
+
+        // Assume that it will stay in this price range for a while
+        assertGt(price, 30_000e8); // 30_000 USD
+        assertLt(price, 300_000e8); // 300_000 USD
+
+        // 16 is 1%
+        // 15 is 0.1%
+        // 14 is 0.01%
+
+        assertApproxEqRel(price, aavePrice, 1e16); // 1% diff between price and aave price
+    }
+
+    function testWBTCPriceInETH() public view {
+        uint256 price =
+            block.chainid == 1 ? cut.getPriceInETH(WBTC_ADDR) : cutL2.getPriceInETH(WBTC_ADDR);
+
+        console.log(price);
+
+        // Assume that it will stay in this price range for a while. If not, we will think of a better way for check
+        assertGt(price, 5e18); // 5 ETH for 1 WBTC
+        assertLt(price, 50e18); // 50 ETH for 1 WBTC
     }
 
     function testDaiPrice() public view {
-        uint256 price = cut.getPriceInETH(DAI_ADDR);
+        uint256 priceInETH =
+            block.chainid == 1 ? cut.getPriceInETH(DAI_ADDR) : cutL2.getPriceInETH(DAI_ADDR);
+        console.log(priceInETH);
+        assertGt(priceInETH, 0);
 
-        address priceOracleAddress =
-            ILendingPoolAddressesProviderV2(AAVE_V2_MARKET).getPriceOracle();
-
-        uint256 aavePrice = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(DAI_ADDR);
-
-        console.log(price);
-        console.log(aavePrice);
+        uint256 priceInUSD =
+            block.chainid == 1 ? cut.getPriceInUSD(DAI_ADDR) : cutL2.getPriceInUSD(DAI_ADDR);
+        console.log(priceInUSD);
+        assertApproxEqRel(priceInUSD, 1e8, 1e15); // 0.1% diff between price and 1 USD
     }
 
     function testPriceForNonTokenAddr() public view {
-        uint256 price = cut.getPriceInUSD(aDAI);
-
+        uint256 price = block.chainid == 1 ? cut.getPriceInUSD(aDAI) : cutL2.getPriceInUSD(aDAI);
         console.log(price);
-
         assertEq(price, 0);
     }
 
     function testGasCost() public {
+        // TODO -> Fix this test for L2s
+        if (block.chainid != 1) vm.skip(true);
+
         vm.fee(100_000_000_000);
         console.log(tx.gasprice);
         uint256 gasCost = cut.calcGasCost(1_000_000, DAI_ADDR, 0);
