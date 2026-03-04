@@ -9,6 +9,20 @@ import {
     StrategyTriggerViewNoRevert
 } from "../../contracts/views/strategy/StrategyTriggerViewNoRevert.sol";
 
+import { AaveV3Supply } from "../../contracts/actions/aaveV3/AaveV3Supply.sol";
+import { AaveV3Borrow } from "../../contracts/actions/aaveV3/AaveV3Borrow.sol";
+import { SparkSupply } from "../../contracts/actions/spark/SparkSupply.sol";
+import { SparkBorrow } from "../../contracts/actions/spark/SparkBorrow.sol";
+
+import { IPoolV3 } from "../../contracts/interfaces/protocols/aaveV3/IPoolV3.sol";
+import { ISparkPool } from "../../contracts/interfaces/protocols/spark/ISparkPool.sol";
+import {
+    IPoolAddressesProvider
+} from "../../contracts/interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
+import {
+    ISparkPoolAddressesProvider
+} from "../../contracts/interfaces/protocols/spark/ISparkPoolAddressesProvider.sol";
+
 contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRevert {
     /*//////////////////////////////////////////////////////////////////////////
                                     VARIABLES
@@ -85,36 +99,175 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRever
         );
     }
 
-    function test_verifyAaveV3LeverageManagementConditions() public view {
-        //vm.warp(1748518160);
-        address walletWithEnoughDebt = 0xaB5a28B6Ca2D1E12FE5AcC7341352d5032b74438;
+    function test_verifyAaveV3LeverageManagementConditions() public {
+        SmartWallet walletWithEnoughDebt = new SmartWallet(jane);
+        _createAaveV3Position(
+            DEFAULT_AAVE_MARKET,
+            Addresses.WETH_ADDR,
+            10e18,
+            Addresses.USDC_ADDR,
+            6000e6,
+            walletWithEnoughDebt
+        );
         assertEq(
-            uint256(_verifyAaveV3MinDebtPosition(walletWithEnoughDebt)),
+            uint256(_verifyAaveV3MinDebtPosition(walletWithEnoughDebt.walletAddr())),
             uint256(TriggerStatus.TRUE),
             "trigger status should be true"
         );
 
-        address walletWithNotEnoughDebt = 0x486c0bE444b63898Cca811654709f7D9e036Dc4E;
+        SmartWallet walletWithNotEnoughDebt = new SmartWallet(alice);
+        _createAaveV3Position(
+            DEFAULT_AAVE_MARKET,
+            Addresses.WETH_ADDR,
+            10e18,
+            Addresses.USDC_ADDR,
+            10e6,
+            walletWithNotEnoughDebt
+        );
         assertEq(
-            uint256(_verifyAaveV3MinDebtPosition(walletWithNotEnoughDebt)),
+            uint256(_verifyAaveV3MinDebtPosition(walletWithNotEnoughDebt.walletAddr())),
             uint256(TriggerStatus.FALSE),
             "trigger status should be false"
         );
     }
 
-    function test_verifySparkLeverageManagementConditions() public view {
-        address walletWithEnoughDebt = 0xc0c790F61a1721B70F0D4b1Aa1133687Fa3fd900;
+    function test_verifySparkLeverageManagementConditions() public {
+        if (block.chainid != 1) {
+            vm.skip(true, "Spark is only supported on Mainnet");
+        }
+
+        SmartWallet walletWithEnoughDebt = new SmartWallet(jane);
+        _createSparkPosition(
+            DEFAULT_SPARK_MARKET_MAINNET,
+            Addresses.WETH_ADDR,
+            10e18,
+            Addresses.USDC_ADDR,
+            6000e6,
+            walletWithEnoughDebt
+        );
         assertEq(
-            uint256(_verifySparkMinDebtPosition(walletWithEnoughDebt)),
+            uint256(_verifySparkMinDebtPosition(walletWithEnoughDebt.walletAddr())),
             uint256(TriggerStatus.TRUE),
             "trigger status should be true"
         );
 
-        address walletWithNotEnoughDebt = 0xe384F9cba7e27Df646C3E636136E5af57EC359FC;
+        SmartWallet walletWithNotEnoughDebt = new SmartWallet(alice);
+        _createSparkPosition(
+            DEFAULT_SPARK_MARKET_MAINNET,
+            Addresses.WETH_ADDR,
+            10e18,
+            Addresses.USDC_ADDR,
+            100e6,
+            walletWithNotEnoughDebt
+        );
         assertEq(
-            uint256(_verifySparkMinDebtPosition(walletWithNotEnoughDebt)),
+            uint256(_verifySparkMinDebtPosition(walletWithNotEnoughDebt.walletAddr())),
             uint256(TriggerStatus.FALSE),
             "trigger status should be false"
         );
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                     HELPERS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function _createAaveV3Position(
+        address _market,
+        address _supplyToken,
+        uint256 _supplyAmount,
+        address _borrowToken,
+        uint256 _borrowAmount,
+        SmartWallet _wallet
+    ) internal {
+        IPoolV3 pool = IPoolV3(IPoolAddressesProvider(_market).getPool());
+        uint16 supplyAssetId = pool.getReserveData(_supplyToken).id;
+        uint16 borrowAssetId = pool.getReserveData(_borrowToken).id;
+
+        give(_supplyToken, _wallet.owner(), _supplyAmount);
+        _wallet.ownerApprove(_supplyToken, _supplyAmount);
+
+        bytes memory supplyCalldata = abi.encodeWithSelector(
+            bytes4(keccak256("executeActionDirect(bytes)")),
+            abi.encode(
+                AaveV3Supply.Params({
+                    amount: _supplyAmount,
+                    from: _wallet.owner(),
+                    assetId: supplyAssetId,
+                    enableAsColl: true,
+                    useDefaultMarket: false,
+                    useOnBehalf: false,
+                    market: _market,
+                    onBehalf: address(0)
+                })
+            )
+        );
+        _wallet.execute(address(new AaveV3Supply()), supplyCalldata, 0);
+
+        bytes memory borrowCalldata = abi.encodeWithSelector(
+            bytes4(keccak256("executeActionDirect(bytes)")),
+            abi.encode(
+                AaveV3Borrow.Params({
+                    amount: _borrowAmount,
+                    to: _wallet.owner(),
+                    rateMode: 2,
+                    assetId: borrowAssetId,
+                    useDefaultMarket: false,
+                    useOnBehalf: false,
+                    market: _market,
+                    onBehalf: address(0)
+                })
+            )
+        );
+        _wallet.execute(address(new AaveV3Borrow()), borrowCalldata, 0);
+    }
+
+    function _createSparkPosition(
+        address _market,
+        address _supplyToken,
+        uint256 _supplyAmount,
+        address _borrowToken,
+        uint256 _borrowAmount,
+        SmartWallet _wallet
+    ) internal {
+        ISparkPool pool = ISparkPool(ISparkPoolAddressesProvider(_market).getPool());
+        uint16 supplyAssetId = pool.getReserveData(_supplyToken).id;
+        uint16 borrowAssetId = pool.getReserveData(_borrowToken).id;
+
+        give(_supplyToken, _wallet.owner(), _supplyAmount);
+        _wallet.ownerApprove(_supplyToken, _supplyAmount);
+
+        bytes memory supplyCalldata = abi.encodeWithSelector(
+            bytes4(keccak256("executeActionDirect(bytes)")),
+            abi.encode(
+                SparkSupply.Params({
+                    amount: _supplyAmount,
+                    from: _wallet.owner(),
+                    assetId: supplyAssetId,
+                    enableAsColl: true,
+                    useDefaultMarket: false,
+                    useOnBehalf: false,
+                    market: _market,
+                    onBehalf: address(0)
+                })
+            )
+        );
+        _wallet.execute(address(new SparkSupply()), supplyCalldata, 0);
+
+        bytes memory borrowCalldata = abi.encodeWithSelector(
+            bytes4(keccak256("executeActionDirect(bytes)")),
+            abi.encode(
+                SparkBorrow.Params({
+                    amount: _borrowAmount,
+                    to: _wallet.owner(),
+                    rateMode: 2,
+                    assetId: borrowAssetId,
+                    useDefaultMarket: false,
+                    useOnBehalf: false,
+                    market: _market,
+                    onBehalf: address(0)
+                })
+            )
+        );
+        _wallet.execute(address(new SparkBorrow()), borrowCalldata, 0);
     }
 }
