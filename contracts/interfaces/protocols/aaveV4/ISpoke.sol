@@ -417,4 +417,23 @@ interface ISpoke {
 
     /// @notice Returns the maximum allowed number of collateral and borrow reserves per user (each counted separately).
     function MAX_USER_RESERVES_LIMIT() external view returns (uint16);
+
+    /// @notice Returns the EIP-712 domain separator.
+    function DOMAIN_SEPARATOR() external view returns (bytes32);
+
+    /// @notice Returns the type hash for the SetUserPositionManagers intent.
+    /// @return The bytes-encoded EIP-712 struct hash representing the intent.
+    function SET_USER_POSITION_MANAGERS_TYPEHASH() external view returns (bytes32);
+
+    /// @notice Allows caller to revoke their next sequential nonce at specified `key`.
+    /// @dev This does not invalidate nonce at other `key`s namespace.
+    /// @param key The key which specifies namespace of the nonce.
+    /// @return keyNonce The revoked key-prefixed nonce.
+    function useNonce(uint192 key) external returns (uint256 keyNonce);
+
+    /// @notice Returns the next unused nonce for an address and key. Result contains the key prefix.
+    /// @param owner The address of the nonce owner.
+    /// @param key The key which specifies namespace of the nonce.
+    /// @return keyNonce The first 24 bytes are for the key, & the last 8 bytes for the nonce.
+    function nonces(address owner, uint192 key) external view returns (uint256 keyNonce);
 }
