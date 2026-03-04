@@ -17,21 +17,22 @@ fs_permissions = [{ access = 'read', path = './test-sol/config/' }]
 
 
 [profile.arbitrum]
-# TODO -> Check fluid tests, MorphoTokenWrap not on L2s, not sure if skip here or skip in setUp()
-no_match_path = "test-sol/{actions,views,triggers}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve,aaveV3/umbrella,fluid,AaveView,MorphoTokenWrap}*"
+# TODO -> Check fluid tests, 
+# Remove strategies/automations from here
+no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation,aaveV3/umbrella,fluid,AaveView}*"
 
 [profile.base]
-no_match_path = "test-sol/{actions,views,triggers}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve}*"
+no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation}*"
 
 [profile.optimism]
-no_match_path = "test-sol/{actions,views,triggers}/*{eulerV2,etherFi,fluid,Fluid,gho,liquityV2,morpho-blue,Morpho,pendle,renzo,sky,Sky,Spark,summerfi,Curve}*"
+no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,fluid,Fluid,gho,liquityV2,morpho-blue,Morpho,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation}*"
 
 [profile.linea]
-no_match_path = "test-sol/{actions,views,triggers}/*{eulerV2,etherFi,fluid,Fluid,gho,liquityV2,morpho-blue,Morpho,pendle,renzo,sky,Sky,Spark,summerfi,Curve}*"
+no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,fluid,Fluid,gho,liquityV2,morpho-blue,Morpho,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation}*"
 evm_version = "london"
 
 [profile.plasma]
-no_match_path = "test-sol/{actions,views,triggers}/*{eulerV2,etherFi,fluid,Fluid,gho,liquityV2,morpho-blue,Morpho,pendle,renzo,sky,Sky,Spark,summerfi,Curve}*"
+no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,fluid,Fluid,gho,liquityV2,morpho-blue,Morpho,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation}*"
 
 
 # Formatting -> https://getfoundry.sh/config/reference/formatter/

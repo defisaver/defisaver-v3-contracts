@@ -8,7 +8,7 @@ library Addresses {
     address public constant DAI_ADDR = 0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb;
     address public constant USDC_ADDR = 0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA;
     address public constant USDT_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address internal constant WSTETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address internal constant WSTETH_ADDR = 0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452;
     address internal constant STETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant WBTC_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant RENBTC_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;

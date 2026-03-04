@@ -2,6 +2,7 @@
 pragma solidity =0.8.24;
 
 import { TokenGroupRegistry } from "../../contracts/exchangeV3/registries/TokenGroupRegistry.sol";
+import { AdminAuth } from "../../contracts/auth/AdminAuth.sol";
 
 import { Addresses } from "../utils/helpers/MainnetAddresses.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
@@ -11,6 +12,8 @@ contract TestTokenGroupRegistry is BaseTest, TokenGroupRegistry {
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
     TokenGroupRegistry cut;
+
+    address constant NOT_AVAILABLE_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     /*//////////////////////////////////////////////////////////////////////////
                                    SETUP FUNCTION
@@ -22,33 +25,18 @@ contract TestTokenGroupRegistry is BaseTest, TokenGroupRegistry {
 
         vm.startPrank(Addresses.OWNER_ADDR);
 
-        // add stable tokens
-        address[] memory stableTokens = new address[](2);
-        stableTokens[0] = Addresses.DAI_ADDR;
-        stableTokens[1] = Addresses.USDC_ADDR;
-        cut.addTokensInGroup(stableTokens, uint256(Groups.STABLECOIN));
-
-        // add eth based tokens
-        address[] memory ethBasedTokens = new address[](3);
-        ethBasedTokens[0] = Addresses.STETH_ADDR;
-        ethBasedTokens[1] = Addresses.WSTETH_ADDR;
-        ethBasedTokens[2] = Addresses.ETH_ADDR;
-        cut.addTokensInGroup(ethBasedTokens, uint256(Groups.ETH_BASED));
-
-        // add btc based tokens
-        address[] memory btcBasedTokens = new address[](2);
-        btcBasedTokens[0] = Addresses.WBTC_ADDR;
-        btcBasedTokens[1] = Addresses.RENBTC_ADDR;
-        cut.addTokensInGroup(btcBasedTokens, uint256(Groups.BTC_BASED));
+        setStableTokens();
+        setETHBasedTokens();
+        setBtcBasedTokens();
 
         // change stable group fee
         cut.changeGroupFee(uint256(Groups.STABLECOIN), STABLE_FEE_DIVIDER);
 
         // change eth based group fee
-        cut.changeGroupFee(uint256(Groups.ETH_BASED), STANDARD_FEE_DIVIDER);
+        cut.changeGroupFee(uint256(Groups.ETH_BASED), STABLE_FEE_DIVIDER);
 
         // change btc based group fee
-        cut.changeGroupFee(uint256(Groups.BTC_BASED), STANDARD_FEE_DIVIDER);
+        cut.changeGroupFee(uint256(Groups.BTC_BASED), STABLE_FEE_DIVIDER);
 
         vm.stopPrank();
     }
@@ -61,45 +49,48 @@ contract TestTokenGroupRegistry is BaseTest, TokenGroupRegistry {
         assertEq(cut.groupIds(Addresses.USDC_ADDR), uint256(Groups.STABLECOIN));
         assertEq(cut.getFeeForTokens(Addresses.DAI_ADDR, Addresses.USDC_ADDR), STABLE_FEE_DIVIDER);
 
+        assertEq(cut.groupIds(Addresses.WETH_ADDR), uint256(Groups.ETH_BASED));
         assertEq(cut.groupIds(Addresses.WSTETH_ADDR), uint256(Groups.ETH_BASED));
-        assertEq(cut.groupIds(Addresses.STETH_ADDR), uint256(Groups.ETH_BASED));
+        if (block.chainid == 1) {
+            assertEq(cut.groupIds(Addresses.STETH_ADDR), uint256(Groups.ETH_BASED));
+        }
         assertEq(
-            cut.getFeeForTokens(Addresses.WSTETH_ADDR, Addresses.STETH_ADDR), STANDARD_FEE_DIVIDER
+            cut.getFeeForTokens(
+                Addresses.WETH_ADDR,
+                block.chainid == 1 ? Addresses.STETH_ADDR : Addresses.WSTETH_ADDR
+            ),
+            STABLE_FEE_DIVIDER
         );
 
         assertEq(cut.groupIds(Addresses.WBTC_ADDR), uint256(Groups.BTC_BASED));
-        assertEq(cut.groupIds(Addresses.RENBTC_ADDR), uint256(Groups.BTC_BASED));
-        assertEq(
-            cut.getFeeForTokens(Addresses.WBTC_ADDR, Addresses.RENBTC_ADDR), STANDARD_FEE_DIVIDER
-        );
+        if (block.chainid == 1) {
+            assertEq(cut.groupIds(Addresses.RENBTC_ADDR), uint256(Groups.BTC_BASED));
+            assertEq(
+                cut.getFeeForTokens(Addresses.WBTC_ADDR, Addresses.RENBTC_ADDR), STABLE_FEE_DIVIDER
+            );
+        } else {
+            assertEq(
+                cut.getFeeForTokens(Addresses.WBTC_ADDR, Addresses.WBTC_ADDR), STABLE_FEE_DIVIDER
+            );
+        }
     }
 
     function testAddBannedToken() public {
-        vm.startPrank(Addresses.OWNER_ADDR);
-
+        vm.prank(Addresses.OWNER_ADDR);
         cut.addTokenInGroup(Addresses.BANNED_TOKEN_ADDR, uint256(Groups.BANNED));
 
-        vm.stopPrank();
-
-        assertEq(cut.getFeeForTokens(Addresses.BANNED_TOKEN_ADDR, Addresses.ETH_ADDR), 0);
+        assertEq(cut.getFeeForTokens(Addresses.BANNED_TOKEN_ADDR, Addresses.WETH_ADDR), 0);
         assertEq(cut.groupIds(Addresses.BANNED_TOKEN_ADDR), uint256(Groups.BANNED));
     }
 
     function testGetFeeForStandardTokens() public view {
-        assertEq(cut.getFeeForTokens(Addresses.YFI_ADDR, Addresses.ETH_ADDR), STANDARD_FEE_DIVIDER);
-        assertEq(cut.groupIds(Addresses.YFI_ADDR), uint256(Groups.NOT_LISTED));
-        assertEq(cut.groupIds(Addresses.ETH_ADDR), uint256(Groups.ETH_BASED));
-
-        assertEq(cut.getFeeForTokens(Addresses.ETH_ADDR, Addresses.YFI_ADDR), STANDARD_FEE_DIVIDER);
-
         assertEq(cut.getFeeForTokens(Addresses.YFI_ADDR, Addresses.MKR_ADDR), STANDARD_FEE_DIVIDER);
+        assertEq(cut.getFeeForTokens(Addresses.MKR_ADDR, Addresses.YFI_ADDR), STANDARD_FEE_DIVIDER);
         assertEq(cut.groupIds(Addresses.YFI_ADDR), uint256(Groups.NOT_LISTED));
         assertEq(cut.groupIds(Addresses.MKR_ADDR), uint256(Groups.NOT_LISTED));
     }
 
     function testAddNewTokenGroup() public {
-        vm.startPrank(Addresses.OWNER_ADDR);
-
         uint256 nextGroupNumber = 5;
         uint256 feeDivider = 555;
 
@@ -107,92 +98,108 @@ contract TestTokenGroupRegistry is BaseTest, TokenGroupRegistry {
         tokens[0] = Addresses.YFI_ADDR;
         tokens[1] = Addresses.MKR_ADDR;
 
+        vm.prank(Addresses.OWNER_ADDR);
         cut.addNewGroup(tokens, feeDivider);
 
         assertEq(cut.groupIds(Addresses.YFI_ADDR), nextGroupNumber);
         assertEq(cut.groupIds(Addresses.MKR_ADDR), nextGroupNumber);
-
         assertEq(cut.getFeeForTokens(Addresses.YFI_ADDR, Addresses.MKR_ADDR), feeDivider);
-
-        vm.stopPrank();
     }
 
     function testChangeFeeForTokenGroup() public {
-        vm.startPrank(Addresses.OWNER_ADDR);
-
+        vm.prank(Addresses.OWNER_ADDR);
         cut.changeGroupFee(uint256(Groups.ETH_BASED), 100);
 
-        assertEq(cut.getFeeForTokens(Addresses.WSTETH_ADDR, Addresses.STETH_ADDR), 100);
+        assertEq(
+            cut.getFeeForTokens(
+                Addresses.WSTETH_ADDR,
+                block.chainid == 1 ? Addresses.STETH_ADDR : Addresses.WETH_ADDR
+            ),
+            100
+        );
     }
 
     function testRevertToAddTokenIfNotOwner() public {
-        vm.expectRevert();
+        vm.expectRevert(abi.encodeWithSelector(AdminAuth.SenderNotOwner.selector));
         cut.addTokenInGroup(Addresses.ETH_ADDR, uint256(Groups.ETH_BASED));
     }
 
     function testRevertToAddTokensIfNotOwner() public {
-        vm.expectRevert();
         address[] memory tokens = new address[](2);
         tokens[0] = Addresses.ETH_ADDR;
         tokens[1] = Addresses.WETH_ADDR;
 
+        vm.expectRevert(abi.encodeWithSelector(AdminAuth.SenderNotOwner.selector));
         cut.addTokensInGroup(tokens, uint256(Groups.ETH_BASED));
     }
 
     function testRevertToAddNewGroupIfNotOwner() public {
-        vm.expectRevert();
-
         address[] memory tokens = new address[](2);
         tokens[0] = Addresses.YFI_ADDR;
         tokens[1] = Addresses.MKR_ADDR;
 
+        vm.expectRevert(abi.encodeWithSelector(AdminAuth.SenderNotOwner.selector));
         cut.addNewGroup(tokens, 666);
     }
 
     function testRevertToChangeGroupFeeIfNotOwner() public {
-        vm.expectRevert();
-
+        vm.expectRevert(abi.encodeWithSelector(AdminAuth.SenderNotOwner.selector));
         cut.changeGroupFee(uint256(Groups.ETH_BASED), 5000);
     }
 
     function testRevertToChangeFeeTooHigh() public {
-        vm.startPrank(Addresses.OWNER_ADDR);
-
-        vm.expectRevert();
+        vm.prank(Addresses.OWNER_ADDR);
+        vm.expectRevert(abi.encodeWithSelector(TokenGroupRegistry.FeeTooHigh.selector, 10));
         cut.changeGroupFee(uint256(Groups.ETH_BASED), 10);
-
-        vm.stopPrank();
     }
 
     function testRevertToCreateGroupFeeTooHigh() public {
-        vm.startPrank(Addresses.OWNER_ADDR);
-
         address[] memory tokens = new address[](2);
         tokens[0] = Addresses.YFI_ADDR;
         tokens[1] = Addresses.MKR_ADDR;
-
         uint256 feeDivider = 1;
+
+        vm.prank(Addresses.OWNER_ADDR);
         vm.expectRevert(abi.encodeWithSelector(TokenGroupRegistry.FeeTooHigh.selector, feeDivider));
         cut.addNewGroup(tokens, feeDivider);
-
-        vm.stopPrank();
     }
 
     function testRevertToAddTokenToNonExistentGroup() public {
-        vm.startPrank(Addresses.OWNER_ADDR);
-
         uint256 groupId = 42;
+
+        vm.prank(Addresses.OWNER_ADDR);
         vm.expectRevert(
             abi.encodeWithSelector(TokenGroupRegistry.GroupNonExistent.selector, groupId)
         );
         cut.addTokenInGroup(Addresses.ETH_ADDR, groupId);
-
-        vm.stopPrank();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                        HELPERS
     //////////////////////////////////////////////////////////////////////////*/
+
+    function setStableTokens() internal {
+        _addIfAvailable(Addresses.DAI_ADDR, uint256(Groups.STABLECOIN));
+        _addIfAvailable(Addresses.USDC_ADDR, uint256(Groups.STABLECOIN));
+    }
+
+    function setETHBasedTokens() internal {
+        _addIfAvailable(Addresses.WETH_ADDR, uint256(Groups.ETH_BASED));
+        _addIfAvailable(Addresses.STETH_ADDR, uint256(Groups.ETH_BASED));
+        _addIfAvailable(Addresses.WSTETH_ADDR, uint256(Groups.ETH_BASED));
+    }
+
+    function setBtcBasedTokens() internal {
+        _addIfAvailable(Addresses.WBTC_ADDR, uint256(Groups.BTC_BASED));
+        _addIfAvailable(Addresses.RENBTC_ADDR, uint256(Groups.BTC_BASED));
+    }
+
+    function _addIfAvailable(address _token, uint256 _groupId) internal {
+        if (_token != NOT_AVAILABLE_ADDR) {
+            cut.addTokenInGroup(_token, _groupId);
+        }
+    }
+
     function populateRegistry() internal {
         vm.startPrank(Addresses.OWNER_ADDR);
 
