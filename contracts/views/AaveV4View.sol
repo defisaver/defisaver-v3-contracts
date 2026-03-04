@@ -521,9 +521,11 @@ contract AaveV4View is AaveV4Helper {
         spokeData.hubDrawnRate = hubAsset.drawnRate;
         spokeData.convertToShares = ts.convertToShares(10 ** spokeData.decimals);
         spokeData.convertToAssets = ts.convertToAssets(10 ** spokeData.decimals);
-        spokeData.user = _user;
-        spokeData.userSuppliedShares = IERC20(_spoke).balanceOf(_user);
-        spokeData.userSuppliedAssets = ts.convertToAssets(spokeData.userSuppliedShares);
+        if (_user != address(0)) {
+            spokeData.user = _user;
+            spokeData.userSuppliedShares = IERC20(_spoke).balanceOf(_user);
+            spokeData.userSuppliedAssets = ts.convertToAssets(spokeData.userSuppliedShares);
+        }
     }
 
     /**
