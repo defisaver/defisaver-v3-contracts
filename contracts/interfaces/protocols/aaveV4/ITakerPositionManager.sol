@@ -2,6 +2,42 @@
 pragma solidity =0.8.24;
 
 interface ITakerPositionManager {
+    /// @notice Structured parameters for withdraw permit intent.
+    /// @param spoke The address of the spoke.
+    /// @param reserveId The identifier of the reserve.
+    /// @param owner The address of the owner.
+    /// @param spender The address of the spender.
+    /// @param amount The amount of allowance.
+    /// @param nonce The key-prefixed nonce for the signature.
+    /// @param deadline The deadline for the intent.
+    struct WithdrawPermit {
+        address spoke;
+        uint256 reserveId;
+        address owner;
+        address spender;
+        uint256 amount;
+        uint256 nonce;
+        uint256 deadline;
+    }
+
+    /// @notice Structured parameters for borrow permit intent.
+    /// @param spoke The address of the spoke.
+    /// @param reserveId The identifier of the reserve.
+    /// @param owner The address of the owner.
+    /// @param spender The address of the spender.
+    /// @param amount The amount of allowance.
+    /// @param nonce The key-prefixed nonce for the signature.
+    /// @param deadline The deadline for the intent.
+    struct BorrowPermit {
+        address spoke;
+        uint256 reserveId;
+        address owner;
+        address spender;
+        uint256 amount;
+        uint256 nonce;
+        uint256 deadline;
+    }
+
     /// @notice Executes a supply on behalf of a user.
     /// @notice Approves a spender to withdraw assets from the specified reserve.
     /// @dev Using `type(uint256).max` as the amount results in an infinite approval, so the allowance is never decreased.
@@ -71,4 +107,23 @@ interface ITakerPositionManager {
         external
         view
         returns (uint256);
+
+    /// @notice Approves a spender to borrow from the specified reserve using an EIP712-typed intent.
+    /// @dev Uses keyed-nonces where for each key's namespace nonce is consumed sequentially.
+    /// @dev Using `type(uint256).max` as the amount results in an infinite approval, so the allowance is never decreased.
+    /// @param params The structured BorrowPermit parameters.
+    /// @param signature The EIP712-compliant signature bytes.
+    function approveBorrowWithSig(BorrowPermit calldata params, bytes calldata signature) external;
+
+    /// @notice Approves a spender to withdraw from the specified reserve using an EIP712-typed intent.
+    /// @dev Uses keyed-nonces where for each key's namespace nonce is consumed sequentially.
+    /// @dev Using `type(uint256).max` as the amount results in an infinite approval, so the allowance is never decreased.
+    /// @param params The structured WithdrawPermit parameters.
+    /// @param signature The EIP712-compliant signature bytes.
+    function approveWithdrawWithSig(WithdrawPermit calldata params, bytes calldata signature)
+        external;
+
+    function DOMAIN_SEPARATOR() external view returns (bytes32);
+
+    function nonces(address owner, uint192 key) external view returns (uint256 keyNonce);
 }
