@@ -165,6 +165,8 @@ contract AaveV4View is AaveV4Helper {
         uint256 totalDrawn; // The total amount of drawn assets, expressed in asset units.
         uint256 totalPremium; // The total amount of premium assets, expressed in asset units.
         uint256 totalDebt; // The total amount of debt (drawn + premium), expressed in asset units.
+        uint256 totalDrawnShares; // The total amount of drawn shares.
+        uint256 totalPremiumShares; // The total amount of premium shares.
         uint256 swept; // The outstanding liquidity which has been invested by the reinvestment controller, expressed in asset units.
         uint16 liquidityFee; // The protocol fee charged on drawn and premium liquidity growth, expressed in BPS.
         uint120 drawnIndex; // The drawn index which monotonically increases according to the drawn rate, expressed in RAY.
@@ -722,6 +724,8 @@ contract AaveV4View is AaveV4Helper {
 
         (uint256 totalDrawn, uint256 totalPremium) = hub.getAssetOwed(_assetId);
 
+        (uint256 totalPremiumShares,) = hub.getAssetPremiumData(_assetId);
+
         hubAssetData = HubAssetData({
             assetId: uint16(_assetId),
             decimals: asset.decimals,
@@ -731,6 +735,8 @@ contract AaveV4View is AaveV4Helper {
             totalDrawn: totalDrawn,
             totalPremium: totalPremium,
             totalDebt: totalDrawn + totalPremium,
+            totalDrawnShares: hub.getAssetDrawnShares(_assetId),
+            totalPremiumShares: totalPremiumShares,
             swept: asset.swept,
             liquidityFee: asset.liquidityFee,
             drawnIndex: asset.drawnIndex,

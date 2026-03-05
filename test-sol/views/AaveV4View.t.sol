@@ -307,6 +307,8 @@ contract TestAaveV4View is AaveV4TestBase {
         console2.log("totalDrawn:", data.totalDrawn);
         console2.log("totalPremium:", data.totalPremium);
         console2.log("totalDebt:", data.totalDebt);
+        console2.log("totalDrawnShares:", data.totalDrawnShares);
+        console2.log("totalPremiumShares:", data.totalPremiumShares);
         console2.log("swept:", data.swept);
         console2.log("liquidityFee:", data.liquidityFee);
         console2.log("drawnIndex:", data.drawnIndex);
