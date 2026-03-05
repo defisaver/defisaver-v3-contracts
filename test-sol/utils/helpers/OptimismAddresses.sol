@@ -50,8 +50,8 @@ library Addresses {
     // Other
     address public constant DS_PROXY_FACTORY = 0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895;
     address public constant COMET_USDC = 0x2e44e174f7D53F0212823acC11C01A11d58c5bCB;
-    address public constant SAFE_PROXY_FACTORY = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address public constant SAFE_SINGLETON = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant SAFE_PROXY_FACTORY = 0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67;
+    address public constant SAFE_SINGLETON = 0x41675C099F32341bf84BFc5382aF534df5C7461a;
     address public constant UNISWAP_ROUTER = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
     address public constant UNI_V2_WRAPPER = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant UNI_V3_WRAPPER = 0xF723B39fe2Aa9102dE45Bc8ECd3417805aAC79Aa;
