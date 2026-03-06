@@ -25,14 +25,14 @@ no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,
 no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation,aaveV3/umbrella,fluid,AaveView}*"
 
 [profile.optimism]
-no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,fluid,Fluid,gho,liquityV2,morpho-blue,Morpho,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation}*"
+no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation,aaveV3/umbrella,fluid,AaveView}*"
 
 [profile.linea]
-no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,fluid,Fluid,gho,liquityV2,morpho-blue,Morpho,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation}*"
+no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation,aaveV3/umbrella,fluid,AaveView}*"
 evm_version = "london"
 
 [profile.plasma]
-no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,fluid,Fluid,gho,liquityV2,morpho-blue,Morpho,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation}*"
+no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation,aaveV3/umbrella,fluid,AaveView}*"
 
 
 # Formatting -> https://getfoundry.sh/config/reference/formatter/

@@ -156,17 +156,15 @@ contract BaseTest is Config {
         for (uint256 i = 0; i < pairs.length; ++i) {
             if (
                 block.chainid == 8453
-                    && (pairs[i].supplyAsset == Addresses.USDT_ADDR
-                        || pairs[i].supplyAsset == Addresses.DAI_ADDR)
-            ) {
-                pairs[i].supplyAsset = Addresses.USDC_ADDR;
-            }
-            if (
-                block.chainid == 8453
                     && (pairs[i].borrowAsset == Addresses.USDT_ADDR
                         || pairs[i].borrowAsset == Addresses.DAI_ADDR)
             ) {
                 pairs[i].borrowAsset = Addresses.USDC_ADDR;
+            }
+
+            // AAVE's LTV on OP chain is 0. Can't use WETH/wstETH because then some other tests are failing on approval checks as we are iterating through all pairs.
+            if (block.chainid == 10 && pairs[i].supplyAsset == Addresses.AAVE_ADDR) {
+                pairs[i].supplyAsset = Addresses.USDC_ADDR;
             }
 
             testPairs.push(pairs[i]);
