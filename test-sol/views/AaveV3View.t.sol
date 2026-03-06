@@ -67,7 +67,9 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function test_Approvals_WithoutPosition() public view {
+    function test_Approvals_WithoutPosition() public {
+        resetTokenBalanceToZero(sender, Addresses.WETH_ADDR);
+
         DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(Addresses.WETH_ADDR);
 
         AaveV3View.EOAApprovalData memory approvals = cut.getEOAApprovalsAndBalances(
@@ -123,6 +125,8 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
     function test_Approvals_AfterOpeningPosition_EOA() public {
         for (uint256 i = 0; i < testConfigs.length; i++) {
             uint256 snapshot = vm.snapshotState();
+            resetTokenBalanceToZero(sender, testConfigs[i].borrowToken);
+
             _baseTest(testConfigs[i]);
             vm.revertToState(snapshot);
         }

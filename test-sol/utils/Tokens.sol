@@ -74,6 +74,10 @@ contract Tokens is Test {
             .checked_write(amt);
     }
 
+    function resetTokenBalanceToZero(address _who, address _token) internal {
+        gibTokens(_who, _token, 0);
+    }
+
     function give(address _token, address _to, uint256 _amount) internal {
         if (isTokenBlacklistedForDeal(_token)) {
             if (block.chainid != 1 || _token == Addresses.AAVE_ADDR) {
