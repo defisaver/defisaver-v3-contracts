@@ -14,6 +14,8 @@ import { console } from "forge-std/console.sol";
 
 import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
 
+import { Addresses } from "../../utils/helpers/MainnetAddresses.sol";
+
 contract TestGasFeeTaker is BaseTest, GasFeeTaker, AaveV3Helper {
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
@@ -39,12 +41,14 @@ contract TestGasFeeTaker is BaseTest, GasFeeTaker, AaveV3Helper {
                                       TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function testGetWbtcPrice() public view {
-        uint256 price =
-            block.chainid == 1 ? cut.getPriceInUSD(WBTC_ADDR) : cutL2.getPriceInUSD(WBTC_ADDR);
+        uint256 price = block.chainid == 1
+            ? cut.getPriceInUSD(Addresses.WBTC_ADDR)
+            : cutL2.getPriceInUSD(Addresses.WBTC_ADDR);
 
         address priceOracleAddress =
             ILendingPoolAddressesProviderV2(DEFAULT_AAVE_MARKET).getPriceOracle();
-        uint256 aavePrice = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(WBTC_ADDR);
+        uint256 aavePrice =
+            IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(Addresses.WBTC_ADDR);
 
         console.log(price);
         console.log(aavePrice);
@@ -61,8 +65,9 @@ contract TestGasFeeTaker is BaseTest, GasFeeTaker, AaveV3Helper {
     }
 
     function testWBTCPriceInETH() public view {
-        uint256 price =
-            block.chainid == 1 ? cut.getPriceInETH(WBTC_ADDR) : cutL2.getPriceInETH(WBTC_ADDR);
+        uint256 price = block.chainid == 1
+            ? cut.getPriceInETH(Addresses.WBTC_ADDR)
+            : cutL2.getPriceInETH(Addresses.WBTC_ADDR);
 
         console.log(price);
 
@@ -72,13 +77,15 @@ contract TestGasFeeTaker is BaseTest, GasFeeTaker, AaveV3Helper {
     }
 
     function testDaiPrice() public view {
-        uint256 priceInETH =
-            block.chainid == 1 ? cut.getPriceInETH(DAI_ADDR) : cutL2.getPriceInETH(DAI_ADDR);
+        uint256 priceInETH = block.chainid == 1
+            ? cut.getPriceInETH(Addresses.DAI_ADDR)
+            : cutL2.getPriceInETH(Addresses.DAI_ADDR);
         console.log(priceInETH);
         assertGt(priceInETH, 0);
 
-        uint256 priceInUSD =
-            block.chainid == 1 ? cut.getPriceInUSD(DAI_ADDR) : cutL2.getPriceInUSD(DAI_ADDR);
+        uint256 priceInUSD = block.chainid == 1
+            ? cut.getPriceInUSD(Addresses.DAI_ADDR)
+            : cutL2.getPriceInUSD(Addresses.DAI_ADDR);
         console.log(priceInUSD);
         assertApproxEqRel(priceInUSD, 1e8, 1e15); // 0.1% diff between price and 1 USD
     }
@@ -95,14 +102,14 @@ contract TestGasFeeTaker is BaseTest, GasFeeTaker, AaveV3Helper {
 
         vm.fee(100_000_000_000);
         console.log(tx.gasprice);
-        uint256 gasCost = cut.calcGasCost(1_000_000, DAI_ADDR, 0);
+        uint256 gasCost = cut.calcGasCost(1_000_000, Addresses.DAI_ADDR, 0);
         console.log("Gas cost:", gasCost);
 
         gasCost = cut.calcGasCost(1_000_000, aDAI, 0);
         console.log("Gas cost:", gasCost);
         assertEq(gasCost, 0);
 
-        gasCost = cut.calcGasCost(1_000_000, WETH_ADDR, 0);
+        gasCost = cut.calcGasCost(1_000_000, Addresses.WETH_ADDR, 0);
         console.log("Gas cost:", gasCost);
         assertEq(gasCost, 1_000_000 * tx.gasprice);
     }

@@ -60,7 +60,7 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
             asset: Addresses.WETH_ADDR, assetId: pool.getReserveData(Addresses.WETH_ADDR).id
         });
         assets[1] = TestAsset({
-            asset: Addresses.DAI_ADDR, assetId: pool.getReserveData(Addresses.DAI_ADDR).id
+            asset: Addresses.USDC_ADDR, assetId: pool.getReserveData(Addresses.USDC_ADDR).id
         });
         assets[2] = TestAsset({
             asset: Addresses.WBTC_ADDR, assetId: pool.getReserveData(Addresses.WBTC_ADDR).id

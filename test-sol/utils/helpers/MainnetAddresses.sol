@@ -22,7 +22,8 @@ library Addresses {
     address public constant USDE_ADDR = 0x4c9EDD5852cd905f086C759E8383e09bff1E68B3;
     address public constant EUSDE_ADDR = 0x90D2af7d622ca3141efA4d8f1F24d86E5974Cc8F;
     address public constant SUSDE_ADDR = 0x9D39A5DE30e57443BfF2A8307A4256c8797A3497;
-    address public constant USDC_E = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant USDC_E_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant USDbC_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     // DFS
     address public constant OWNER_ADDR = 0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00;

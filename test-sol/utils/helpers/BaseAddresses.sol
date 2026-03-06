@@ -7,23 +7,23 @@ library Addresses {
     address public constant WETH_ADDR = 0x4200000000000000000000000000000000000006;
     address public constant DAI_ADDR = 0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb;
     address public constant USDC_ADDR = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913;
-    address public constant USDT_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant USDT_ADDR = 0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2; // Bridged USDT
     address internal constant WSTETH_ADDR = 0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452;
     address internal constant STETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address public constant WBTC_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant WBTC_ADDR = 0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf; // This is cbBTC but for the sake of simplicity in tests we named it WBTC
     address public constant RENBTC_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant BANNED_TOKEN_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant YFI_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant MKR_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant LUSD_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address public constant LINK_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant LINK_ADDR = 0x88Fb150BDc53A65fe94Dea0c9BA0a6dAf8C6e196;
     address public constant AAVE_ADDR = 0x63706e401c06ac8513145b7687A14804d17f814b;
     address public constant GHO_TOKEN = 0x6Bb7a212910682DCFdbd5BCBb3e28FB4E8da10Ee;
     address public constant USDE_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant EUSDE_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant SUSDE_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address public constant USDC_E = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913;
-    address public constant USDbC = 0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA;
+    address public constant USDC_E_ADDR = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913;
+    address public constant USDbC_ADDR = 0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA;
 
     // DFS
     address public constant OWNER_ADDR = 0xBaBe2409dBD359453E5292d684fF324A638801bF;

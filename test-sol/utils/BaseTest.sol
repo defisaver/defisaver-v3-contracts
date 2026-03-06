@@ -5,6 +5,7 @@ pragma solidity =0.8.24;
 import { IERC20 } from "../../contracts/interfaces/token/IERC20.sol";
 import { SafeERC20 } from "../../contracts/_vendor/openzeppelin/SafeERC20.sol";
 import { Config } from "../config/Config.sol";
+import { Addresses } from "./helpers/MainnetAddresses.sol";
 
 /// @notice Base test - root contract for all tests
 contract BaseTest is Config {
@@ -153,7 +154,23 @@ contract BaseTest is Config {
 
         TestPair[] memory pairs = getTestPairsForProtocol(_protocolName);
         for (uint256 i = 0; i < pairs.length; ++i) {
+            if (
+                block.chainid == 8453
+                    && (pairs[i].supplyAsset == Addresses.USDT_ADDR
+                        || pairs[i].supplyAsset == Addresses.DAI_ADDR)
+            ) {
+                pairs[i].supplyAsset = Addresses.USDC_ADDR;
+            }
+            if (
+                block.chainid == 8453
+                    && (pairs[i].borrowAsset == Addresses.USDT_ADDR
+                        || pairs[i].borrowAsset == Addresses.DAI_ADDR)
+            ) {
+                pairs[i].borrowAsset = Addresses.USDC_ADDR;
+            }
+
             testPairs.push(pairs[i]);
         }
     }
 }
+

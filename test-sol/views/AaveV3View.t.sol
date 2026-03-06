@@ -256,7 +256,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         testConfigs.push(
             TestConfig({
                 supplyToken: Addresses.WETH_ADDR,
-                borrowToken: Addresses.USDT_ADDR,
+                borrowToken: block.chainid == 8453 ? Addresses.USDC_ADDR : Addresses.USDT_ADDR,
                 supplyAmount: 40e18, // 40 WETH
                 borrowAmount: 50_000e6, // 50k USDT
                 initialBalance: 100e18 // 100 WETH
@@ -278,7 +278,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         testConfigs.push(
             TestConfig({
                 supplyToken: Addresses.WBTC_ADDR,
-                borrowToken: Addresses.USDT_ADDR,
+                borrowToken: block.chainid == 8453 ? Addresses.USDC_ADDR : Addresses.USDT_ADDR,
                 supplyAmount: 4e8, // 4 WBTC
                 borrowAmount: 100_000e6, // 100k USDT
                 initialBalance: 10e8 // 10 WBTC
@@ -299,7 +299,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         // USDT/WETH
         testConfigs.push(
             TestConfig({
-                supplyToken: Addresses.USDT_ADDR,
+                supplyToken: block.chainid == 8453 ? Addresses.USDbC_ADDR : Addresses.USDT_ADDR,
                 borrowToken: Addresses.WETH_ADDR,
                 supplyAmount: 75_000e6, // 75k USDT
                 borrowAmount: 5e18, // 5 WETH

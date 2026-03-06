@@ -33,7 +33,7 @@ contract Tokens is Test {
             tokenNames["WBTC"] = Addresses.WBTC_ADDR;
             tokenNames["DAI"] = Addresses.DAI_ADDR;
             tokenNames["USDC"] = Addresses.USDC_ADDR;
-            tokenNames["WSETH"] = Addresses.WSTETH_ADDR;
+            tokenNames["WSTETH"] = Addresses.WSTETH_ADDR;
             tokenNames["LUSD"] = Addresses.LUSD_ADDR;
             tokenNames["USDT"] = Addresses.USDT_ADDR;
             tokenNames["LINK"] = Addresses.LINK_ADDR;
@@ -76,7 +76,7 @@ contract Tokens is Test {
 
     function give(address _token, address _to, uint256 _amount) internal {
         if (isTokenBlacklistedForDeal(_token)) {
-            if (block.chainid != 1) {
+            if (block.chainid != 1 || _token == Addresses.AAVE_ADDR) {
                 gibTokens(_to, _token, _amount);
                 return;
             }

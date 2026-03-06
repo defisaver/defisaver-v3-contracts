@@ -35,8 +35,8 @@
         "fullPairs": [
             { "supplyAsset": "WETH", "borrowAsset": "DAI" },
             { "supplyAsset": "WBTC", "borrowAsset": "USDC" },
-            { "supplyAsset": "WSETH", "borrowAsset": "WETH" },
-            { "supplyAsset": "LINK", "borrowAsset": "USDT" }
+            { "supplyAsset": "WSTETH", "borrowAsset": "WETH" },
+            { "supplyAsset": "AAVE", "borrowAsset": "USDT" }
         ]
     },
     "EulerV2": {

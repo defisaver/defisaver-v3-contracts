@@ -22,7 +22,7 @@ fs_permissions = [{ access = 'read', path = './test-sol/config/' }]
 no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation,aaveV3/umbrella,fluid,AaveView}*"
 
 [profile.base]
-no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation}*"
+no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation,aaveV3/umbrella,fluid,AaveView}*"
 
 [profile.optimism]
 no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,fluid,Fluid,gho,liquityV2,morpho-blue,Morpho,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation}*"
