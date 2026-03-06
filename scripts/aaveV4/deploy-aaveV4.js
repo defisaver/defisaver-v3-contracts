@@ -20,6 +20,9 @@ async function main() {
     const aaveV4QuotePriceTrigger = await redeploy('AaveV4QuotePriceTrigger', true);
     const aaveV4QuotePriceRangeTrigger = await redeploy('AaveV4QuotePriceRangeTrigger', true);
     const aaveV4RefreshPremium = await redeploy('AaveV4RefreshPremium', true);
+    const aaveV4SetUserManagersWithSig = await redeploy('AaveV4SetUserManagersWithSig', true);
+    const aaveV4DelegateWithdrawWithSig = await redeploy('AaveV4DelegateWithdrawWithSig', true);
+    const aaveV4DelegateBorrowWithSig = await redeploy('AaveV4DelegateBorrowWithSig', true);
 
     console.log('AaveV4View:', aaveV4View.address);
     console.log('AaveV4Supply:', aaveV4Supply.address);
@@ -33,6 +36,9 @@ async function main() {
     console.log('AaveV4QuotePriceTrigger:', aaveV4QuotePriceTrigger.address);
     console.log('AaveV4QuotePriceRangeTrigger:', aaveV4QuotePriceRangeTrigger.address);
     console.log('AaveV4RefreshPremium:', aaveV4RefreshPremium.address);
+    console.log('AaveV4SetUserManagersWithSig:', aaveV4SetUserManagersWithSig.address);
+    console.log('AaveV4DelegateWithdrawWithSig:', aaveV4DelegateWithdrawWithSig.address);
+    console.log('AaveV4DelegateBorrowWithSig:', aaveV4DelegateBorrowWithSig.address);
 
     await deployAndLogAllStrategiesAndBundles();
 }
