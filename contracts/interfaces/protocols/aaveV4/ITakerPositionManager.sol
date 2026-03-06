@@ -126,4 +126,17 @@ interface ITakerPositionManager {
     function DOMAIN_SEPARATOR() external view returns (bytes32);
 
     function nonces(address owner, uint192 key) external view returns (uint256 keyNonce);
+
+    function eip712Domain()
+        external
+        view
+        returns (
+            bytes1 fields,
+            string memory name,
+            string memory version,
+            uint256 chainId,
+            address verifyingContract,
+            bytes32 salt,
+            uint256[] memory extensions
+        );
 }

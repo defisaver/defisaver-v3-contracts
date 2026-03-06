@@ -33,7 +33,8 @@ contract DFSSafeFactory {
     constructor() {
         uint256 chainId = block.chainid;
 
-        if (chainId == 1) {
+        // TODO:AaveV4 REMOVE AFTER TESTING
+        if (chainId == 1 || chainId == 123_456_789) {
             safeFactory = ISafeProxyFactory(0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2);
         } else if (chainId == 10) {
             safeFactory = ISafeProxyFactory(0xC22834581EbC8527d974F8a1c97E1bEA4EF910BC);

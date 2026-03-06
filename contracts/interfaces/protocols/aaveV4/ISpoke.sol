@@ -436,4 +436,17 @@ interface ISpoke {
     /// @param key The key which specifies namespace of the nonce.
     /// @return keyNonce The first 24 bytes are for the key, & the last 8 bytes for the nonce.
     function nonces(address owner, uint192 key) external view returns (uint256 keyNonce);
+
+    function eip712Domain()
+        external
+        view
+        returns (
+            bytes1 fields,
+            string memory name,
+            string memory version,
+            uint256 chainId,
+            address verifyingContract,
+            bytes32 salt,
+            uint256[] memory extensions
+        );
 }

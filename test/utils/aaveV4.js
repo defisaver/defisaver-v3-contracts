@@ -3,8 +3,6 @@ const hre = require('hardhat');
 const dfs = require('@defisaver/sdk');
 
 const {
-    addrs,
-    network,
     setBalance,
     approve,
     isNetworkFork,
@@ -18,9 +16,39 @@ const { createStrategy, createBundle } = require('../strategies/utils/utils-stra
 
 const EOA_ACC_INDEX = 2;
 
+// AaveV4 Mainnet deployment addresses
+// ===================================
+
+// Position managers
 const GIVER_POSITION_MANAGER = '0x8675fBc9B6F8F3097c4C151A7a4838AFE23AB020';
 const TAKER_POSITION_MANAGER = '0x063A6DFe3a02Ae18afDF293c86c76A8A6665Cb60';
 const CONFIG_POSITION_MANAGER = '0x22a0Ee581644f55E1deB487804Ec9b4188B41457';
+
+// Hubs
+const CORE_HUB = '0x3Ed2C9829FBCab6015E331a0352F8ae148217D70';
+const PLUS_HUB = '0xcb8C80026248f92c6DE735264c23c8e22922C562';
+const PRIME_HUB = '0xea40581231Ca775e6A3d7c129cF231D292B85f20';
+
+// Spokes
+const BLUECHIP_SPOKE = '0x637F9E189332a2821e5B046E2d7EEFae2405d6c5';
+const ETHENA_SPOKE = '0xf3b207c235f6154120F41eB63D5ACCBAfD4086D1';
+const ETHERFI_ESPOKE = '0x4054a9EbfcdB692599a8dF61eb0b3484F2d279D4';
+const GOLD_SPOKE = '0x0DC7ccE912Afab8B49031A0A95DB74531741C2c4';
+const LIDO_ESPOKE = '0x8aC76d950a3D03F9E1d857b5AAFFdA3f86C1e9AA';
+const KELP_ESPOKE = '0x4D4a7b3Ce709b4362D7095a4A0105bDFDb5dA2a7';
+const MAIN_SPOKE = '0x46539e9123A18c427e6b4DFF114c28CF405Cb023';
+
+const HUBS = [CORE_HUB, PLUS_HUB, PRIME_HUB];
+const SPOKES = [
+    BLUECHIP_SPOKE,
+    ETHENA_SPOKE,
+    ETHERFI_ESPOKE,
+    GOLD_SPOKE,
+    LIDO_ESPOKE,
+    KELP_ESPOKE,
+    MAIN_SPOKE,
+];
+
 const {
     createAaveV4RepayStrategy,
     createAaveV4FLRepayStrategy,
@@ -45,7 +73,7 @@ const AAVE_V4_AUTOMATION_TEST_PAIRS = [
         debtSymbol: 'USDC',
         collReserveId: CORE_RESERVE_ID_WETH,
         debtReserveId: CORE_RESERVE_ID_USDC,
-        spoke: addrs[network].AAVE_V4_CORE_SPOKE,
+        spoke: MAIN_SPOKE,
         spokeName: 'CORE',
     },
 ];
@@ -240,7 +268,7 @@ const openAaveV4ProxyPosition = async (
     debtReserveId,
     collAmountInUSD,
     debtAmountInUSD,
-    spoke = addrs[network].AAVE_V4_CORE_SPOKE,
+    spoke = MAIN_SPOKE,
 ) => {
     const eoaSigner = await hre.ethers.getSigner(eoaAddr);
     const proxyAddr = proxy.address;
@@ -289,7 +317,7 @@ const openAaveV4EoaPosition = async (
     debtReserveId,
     collAmountInUSD,
     debtAmountInUSD,
-    spoke = addrs[network].AAVE_V4_CORE_SPOKE,
+    spoke = MAIN_SPOKE,
 ) => {
     const eoaSigner = await hre.ethers.getSigner(eoaAddr);
     const spokeContract = await hre.ethers.getContractAt('ISpoke', spoke);
@@ -408,9 +436,117 @@ const getUserSuppliedAmount = async (spoke, user, reserveId) => {
     return userSuppliedAmount;
 };
 
+const ALL_POSITION_MANAGER_UPDATES = [
+    { positionManager: GIVER_POSITION_MANAGER, approve: true },
+    { positionManager: TAKER_POSITION_MANAGER, approve: true },
+    { positionManager: CONFIG_POSITION_MANAGER, approve: true },
+];
+
+const signSetUserManagersIntent = async (signer, spoke, updates) => {
+    const spokeContract = await hre.ethers.getContractAt('ISpoke', spoke);
+    const nonce = await spokeContract.nonces(signer.address, 0);
+    const deadline = (await hre.ethers.provider.getBlock('latest')).timestamp + 3600;
+
+    const domainResult = await spokeContract.eip712Domain();
+    const domain = {
+        name: domainResult[1],
+        version: domainResult[2],
+        chainId: domainResult[3],
+        verifyingContract: domainResult[4],
+    };
+
+    const signature = await signer._signTypedData(
+        domain,
+        {
+            SetUserPositionManagers: [
+                { name: 'onBehalfOf', type: 'address' },
+                { name: 'updates', type: 'PositionManagerUpdate[]' },
+                { name: 'nonce', type: 'uint256' },
+                { name: 'deadline', type: 'uint256' },
+            ],
+            PositionManagerUpdate: [
+                { name: 'positionManager', type: 'address' },
+                { name: 'approve', type: 'bool' },
+            ],
+        },
+        {
+            onBehalfOf: signer.address,
+            updates,
+            nonce,
+            deadline,
+        },
+    );
+
+    return { signature, nonce, deadline };
+};
+
+const signTakerPermit = async (signer, spoke, reserveId, spender, amount, typeName) => {
+    const takerPM = await hre.ethers.getContractAt('ITakerPositionManager', TAKER_POSITION_MANAGER);
+    const nonce = await takerPM.nonces(signer.address, 0);
+    const deadline = (await hre.ethers.provider.getBlock('latest')).timestamp + 3600;
+
+    const domainResult = await takerPM.eip712Domain();
+    const domain = {
+        name: domainResult[1],
+        version: domainResult[2],
+        chainId: domainResult[3],
+        verifyingContract: domainResult[4],
+    };
+
+    const signature = await signer._signTypedData(
+        domain,
+        {
+            [typeName]: [
+                { name: 'spoke', type: 'address' },
+                { name: 'reserveId', type: 'uint256' },
+                { name: 'owner', type: 'address' },
+                { name: 'spender', type: 'address' },
+                { name: 'amount', type: 'uint256' },
+                { name: 'nonce', type: 'uint256' },
+                { name: 'deadline', type: 'uint256' },
+            ],
+        },
+        {
+            spoke,
+            reserveId,
+            owner: signer.address,
+            spender,
+            amount,
+            nonce,
+            deadline,
+        },
+    );
+
+    return { signature, nonce, deadline };
+};
+
+const signBorrowPermit = (signer, spoke, reserveId, spender, amount) =>
+    signTakerPermit(signer, spoke, reserveId, spender, amount, 'BorrowPermit');
+
+const signWithdrawPermit = (signer, spoke, reserveId, spender, amount) =>
+    signTakerPermit(signer, spoke, reserveId, spender, amount, 'WithdrawPermit');
+
 module.exports = {
     EOA_ACC_INDEX,
     AAVE_V4_AUTOMATION_TEST_PAIRS,
+    GIVER_POSITION_MANAGER,
+    TAKER_POSITION_MANAGER,
+    CONFIG_POSITION_MANAGER,
+    HUBS,
+    SPOKES,
+    BLUECHIP_SPOKE,
+    ETHENA_SPOKE,
+    ETHERFI_ESPOKE,
+    GOLD_SPOKE,
+    LIDO_ESPOKE,
+    KELP_ESPOKE,
+    MAIN_SPOKE,
+    CORE_HUB,
+    PLUS_HUB,
+    PRIME_HUB,
+    ALL_POSITION_MANAGER_UPDATES,
+    CORE_RESERVE_ID_USDC,
+    CORE_RESERVE_ID_WETH,
     CORE_RESERVE_ID_USDT,
     deployAaveV4RepayBundle,
     deployAaveV4BoostBundle,
@@ -428,4 +564,7 @@ module.exports = {
     getAaveV4AssetPrice,
     getUserSuppliedAmount,
     deployAndLogAllStrategiesAndBundles,
+    signSetUserManagersIntent,
+    signBorrowPermit,
+    signWithdrawPermit,
 };
