@@ -293,9 +293,9 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         testConfigs.push(
             TestConfig({
                 supplyToken: Addresses.WBTC_ADDR,
-                borrowToken: Addresses.GHO_TOKEN,
+                borrowToken: block.chainid == 10 ? Addresses.USDT_ADDR : Addresses.GHO_TOKEN,
                 supplyAmount: 4e8, // 4 WBTC
-                borrowAmount: 100_000e8, // 100k GHO
+                borrowAmount: block.chainid == 10 ? 100_000e6 : 100_000e8, // 100k GHO
                 initialBalance: 10e8 // 10 WBTC
             })
         );
