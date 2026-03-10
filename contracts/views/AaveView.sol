@@ -212,11 +212,16 @@ contract AaveView is AaveHelper, DSMath {
             (, uint256 ltv,,,,,,,,) = dataProvider.getReserveConfigurationData(_tokenAddresses[i]);
             (address aToken,,) = dataProvider.getReserveTokensAddresses(_tokenAddresses[i]);
 
+            uint256 price = 0;
+            if (_tokenAddresses[i] != REN_TOKEN_ADDR) {
+                price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddresses[i]);
+            }
+
             tokens[i] = TokenInfo({
                 aTokenAddress: aToken,
                 underlyingTokenAddress: _tokenAddresses[i],
                 collateralFactor: ltv,
-                price: IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddresses[i])
+                price: price
             });
         }
     }
@@ -250,7 +255,10 @@ contract AaveView is AaveHelper, DSMath {
 
         (address aToken,,) = _dataProvider.getReserveTokensAddresses(_token);
 
-        uint256 price = IPriceOracleGetterAave(_priceOracleAddress).getAssetPrice(_token);
+        uint256 price = 0;
+        if (_token != REN_TOKEN_ADDR) {
+            price = IPriceOracleGetterAave(_priceOracleAddress).getAssetPrice(_token);
+        }
 
         _tokenInfo = TokenInfoFull({
             aTokenAddress: aToken,
@@ -331,7 +339,11 @@ contract AaveView is AaveHelper, DSMath {
                 uint256 borrowsVariable,,,,,,
                 bool usageAsCollateralEnabled
             ) = dataProvider.getUserReserveData(reserve, _user);
-            uint256 price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(reserve);
+
+            uint256 price = 0;
+            if (reserve != REN_TOKEN_ADDR) {
+                price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(reserve);
+            }
 
             if (aTokenBalance > 0) {
                 uint256 userTokenBalanceEth =

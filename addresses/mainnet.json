@@ -815,14 +815,16 @@
     },
     {
         "name": "AaveView",
-        "address": "0xD0bA40A400f9e045D54978E3B78Cd9aD9FA92144",
+        "address": "0x792c56838Ab06015da7E298e4bD2Cc31248a18Aa",
         "id": "0x0a55b48c",
         "path": "contracts/views/AaveView.sol",
-        "version": "1.0.2",
+        "version": "1.0.4",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x6102E50F88f039976bd1909a9CC368c7dd1d1A1d",
+            "0xD0bA40A400f9e045D54978E3B78Cd9aD9FA92144",
             "0xf585d53f568d226449a94d48c4ea122cdeffe52d",
             "0xEDf1087544a01596b70Da746F861B878F245B08f"
         ]

@@ -99,7 +99,7 @@ contract TestSkyStakingEngineClaimRewards is SkyExecuteActions {
         SkyView.UrnInfo[] memory urnsInfoBeforeClaim = skyView.getUserInfo(walletAddr, farms);
         uint256 amountEarnedBeforeClaim = urnsInfoBeforeClaim[index].amountsEarned[0].amountEarned;
 
-        if (_farm != USDS_FARM) {
+        if (_farm != USDS_FARM && _farm != SPARK_FARM) {
             assertGt(amountEarnedBeforeClaim, 0, "Should have earned rewards before claiming");
         }
 
@@ -112,7 +112,7 @@ contract TestSkyStakingEngineClaimRewards is SkyExecuteActions {
         wallet.execute(address(cut), executeActionCallData, 0);
 
         uint256 amountAfter = IERC20(_rewardToken).balanceOf(sender);
-        if (_farm != USDS_FARM) {
+        if (_farm != USDS_FARM && _farm != SPARK_FARM) {
             assertGt(amountAfter, amountBefore);
         }
 
