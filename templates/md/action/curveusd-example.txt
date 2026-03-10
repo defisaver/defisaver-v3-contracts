@@ -1,0 +1,122 @@
+USAGE:
+1. Copy below actions definitions and place them inside template.txt (templates/md/action/template.txt)
+2. Run: node ./cmd/generate-cli genActionsDocs 
+
+-------------------------------------------------------------------------------------
+
+const curveUsdAdjustAction = new dfs.actions.curveusd.CurveUsdAdjustAction(
+    controllerAddress,
+    from,
+    to,
+    supplyAmount,
+    borrowAmount
+);
+
+const curveUsdBorrowAction = new dfs.actions.curveusd.CurveUsdBorrowAction(
+    controllerAddress,
+    to,
+    debtAmount
+);
+
+const curveUsdCreateAction = new dfs.actions.curveusd.CurveUsdCreateAction(
+    controllerAddress,
+    from,
+    to,
+    collateralAmount,
+    debtAmount,
+    nBands
+);
+
+const curveUsdGetDebtAction = new dfs.actions.curveusd.CurveUsdGetDebtAction(
+    controllerAddr,
+    debtor
+);
+
+const curveUsdLevCreateAction = new dfs.actions.curveusd.CurveUsdLevCreateAction(
+    controllerAddress,
+    collateralAmount,
+    debtAmount,
+    minAmount,
+    nBands,
+    from,
+    additionData,
+    gasUsed,
+    dfsFeeDivider
+);
+
+const curveUsdLevCreateTransientAction = new dfs.actions.curveusd.CurveUsdLevCreateTransientAction(
+    controllerAddress,
+    from,
+    collateralAmount,
+    nBands,
+    exchangeOrder,
+    gasUsed
+);
+
+const curveUsdPaybackAction = new dfs.actions.curveusd.CurveUsdPaybackAction(
+    controllerAddress,
+    from,
+    onBehalfOf,
+    to,
+    debtAmount,
+    maxActiveBand
+);
+
+const curveUsdRepayAction = new dfs.actions.curveusd.CurveUsdRepayAction(
+    controllerAddress,
+    collAmount,
+    to,
+    minAmount,
+    additionData,
+    gasUsed,
+    dfsFeeDivider
+);
+
+const curveUsdRepayTransientAction = new dfs.actions.curveusd.CurveUsdRepayTransientAction(
+    controllerAddress,
+    to,
+    exchangeOrder,
+    gasUsed
+);
+
+const curveUsdSelfLiquidateAction = new dfs.actions.curveusd.CurveUsdSelfLiquidateAction(
+    controllerAddress,
+    minCrvUsdExpected,
+    from,
+    to
+);
+
+const curveUsdSelfLiquidateWithCollAction = new dfs.actions.curveusd.CurveUsdSelfLiquidateWithCollAction(
+    controllerAddress,
+    percentage,
+    minCrvUsdExpected,
+    swapAmount,
+    minAmount,
+    to,
+    additionData,
+    gasUsed,
+    dfsFeeDivider
+);
+
+const curveUsdSelfLiquidateWithCollTransientAction = new dfs.actions.curveusd.CurveUsdSelfLiquidateWithCollTransientAction(
+    controllerAddress,
+    percentage,
+    minCrvUsdExpected,
+    to,
+    exchangeOrder,
+    sellAllCollateral,
+    gasUsed
+);
+
+const curveUsdSupplyAction = new dfs.actions.curveusd.CurveUsdSupplyAction(
+    controllerAddress,
+    from,
+    onBehalfOf,
+    collateralAmount
+);
+
+const curveUsdWithdrawAction = new dfs.actions.curveusd.CurveUsdWithdrawAction(
+    controllerAddress,
+    to,
+    collateralAmount
+);

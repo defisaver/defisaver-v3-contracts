@@ -1,14 +1,22 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/AaveHelper.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { AaveHelper } from "./helpers/AaveHelper.sol";
+import { ILendingPoolV2 } from "../../interfaces/protocols/aaveV2/ILendingPoolV2.sol";
 
 /// @title Payback a token a user borrowed from an Aave market
 contract AavePayback is ActionBase, AaveHelper {
     using TokenUtils for address;
+
+    /// @param market Aave Market address.
+    /// @param tokenAddr Token address.
+    /// @param amount Amount of tokens to pay back.
+    /// @param rateMode Rate mode.
+    /// @param from Address to send the payback tokens from.
+    /// @param onBehalf Address to send the payback tokens on behalf of. Defaults to the user's wallet.
     struct Params {
         address market;
         address tokenAddr;
@@ -28,11 +36,14 @@ contract AavePayback is ActionBase, AaveHelper {
         Params memory params = parseInputs(_callData);
 
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
-        params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
+        params.tokenAddr =
+            _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
-        params.rateMode = _parseParamUint(params.rateMode, _paramMapping[3], _subData, _returnValues);
+        params.rateMode =
+            _parseParamUint(params.rateMode, _paramMapping[3], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[4], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[5], _subData, _returnValues);
+        params.onBehalf =
+            _parseParamAddr(params.onBehalf, _paramMapping[5], _subData, _returnValues);
 
         (uint256 paybackAmount, bytes memory logData) = _payback(
             params.market,
@@ -102,14 +113,7 @@ contract AavePayback is ActionBase, AaveHelper {
         // send back any leftover tokens that weren't used in the repay
         _tokenAddr.withdrawTokens(_from, tokensAfter);
 
-        bytes memory logData = abi.encode(
-            _market,
-            _tokenAddr,
-            _amount,
-            _rateMode,
-            _from,
-            _onBehalf
-        );
+        bytes memory logData = abi.encode(_market, _tokenAddr, _amount, _rateMode, _from, _onBehalf);
         return (tokensBefore - tokensAfter, logData);
     }
 

@@ -1,0 +1,52 @@
+USAGE:
+For solidity action generation:  node ./cmd/generate-cli.js genActionSol DFSSell -t templates/solSdk/action/dfsSell-example.txt
+For sdk action generation:       node ./cmd/generate-cli.js genActionSdk DFSSell -t templates/solSdk/action/dfsSell-example.txt
+
+/*---------------------------START OF TEMPLATE---------------------------*/
+
+/// @param wrapper - dfs wrapper address for the aggregator (must be in WrapperExchangeRegistry)
+/// @param exchangeAddr - exchange address we are calling to execute the order (must be in ExchangeAggregatorRegistry)
+/// @param allowanceTarget - exchange aggregator contract we give allowance to
+/// @param price - expected price that the aggregator sent us
+/// @param protocolFee - deprecated (used as a separate fee amount for 0x v1)
+/// @param callData - 0ff-chain calldata the aggregator gives to perform the swap
+struct OffchainData {
+    address wrapper;
+    address exchangeAddr;
+    address allowanceTarget;
+    uint256 price;
+    uint256 protocolFee;
+    bytes callData;
+}
+
+/// @param srcAddr - source token address (which we're selling)
+/// @param destAddr - destination token address (which we're buying)
+/// @param srcAmount - amount of source token in token decimals
+/// @param destAmount - amount of bought token in token decimals
+/// @param minPrice - minPrice we are expecting (checked in DFSExchangeCore)
+/// @param dfsFeeDivider - service fee divider
+/// @param user - currently deprecated (used to check custom fees for the user)
+/// @param wrapper - on-chain wrapper address (must be in WrapperExchangeRegistry)
+/// @param wrapperData - on-chain additional data for on-chain (uniswap route for example)
+/// @param offchainData - offchain aggregator order
+struct ExchangeData {
+    address srcAddr; // p
+    address destAddr; // p
+    uint256 srcAmount; // p
+    uint256 destAmount;
+    uint256 minPrice;
+    uint256 dfsFeeDivider;
+    address user;
+    address wrapper;
+    bytes wrapperData;
+    OffchainData offchainData;
+}
+
+/// @param exchangeData - exchange data
+/// @param from - from address
+/// @param to - to address
+struct Params {
+    ExchangeData exchangeData;
+    address from; // p
+    address to; // p
+}

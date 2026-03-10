@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 contract DFSExchangeData {
-
     struct OffchainData {
         address wrapper; // dfs wrapper address for the aggregator (must be in WrapperExchangeRegistry)
         address exchangeAddr; // exchange address we are calling to execute the order (must be in ExchangeAggregatorRegistry)
@@ -20,6 +19,12 @@ contract DFSExchangeData {
         uint256 minPrice; // minPrice we are expecting (checked in DFSExchangeCore)
         uint256 dfsFeeDivider; // service fee divider
         address user; // currently deprecated (used to check custom fees for the user)
+        address wrapper; // on-chain wrapper address (must be in WrapperExchangeRegistry)
+        bytes wrapperData; // on-chain additional data for on-chain (uniswap route for example)
+        OffchainData offchainData; // offchain aggregator order
+    }
+
+    struct InjectedExchangeData {
         address wrapper; // on-chain wrapper address (must be in WrapperExchangeRegistry)
         bytes wrapperData; // on-chain additional data for on-chain (uniswap route for example)
         OffchainData offchainData; // offchain aggregator order

@@ -1,20 +1,22 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../auth/AdminAuth.sol";
-import "../actions/spark/helpers/SparkRatioHelper.sol";
-import "../interfaces/ITrigger.sol";
-import "../utils/TransientStorage.sol";
-import "./helpers/TriggerHelper.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { SparkRatioHelper } from "../actions/spark/helpers/SparkRatioHelper.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
+import { TransientStorage } from "../utils/transient/TransientStorage.sol";
+import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
-
+/// @title Trigger that triggers when the ratio of a user's position in a Spark market is over or under a certain ratio.
 contract SparkRatioTrigger is ITrigger, AdminAuth, SparkRatioHelper, TriggerHelper {
-
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 
-    enum RatioState { OVER, UNDER }
-    
+    enum RatioState {
+        OVER,
+        UNDER
+    }
+
     /// @param user address of the user whose position we check
     /// @param market spark market address
     /// @param ratio ratio that represents the triggerable point
@@ -25,13 +27,9 @@ contract SparkRatioTrigger is ITrigger, AdminAuth, SparkRatioHelper, TriggerHelp
         uint256 ratio;
         uint8 state;
     }
-    
-    function isTriggered(bytes memory, bytes memory _subData)
-        public
-        override
-        returns (bool)
-    {   
-        SubParams memory triggerSubData = parseInputs(_subData);
+
+    function isTriggered(bytes memory, bytes memory _subData) external override returns (bool) {
+        SubParams memory triggerSubData = parseSubInputs(_subData);
 
         uint256 currRatio = getSafetyRatio(triggerSubData.market, triggerSubData.user);
 
@@ -50,14 +48,13 @@ contract SparkRatioTrigger is ITrigger, AdminAuth, SparkRatioHelper, TriggerHelp
         return false;
     }
 
-    function parseInputs(bytes memory _subData) internal pure returns (SubParams memory params) {
+    function parseSubInputs(bytes memory _subData) public pure returns (SubParams memory params) {
         params = abi.decode(_subData, (SubParams));
     }
-    function changedSubData(bytes memory _subData) public pure override  returns (bytes memory) {
-    }
-    
-    function isChangeable() public pure override returns (bool){
+
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
+
+    function isChangeable() public pure override returns (bool) {
         return false;
     }
-
 }

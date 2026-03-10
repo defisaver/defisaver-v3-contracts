@@ -1,16 +1,24 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/IWETH.sol";
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/SparkHelper.sol";
+import { ISparkPool } from "../../interfaces/protocols/spark/ISparkPool.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { SparkHelper } from "./helpers/SparkHelper.sol";
+import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Payback a token a user borrowed from an Spark market
 contract SparkPayback is ActionBase, SparkHelper {
     using TokenUtils for address;
 
+    /// @param amount Amount of tokens to payback
+    /// @param from Address to pull the payback tokens from
+    /// @param rateMode Type of borrow debt [Stable: 1, Variable: 2]
+    /// @param assetId The id of the token to be repaid
+    /// @param useDefaultMarket Whether to use the default market
+    /// @param useOnBehalf Whether to payback on behalf of another address
+    /// @param market Address of the market to payback from
     struct Params {
         uint256 amount;
         address from;
@@ -24,7 +32,7 @@ contract SparkPayback is ActionBase, SparkHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes calldata _callData,
+        bytes memory _callData,
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -33,17 +41,29 @@ contract SparkPayback is ActionBase, SparkHelper {
 
         params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
-        params.rateMode = uint8(_parseParamUint(uint8(params.rateMode), _paramMapping[2], _subData, _returnValues));
-        params.assetId = uint16(_parseParamUint(uint16(params.assetId), _paramMapping[3], _subData, _returnValues));
-        params.useDefaultMarket = _parseParamUint(params.useDefaultMarket ? 1 : 0, _paramMapping[4], _subData, _returnValues) == 1;
-        params.useOnBehalf = _parseParamUint(params.useOnBehalf ? 1 : 0, _paramMapping[5], _subData, _returnValues) == 1;
-        params.market = _parseParamAddr(params.market, _paramMapping[6], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(
-            params.onBehalf,
-            _paramMapping[7],
-            _subData,
-            _returnValues
+        params.rateMode = uint8(
+            _parseParamUint(uint8(params.rateMode), _paramMapping[2], _subData, _returnValues)
         );
+        params.assetId = uint16(
+            _parseParamUint(uint16(params.assetId), _paramMapping[3], _subData, _returnValues)
+        );
+        params.useDefaultMarket =
+            _parseParamUint(
+                    params.useDefaultMarket ? 1 : 0, _paramMapping[4], _subData, _returnValues
+                ) == 1;
+        params.useOnBehalf =
+            _parseParamUint(params.useOnBehalf ? 1 : 0, _paramMapping[5], _subData, _returnValues)
+                == 1;
+        params.market = _parseParamAddr(params.market, _paramMapping[6], _subData, _returnValues);
+        params.onBehalf =
+            _parseParamAddr(params.onBehalf, _paramMapping[7], _subData, _returnValues);
+
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_SPARK_MARKET;
+        }
+        if (!params.useOnBehalf) {
+            params.onBehalf = address(0);
+        }
 
         (uint256 paybackAmount, bytes memory logData) = _payback(
             params.market,
@@ -111,10 +131,10 @@ contract SparkPayback is ActionBase, SparkHelper {
         if (_onBehalf == address(0)) {
             _onBehalf = address(this);
         }
-        IPoolV3 lendingPool = getLendingPool(_market);
+        ISparkPool lendingPool = getSparkLendingPool(_market);
         address tokenAddr = lendingPool.getReserveAddressById(_assetId);
 
-        uint256 maxDebt = getWholeDebt(_market, tokenAddr, _rateMode, _onBehalf);
+        uint256 maxDebt = getSparkWholeDebt(_market, tokenAddr, _rateMode, _onBehalf);
         _amount = _amount > maxDebt ? maxDebt : _amount;
 
         tokenAddr.pullTokensIfNeeded(_from, _amount);
@@ -146,8 +166,8 @@ contract SparkPayback is ActionBase, SparkHelper {
         encodedInput = bytes.concat(encodedInput, bytes20(_params.from));
         encodedInput = bytes.concat(encodedInput, bytes1(_params.rateMode));
         encodedInput = bytes.concat(encodedInput, bytes2(_params.assetId));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useDefaultMarket));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useOnBehalf));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useDefaultMarket));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useOnBehalf));
         if (!_params.useDefaultMarket) {
             encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
         }
@@ -161,8 +181,8 @@ contract SparkPayback is ActionBase, SparkHelper {
         params.from = address(bytes20(_encodedInput[32:52]));
         params.rateMode = uint8(bytes1(_encodedInput[52:53]));
         params.assetId = uint16(bytes2(_encodedInput[53:55]));
-        params.useDefaultMarket = bytesToBool(bytes1(_encodedInput[55:56]));
-        params.useOnBehalf = bytesToBool(bytes1(_encodedInput[56:57]));
+        params.useDefaultMarket = DFSLib.bytesToBool(bytes1(_encodedInput[55:56]));
+        params.useOnBehalf = DFSLib.bytesToBool(bytes1(_encodedInput[56:57]));
         uint256 mark = 57;
 
         if (params.useDefaultMarket) {

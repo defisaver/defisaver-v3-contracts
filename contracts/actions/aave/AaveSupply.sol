@@ -1,15 +1,22 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/AaveHelper.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { AaveHelper } from "./helpers/AaveHelper.sol";
+import { ILendingPoolV2 } from "../../interfaces/protocols/aaveV2/ILendingPoolV2.sol";
 
 /// @title Supply a token to an Aave market
 contract AaveSupply is ActionBase, AaveHelper {
     using TokenUtils for address;
 
+    /// @param market Aave Market address.
+    /// @param tokenAddr Token address.
+    /// @param amount Amount of tokens to supply.
+    /// @param from Address to send the supply tokens from.
+    /// @param onBehalf Address to send the supply tokens on behalf of. Defaults to the user's wallet.
+    /// @param enableAsColl Whether to enable the token as collateral.
     struct Params {
         address market;
         address tokenAddr;
@@ -29,13 +36,24 @@ contract AaveSupply is ActionBase, AaveHelper {
         Params memory params = parseInputs(_callData);
 
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
-        params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
+        params.tokenAddr =
+            _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[4], _subData, _returnValues);
-        params.enableAsColl = _parseParamUint(params.enableAsColl ? 1 : 0, _paramMapping[5], _subData, _returnValues) == 1;
+        params.onBehalf =
+            _parseParamAddr(params.onBehalf, _paramMapping[4], _subData, _returnValues);
+        params.enableAsColl =
+            _parseParamUint(params.enableAsColl ? 1 : 0, _paramMapping[5], _subData, _returnValues)
+                == 1;
 
-        (uint256 supplyAmount, bytes memory logData) = _supply(params.market, params.tokenAddr, params.amount, params.from, params.onBehalf, params.enableAsColl);
+        (uint256 supplyAmount, bytes memory logData) = _supply(
+            params.market,
+            params.tokenAddr,
+            params.amount,
+            params.from,
+            params.onBehalf,
+            params.enableAsColl
+        );
         emit ActionEvent("AaveSupply", logData);
         return bytes32(supplyAmount);
     }
@@ -43,7 +61,14 @@ contract AaveSupply is ActionBase, AaveHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _supply(params.market, params.tokenAddr, params.amount, params.from, params.onBehalf, params.enableAsColl);
+        (, bytes memory logData) = _supply(
+            params.market,
+            params.tokenAddr,
+            params.amount,
+            params.from,
+            params.onBehalf,
+            params.enableAsColl
+        );
         logger.logActionDirectEvent("AaveSupply", logData);
     }
 
@@ -54,14 +79,14 @@ contract AaveSupply is ActionBase, AaveHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice User deposits tokens to the Aave protocol
-    /// @dev User needs to approve its wallet to pull the _tokenAddr tokens
-    /// @param _market Address provider for specific market
-    /// @param _tokenAddr The address of the token to be deposited
-    /// @param _amount Amount of tokens to be deposited
-    /// @param _from Where are we pulling the supply tokens amount from
-    /// @param _onBehalf For what user we are supplying the tokens, defaults to user's wallet
-    /// @param _enableAsColl If the supply asset should be collateral
+    /// @notice User deposits tokens to the Aave protocol.
+    /// @notice User needs to approve its wallet to pull the _tokenAddr tokens.
+    /// @param _market Address provider for specific market.
+    /// @param _tokenAddr The address of the token to be deposited.
+    /// @param _amount Amount of tokens to be deposited.
+    /// @param _from Where are we pulling the supply tokens amount from.
+    /// @param _onBehalf For what user we are supplying the tokens, defaults to user's wallet.
+    /// @param _enableAsColl If the supply asset should be collateral.
     function _supply(
         address _market,
         address _tokenAddr,
@@ -95,14 +120,8 @@ contract AaveSupply is ActionBase, AaveHelper {
             enableAsCollateral(_market, _tokenAddr, true);
         }
 
-        bytes memory logData = abi.encode(
-            _market,
-            _tokenAddr,
-            _amount,
-            _from,
-            _onBehalf,
-            _enableAsColl
-        );
+        bytes memory logData =
+            abi.encode(_market, _tokenAddr, _amount, _from, _onBehalf, _enableAsColl);
         return (_amount, logData);
     }
 

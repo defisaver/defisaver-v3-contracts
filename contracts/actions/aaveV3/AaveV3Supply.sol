@@ -1,16 +1,26 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/AaveV3Helper.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
+import { IPoolV3 } from "../../interfaces/protocols/aaveV3/IPoolV3.sol";
+import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Supply a token to an Aave market
 contract AaveV3Supply is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
     /// @dev enableAsColl - left for backwards compatibility, it's not used in this action
+    /// @param amount Amount of tokens to supply.
+    /// @param from Address to send the supply tokens from.
+    /// @param assetId Asset id.
+    /// @param enableAsColl Whether to enable as collateral.
+    /// @param useDefaultMarket Whether to use the default market.
+    /// @param useOnBehalf Whether to use on behalf.
+    /// @param market Aave Market address.
+    /// @param onBehalf Address to send the supply tokens on behalf of. Defaults to the user's wallet.
     struct Params {
         uint256 amount;
         address from;
@@ -24,7 +34,7 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes calldata _callData,
+        bytes memory _callData,
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -33,50 +43,44 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
 
         params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
-        params.assetId = uint16(_parseParamUint(params.assetId, _paramMapping[2], _subData, _returnValues));
-        params.useDefaultMarket = _parseParamUint(params.useDefaultMarket ? 1 : 0, _paramMapping[4], _subData, _returnValues) == 1;
-        params.useOnBehalf = _parseParamUint(params.useOnBehalf ? 1 : 0, _paramMapping[5], _subData, _returnValues) == 1;
+        params.assetId =
+            uint16(_parseParamUint(params.assetId, _paramMapping[2], _subData, _returnValues));
+        params.useDefaultMarket =
+            _parseParamUint(
+                    params.useDefaultMarket ? 1 : 0, _paramMapping[4], _subData, _returnValues
+                ) == 1;
+        params.useOnBehalf =
+            _parseParamUint(params.useOnBehalf ? 1 : 0, _paramMapping[5], _subData, _returnValues)
+                == 1;
         params.market = _parseParamAddr(params.market, _paramMapping[6], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(
-            params.onBehalf,
-            _paramMapping[7],
-            _subData,
-            _returnValues
-        );
+        params.onBehalf =
+            _parseParamAddr(params.onBehalf, _paramMapping[7], _subData, _returnValues);
 
-        (uint256 supplyAmount, bytes memory logData) = _supply(
-            params.market,
-            params.amount,
-            params.from,
-            params.assetId,
-            params.onBehalf
-        );
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_AAVE_MARKET;
+        }
+        if (!params.useOnBehalf) {
+            params.onBehalf = address(0);
+        }
+
+        (uint256 supplyAmount, bytes memory logData) =
+            _supply(params.market, params.amount, params.from, params.assetId, params.onBehalf);
         emit ActionEvent("AaveV3Supply", logData);
         return bytes32(supplyAmount);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes calldata _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _supply(
-            params.market,
-            params.amount,
-            params.from,
-            params.assetId,
-            params.onBehalf
-        );
+        (, bytes memory logData) =
+            _supply(params.market, params.amount, params.from, params.assetId, params.onBehalf);
         logger.logActionDirectEvent("AaveV3Supply", logData);
     }
 
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
-        (, bytes memory logData) = _supply(
-            params.market,
-            params.amount,
-            params.from,
-            params.assetId,
-            params.onBehalf
-        );
+        (, bytes memory logData) =
+            _supply(params.market, params.amount, params.from, params.assetId, params.onBehalf);
         logger.logActionDirectEvent("AaveV3Supply", logData);
     }
 
@@ -87,8 +91,8 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice User deposits tokens to the Aave protocol
-    /// @dev User needs to approve its wallet to pull the tokens being supplied
+    /// @notice User deposits tokens to the Aave protocol.
+    /// @notice User needs to approve its wallet to pull the tokens being supplied
     /// @param _market Address provider for specific market
     /// @param _amount Amount of tokens to be deposited
     /// @param _from Where are we pulling the supply tokens amount from
@@ -122,13 +126,7 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
 
         lendingPool.supply(tokenAddr, _amount, _onBehalf, AAVE_REFERRAL_CODE);
 
-        bytes memory logData = abi.encode(
-            _market,
-            tokenAddr,
-            _amount,
-            _from,
-            _onBehalf
-        );
+        bytes memory logData = abi.encode(_market, tokenAddr, _amount, _from, _onBehalf);
         return (_amount, logData);
     }
 
@@ -147,9 +145,9 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
         encodedInput = bytes.concat(encodedInput, bytes32(_params.amount));
         encodedInput = bytes.concat(encodedInput, bytes20(_params.from));
         encodedInput = bytes.concat(encodedInput, bytes2(_params.assetId));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.enableAsColl));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useDefaultMarket));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useOnBehalf));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.enableAsColl));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useDefaultMarket));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useOnBehalf));
         if (!_params.useDefaultMarket) {
             encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
         }
@@ -162,9 +160,9 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
         params.amount = uint256(bytes32(_encodedInput[0:32]));
         params.from = address(bytes20(_encodedInput[32:52]));
         params.assetId = uint16(bytes2(_encodedInput[52:54]));
-        params.enableAsColl = bytesToBool(bytes1(_encodedInput[54:55]));
-        params.useDefaultMarket = bytesToBool(bytes1(_encodedInput[55:56]));
-        params.useOnBehalf = bytesToBool(bytes1(_encodedInput[56:57]));
+        params.enableAsColl = DFSLib.bytesToBool(bytes1(_encodedInput[54:55]));
+        params.useDefaultMarket = DFSLib.bytesToBool(bytes1(_encodedInput[55:56]));
+        params.useOnBehalf = DFSLib.bytesToBool(bytes1(_encodedInput[56:57]));
         uint256 mark = 57;
 
         if (params.useDefaultMarket) {

@@ -5,11 +5,7 @@ const { expect } = require('chai');
 chai.use(require('chai-as-promised'));
 
 const { configure } = require('@defisaver/sdk');
-const {
-    assets,
-    getAssetInfo,
-    utils: { compare },
-} = require('@defisaver/tokens');
+const { assets, getAssetInfo, compare } = require('@defisaver/tokens');
 
 const {
     getProxy,
@@ -31,35 +27,32 @@ const {
     takeSnapshot,
     revertToSnapshot,
     ETH_ADDR,
-} = require('../../../utils');
+} = require('../../../utils/utils');
 
 const {
     addBotCaller,
     createStrategy,
     createBundle,
     activateSub,
-} = require('../../../utils-strategies');
+} = require('../../utils/utils-strategies');
 
 const {
     createAaveV3CloseToCollWithMaximumGasPriceStrategy,
     createAaveV3FLCloseToCollWithMaximumGasPriceStrategy,
     createAaveV3CloseToDebtWithMaximumGasPriceStrategy,
     createAaveV3FLCloseToDebtWithMaximumGasPriceStrategy,
-} = require('../../../strategies');
+} = require('../../../../strategies-spec/mainnet');
 
-const {
-    aaveV3Supply,
-    aaveV3Borrow,
-} = require('../../../actions');
+const { aaveV3Supply, aaveV3Borrow } = require('../../../utils/actions');
 
-const { RATIO_STATE_OVER } = require('../../../triggers');
-const { subAaveV3CloseWithMaximumGasPriceBundle } = require('../../../strategy-subs');
+const { RATIO_STATE_OVER } = require('../../utils/triggers');
+const { subAaveV3CloseWithMaximumGasPriceBundle } = require('../../utils/strategy-subs');
 const {
     callAaveCloseToCollWithMaximumGasPriceStrategy,
     callAaveFLCloseToCollWithMaximumGasPriceStrategy,
     callAaveCloseToDebtWithMaximumGasPriceStrategy,
     callAaveFLCloseToDebtWithMaximumGasPriceStrategy,
-} = require('../../../strategy-calls');
+} = require('../../utils/strategy-calls');
 
 const testPairs = [
     {
@@ -83,20 +76,12 @@ const deployCloseToCollWithMaximumGasPriceBundle = async (proxy, isFork = false)
 
     const flCloseStrategy = createAaveV3FLCloseToCollWithMaximumGasPriceStrategy();
 
-    const aaveV3CloseToCollStrategyId = await createStrategy(
-        proxy,
-        ...closeStrategy,
-        false,
-    );
-    const aaveV3FLCloseToCollStrategyId = await createStrategy(
-        proxy,
-        ...flCloseStrategy,
-        false,
-    );
-    const aaveV3CloseToCollBundleId = await createBundle(
-        proxy,
-        [aaveV3CloseToCollStrategyId, aaveV3FLCloseToCollStrategyId],
-    );
+    const aaveV3CloseToCollStrategyId = await createStrategy(...closeStrategy, false);
+    const aaveV3FLCloseToCollStrategyId = await createStrategy(...flCloseStrategy, false);
+    const aaveV3CloseToCollBundleId = await createBundle([
+        aaveV3CloseToCollStrategyId,
+        aaveV3FLCloseToCollStrategyId,
+    ]);
 
     return aaveV3CloseToCollBundleId;
 };
@@ -108,20 +93,12 @@ const deployCloseToDebtWithMaximumGasPriceBundle = async (proxy, isFork = false)
 
     const flCloseStrategy = createAaveV3FLCloseToDebtWithMaximumGasPriceStrategy();
 
-    const aaveV3CloseToDebtStrategyId = await createStrategy(
-        proxy,
-        ...closeStrategy,
-        false,
-    );
-    const aaveV3FLCloseToDebtStrategyId = await createStrategy(
-        proxy,
-        ...flCloseStrategy,
-        false,
-    );
-    const aaveV3CloseToCollBundleId = await createBundle(
-        proxy,
-        [aaveV3CloseToDebtStrategyId, aaveV3FLCloseToDebtStrategyId],
-    );
+    const aaveV3CloseToDebtStrategyId = await createStrategy(...closeStrategy, false);
+    const aaveV3FLCloseToDebtStrategyId = await createStrategy(...flCloseStrategy, false);
+    const aaveV3CloseToCollBundleId = await createBundle([
+        aaveV3CloseToDebtStrategyId,
+        aaveV3FLCloseToDebtStrategyId,
+    ]);
 
     return aaveV3CloseToCollBundleId;
 };
@@ -169,7 +146,10 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
                 proxy: proxyAddr,
             });
 
-            const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
+            const aaveMarketContract = await hre.ethers.getContractAt(
+                'IPoolAddressesProvider',
+                addrs[network].AAVE_MARKET,
+            );
             const poolAddress = await aaveMarketContract.getPool();
 
             pool = await hre.ethers.getContractAt('IPoolV3', poolAddress);
@@ -195,10 +175,7 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
 
             const linkInfo = getAssetInfo('LINK', chainIds[network]);
             const amountLINK = Float2BN(
-                fetchAmountinUSDPrice(
-                    linkInfo.symbol,
-                    USD_COLL_OPEN,
-                ),
+                fetchAmountinUSDPrice(linkInfo.symbol, USD_COLL_OPEN),
                 linkInfo.decimals,
             );
             await setBalance(linkInfo.address, senderAcc.address, amountLINK);
@@ -266,14 +243,11 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
                 const triggerPrice = Float2BN(
-                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`,
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / 10 ** 8).toFixed(8)}`,
                     8,
                 );
 
-                ({
-                    subId,
-                    strategySub: sub,
-                } = await subAaveV3CloseWithMaximumGasPriceBundle(
+                ({ subId, strategySub: sub } = await subAaveV3CloseWithMaximumGasPriceBundle(
                     proxy,
                     bundleId,
                     collAddr,
@@ -294,20 +268,25 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
                 const usdRepayAmount = USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST);
                 const usdSwapAmount = usdRepayAmount * (1 + ALLOWED_SLIPPAGE);
                 const swapAmount = Float2BN(
-                    fetchAmountinUSDPrice(
-                        collAssetInfo.symbol,
-                        usdSwapAmount,
-                    ),
+                    fetchAmountinUSDPrice(collAssetInfo.symbol, usdSwapAmount),
                     collAssetInfo.decimals,
                 );
 
                 const collAssetBalanceBefore = await balanceOf(
-                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : collAddr,
                     senderAcc.address,
                 );
 
                 const debtAssetBalanceBefore = await balanceOf(
-                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address, chainIds[network]) ? ETH_ADDR : debtAddr,
+                    compare(
+                        debtAddr,
+                        getAssetInfo('WETH', chainIds[network]).address,
+                        chainIds[network],
+                    )
+                        ? ETH_ADDR
+                        : debtAddr,
                     senderAcc.address,
                 );
 
@@ -320,73 +299,73 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
                     debtAssetInfo,
                 );
 
-                const {
-                    collAssetBalance,
-                    collAssetBalanceFloat,
-                } = await balanceOf(
-                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : collAddr,
                     senderAcc.address,
-                )
-                    .then((e) => Object({
+                ).then((e) =>
+                    Object({
                         collAssetBalance: e.sub(collAssetBalanceBefore),
                         collAssetBalanceFloat: BN2Float(
-                            e.sub(collAssetBalanceBefore), collAssetInfo.decimals,
-                        ),
-                    }));
-
-                const {
-                    debtAssetBalance,
-                    debtAssetBalanceFloat,
-                } = await balanceOf(
-                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address, chainIds[network]) ? ETH_ADDR : debtAddr,
-                    senderAcc.address,
-                )
-                    .then((e) => Object({
-                        debtAssetBalance: e.sub(debtAssetBalanceBefore),
-                        debtAssetBalanceFloat: BN2Float(
-                            e.sub(debtAssetBalanceBefore), debtAssetInfo.decimals,
-                        ),
-                    }));
-
-                console.log('-----sender coll/debt assets after close-----');
-                console.log(`${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`);
-                console.log(`${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`);
-                console.log('---------------------------------------------');
-
-                expect(await balanceOf(collAddr, proxyAddr))
-                    .to
-                    .be
-                    .eq(Float2BN('0'));
-                expect(await balanceOf(debtAddr, proxyAddr))
-                    .to
-                    .be
-                    .eq(Float2BN('0'));
-                expect(
-                    collAssetBalance,
-                )
-                    .to
-                    .be
-                    .gt(
-                        Float2BN(
-                            fetchAmountinUSDPrice(
-                                collAssetInfo.symbol,
-                                (USD_COLL_OPEN - usdSwapAmount) * (1 - EXPECTED_MAX_FEE),
-                            ),
+                            e.sub(collAssetBalanceBefore),
                             collAssetInfo.decimals,
                         ),
-                    );
-                expect(debtAssetBalance)
-                    .to
-                    .be
-                    .lte(
-                        Float2BN(
-                            fetchAmountinUSDPrice(
-                                debtAssetInfo.symbol,
-                                usdRepayAmount * ALLOWED_SLIPPAGE,
-                            ),
+                    }),
+                );
+
+                const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
+                    compare(
+                        debtAddr,
+                        getAssetInfo('WETH', chainIds[network]).address,
+                        chainIds[network],
+                    )
+                        ? ETH_ADDR
+                        : debtAddr,
+                    senderAcc.address,
+                ).then((e) =>
+                    Object({
+                        debtAssetBalance: e.sub(debtAssetBalanceBefore),
+                        debtAssetBalanceFloat: BN2Float(
+                            e.sub(debtAssetBalanceBefore),
                             debtAssetInfo.decimals,
                         ),
-                    );
+                    }),
+                );
+
+                console.log('-----sender coll/debt assets after close-----');
+                console.log(
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
+                );
+                console.log(
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
+                );
+                console.log('---------------------------------------------');
+
+                expect(await balanceOf(collAddr, proxyAddr)).to.be.eq(Float2BN('0'));
+                expect(await balanceOf(debtAddr, proxyAddr)).to.be.eq(Float2BN('0'));
+                expect(collAssetBalance).to.be.gt(
+                    Float2BN(
+                        fetchAmountinUSDPrice(
+                            collAssetInfo.symbol,
+                            (USD_COLL_OPEN - usdSwapAmount) * (1 - EXPECTED_MAX_FEE),
+                        ),
+                        collAssetInfo.decimals,
+                    ),
+                );
+                expect(debtAssetBalance).to.be.lte(
+                    Float2BN(
+                        fetchAmountinUSDPrice(
+                            debtAssetInfo.symbol,
+                            usdRepayAmount * ALLOWED_SLIPPAGE,
+                        ),
+                        debtAssetInfo.decimals,
+                    ),
+                );
             });
 
             it('... should subscribe to AaveV3 Close With Maximum Gas Price strategy with small gasprice', async () => {
@@ -431,14 +410,11 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
                 const triggerPrice = Float2BN(
-                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`,
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / 10 ** 8).toFixed(8)}`,
                     8,
                 );
 
-                ({
-                    subId,
-                    strategySub: sub,
-                } = await subAaveV3CloseWithMaximumGasPriceBundle(
+                ({ subId, strategySub: sub } = await subAaveV3CloseWithMaximumGasPriceBundle(
                     proxy,
                     bundleId,
                     collAddr,
@@ -459,27 +435,27 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
                 const usdRepayAmount = USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST);
                 const usdSwapAmount = usdRepayAmount * (1 + ALLOWED_SLIPPAGE);
                 const swapAmount = Float2BN(
-                    fetchAmountinUSDPrice(
-                        collAssetInfo.symbol,
-                        usdSwapAmount,
-                    ),
+                    fetchAmountinUSDPrice(collAssetInfo.symbol, usdSwapAmount),
                     collAssetInfo.decimals,
                 );
 
                 let errMsg = 'Transaction reverted without a reason string';
 
                 if (hre.config.isWalletSafe) {
-                    errMsg = 'VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xe540c1c8)';
+                    errMsg =
+                        'VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xe540c1c8)';
                 }
 
-                await expect(callAaveCloseToCollWithMaximumGasPriceStrategy(
-                    strategyExecutorByBot,
-                    subId,
-                    sub,
-                    swapAmount,
-                    collAssetInfo,
-                    debtAssetInfo,
-                )).to.be.rejectedWith(errMsg);
+                await expect(
+                    callAaveCloseToCollWithMaximumGasPriceStrategy(
+                        strategyExecutorByBot,
+                        subId,
+                        sub,
+                        swapAmount,
+                        collAssetInfo,
+                        debtAssetInfo,
+                    ),
+                ).to.be.rejectedWith(errMsg);
             });
         }
     });
@@ -527,7 +503,10 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
 
             console.log({ eoa: senderAcc.address, proxy: proxyAddr });
 
-            const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
+            const aaveMarketContract = await hre.ethers.getContractAt(
+                'IPoolAddressesProvider',
+                addrs[network].AAVE_MARKET,
+            );
             const poolAddress = await aaveMarketContract.getPool();
 
             pool = await hre.ethers.getContractAt('IPoolV3', poolAddress);
@@ -567,10 +546,7 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                 snapshotId = await takeSnapshot();
 
                 const amount = Float2BN(
-                    fetchAmountinUSDPrice(
-                        testPairs[i].collAsset,
-                        USD_COLL_OPEN,
-                    ),
+                    fetchAmountinUSDPrice(testPairs[i].collAsset, USD_COLL_OPEN),
                     collAssetInfo.decimals,
                 );
                 await setBalance(collAddr, senderAcc.address, amount);
@@ -589,10 +565,7 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
 
                 const reserveDataDebt = await pool.getReserveData(debtAddr);
                 const amountDebt = Float2BN(
-                    fetchAmountinUSDPrice(
-                        testPairs[i].debtAsset,
-                        USD_DEBT_OPEN,
-                    ),
+                    fetchAmountinUSDPrice(testPairs[i].debtAsset, USD_DEBT_OPEN),
                     debtAssetInfo.decimals,
                 );
                 debtAssetId = reserveDataDebt.id;
@@ -609,14 +582,11 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
                 const triggerPrice = Float2BN(
-                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`,
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / 10 ** 8).toFixed(8)}`,
                     8,
                 );
 
-                ({
-                    subId,
-                    strategySub: sub,
-                } = await subAaveV3CloseWithMaximumGasPriceBundle(
+                ({ subId, strategySub: sub } = await subAaveV3CloseWithMaximumGasPriceBundle(
                     proxy,
                     bundleId,
                     collAddr,
@@ -636,30 +606,27 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
             it('... should call AaveV3 FL Close With Maximum Gas Price strategy', async () => {
                 const usdRepayAmount = USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST);
                 const repayAmount = Float2BN(
-                    fetchAmountinUSDPrice(
-                        debtAssetInfo.symbol,
-                        usdRepayAmount,
-                    ),
+                    fetchAmountinUSDPrice(debtAssetInfo.symbol, usdRepayAmount),
                     debtAssetInfo.decimals,
                 );
 
-                // eslint-disable-next-line max-len
                 const usdSwapAmount = usdRepayAmount * (1 + ALLOWED_SLIPPAGE);
                 const swapAmount = Float2BN(
-                    fetchAmountinUSDPrice(
-                        collAssetInfo.symbol,
-                        usdSwapAmount,
-                    ),
+                    fetchAmountinUSDPrice(collAssetInfo.symbol, usdSwapAmount),
                     collAssetInfo.decimals,
                 );
 
                 const collAssetBalanceBefore = await balanceOf(
-                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : collAddr,
                     senderAcc.address,
                 );
 
                 const debtAssetBalanceBefore = await balanceOf(
-                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
+                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : debtAddr,
                     senderAcc.address,
                 );
 
@@ -676,35 +643,51 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                 );
 
                 const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
-                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : collAddr,
                     senderAcc.address,
-                ).then((e) => Object({
-                    collAssetBalance: e.sub(collAssetBalanceBefore),
-                    collAssetBalanceFloat: BN2Float(
-                        e.sub(collAssetBalanceBefore), collAssetInfo.decimals,
-                    ),
-                }));
+                ).then((e) =>
+                    Object({
+                        collAssetBalance: e.sub(collAssetBalanceBefore),
+                        collAssetBalanceFloat: BN2Float(
+                            e.sub(collAssetBalanceBefore),
+                            collAssetInfo.decimals,
+                        ),
+                    }),
+                );
 
                 const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
-                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
+                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : debtAddr,
                     senderAcc.address,
-                ).then((e) => Object({
-                    debtAssetBalance: e.sub(debtAssetBalanceBefore),
-                    debtAssetBalanceFloat: BN2Float(
-                        e.sub(debtAssetBalanceBefore), debtAssetInfo.decimals,
-                    ),
-                }));
+                ).then((e) =>
+                    Object({
+                        debtAssetBalance: e.sub(debtAssetBalanceBefore),
+                        debtAssetBalanceFloat: BN2Float(
+                            e.sub(debtAssetBalanceBefore),
+                            debtAssetInfo.decimals,
+                        ),
+                    }),
+                );
 
                 console.log('-----sender coll/debt assets after close-----');
-                console.log(`${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`);
-                console.log(`${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`);
+                console.log(
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
+                );
+                console.log(
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
+                );
                 console.log('---------------------------------------------');
 
                 expect(await balanceOf(collAddr, proxyAddr)).to.be.eq(Float2BN('0'));
                 expect(await balanceOf(debtAddr, proxyAddr)).to.be.eq(Float2BN('0'));
-                expect(
-                    collAssetBalance,
-                ).to.be.gt(
+                expect(collAssetBalance).to.be.gt(
                     Float2BN(
                         fetchAmountinUSDPrice(
                             collAssetInfo.symbol,
@@ -729,10 +712,7 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                 snapshotId = await takeSnapshot();
 
                 const amount = Float2BN(
-                    fetchAmountinUSDPrice(
-                        testPairs[i].collAsset,
-                        USD_COLL_OPEN,
-                    ),
+                    fetchAmountinUSDPrice(testPairs[i].collAsset, USD_COLL_OPEN),
                     collAssetInfo.decimals,
                 );
                 await setBalance(collAddr, senderAcc.address, amount);
@@ -751,10 +731,7 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
 
                 const reserveDataDebt = await pool.getReserveData(debtAddr);
                 const amountDebt = Float2BN(
-                    fetchAmountinUSDPrice(
-                        testPairs[i].debtAsset,
-                        USD_DEBT_OPEN,
-                    ),
+                    fetchAmountinUSDPrice(testPairs[i].debtAsset, USD_DEBT_OPEN),
                     debtAssetInfo.decimals,
                 );
                 debtAssetId = reserveDataDebt.id;
@@ -771,14 +748,11 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
                 const triggerPrice = Float2BN(
-                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`,
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / 10 ** 8).toFixed(8)}`,
                     8,
                 );
 
-                ({
-                    subId,
-                    strategySub: sub,
-                } = await subAaveV3CloseWithMaximumGasPriceBundle(
+                ({ subId, strategySub: sub } = await subAaveV3CloseWithMaximumGasPriceBundle(
                     proxy,
                     bundleId,
                     collAddr,
@@ -798,40 +772,36 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
             it('... should call AaveV3 FL Close With Maximum Gas Price strategy and fail', async () => {
                 const usdRepayAmount = USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST);
                 const repayAmount = Float2BN(
-                    fetchAmountinUSDPrice(
-                        debtAssetInfo.symbol,
-                        usdRepayAmount,
-                    ),
+                    fetchAmountinUSDPrice(debtAssetInfo.symbol, usdRepayAmount),
                     debtAssetInfo.decimals,
                 );
 
-                // eslint-disable-next-line max-len
                 const usdSwapAmount = usdRepayAmount * (1 + ALLOWED_SLIPPAGE);
                 const swapAmount = Float2BN(
-                    fetchAmountinUSDPrice(
-                        collAssetInfo.symbol,
-                        usdSwapAmount,
-                    ),
+                    fetchAmountinUSDPrice(collAssetInfo.symbol, usdSwapAmount),
                     collAssetInfo.decimals,
                 );
 
                 let errMsg = 'Transaction reverted without a reason string';
 
                 if (hre.config.isWalletSafe) {
-                    errMsg = 'VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xe540c1c8)';
+                    errMsg =
+                        'VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xe540c1c8)';
                 }
 
-                await expect(callAaveFLCloseToCollWithMaximumGasPriceStrategy(
-                    strategyExecutorByBot,
-                    subId,
-                    sub,
-                    repayAmount,
-                    debtAddr,
-                    flActionAddr,
-                    swapAmount,
-                    collAssetInfo,
-                    debtAssetInfo,
-                )).to.be.rejectedWith(errMsg);
+                await expect(
+                    callAaveFLCloseToCollWithMaximumGasPriceStrategy(
+                        strategyExecutorByBot,
+                        subId,
+                        sub,
+                        repayAmount,
+                        debtAddr,
+                        flActionAddr,
+                        swapAmount,
+                        collAssetInfo,
+                        debtAssetInfo,
+                    ),
+                ).to.be.rejectedWith(errMsg);
             });
         }
     });
@@ -877,7 +847,10 @@ const aaveV3CloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
 
             console.log({ eoa: senderAcc.address, proxy: proxyAddr });
 
-            const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
+            const aaveMarketContract = await hre.ethers.getContractAt(
+                'IPoolAddressesProvider',
+                addrs[network].AAVE_MARKET,
+            );
             const poolAddress = await aaveMarketContract.getPool();
 
             pool = await hre.ethers.getContractAt('IPoolV3', poolAddress);
@@ -903,9 +876,7 @@ const aaveV3CloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
 
             const linkInfo = getAssetInfo('LINK', chainIds[network]);
             const amountLINK = Float2BN(
-                (+fetchAmountinUSDPrice(
-                    linkInfo.symbol, USD_COLL_OPEN,
-                )).toFixed(linkInfo.decimals),
+                (+fetchAmountinUSDPrice(linkInfo.symbol, USD_COLL_OPEN)).toFixed(linkInfo.decimals),
                 linkInfo.decimals,
             );
             await setBalance(linkInfo.address, senderAcc.address, amountLINK);
@@ -973,7 +944,7 @@ const aaveV3CloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
                 const triggerPrice = Float2BN(
-                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`,
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / 10 ** 8).toFixed(8)}`,
                     8,
                 );
 
@@ -996,12 +967,16 @@ const aaveV3CloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
 
             it('... should call AaveV3 Close with maximum gas price strategy', async () => {
                 const collAssetBalanceBefore = await balanceOf(
-                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : collAddr,
                     senderAcc.address,
                 );
 
                 const debtAssetBalanceBefore = await balanceOf(
-                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
+                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : debtAddr,
                     senderAcc.address,
                 );
 
@@ -1014,28 +989,46 @@ const aaveV3CloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
                 );
 
                 const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
-                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : collAddr,
                     senderAcc.address,
-                ).then((e) => Object({
-                    collAssetBalance: e.sub(collAssetBalanceBefore),
-                    collAssetBalanceFloat: BN2Float(
-                        e.sub(collAssetBalanceBefore), collAssetInfo.decimals,
-                    ),
-                }));
+                ).then((e) =>
+                    Object({
+                        collAssetBalance: e.sub(collAssetBalanceBefore),
+                        collAssetBalanceFloat: BN2Float(
+                            e.sub(collAssetBalanceBefore),
+                            collAssetInfo.decimals,
+                        ),
+                    }),
+                );
 
                 const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
-                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
+                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : debtAddr,
                     senderAcc.address,
-                ).then((e) => Object({
-                    debtAssetBalance: e.sub(debtAssetBalanceBefore),
-                    debtAssetBalanceFloat: BN2Float(
-                        e.sub(debtAssetBalanceBefore), debtAssetInfo.decimals,
-                    ),
-                }));
+                ).then((e) =>
+                    Object({
+                        debtAssetBalance: e.sub(debtAssetBalanceBefore),
+                        debtAssetBalanceFloat: BN2Float(
+                            e.sub(debtAssetBalanceBefore),
+                            debtAssetInfo.decimals,
+                        ),
+                    }),
+                );
 
                 console.log('-----sender coll/debt assets after close-----');
-                console.log(`${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`);
-                console.log(`${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`);
+                console.log(
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
+                );
+                console.log(
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
+                );
                 console.log('---------------------------------------------');
 
                 expect(await balanceOf(collAddr, proxyAddr)).to.be.eq(Float2BN('0'));
@@ -1045,8 +1038,8 @@ const aaveV3CloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
                     Float2BN(
                         fetchAmountinUSDPrice(
                             debtAssetInfo.symbol,
-                            USD_COLL_OPEN * (1 - ALLOWED_SLIPPAGE)
-                            - USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST),
+                            USD_COLL_OPEN * (1 - ALLOWED_SLIPPAGE) -
+                                USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST),
                         ),
                         debtAssetInfo.decimals,
                     ),
@@ -1095,7 +1088,7 @@ const aaveV3CloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
                 const triggerPrice = Float2BN(
-                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`,
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / 10 ** 8).toFixed(8)}`,
                     8,
                 );
 
@@ -1120,16 +1113,19 @@ const aaveV3CloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
                 let errMsg = 'Transaction reverted without a reason string';
 
                 if (hre.config.isWalletSafe) {
-                    errMsg = 'VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xe540c1c8)';
+                    errMsg =
+                        'VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xe540c1c8)';
                 }
 
-                await expect(callAaveCloseToDebtWithMaximumGasPriceStrategy(
-                    strategyExecutorByBot,
-                    subId,
-                    sub,
-                    collAssetInfo,
-                    debtAssetInfo,
-                )).to.be.rejectedWith(errMsg);
+                await expect(
+                    callAaveCloseToDebtWithMaximumGasPriceStrategy(
+                        strategyExecutorByBot,
+                        subId,
+                        sub,
+                        collAssetInfo,
+                        debtAssetInfo,
+                    ),
+                ).to.be.rejectedWith(errMsg);
             });
         }
     });
@@ -1176,7 +1172,10 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
 
             console.log({ eoa: senderAcc.address, proxy: proxyAddr });
 
-            const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
+            const aaveMarketContract = await hre.ethers.getContractAt(
+                'IPoolAddressesProvider',
+                addrs[network].AAVE_MARKET,
+            );
             const poolAddress = await aaveMarketContract.getPool();
 
             pool = await hre.ethers.getContractAt('IPoolV3', poolAddress);
@@ -1236,10 +1235,7 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                 const reserveDataDebt = await pool.getReserveData(debtAddr);
 
                 const amountDebt = Float2BN(
-                    fetchAmountinUSDPrice(
-                        testPairs[i].debtAsset,
-                        USD_DEBT_OPEN,
-                    ),
+                    fetchAmountinUSDPrice(testPairs[i].debtAsset, USD_DEBT_OPEN),
                     debtAssetInfo.decimals,
                 );
                 debtAssetId = reserveDataDebt.id;
@@ -1256,14 +1252,11 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
                 const triggerPrice = Float2BN(
-                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`,
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / 10 ** 8).toFixed(8)}`,
                     8,
                 );
 
-                ({
-                    subId,
-                    strategySub: sub,
-                } = await subAaveV3CloseWithMaximumGasPriceBundle(
+                ({ subId, strategySub: sub } = await subAaveV3CloseWithMaximumGasPriceBundle(
                     proxy,
                     bundleId,
                     collAddr,
@@ -1290,12 +1283,16 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                 );
 
                 const collAssetBalanceBefore = await balanceOf(
-                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : collAddr,
                     senderAcc.address,
                 );
 
                 const debtAssetBalanceBefore = await balanceOf(
-                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
+                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : debtAddr,
                     senderAcc.address,
                 );
 
@@ -1311,28 +1308,46 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                 );
 
                 const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
-                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : collAddr,
                     senderAcc.address,
-                ).then((e) => Object({
-                    collAssetBalance: e.sub(collAssetBalanceBefore),
-                    collAssetBalanceFloat: BN2Float(
-                        e.sub(collAssetBalanceBefore), collAssetInfo.decimals,
-                    ),
-                }));
+                ).then((e) =>
+                    Object({
+                        collAssetBalance: e.sub(collAssetBalanceBefore),
+                        collAssetBalanceFloat: BN2Float(
+                            e.sub(collAssetBalanceBefore),
+                            collAssetInfo.decimals,
+                        ),
+                    }),
+                );
 
                 const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
-                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
+                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : debtAddr,
                     senderAcc.address,
-                ).then((e) => Object({
-                    debtAssetBalance: e.sub(debtAssetBalanceBefore),
-                    debtAssetBalanceFloat: BN2Float(
-                        e.sub(debtAssetBalanceBefore), debtAssetInfo.decimals,
-                    ),
-                }));
+                ).then((e) =>
+                    Object({
+                        debtAssetBalance: e.sub(debtAssetBalanceBefore),
+                        debtAssetBalanceFloat: BN2Float(
+                            e.sub(debtAssetBalanceBefore),
+                            debtAssetInfo.decimals,
+                        ),
+                    }),
+                );
 
                 console.log('-----sender coll/debt assets after close-----');
-                console.log(`${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`);
-                console.log(`${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`);
+                console.log(
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
+                );
+                console.log(
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
+                );
                 console.log('---------------------------------------------');
 
                 expect(await balanceOf(collAddr, proxyAddr)).to.be.eq(Float2BN('0'));
@@ -1342,8 +1357,8 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                     Float2BN(
                         fetchAmountinUSDPrice(
                             debtAssetInfo.symbol,
-                            USD_COLL_OPEN * (1 - ALLOWED_SLIPPAGE)
-                            - USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST),
+                            USD_COLL_OPEN * (1 - ALLOWED_SLIPPAGE) -
+                                USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST),
                         ),
                         debtAssetInfo.decimals,
                     ),
@@ -1375,10 +1390,7 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                 const reserveDataDebt = await pool.getReserveData(debtAddr);
 
                 const amountDebt = Float2BN(
-                    fetchAmountinUSDPrice(
-                        testPairs[i].debtAsset,
-                        USD_DEBT_OPEN,
-                    ),
+                    fetchAmountinUSDPrice(testPairs[i].debtAsset, USD_DEBT_OPEN),
                     debtAssetInfo.decimals,
                 );
                 debtAssetId = reserveDataDebt.id;
@@ -1395,14 +1407,11 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
                 const triggerPrice = Float2BN(
-                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`,
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / 10 ** 8).toFixed(8)}`,
                     8,
                 );
 
-                ({
-                    subId,
-                    strategySub: sub,
-                } = await subAaveV3CloseWithMaximumGasPriceBundle(
+                ({ subId, strategySub: sub } = await subAaveV3CloseWithMaximumGasPriceBundle(
                     proxy,
                     bundleId,
                     collAddr,
@@ -1431,19 +1440,22 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                 let errMsg = 'Transaction reverted without a reason string';
 
                 if (hre.config.isWalletSafe) {
-                    errMsg = 'VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xe540c1c8)';
+                    errMsg =
+                        'VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xe540c1c8)';
                 }
 
-                await expect(callAaveFLCloseToDebtWithMaximumGasPriceStrategy(
-                    strategyExecutorByBot,
-                    subId,
-                    sub,
-                    repayAmount,
-                    debtAddr,
-                    flActionAddr,
-                    collAssetInfo,
-                    debtAssetInfo,
-                )).to.be.rejectedWith(errMsg);
+                await expect(
+                    callAaveFLCloseToDebtWithMaximumGasPriceStrategy(
+                        strategyExecutorByBot,
+                        subId,
+                        sub,
+                        repayAmount,
+                        debtAddr,
+                        flActionAddr,
+                        collAssetInfo,
+                        debtAssetInfo,
+                    ),
+                ).to.be.rejectedWith(errMsg);
             });
         }
     });

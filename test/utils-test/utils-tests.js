@@ -1,9 +1,7 @@
-/* eslint-disable no-await-in-loop */
+const sdk = require('@defisaver/sdk');
 const { expect } = require('chai');
 const hre = require('hardhat');
 const { getAssetInfo, assets } = require('@defisaver/tokens');
-const path = require('path');
-const fs = require('fs');
 
 const {
     redeploy,
@@ -13,7 +11,6 @@ const {
     depositToWeth,
     impersonateAccount,
     stopImpersonatingAccount,
-    DAI_ADDR,
     MAX_UINT,
     send,
     nullAddress,
@@ -25,63 +22,74 @@ const {
     DFS_REG_CONTROLLER,
     getAddrFromRegistry,
     chainIds,
-} = require('../utils');
+    setBalance,
+    addrs,
+    takeSnapshot,
+    revertToSnapshot,
+    getContractFromRegistry,
+    getOwnerAddr,
+    network,
+} = require('../utils/utils');
+const { predictSafeAddress, signSafeTx, encodeSetupArgs } = require('../utils/safe');
 
 const botRefillTest = async () => {
     describe('Bot-Refills', function () {
         this.timeout(80000);
 
-        let botRefills;
-        let refillCaller; let refillAddr; let feeAddr;
+        let botRefillsContract;
+        let feeRecipientContract;
+        let feeReceiverAddr;
+        let refillCaller;
+        const botAddr = '0x5aa40C7C8158D8E29CA480d7E05E5a32dD819332';
 
         before(async () => {
-            const botRefillsAddr = await getAddrFromRegistry('BotRefills');
-            botRefills = await hre.ethers.getContractAt('BotRefills', botRefillsAddr);
+            botRefillsContract = await getContractFromRegistry('BotRefills');
+            feeRecipientContract = await hre.ethers.getContractAt(
+                'FeeRecipient',
+                addrs[network].FEE_RECIPIENT_ADDR,
+            );
+            feeReceiverAddr = await feeRecipientContract.getFeeAddr();
+            refillCaller = addrs[network].REFILL_CALLER;
 
-            refillAddr = '0x5aa40C7C8158D8E29CA480d7E05E5a32dD819332';
-            feeAddr = '0x76720ac2574631530ec8163e4085d6f98513fb27';
-            refillCaller = '0x33fDb79aFB4456B604f376A45A546e7ae700e880';
+            await impersonateAccount(feeReceiverAddr);
 
-            // give approval to contract from feeAddr
-            await impersonateAccount(feeAddr);
+            let wethContract = await hre.ethers.getContractAt(
+                'IERC20',
+                addrs[network].WETH_ADDRESS,
+            );
 
-            let daiContract = await hre.ethers.getContractAt('IERC20', DAI_ADDR);
-            let wethContract = await hre.ethers.getContractAt('IERC20', WETH_ADDRESS);
-
-            const signer = await hre.ethers.provider.getSigner(feeAddr);
+            let signer = await hre.ethers.provider.getSigner(feeReceiverAddr);
             wethContract = wethContract.connect(signer);
-            daiContract = daiContract.connect(signer);
 
-            await wethContract.approve(botRefills.address, MAX_UINT);
-            await daiContract.approve(botRefills.address, MAX_UINT);
+            await wethContract.approve(botRefillsContract.address, MAX_UINT);
 
-            // clean out all weth on fee addr for test to work
-            const wethFeeAddrBalance = await balanceOf(WETH_ADDRESS, feeAddr);
-            await wethContract.transfer(nullAddress, wethFeeAddrBalance);
+            await stopImpersonatingAccount(feeReceiverAddr);
 
-            await stopImpersonatingAccount(feeAddr);
+            await impersonateAccount(getOwnerAddr());
+            signer = await hre.ethers.provider.getSigner(getOwnerAddr());
+            await botRefillsContract.connect(signer).setAdditionalBot(botAddr, true);
+            await stopImpersonatingAccount(getOwnerAddr());
         });
 
         it('... should call refill with WETH', async () => {
+            const [deployer] = await hre.ethers.getSigners();
+            await sendEther(deployer, refillCaller, '10');
+
             await impersonateAccount(refillCaller);
-
-            const ethBotAddrBalanceBefore = await balanceOf(ETH_ADDR, refillAddr);
-
             const signer = await hre.ethers.provider.getSigner(refillCaller);
-            botRefills = botRefills.connect(signer);
+            botRefillsContract = botRefillsContract.connect(signer);
 
-            const ethRefillAmount = hre.ethers.utils.parseUnits('4', 18);
-
-            const wethFeeAddrBalance = await balanceOf(WETH_ADDRESS, feeAddr);
+            const ethBotAddrBalanceBefore = await balanceOf(ETH_ADDR, botAddr);
+            const ethRefillAmount = hre.ethers.utils.parseEther('4');
+            const wethFeeAddrBalance = await balanceOf(WETH_ADDRESS, feeReceiverAddr);
 
             if (wethFeeAddrBalance.lt(ethRefillAmount)) {
                 await depositToWeth(ethRefillAmount);
-                await send(WETH_ADDRESS, feeAddr, ethRefillAmount);
+                await send(WETH_ADDRESS, feeReceiverAddr, ethRefillAmount);
             }
 
-            await botRefills.refill(ethRefillAmount, refillAddr);
-
-            const ethBotAddrBalanceAfter = await balanceOf(ETH_ADDR, refillAddr);
+            await botRefillsContract.refill(ethRefillAmount, botAddr);
+            const ethBotAddrBalanceAfter = await balanceOf(ETH_ADDR, botAddr);
 
             expect(ethBotAddrBalanceAfter).to.be.eq(ethBotAddrBalanceBefore.add(ethRefillAmount));
 
@@ -89,6 +97,7 @@ const botRefillTest = async () => {
         });
     });
 };
+
 const feeReceiverTest = async () => {
     describe('Fee-Receiver', function () {
         this.timeout(80000);
@@ -241,12 +250,16 @@ const dfsRegistryControllerTest = async () => {
     describe('DFS-Registry-Controller', function () {
         this.timeout(80000);
 
-        let dfsRegController; let senderAcc;
+        let dfsRegController;
+        let senderAcc;
 
         const ADMIN_VAULT = '0xCCf3d848e08b94478Ed8f46fFead3008faF581fD';
 
         before(async () => {
-            dfsRegController = await hre.ethers.getContractAt('DFSProxyRegistryController', DFS_REG_CONTROLLER);
+            dfsRegController = await hre.ethers.getContractAt(
+                'DFSProxyRegistryController',
+                DFS_REG_CONTROLLER,
+            );
 
             await impersonateAccount(ADMIN_ACC);
 
@@ -320,11 +333,19 @@ const tokenPriceHelperTest = async () => {
     describe('Token-Price-Helper', function () {
         this.timeout(80000);
 
-        let tokenPriceHelper; let tokenPriceHelperAddr; let tokenHelperOld;
+        let tokenPriceHelper;
+        let tokenPriceHelperAddr;
+        let tokenHelperOld;
         before(async () => {
             tokenPriceHelperAddr = await getAddrFromRegistry('TokenPriceHelper');
-            tokenPriceHelper = await hre.ethers.getContractAt('TokenPriceHelper', tokenPriceHelperAddr);
-            tokenHelperOld = await hre.ethers.getContractAt('TokenPriceHelper', '0xBa2e5E56A92e93Cc0Cd84626cf762E6B2b30349b');
+            tokenPriceHelper = await hre.ethers.getContractAt(
+                'TokenPriceHelper',
+                tokenPriceHelperAddr,
+            );
+            tokenHelperOld = await hre.ethers.getContractAt(
+                'TokenPriceHelper',
+                '0xBa2e5E56A92e93Cc0Cd84626cf762E6B2b30349b',
+            );
         });
 
         for (let i = 0; i < assets.length; i++) {
@@ -379,15 +400,18 @@ const tokenPriceHelperL2Test = async () => {
     describe('Token-Price-Helper-L2 (Using GasFeeTakerL2)', function () {
         this.timeout(80000);
 
-        let tokenPriceHelper; let tokenPriceHelperAddr;
+        let tokenPriceHelper;
+        let tokenPriceHelperAddr;
         before(async () => {
             tokenPriceHelperAddr = await getAddrFromRegistry('GasFeeTakerL2');
-            tokenPriceHelper = await hre.ethers.getContractAt('GasFeeTakerL2', tokenPriceHelperAddr);
+            tokenPriceHelper = await hre.ethers.getContractAt(
+                'GasFeeTakerL2',
+                tokenPriceHelperAddr,
+            );
         });
 
         for (let i = 0; i < assets.length; i++) {
             it(`... should get USD and ETH price for ${assets[i].symbol} `, async () => {
-                const network = hre.network.config.name;
                 const chainId = chainIds[network];
                 if (assets[i].symbol === 'rETH') {
                     assets[i].addresses[42161] = '0xEC70Dcb4A1EFa46b8F2D97C310C9c4790ba5ffA8';
@@ -400,7 +424,8 @@ const tokenPriceHelperL2Test = async () => {
                 const priceInUSD = await tokenPriceHelper.getPriceInUSD(address);
                 const aaveInUSD = await tokenPriceHelper.getAaveTokenPriceInUSD(address);
                 const chainlinkInUSD = await tokenPriceHelper.getChainlinkPriceInUSD(
-                    address, false,
+                    address,
+                    false,
                 );
                 const priceInETH = await tokenPriceHelper.getPriceInETH(address);
                 const aaveInETH = await tokenPriceHelper.getAaveTokenPriceInETH(address);
@@ -417,64 +442,96 @@ const tokenPriceHelperL2Test = async () => {
         }
     });
 };
-const priceFeedTest = async () => {
-    describe('Price feed test', function () {
+const dfsSafeFactoryTest = async () => {
+    describe('DFS-Safe-Factory', function () {
         this.timeout(80000);
-
-        let priceFeedContract;
-        let priceFeeds;
+        let dfsSafeFactory;
+        let snapshotId;
         before(async () => {
-            console.log(priceFeeds);
-
-            const network = hre.network.config.name;
-            const chainId = chainIds[network];
-
-            let priceFeedAddr;
-            if (chainId === 10) {
-                priceFeedAddr = '0x7E3D9e4E620842d61aB111a6DbF1be5a8cc91774';
-                const filePath = path.join(__dirname, '../../addresses/priceFeeds/optimism.json');
-                fs.readFile(filePath, 'utf-8', (err, data) => {
-                    if (err) {
-                        console.error(err);
-                        return;
-                    }
-                    priceFeeds = JSON.parse(data);
-                });
-            }
-            if (chainId === 42161) {
-                priceFeedAddr = '0x158E27De8B5E5bC3FA1C6D5b365a291c54f6b0Fd';
-                const filePath = path.join(__dirname, '../../addresses/priceFeeds/arbitrum.json');
-                fs.readFile(filePath, 'utf-8', (err, data) => {
-                    if (err) {
-                        console.error(err);
-                        return;
-                    }
-                    priceFeeds = JSON.parse(data);
-                });
-            }
-            priceFeedContract = await hre.ethers.getContractAt('PriceFeedRegistry', priceFeedAddr);
+            dfsSafeFactory = await redeploy('DFSSafeFactory');
+        });
+        beforeEach(async () => {
+            snapshotId = await takeSnapshot();
         });
 
-        it('... should check priceFeed for any changes', async () => {
-            for (let i = 0; i < priceFeeds.length; i++) {
-                const feedAddressLive = await priceFeedContract.getFeed(
-                    priceFeeds[i].base, priceFeeds[i].quote,
-                );
-                const feed = await hre.ethers.getContractAt('IAggregatorV3', feedAddressLive);
-                const latestData = await feed.latestRoundData();
-                const currTimestamp = Math.floor(Date.now() / 1000);
-                const lastUpdatedTimestamp = latestData.updatedAt;
-                const diffInHours = (currTimestamp - lastUpdatedTimestamp) / 3600;
-                if (diffInHours > 24) {
-                    console.log("ALERT: Price feed hasn't been updated in 24 hours");
-                }
-                if (feedAddressLive !== priceFeeds[i].feedAddress) {
-                    console.log(priceFeeds[i].name);
-                    console.log(await feed.description());
-                    console.log(priceFeeds[i]);
-                    console.log(feedAddressLive);
-                }
-            }
+        afterEach(async () => {
+            await revertToSnapshot(snapshotId);
+        });
+
+        it('... should create a Safe and execute a transaction on it via signature', async () => {
+            const [signer] = await hre.ethers.getSigners();
+            const setupArgs = [
+                [signer.address], // _owners - List of Safe owners.
+                1, // _threshold - Number of required confirmations for a Safe transaction.
+                nullAddress, // to - Contract address for optional delegate call.
+                '0x', // data - Data payload for optional delegate call.
+                nullAddress, // fallbackHandler - Handler for fallback calls to this contract.
+                nullAddress, // paymentToken - Token that should be used for the payment (0 is ETH)
+                0, // payment - Value that should be paid.
+                nullAddress, // paymentReceiver - Address that should receive the payment
+            ];
+
+            const saltNonce = '0';
+            const safeFactory = await dfsSafeFactory.safeFactory();
+            const singletonAddr = '0xd9db270c1b5e3bd161e8c8503c55ceabee709552';
+            const predictedAddress = await predictSafeAddress(
+                singletonAddr,
+                setupArgs,
+                saltNonce,
+                safeFactory,
+            );
+
+            await setBalance(
+                addrs[network].WETH_ADDRESS,
+                predictedAddress,
+                hre.ethers.utils.parseUnits('10', 18),
+            );
+            const tokenBalanceAction = new sdk.actions.basic.TokenBalanceAction(
+                addrs[network].WETH_ADDRESS,
+                predictedAddress,
+            );
+            const recipe = new sdk.Recipe('Test Recipe', [
+                tokenBalanceAction,
+                new sdk.actions.basic.SendTokenAction(
+                    addrs[network].WETH_ADDRESS,
+                    signer.address,
+                    '$1',
+                ),
+            ]);
+            const recipeExecutor = await getAddrFromRegistry('RecipeExecutor');
+            const safeTxParams = {
+                to: recipeExecutor,
+                value: 0,
+                data: recipe.encodeForDsProxyCall()[1],
+                operation: 1,
+                safeTxGas: 0,
+                baseGas: 0,
+                gasPrice: 0,
+                gasToken: hre.ethers.constants.AddressZero,
+                refundReceiver: hre.ethers.constants.AddressZero,
+                nonce: 0,
+            };
+            const signature = await signSafeTx({ address: predictedAddress }, safeTxParams, signer);
+            const setupArgsEncoded = await encodeSetupArgs(setupArgs);
+            await dfsSafeFactory.createSafeAndExecute(
+                [singletonAddr, setupArgsEncoded, saltNonce],
+                [
+                    safeTxParams.to,
+                    safeTxParams.value,
+                    safeTxParams.data,
+                    safeTxParams.operation,
+                    safeTxParams.safeTxGas,
+                    safeTxParams.baseGas,
+                    safeTxParams.gasPrice,
+                    safeTxParams.gasToken,
+                    safeTxParams.refundReceiver,
+                    signature,
+                ],
+            );
+            const eoaBalance = await balanceOf(addrs[network].WETH_ADDRESS, signer.address);
+            const safeBalance = await balanceOf(addrs[network].WETH_ADDRESS, predictedAddress);
+            expect(safeBalance).to.be.eq(0);
+            expect(eoaBalance).to.be.eq(hre.ethers.utils.parseUnits('10', 18));
         });
     });
 };
@@ -495,5 +552,5 @@ module.exports = {
     dfsRegistryControllerTest,
     tokenPriceHelperTest,
     tokenPriceHelperL2Test,
-    priceFeedTest,
+    dfsSafeFactoryTest,
 };

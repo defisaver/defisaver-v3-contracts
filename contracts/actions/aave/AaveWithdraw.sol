@@ -1,16 +1,21 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/AaveHelper.sol";
-import "../../utils/FLFeeFaucet.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { AaveHelper } from "./helpers/AaveHelper.sol";
+import { FLFeeFaucet } from "../../utils/fee/FLFeeFaucet.sol";
+import { ILendingPoolV2 } from "../../interfaces/protocols/aaveV2/ILendingPoolV2.sol";
 
 /// @title Withdraw a token from an Aave market
 contract AaveWithdraw is ActionBase, AaveHelper {
     using TokenUtils for address;
 
+    /// @param market Aave Market address.
+    /// @param tokenAddr Token address.
+    /// @param amount Amount of tokens to withdraw.
+    /// @param to Address to send the withdrawn tokens to.
     struct Params {
         address market;
         address tokenAddr;
@@ -28,11 +33,13 @@ contract AaveWithdraw is ActionBase, AaveHelper {
         Params memory params = parseInputs(_callData);
 
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
-        params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
+        params.tokenAddr =
+            _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
 
-        (uint256 withdrawnAmount, bytes memory logData) = _withdraw(params.market, params.tokenAddr, params.amount, params.to);
+        (uint256 withdrawnAmount, bytes memory logData) =
+            _withdraw(params.market, params.tokenAddr, params.amount, params.to);
         emit ActionEvent("AaveWithdraw", logData);
         return bytes32(withdrawnAmount);
     }
@@ -40,7 +47,8 @@ contract AaveWithdraw is ActionBase, AaveHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _withdraw(params.market, params.tokenAddr, params.amount, params.to);
+        (, bytes memory logData) =
+            _withdraw(params.market, params.tokenAddr, params.amount, params.to);
         logger.logActionDirectEvent("AaveWithdraw", logData);
     }
 
@@ -56,12 +64,10 @@ contract AaveWithdraw is ActionBase, AaveHelper {
     /// @param _tokenAddr The address of the token to be withdrawn
     /// @param _amount Amount of tokens to be withdrawn -> send type(uint).max for whole amount
     /// @param _to Where the withdrawn tokens will be sent
-    function _withdraw(
-        address _market,
-        address _tokenAddr,
-        uint256 _amount,
-        address _to
-    ) internal returns (uint256, bytes memory) {
+    function _withdraw(address _market, address _tokenAddr, uint256 _amount, address _to)
+        internal
+        returns (uint256, bytes memory)
+    {
         ILendingPoolV2 lendingPool = getLendingPool(_market);
         uint256 tokenBefore;
         uint256 amountToWithdraw = _amount;

@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "./helpers/AaveHelper.sol";
-import "../../interfaces/aave/IStkAave.sol";
-import "../../utils/TokenUtils.sol";
+import { IStkAave } from "../../interfaces/protocols/aave/IStkAave.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { AaveHelper } from "./helpers/AaveHelper.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
+/// @title Action to unstake stkAave tokens
 contract AaveUnstake is ActionBase, AaveHelper {
     using TokenUtils for address;
 
@@ -47,9 +48,10 @@ contract AaveUnstake is ActionBase, AaveHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _unstake(
-        Params memory _params
-    ) internal returns (uint256 unstakedAmount, bytes memory logData) {
+    function _unstake(Params memory _params)
+        internal
+        returns (uint256 unstakedAmount, bytes memory logData)
+    {
         if (_params.amount == 0) {
             IStkAave(STAKED_TOKEN_ADDR).cooldown();
         } else {
@@ -63,7 +65,7 @@ contract AaveUnstake is ActionBase, AaveHelper {
         }
     }
 
-    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
     }
 }

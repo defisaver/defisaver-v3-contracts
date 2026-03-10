@@ -1,18 +1,22 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "../../interfaces/mcd/IPot.sol";
-import "../../interfaces/mcd/IDaiJoin.sol";
-import "./helpers/McdHelper.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { IPot } from "../../interfaces/protocols/mcd/IPot.sol";
+import { IDaiJoin } from "../../interfaces/protocols/mcd/IDaiJoin.sol";
+import { McdHelper } from "./helpers/McdHelper.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
+/// @title Action for depositing DAI into Maker DSR
 contract McdDsrDeposit is McdHelper, ActionBase {
     using TokenUtils for address;
 
+    /// @param amount Amount of DAI to deposit into DSR
+    /// @param from Address from which the DAI will be pulled
     struct Params {
-        uint256 amount; // amount of DAI to deposit into DSR
-        address from; // address from which the DAI will be pulled
+        uint256 amount;
+        address from;
     }
 
     /// @inheritdoc ActionBase
@@ -44,8 +48,10 @@ contract McdDsrDeposit is McdHelper, ActionBase {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    /// @notice Deposits DAI into Maker DSR
-    function _deposit(Params memory _params) internal returns (uint256 deposited, bytes memory logData) {
+    function _deposit(Params memory _params)
+        internal
+        returns (uint256 deposited, bytes memory logData)
+    {
         IPot pot = IPot(POT_ADDR);
 
         _params.amount = DAI_ADDRESS.pullTokensIfNeeded(_params.from, _params.amount);
@@ -66,11 +72,7 @@ contract McdDsrDeposit is McdHelper, ActionBase {
         deposited = _params.amount;
     }
 
-    function parseInputs(bytes memory _callData)
-        internal
-        pure
-        returns (Params memory inputData)
-    {
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
         inputData = abi.decode(_callData, (Params));
     }
 }

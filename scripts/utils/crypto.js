@@ -2,8 +2,7 @@ const crypto = require('crypto');
 
 const algorithm = 'aes-256-cbc';
 const encrypt = (privateKey, secretKey) => {
-    const hash = crypto.createHmac('sha256', secretKey)
-        .digest('hex');
+    const hash = crypto.createHmac('sha256', secretKey).digest('hex');
 
     // generate 16 bytes of random data
     const initVector = Buffer.from(hash).slice(0, 16);
@@ -24,8 +23,7 @@ const encrypt = (privateKey, secretKey) => {
 };
 
 const decrypt = (encryptedPrivateKey, secretKey) => {
-    const hash = crypto.createHmac('sha256', secretKey)
-        .digest('hex');
+    const hash = crypto.createHmac('sha256', secretKey).digest('hex');
 
     // generate 16 bytes of random data
     const initVector = Buffer.from(hash).slice(0, 16);

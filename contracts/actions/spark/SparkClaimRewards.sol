@@ -1,16 +1,23 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/SparkHelper.sol";
-import "../../interfaces/aaveV3/IRewardsController.sol";
+import {
+    ISparkRewardsController
+} from "../../interfaces/protocols/spark/ISparkRewardsController.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { SparkHelper } from "./helpers/SparkHelper.sol";
 
 /// @title Claims single reward type specified by reward for the list of assets. Rewards are received by to address.
 contract SparkClaimRewards is ActionBase, SparkHelper {
     using TokenUtils for address;
 
+    /// @param assetsLength Length of the assets array
+    /// @param amount Amount of tokens to claim
+    /// @param to Address to send the claimed tokens to
+    /// @param reward Address of the reward token
+    /// @param assets Array of asset addresses
     struct Params {
         uint8 assetsLength;
         uint256 amount;
@@ -21,7 +28,7 @@ contract SparkClaimRewards is ActionBase, SparkHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes calldata _callData,
+        bytes memory _callData,
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -38,7 +45,7 @@ contract SparkClaimRewards is ActionBase, SparkHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes calldata _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
 
         (, bytes memory logData) = _claimRewards(params);
@@ -65,9 +72,12 @@ contract SparkClaimRewards is ActionBase, SparkHelper {
     {
         require(_params.assetsLength == _params.assets.length);
 
-        IRewardsController rewardsController = IRewardsController(SPARK_REWARDS_CONTROLLER_ADDRESS);
+        ISparkRewardsController rewardsController =
+            ISparkRewardsController(SPARK_REWARDS_CONTROLLER_ADDRESS);
 
-        amountReceived = rewardsController.claimRewards(_params.assets, _params.amount, _params.to, _params.reward);
+        amountReceived = rewardsController.claimRewards(
+            _params.assets, _params.amount, _params.to, _params.reward
+        );
 
         bytes memory logData = abi.encode(_params, amountReceived);
         return (amountReceived, logData);

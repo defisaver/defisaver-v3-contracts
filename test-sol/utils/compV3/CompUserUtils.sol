@@ -1,17 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../UserWallet.sol";
-
-import "../../Const.sol";
-import "../../../contracts/interfaces/compoundV3/IComet.sol";
-import "../../../contracts/actions/compoundV3/CompV3SubProxy.sol";
+import { UserWallet } from "../UserWallet.sol";
+import { Addresses } from "../../utils/Addresses.sol";
+import { CompV3SubProxy } from "../../../contracts/actions/compoundV3/CompV3SubProxy.sol";
 
 contract CompUserUtils is UserWallet {
-
-    //solhint-disable-next-line no-empty-blocks
-    constructor() UserWallet() {}
-
     function subToAutomationBundles(
         bool _isSafe,
         address _subProxy,
@@ -22,8 +16,8 @@ contract CompUserUtils is UserWallet {
         bool _isEOA
     ) public returns (CompV3SubProxy.CompV3SubData memory params) {
         params = CompV3SubProxy.CompV3SubData({
-            market: Const.COMET_USDC,
-            baseToken: Const.USDC_ADDR,
+            market: Addresses.COMET_USDC,
+            baseToken: Addresses.USDC_ADDR,
             minRatio: _minRatio,
             maxRatio: _maxRatio,
             targetRatioBoost: _targetRatioBoost,

@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "../spark/helpers/SparkRatioHelper.sol";
-import "../../core/helpers/CoreHelper.sol";
-import "../../utils/TransientStorage.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { SparkRatioHelper } from "../spark/helpers/SparkRatioHelper.sol";
+import { TransientStorage } from "../../utils/transient/TransientStorage.sol";
 
+/// @title Action to check the ratio of the Spark position after strategy execution.
 contract SparkRatioCheck is ActionBase, SparkRatioHelper {
-
-    /// @dev 5% offset acceptable
-    uint256 internal constant RATIO_OFFSET = 50000000000000000;
+    /// @notice 5% offset acceptable
+    uint256 internal constant RATIO_OFFSET = 50_000_000_000_000_000;
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 
@@ -21,6 +20,8 @@ contract SparkRatioCheck is ActionBase, SparkRatioHelper {
         IN_REPAY
     }
 
+    /// @param ratioState State of the ratio (IN_BOOST or IN_REPAY)
+    /// @param targetRatio Target ratio.
     struct Params {
         RatioState ratioState;
         uint256 targetRatio;
@@ -35,13 +36,17 @@ contract SparkRatioCheck is ActionBase, SparkRatioHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        uint256 ratioState = _parseParamUint(uint256(inputData.ratioState), _paramMapping[0], _subData, _returnValues);
-        uint256 targetRatio = _parseParamUint(uint256(inputData.targetRatio), _paramMapping[1], _subData, _returnValues);
+        uint256 ratioState = _parseParamUint(
+            uint256(inputData.ratioState), _paramMapping[0], _subData, _returnValues
+        );
+        uint256 targetRatio = _parseParamUint(
+            uint256(inputData.targetRatio), _paramMapping[1], _subData, _returnValues
+        );
 
         uint256 currRatio = getRatio(DEFAULT_SPARK_MARKET, address(this));
 
         uint256 startRatio = uint256(tempStorage.getBytes32("SPARK_RATIO"));
-        
+
         // if we are doing repay
         if (RatioState(ratioState) == RatioState.IN_REPAY) {
             // if repay ratio should be better off
@@ -74,7 +79,7 @@ contract SparkRatioCheck is ActionBase, SparkRatioHelper {
 
     /// @inheritdoc ActionBase
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes memory _callData) public payable override {}
+    function executeActionDirect(bytes memory _callData) public payable override { }
 
     /// @inheritdoc ActionBase
     function actionType() public pure virtual override returns (uint8) {
@@ -84,5 +89,4 @@ contract SparkRatioCheck is ActionBase, SparkRatioHelper {
     function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {
         inputData = abi.decode(_callData, (Params));
     }
-
 }

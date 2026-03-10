@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 contract BaseAuthAddresses {
     address internal constant ADMIN_VAULT_ADDR = 0xD8E67968d8a0df4beCf2D50daE1e34d4d80C701C;

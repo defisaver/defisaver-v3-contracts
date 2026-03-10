@@ -1,14 +1,21 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/SparkHelper.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { SparkHelper } from "./helpers/SparkHelper.sol";
+import { ISparkPool } from "../../interfaces/protocols/spark/ISparkPool.sol";
+import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Swaps user's wallet positions borrow rate mode between stable and variable.
 contract SparkSwapBorrowRateMode is ActionBase, SparkHelper {
     using TokenUtils for address;
+
+    /// @param rateMode Type of borrow debt [Stable: 1, Variable: 2]
+    /// @param assetId The id of the token to be swapped
+    /// @param useDefaultMarket Whether to use the default market
+    /// @param market Address of the market to swap borrow rate mode for
     struct Params {
         uint256 rateMode;
         uint16 assetId;
@@ -25,7 +32,8 @@ contract SparkSwapBorrowRateMode is ActionBase, SparkHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.market = _parseParamAddr(inputData.market, _paramMapping[0], _subData, _returnValues);
+        inputData.market =
+            _parseParamAddr(inputData.market, _paramMapping[0], _subData, _returnValues);
 
         (, bytes memory logData) = _swapBorrowRate(inputData);
 
@@ -54,18 +62,15 @@ contract SparkSwapBorrowRateMode is ActionBase, SparkHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _swapBorrowRate(Params memory _inputData)
-        internal
-        returns (uint256, bytes memory)
-    {
-        IPoolV3 lendingPool = getLendingPool(_inputData.market);
+    function _swapBorrowRate(Params memory _inputData) internal returns (uint256, bytes memory) {
+        ISparkPool lendingPool = getSparkLendingPool(_inputData.market);
         address tokenAddr = lendingPool.getReserveAddressById(_inputData.assetId);
         lendingPool.swapBorrowRateMode(tokenAddr, _inputData.rateMode);
         bytes memory logData = abi.encode(_inputData);
         return (0, logData);
     }
 
-    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
         if (params.useDefaultMarket) {
             params.market = DEFAULT_SPARK_MARKET;
@@ -76,7 +81,7 @@ contract SparkSwapBorrowRateMode is ActionBase, SparkHelper {
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
         encodedInput = bytes.concat(encodedInput, bytes32(_params.rateMode));
         encodedInput = bytes.concat(encodedInput, bytes2(_params.assetId));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useDefaultMarket));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useDefaultMarket));
         if (!_params.useDefaultMarket) {
             encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
         }
@@ -85,7 +90,7 @@ contract SparkSwapBorrowRateMode is ActionBase, SparkHelper {
     function decodeInputs(bytes calldata _encodedInput) public pure returns (Params memory params) {
         params.rateMode = uint256(bytes32(_encodedInput[0:32]));
         params.assetId = uint16(bytes2(_encodedInput[32:34]));
-        params.useDefaultMarket = bytesToBool(bytes1(_encodedInput[34:35]));
+        params.useDefaultMarket = DFSLib.bytesToBool(bytes1(_encodedInput[34:35]));
 
         if (params.useDefaultMarket) {
             params.market = DEFAULT_SPARK_MARKET;

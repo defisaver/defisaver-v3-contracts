@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 import { StrategyStorage } from "../../contracts/core/strategy/StrategyStorage.sol";
 import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
 import { AdminAuth } from "../../contracts/auth/AdminAuth.sol";
 
-import { Strings } from "../utils/library/Strings.sol";
+import { Strings } from "../utils/Strings.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
-import { Const } from "../Const.sol";
+import { Addresses } from "../utils/Addresses.sol";
 
 contract TestCore_StrategyStorage is BaseTest {
-
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -33,13 +32,13 @@ contract TestCore_StrategyStorage is BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function test_open_to_public_should_be_false_by_default() public {
+    function test_open_to_public_should_be_false_by_default() public view {
         bool openToPublic = cut.openToPublic();
         assertFalse(openToPublic);
     }
 
     function test_should_add_and_fetch_strategy_as_owner() public {
-        address sender = Const.OWNER_ACC;
+        address sender = Addresses.OWNER_ACC;
         _should_add_and_fetch_strategy(sender);
     }
 
@@ -55,9 +54,7 @@ contract TestCore_StrategyStorage is BaseTest {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                StrategyStorage.NoAuthToCreateStrategy.selector,
-                sender,
-                openToPublic
+                StrategyStorage.NoAuthToCreateStrategy.selector, sender, openToPublic
             )
         );
         cut.createStrategy("Test", new bytes4[](0), new bytes4[](0), new uint8[][](0), true);
@@ -78,7 +75,7 @@ contract TestCore_StrategyStorage is BaseTest {
 
     function test_should_fetch_paginated_strategies() public {
         // first add 4 strategies
-        startPrank(Const.OWNER_ACC);
+        startPrank(Addresses.OWNER_ACC);
         cut.createStrategy("Test1", new bytes4[](0), new bytes4[](0), new uint8[][](0), true);
         cut.createStrategy("Test2", new bytes4[](0), new bytes4[](0), new uint8[][](0), true);
         cut.createStrategy("Test3", new bytes4[](0), new bytes4[](0), new uint8[][](0), true);
@@ -128,7 +125,7 @@ contract TestCore_StrategyStorage is BaseTest {
         StrategyModel.Strategy[] memory _fetchedStrategies,
         uint256 _realSize,
         uint256 _offset
-    ) internal {
+    ) internal pure {
         for (uint256 i = 0; i < _realSize; ++i) {
             assertTrue(
                 Strings.equal(
@@ -136,7 +133,7 @@ contract TestCore_StrategyStorage is BaseTest {
                     string(abi.encodePacked("Test", Strings.toString(i + 1 + _offset)))
                 )
             );
-            assertEq(_fetchedStrategies[i].creator, Const.OWNER_ACC);
+            assertEq(_fetchedStrategies[i].creator, Addresses.OWNER_ACC);
         }
         // empty strategies are returned if the requested count is more than the actual count
         for (uint256 i = _realSize; i < _fetchedStrategies.length; ++i) {
@@ -151,7 +148,8 @@ contract TestCore_StrategyStorage is BaseTest {
         vm.expectEmit(true, false, false, false, address(cut));
         emit StrategyCreated(strategyCountBefore);
         startPrank(_sender);
-        uint256 strategyId = cut.createStrategy("Test1", new bytes4[](0), new bytes4[](0), new uint8[][](0), true);
+        uint256 strategyId =
+            cut.createStrategy("Test1", new bytes4[](0), new bytes4[](0), new uint8[][](0), true);
         stopPrank();
 
         uint256 strategyCountAfter = cut.getStrategyCount();
@@ -165,7 +163,7 @@ contract TestCore_StrategyStorage is BaseTest {
     }
 
     function _change_edit_permission_as_owner(bool _isOpenToPublic) internal {
-        prank(Const.OWNER_ACC);
+        prank(Addresses.OWNER_ACC);
         cut.changeEditPermission(_isOpenToPublic);
     }
 }

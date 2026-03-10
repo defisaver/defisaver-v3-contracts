@@ -1,28 +1,24 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
+import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
+import { IERC3156FlashLender } from "../../interfaces/flashloan/IERC3156FlashLender.sol";
+import { IERC3156FlashBorrower } from "../../interfaces/flashloan/IERC3156FlashBorrower.sol";
+import { ILendingPoolV2 } from "../../interfaces/protocols/aaveV2/ILendingPoolV2.sol";
+import { IFlashLoans } from "../../interfaces/protocols/balancer/IFlashLoans.sol";
+import { IUniswapV3Pool } from "../../interfaces/protocols/uniswap/v3/IUniswapV3Pool.sol";
+import { IUniswapV3Factory } from "../../interfaces/protocols/uniswap/v3/IUniswapV3Factory.sol";
+import { IMorphoBlue } from "../../interfaces/protocols/morpho-blue/IMorphoBlue.sol";
+import { IVaultMain } from "../../interfaces/protocols/balancerV3/IVaultMain.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
-import "../../utils/ReentrancyGuard.sol";
-import "../../utils/TokenUtils.sol";
-
-import "../../interfaces/IDSProxy.sol";
-import "../../interfaces/flashloan/IFlashLoanBase.sol";
-import "../../interfaces/flashloan/IERC3156FlashLender.sol";
-import "../../interfaces/flashloan/IERC3156FlashBorrower.sol";
-import "../../interfaces/aaveV2/ILendingPoolV2.sol";
-import "../../interfaces/balancer/IFlashLoans.sol";
-import "../../interfaces/uniswap/v3/IUniswapV3Pool.sol";
-import "../../interfaces/uniswap/v3/IUniswapV3Factory.sol";
-import "../../interfaces/morpho-blue/IMorphoBlue.sol";
-import "../../core/helpers/CoreHelper.sol";
-
-import "../../core/strategy/StrategyModel.sol";
-
-import "./helpers/FLHelper.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { ReentrancyGuard } from "../../_vendor/openzeppelin/ReentrancyGuard.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { FLHelper } from "./helpers/FLHelper.sol";
 
 /// @title Action that gets and receives FL from different variety of sources
-contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel, FLHelper {
+contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
     using TokenUtils for address;
 
     /// @dev FL Initiator must be this contract
@@ -33,8 +29,6 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
     error WrongPaybackAmountError();
     // When FL source is not found
     error NonexistentFLSource();
-    // Revert if execution fails when using safe wallet
-    error SafeExecutionError();
 
     enum FLSource {
         EMPTY,
@@ -45,16 +39,10 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         AAVEV3,
         UNIV3,
         SPARK,
-        MORPHO_BLUE
+        MORPHO_BLUE,
+        CURVEUSD,
+        BALANCER_V3
     }
-
-    /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
-    bytes4 public constant CALLBACK_SELECTOR =
-        bytes4(
-            keccak256(
-                "_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"
-            )
-        );
 
     /// @inheritdoc ActionBase
     function actionType() public pure override returns (uint8) {
@@ -62,7 +50,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
     }
 
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes memory _callData) public payable override {}
+    function executeActionDirect(bytes memory _callData) public payable override { }
 
     /// @inheritdoc ActionBase
     /// @notice This action doesn't use flParamGetterAddr and flParamGetterData
@@ -98,6 +86,10 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
             _flSpark(_flParams);
         } else if (_source == FLSource.MORPHO_BLUE) {
             _flMorphoBlue(_flParams);
+        } else if (_source == FLSource.CURVEUSD) {
+            _flCurveUSD(_flParams);
+        } else if (_source == FLSource.BALANCER_V3) {
+            _flBalancerV3(_flParams);
         } else {
             revert NonexistentFLSource();
         }
@@ -106,24 +98,21 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
     /// @notice Gets a Fl from Aave and returns back the execution to the action address
     /// @param _flParams All the amounts/tokens and related aave fl data
     function _flAaveV2(FlashLoanParams memory _flParams) internal {
-        ILendingPoolV2(AAVE_LENDING_POOL).flashLoan(
-            address(this),
-            _flParams.tokens,
-            _flParams.amounts,
-            _flParams.modes,
-            _flParams.onBehalfOf,
-            _flParams.recipeData,
-            AAVE_REFERRAL_CODE
-        );
+        ILendingPoolV2(AAVE_LENDING_POOL)
+            .flashLoan(
+                address(this),
+                _flParams.tokens,
+                _flParams.amounts,
+                _flParams.modes,
+                _flParams.onBehalfOf,
+                _flParams.recipeData,
+                AAVE_REFERRAL_CODE
+            );
 
         emit ActionEvent(
             "FLAction",
             abi.encode(
-                "AAVEV2",
-                _flParams.tokens,
-                _flParams.amounts,
-                _flParams.modes,
-                _flParams.onBehalfOf
+                "AAVEV2", _flParams.tokens, _flParams.amounts, _flParams.modes, _flParams.onBehalfOf
             )
         );
     }
@@ -131,48 +120,50 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
     /// @notice Gets a Fl from Aave V3 and returns back the execution to the action address
     /// @param _flParams All the amounts/tokens and related aave fl data
     function _flAaveV3(FlashLoanParams memory _flParams) internal {
-        ILendingPoolV2(AAVE_V3_LENDING_POOL).flashLoan(
-            address(this),
-            _flParams.tokens,
-            _flParams.amounts,
-            _flParams.modes,
-            _flParams.onBehalfOf,
-            _flParams.recipeData,
-            AAVE_REFERRAL_CODE
-        );
+        ILendingPoolV2(AAVE_V3_LENDING_POOL)
+            .flashLoan(
+                address(this),
+                _flParams.tokens,
+                _flParams.amounts,
+                _flParams.modes,
+                _flParams.onBehalfOf,
+                _flParams.recipeData,
+                AAVE_REFERRAL_CODE
+            );
 
         emit ActionEvent(
             "FLAction",
             abi.encode(
-                "AAVEV3",
-                _flParams.tokens,
-                _flParams.amounts,
-                _flParams.modes,
-                _flParams.onBehalfOf
+                "AAVEV3", _flParams.tokens, _flParams.amounts, _flParams.modes, _flParams.onBehalfOf
             )
         );
     }
 
     /// @notice Gets a FL from Balancer and returns back the execution to the action address
     function _flBalancer(FlashLoanParams memory _flParams) internal {
-        IFlashLoans(VAULT_ADDR).flashLoan(
-            address(this),
-            _flParams.tokens,
-            _flParams.amounts,
-            _flParams.recipeData
-        );
+        IFlashLoans(VAULT_ADDR)
+            .flashLoan(address(this), _flParams.tokens, _flParams.amounts, _flParams.recipeData);
 
         emit ActionEvent("FLAction", abi.encode("BALANCER", _flParams));
     }
 
+    /// @notice Gets a FL from Balancer V3 and returns back the execution to the action address
+    function _flBalancerV3(FlashLoanParams memory _flParams) internal {
+        IVaultMain(BALANCER_V3_VAULT_ADDR)
+            .unlock(abi.encodeWithSelector(this.receiveFlashLoanBalancerV3.selector, _flParams));
+
+        emit ActionEvent("FLAction", abi.encode("BALANCER_V3", _flParams));
+    }
+
     /// @notice Gets a GHO FL from Gho Flash Minter
     function _flGho(FlashLoanParams memory _flParams) internal {
-        IERC3156FlashLender(GHO_FLASH_MINTER_ADDR).flashLoan(
-            IERC3156FlashBorrower(address(this)),
-            GHO_ADDR,
-            _flParams.amounts[0],
-            _flParams.recipeData
-        );
+        IERC3156FlashLender(GHO_FLASH_MINTER_ADDR)
+            .flashLoan(
+                IERC3156FlashBorrower(address(this)),
+                GHO_ADDR,
+                _flParams.amounts[0],
+                _flParams.recipeData
+            );
 
         emit ActionEvent("FLAction", abi.encode("GHO", _flParams.amounts[0]));
     }
@@ -180,12 +171,13 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
     /// @notice Gets a DAI flash loan from Maker and returns back the execution to the action address
     /// @param _flParams All the amounts/tokens and related aave fl data
     function _flMaker(FlashLoanParams memory _flParams) internal {
-        IERC3156FlashLender(DSS_FLASH_ADDR).flashLoan(
-            IERC3156FlashBorrower(address(this)),
-            DAI_ADDR,
-            _flParams.amounts[0],
-            _flParams.recipeData
-        );
+        IERC3156FlashLender(DSS_FLASH_ADDR)
+            .flashLoan(
+                IERC3156FlashBorrower(address(this)),
+                DAI_ADDR,
+                _flParams.amounts[0],
+                _flParams.recipeData
+            );
 
         emit ActionEvent("FLAction", abi.encode("MAKER", _flParams.amounts[0]));
     }
@@ -193,45 +185,56 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
     function _flUniV3(FlashLoanParams memory _flParams) internal {
         // modes aren't used so we set them to later know starting balances
         _flParams.modes = new uint256[](2);
-        _flParams.modes[0] = _flParams.amounts[0] > 0 ? _flParams.tokens[0].getBalance(address(this)) : 0;
-        _flParams.modes[1] = _flParams.amounts[1] > 0 ? _flParams.tokens[1].getBalance(address(this)) : 0;
+        _flParams.modes[0] =
+            _flParams.amounts[0] > 0 ? _flParams.tokens[0].getBalance(address(this)) : 0;
+        _flParams.modes[1] =
+            _flParams.amounts[1] > 0 ? _flParams.tokens[1].getBalance(address(this)) : 0;
 
         /// @dev FlashLoanParams.tokens, first two array indexes contain tokens, third index contains pool address
-        IUniswapV3Pool(_flParams.tokens[2]).flash(
-            address(this),
-            _flParams.amounts[0],
-            _flParams.amounts[1],
-            abi.encode(_flParams)
-        );
+        IUniswapV3Pool(_flParams.tokens[2])
+            .flash(address(this), _flParams.amounts[0], _flParams.amounts[1], abi.encode(_flParams));
 
         emit ActionEvent("FLAction", abi.encode("UNIV3", _flParams.amounts[0]));
     }
 
     /// @notice Gets a Fl from Spark and returns back the execution to the action address
     function _flSpark(FlashLoanParams memory _flParams) internal {
-
-        ILendingPoolV2(SPARK_LENDING_POOL).flashLoan(
-            address(this),
-            _flParams.tokens,
-            _flParams.amounts,
-            _flParams.modes,
-            _flParams.onBehalfOf,
-            _flParams.recipeData,
-            SPARK_REFERRAL_CODE
-        );
+        ILendingPoolV2(SPARK_LENDING_POOL)
+            .flashLoan(
+                address(this),
+                _flParams.tokens,
+                _flParams.amounts,
+                _flParams.modes,
+                _flParams.onBehalfOf,
+                _flParams.recipeData,
+                SPARK_REFERRAL_CODE
+            );
 
         emit ActionEvent("FLAction", abi.encode("SPARK", _flParams.amounts[0]));
     }
 
     /// @notice Gets a FL from Morpho blue and returns back the execution to the action address
     function _flMorphoBlue(FlashLoanParams memory _params) internal {
-        IMorphoBlue(MORPHO_BLUE_ADDR).flashLoan(
-            _params.tokens[0],
-            _params.amounts[0],
-            abi.encode(_params.recipeData, _params.tokens[0])
-        );
+        IMorphoBlue(MORPHO_BLUE_ADDR)
+            .flashLoan(
+                _params.tokens[0],
+                _params.amounts[0],
+                abi.encode(_params.recipeData, _params.tokens[0])
+            );
 
         emit ActionEvent("FLAction", abi.encode("MORPHOBLUE", _params.amounts[0]));
+    }
+
+    function _flCurveUSD(FlashLoanParams memory _params) internal {
+        IERC3156FlashLender(CURVEUSD_FLASH_ADDR)
+            .flashLoan(
+                IERC3156FlashBorrower(address(this)),
+                CURVEUSD_ADDR,
+                _params.amounts[0],
+                _params.recipeData
+            );
+
+        emit ActionEvent("FLAction", abi.encode("CURVEUSD", _params.amounts[0]));
     }
 
     /// @notice Aave callback function that formats and calls back RecipeExecutor
@@ -243,7 +246,10 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         address _initiator,
         bytes memory _params
     ) public nonReentrant returns (bool) {
-        if (msg.sender != AAVE_LENDING_POOL && msg.sender != AAVE_V3_LENDING_POOL && msg.sender != SPARK_LENDING_POOL) {
+        if (
+            msg.sender != AAVE_LENDING_POOL && msg.sender != AAVE_V3_LENDING_POOL
+                && msg.sender != SPARK_LENDING_POOL
+        ) {
             revert UntrustedLender();
         }
         if (_initiator != address(this)) {
@@ -258,13 +264,13 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
             balancesBefore[i] = _assets[i].getBalance(address(this));
         }
 
-        _executeRecipe(wallet, currRecipe, _amounts[0] + _fees[0]);
+        _executeRecipe(wallet, _getWalletType(wallet), currRecipe, _amounts[0] + _fees[0]);
 
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
             uint256 paybackAmount = _amounts[i] + _fees[i];
-            bool correctAmount = _assets[i].getBalance(address(this)) ==
-                paybackAmount + balancesBefore[i];
+            bool correctAmount =
+                _assets[i].getBalance(address(this)) == paybackAmount + balancesBefore[i];
 
             if (_assets[i] == ST_ETH_ADDR && !correctAmount) {
                 flFeeFaucet.my2Wei(ST_ETH_ADDR);
@@ -278,6 +284,40 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         }
 
         return true;
+    }
+
+    /// @notice Balancer V3 FL callback function that formats and calls back RecipeExecutor
+    /// FLSource == BALANCER_V3
+    function receiveFlashLoanBalancerV3(FlashLoanParams memory _userData) external nonReentrant {
+        if (msg.sender != BALANCER_V3_VAULT_ADDR) {
+            revert UntrustedLender();
+        }
+
+        (Recipe memory currRecipe, address wallet) =
+            abi.decode(_userData.recipeData, (Recipe, address));
+
+        uint256[] memory balancesBefore = new uint256[](_userData.tokens.length);
+        for (uint256 i = 0; i < _userData.tokens.length; i++) {
+            balancesBefore[i] = _userData.tokens[i].getBalance(address(this));
+            // Send token from the vault directly to the wallet
+            IVaultMain(BALANCER_V3_VAULT_ADDR)
+                .sendTo(IERC20(_userData.tokens[i]), wallet, _userData.amounts[i]);
+        }
+
+        _executeRecipe(wallet, _getWalletType(wallet), currRecipe, _userData.amounts[0]);
+
+        for (uint256 i = 0; i < _userData.tokens.length; i++) {
+            uint256 paybackAmount = _userData.amounts[i];
+
+            if (_userData.tokens[i].getBalance(address(this)) != paybackAmount + balancesBefore[i])
+            {
+                revert WrongPaybackAmountError();
+            }
+            // Send tokens back to Balancer V3 Vault - repay the loan
+            _userData.tokens[i].withdrawTokens(BALANCER_V3_VAULT_ADDR, paybackAmount);
+            // Settle the repayment
+            IVaultMain(BALANCER_V3_VAULT_ADDR).settle(IERC20(_userData.tokens[i]), paybackAmount);
+        }
     }
 
     /// @notice Balancer FL callback function that formats and calls back RecipeExecutor
@@ -299,8 +339,8 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
             balancesBefore[i] = _tokens[i].getBalance(address(this));
         }
 
-        _executeRecipe(wallet, currRecipe, _amounts[0] + _feeAmounts[0]);
-        
+        _executeRecipe(wallet, _getWalletType(wallet), currRecipe, _amounts[0] + _feeAmounts[0]);
+
         for (uint256 i = 0; i < _tokens.length; i++) {
             uint256 paybackAmount = _amounts[i] + (_feeAmounts[i]);
 
@@ -313,7 +353,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
     }
 
     /// @notice ERC3156 callback function that formats and calls back RecipeExecutor
-    /// FLSource == MAKER | GHO
+    /// FLSource == MAKER | GHO | CURVEUSD
     function onFlashLoan(
         address _initiator,
         address _token,
@@ -321,7 +361,10 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         uint256 _fee,
         bytes calldata _data
     ) external nonReentrant returns (bytes32) {
-        if (msg.sender != DSS_FLASH_ADDR && msg.sender != GHO_FLASH_MINTER_ADDR) {
+        if (
+            msg.sender != DSS_FLASH_ADDR && msg.sender != GHO_FLASH_MINTER_ADDR
+                && msg.sender != CURVEUSD_FLASH_ADDR
+        ) {
             revert UntrustedLender();
         }
         if (_initiator != address(this)) {
@@ -332,43 +375,50 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         _token.withdrawTokens(wallet, _amount);
         uint256 balanceBefore = _token.getBalance(address(this));
 
-        uint256 paybackAmount = _amount +_fee;
+        uint256 paybackAmount = _amount + _fee;
 
-        _executeRecipe(wallet, currRecipe, paybackAmount);
+        _executeRecipe(wallet, _getWalletType(wallet), currRecipe, paybackAmount);
 
         if (_token.getBalance(address(this)) != paybackAmount + balanceBefore) {
             revert WrongPaybackAmountError();
         }
 
-        _token.approveToken(msg.sender, paybackAmount);
+        if (msg.sender == CURVEUSD_FLASH_ADDR) {
+            _token.withdrawTokens(msg.sender, paybackAmount);
+        } else {
+            _token.approveToken(msg.sender, paybackAmount);
+        }
 
         return keccak256("ERC3156FlashBorrower.onFlashLoan");
     }
 
-    function uniswapV3FlashCallback(
-        uint256 _fee0,
-        uint256 _fee1,
-        bytes memory _params
-    ) external nonReentrant {
+    function uniswapV3FlashCallback(uint256 _fee0, uint256 _fee1, bytes memory _params)
+        external
+        nonReentrant
+    {
         FlashLoanParams memory params = abi.decode(_params, (FlashLoanParams));
         {
             uint24 fee = IUniswapV3Pool(msg.sender).fee();
-            address realPool = IUniswapV3Factory(UNI_V3_FACTORY).getPool(params.tokens[0], params.tokens[1], uint24(fee));
+            address realPool = IUniswapV3Factory(UNI_V3_FACTORY)
+                .getPool(params.tokens[0], params.tokens[1], uint24(fee));
             if (msg.sender != realPool) revert UntrustedLender();
         }
 
-        (Recipe memory currRecipe, address wallet) = abi.decode(params.recipeData, (Recipe, address));
+        (Recipe memory currRecipe, address wallet) =
+            abi.decode(params.recipeData, (Recipe, address));
 
         params.tokens[0].withdrawTokens(wallet, params.amounts[0]);
         params.tokens[1].withdrawTokens(wallet, params.amounts[1]);
 
-        _executeRecipe(wallet, currRecipe, params.amounts[0]);
+        _executeRecipe(wallet, _getWalletType(wallet), currRecipe, params.amounts[0]);
 
         uint256 expectedBalance0 = params.modes[0] + params.amounts[0] + _fee0;
         uint256 expectedBalance1 = params.modes[1] + params.amounts[1] + _fee1;
 
-        uint256 currBalance0 = params.amounts[0] > 0 ? params.tokens[0].getBalance(address(this)) : 0;
-        uint256 currBalance1 = params.amounts[1] > 0 ? params.tokens[1].getBalance(address(this)) : 0;
+        uint256 currBalance0 =
+            params.amounts[0] > 0 ? params.tokens[0].getBalance(address(this)) : 0;
+        uint256 currBalance1 =
+            params.amounts[1] > 0 ? params.tokens[1].getBalance(address(this)) : 0;
 
         bool isCorrectAmount0 = currBalance0 == expectedBalance0;
         bool isCorrectAmount1 = currBalance1 == expectedBalance1;
@@ -389,7 +439,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
         params.tokens[1].withdrawTokens(msg.sender, params.amounts[1] + _fee1);
     }
 
-    function onMorphoFlashLoan(uint256 assets, bytes calldata data) external nonReentrant{
+    function onMorphoFlashLoan(uint256 assets, bytes calldata data) external nonReentrant {
         if (msg.sender != MORPHO_BLUE_ADDR) {
             revert UntrustedLender();
         }
@@ -400,32 +450,12 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, StrategyModel,
 
         uint256 balanceBefore = token.getBalance(address(this));
 
-        _executeRecipe(wallet, currRecipe, assets);
+        _executeRecipe(wallet, _getWalletType(wallet), currRecipe, assets);
 
         if (token.getBalance(address(this)) != assets + balanceBefore) {
             revert WrongPaybackAmountError();
         }
 
         token.approveToken(MORPHO_BLUE_ADDR, assets);
-    }
-
-    function _executeRecipe(address _wallet, Recipe memory _currRecipe, uint256 _paybackAmount) internal {
-        if (isDSProxy(_wallet)) {
-            IDSProxy(_wallet).execute{value: address(this).balance}(
-                RECIPE_EXECUTOR_ADDR,
-                abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount)
-            );
-        } else {
-            bool success = ISafe(_wallet).execTransactionFromModule(
-                RECIPE_EXECUTOR_ADDR,
-                address(this).balance,
-                abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount),
-                ISafe.Operation.DelegateCall
-            );
-
-            if (!success) {
-                revert SafeExecutionError();
-             }
-        }
     }
 }

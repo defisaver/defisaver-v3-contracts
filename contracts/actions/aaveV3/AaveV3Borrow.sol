@@ -1,14 +1,24 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/AaveV3Helper.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
+import { IPoolV3 } from "../../interfaces/protocols/aaveV3/IPoolV3.sol";
+import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Borrow a token from AaveV3 market
 contract AaveV3Borrow is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
+    /// @param amount Amount of tokens to borrow.
+    /// @param to Address to send the borrowed tokens to.
+    /// @param rateMode Rate mode.
+    /// @param assetId Asset id.
+    /// @param useDefaultMarket Whether to use the default market.
+    /// @param useOnBehalf Whether to use on behalf.
+    /// @param market Aave Market address.
+    /// @param onBehalf Address to send the borrowed tokens on behalf of. Defaults to the user's wallet.
     struct Params {
         uint256 amount;
         address to;
@@ -31,17 +41,29 @@ contract AaveV3Borrow is ActionBase, AaveV3Helper {
 
         params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
-        params.rateMode = uint8(_parseParamUint(uint8(params.rateMode), _paramMapping[2], _subData, _returnValues));
-        params.assetId = uint16(_parseParamUint(uint16(params.assetId), _paramMapping[3], _subData, _returnValues));
-        params.useDefaultMarket = _parseParamUint(params.useDefaultMarket ? 1 : 0, _paramMapping[4], _subData, _returnValues) == 1;
-        params.useOnBehalf = _parseParamUint(params.useOnBehalf ? 1 : 0, _paramMapping[5], _subData, _returnValues) == 1;
-        params.market = _parseParamAddr(params.market, _paramMapping[6], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(
-            params.onBehalf,
-            _paramMapping[7],
-            _subData,
-            _returnValues
+        params.rateMode = uint8(
+            _parseParamUint(uint8(params.rateMode), _paramMapping[2], _subData, _returnValues)
         );
+        params.assetId = uint16(
+            _parseParamUint(uint16(params.assetId), _paramMapping[3], _subData, _returnValues)
+        );
+        params.useDefaultMarket =
+            _parseParamUint(
+                    params.useDefaultMarket ? 1 : 0, _paramMapping[4], _subData, _returnValues
+                ) == 1;
+        params.useOnBehalf =
+            _parseParamUint(params.useOnBehalf ? 1 : 0, _paramMapping[5], _subData, _returnValues)
+                == 1;
+        params.market = _parseParamAddr(params.market, _paramMapping[6], _subData, _returnValues);
+        params.onBehalf =
+            _parseParamAddr(params.onBehalf, _paramMapping[7], _subData, _returnValues);
+
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_AAVE_MARKET;
+        }
+        if (!params.useOnBehalf) {
+            params.onBehalf = address(0);
+        }
 
         (uint256 borrowAmount, bytes memory logData) = _borrow(
             params.market,
@@ -58,14 +80,6 @@ contract AaveV3Borrow is ActionBase, AaveV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-
-        if (params.useDefaultMarket) {
-            params.market = DEFAULT_AAVE_MARKET;
-        }
-        if (!params.useOnBehalf) {
-            params.onBehalf = address(0);
-        }
-
         (, bytes memory logData) = _borrow(
             params.market,
             params.assetId,
@@ -142,8 +156,8 @@ contract AaveV3Borrow is ActionBase, AaveV3Helper {
         encodedInput = bytes.concat(encodedInput, bytes20(_params.to));
         encodedInput = bytes.concat(encodedInput, bytes1(_params.rateMode));
         encodedInput = bytes.concat(encodedInput, bytes2(_params.assetId));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useDefaultMarket));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useOnBehalf));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useDefaultMarket));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useOnBehalf));
         if (!_params.useDefaultMarket) {
             encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
         }
@@ -157,8 +171,8 @@ contract AaveV3Borrow is ActionBase, AaveV3Helper {
         params.to = address(bytes20(_encodedInput[32:52]));
         params.rateMode = uint8(bytes1(_encodedInput[52:53]));
         params.assetId = uint16(bytes2(_encodedInput[53:55]));
-        params.useDefaultMarket = bytesToBool(bytes1(_encodedInput[55:56]));
-        params.useOnBehalf = bytesToBool(bytes1(_encodedInput[56:57]));
+        params.useDefaultMarket = DFSLib.bytesToBool(bytes1(_encodedInput[55:56]));
+        params.useOnBehalf = DFSLib.bytesToBool(bytes1(_encodedInput[56:57]));
         uint256 mark = 57;
 
         if (params.useDefaultMarket) {

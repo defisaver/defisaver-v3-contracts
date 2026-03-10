@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "../../core/strategy/SubStorage.sol";
-import "../../core/strategy/StrategyModel.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { SubStorage } from "../../core/strategy/SubStorage.sol";
+import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 
 /// @title Updates users sub information on SubStorage contract
-/// @dev user can only change his own subscriptions
+/// @notice User can only change his own subscriptions
 contract UpdateSub is ActionBase {
+    /// @param subId Id of the Subscription
+    /// @param sub Object that represents the updated sub
     struct Params {
         uint256 subId;
         StrategyModel.StrategySub sub;
@@ -20,28 +22,31 @@ contract UpdateSub is ActionBase {
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) public virtual override payable returns (bytes32) {
+    ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.subId = _parseParamUint(inputData.subId, _paramMapping[0], _subData, _returnValues);
+        inputData.subId =
+            _parseParamUint(inputData.subId, _paramMapping[0], _subData, _returnValues);
 
-        for (uint256 i = 0; i < inputData.sub.subData.length; i++){
-            inputData.sub.subData[i] = _parseParamABytes32(inputData.sub.subData[i], _paramMapping[1+i], _subData, _returnValues);
+        for (uint256 i = 0; i < inputData.sub.subData.length; i++) {
+            inputData.sub.subData[i] = _parseParamABytes32(
+                inputData.sub.subData[i], _paramMapping[1 + i], _subData, _returnValues
+            );
         }
 
         updateSubData(inputData);
 
-        return(bytes32(inputData.subId));
+        return (bytes32(inputData.subId));
     }
 
-    function executeActionDirect(bytes memory _callData) public override payable {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
 
         updateSubData(inputData);
     }
 
     /// @inheritdoc ActionBase
-    function actionType() public virtual override pure returns (uint8) {
+    function actionType() public pure virtual override returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
 

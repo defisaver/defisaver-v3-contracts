@@ -19,18 +19,21 @@ const {
     WETH_ADDRESS,
     takeSnapshot,
     revertToSnapshot,
-} = require('../utils');
+    expectError,
+} = require('../utils/utils');
 
-const { createSafe, executeSafeTx, SAFE_CONSTANTS } = require('../utils-safe');
+const { createSafe, executeSafeTx, SAFE_CONSTANTS } = require('../utils/safe');
 
 const adminAuthTest = async () => {
     describe('Admin-Auth', () => {
-        let sender; let ownerAcc; let adminAcc; let adminAuth;
+        let sender;
+        let ownerAcc;
+        let adminAuth;
+
         before(async () => {
             const adminAuthAddr = await getAddrFromRegistry('AdminAuth');
             adminAuth = await hre.ethers.getContractAt('AdminAuth', adminAuthAddr);
 
-            adminAcc = await hre.ethers.provider.getSigner(ADMIN_ACC);
             ownerAcc = await hre.ethers.provider.getSigner(OWNER_ACC);
 
             sender = (await hre.ethers.getSigners())[0];
@@ -63,43 +66,18 @@ const adminAuthTest = async () => {
 
                 expect(true).to.be(false);
             } catch (err) {
-                expect(err.toString()).to.have.string('SenderNotOwner');
-            }
-        });
-
-        it('... non admin should not be able to kill the contract', async () => {
-            try {
-                await adminAuth.kill();
-
-                expect(true).to.be(false);
-            } catch (err) {
-                expect(err.toString()).to.have.string('SenderNotAdmin');
-            }
-        });
-
-        it('... admin should be able to kill the contract', async () => {
-            await impersonateAccount(ADMIN_ACC);
-
-            const adminAuthByAdmin = adminAuth.connect(adminAcc);
-            await adminAuthByAdmin.kill();
-
-            await stopImpersonatingAccount(ADMIN_ACC);
-
-            try {
-                await adminAuth.adminVault();
-
-                expect(true).to.be(false);
-            } catch (err) {
-                expect(err.toString()).to.have.string('Error: call revert exception');
+                expectError(err.toString(), 'SenderNotOwner()');
             }
         });
     });
 };
-
 const adminVaultTest = async () => {
     describe('Admin-Vault', () => {
-        let notOwner; let adminAcc; let adminVault; let
-            newOwner; let newAdminAcc;
+        let notOwner;
+        let adminAcc;
+        let adminVault;
+        let newOwner;
+        let newAdminAcc;
 
         before(async () => {
             adminVault = await redeploy('AdminVault');
@@ -117,7 +95,7 @@ const adminVaultTest = async () => {
             await impersonateAccount(ADMIN_ACC);
 
             const adminVaultByAdmin = adminVault.connect(adminAcc);
-            await adminVaultByAdmin.changeOwner(newOwner.address);
+            await adminVaultByAdmin.changeOwner(newOwner.address, { gasLimit: 200000 });
             const currOwner = await adminVaultByAdmin.owner();
 
             await stopImpersonatingAccount(ADMIN_ACC);
@@ -127,10 +105,13 @@ const adminVaultTest = async () => {
 
         it('... should fail to change the owner address if not called by admin', async () => {
             try {
-                await adminVault.changeAdmin(newOwner.address);
-                expect(true).to.be(false);
+                await adminVault
+                    .connect(notOwner)
+                    .changeAdmin(newOwner.address, { gasLimit: 200000 });
+
+                expect(true).to.eq(false);
             } catch (err) {
-                expect(err.toString()).to.have.string('SenderNotAdmin');
+                expectError(err.toString(), 'SenderNotAdmin()');
             }
         });
 
@@ -138,7 +119,7 @@ const adminVaultTest = async () => {
             await impersonateAccount(ADMIN_ACC);
 
             const adminVaultByAdmin = adminVault.connect(adminAcc);
-            await adminVaultByAdmin.changeAdmin(newAdminAcc.address);
+            await adminVaultByAdmin.changeAdmin(newAdminAcc.address, { gasLimit: 200000 });
             const currAdmin = await adminVaultByAdmin.admin();
 
             await stopImpersonatingAccount(ADMIN_ACC);
@@ -148,22 +129,26 @@ const adminVaultTest = async () => {
 
         it('... should fail to change the admin address if not called by admin', async () => {
             try {
-                await adminVault.changeAdmin(notOwner.address);
+                await adminVault
+                    .connect(notOwner)
+                    .changeAdmin(notOwner.address, { gasLimit: 200000 });
 
-                expect(true).to.be(false);
+                expect(true).to.eq(false);
             } catch (err) {
-                expect(err.toString()).to.have.string('SenderNotAdmin');
+                expectError(err.toString(), 'SenderNotAdmin()');
             }
         });
     });
 };
 const dsProxyPermissionTest = async () => {
     describe('DSProxy-Permission', () => {
-        let ownerAcc1; let ownerAcc2; let
-            proxy; let dsProxyPermission;
+        let ownerAcc1;
+        let ownerAcc2;
+        let proxy;
+        let dsProxyPermission;
 
         before(async () => {
-            dsProxyPermission = await deployContract('DSProxyPermission');
+            dsProxyPermission = await deployContract('MockDSProxyPermission');
 
             ownerAcc1 = (await hre.ethers.getSigners())[0];
             ownerAcc2 = (await hre.ethers.getSigners())[1];
@@ -172,33 +157,38 @@ const dsProxyPermissionTest = async () => {
         });
 
         it('... should through DSProxy give contract permission', async () => {
-            const DSProxyPermission = await hre.ethers.getContractFactory('DSProxyPermission');
-            const functionData = DSProxyPermission.interface.encodeFunctionData(
+            const MockDSProxyPermission =
+                await hre.ethers.getContractFactory('MockDSProxyPermission');
+            const functionData = MockDSProxyPermission.interface.encodeFunctionData(
                 'giveProxyPermission',
                 [ownerAcc2.address],
             );
 
-            await proxy['execute(address,bytes)'](dsProxyPermission.address, functionData, { gasLimit: 1500000 });
+            await proxy['execute(address,bytes)'](dsProxyPermission.address, functionData, {
+                gasLimit: 1500000,
+            });
 
             const hasPermission = await getProxyAuth(proxy.address, ownerAcc2.address);
             expect(hasPermission).to.be.equal(true);
         });
 
         it('... should through DSProxy remove contract permission', async () => {
-            const DSProxyPermission = await hre.ethers.getContractFactory('DSProxyPermission');
-            const functionData = DSProxyPermission.interface.encodeFunctionData(
+            const MockDSProxyPermission =
+                await hre.ethers.getContractFactory('MockDSProxyPermission');
+            const functionData = MockDSProxyPermission.interface.encodeFunctionData(
                 'removeProxyPermission',
                 [ownerAcc2.address],
             );
 
-            await proxy['execute(address,bytes)'](dsProxyPermission.address, functionData, { gasLimit: 1500000 });
+            await proxy['execute(address,bytes)'](dsProxyPermission.address, functionData, {
+                gasLimit: 1500000,
+            });
 
             const hasPermission = await getProxyAuth(proxy.address, ownerAcc2.address);
             expect(hasPermission).to.be.equal(false);
         });
     });
 };
-
 const safeModulePermissionTest = async () => {
     describe('SafeModulePermission', () => {
         let modulePermissionContract;
@@ -209,7 +199,7 @@ const safeModulePermissionTest = async () => {
         let snapshotId;
 
         before(async () => {
-            modulePermissionContract = await redeploy('SafeModulePermission');
+            modulePermissionContract = await redeploy('MockSafeModulePermission');
 
             flAddr = await getAddrFromRegistry('FLAction');
 
@@ -221,8 +211,12 @@ const safeModulePermissionTest = async () => {
             safeInstance = await hre.ethers.getContractAt('ISafe', safeAddr);
         });
 
-        beforeEach(async () => { snapshotId = await takeSnapshot(); });
-        afterEach(async () => { await revertToSnapshot(snapshotId); });
+        beforeEach(async () => {
+            snapshotId = await takeSnapshot();
+        });
+        afterEach(async () => {
+            await revertToSnapshot(snapshotId);
+        });
 
         const enableSafeModule = async (moduleAddr) => {
             const enableModuleFuncData = modulePermissionContract.interface.encodeFunctionData(
@@ -239,7 +233,7 @@ const safeModulePermissionTest = async () => {
 
         const disableSafeModule = async (moduleAddr) => {
             const disableModuleFuncData = modulePermissionContract.interface.encodeFunctionData(
-                'disableLastModule',
+                'disableModule',
                 [moduleAddr],
             );
             await executeSafeTx(
@@ -300,7 +294,7 @@ const safeModulePermissionTest = async () => {
 
         it('... should revert when disabling module that is not enabled', async () => {
             const disableModuleFuncData = modulePermissionContract.interface.encodeFunctionData(
-                'disableLastModule',
+                'disableModule',
                 [flAddr],
             );
             await expect(
@@ -315,7 +309,7 @@ const safeModulePermissionTest = async () => {
 
         it('... should revert when disabling sentinel module address', async () => {
             const disableModuleFuncData = modulePermissionContract.interface.encodeFunctionData(
-                'disableLastModule',
+                'disableModule',
                 [SAFE_CONSTANTS.SENTINEL_MODULE],
             );
             await expect(
@@ -343,28 +337,22 @@ const safeModulePermissionTest = async () => {
             expect(isFlBalancerEnabled).to.be.equal(false);
         });
 
-        it('... should revert when not disabling last module in list of enabled modules', async () => {
+        it('... should disable first module in list of enabled modules', async () => {
             await enableSafeModule(flAddr);
 
             const flBalancer = await getAddrFromRegistry('FLBalancer');
             await enableSafeModule(flBalancer);
 
-            const disableModuleFuncData = modulePermissionContract.interface.encodeFunctionData(
-                'disableLastModule',
-                [flAddr],
-            );
-            await expect(
-                executeSafeTx(
-                    senderAddr,
-                    safeInstance,
-                    modulePermissionContract.address,
-                    disableModuleFuncData,
-                ),
-            ).to.be.reverted;
+            await disableSafeModule(flAddr);
+
+            const isFlEnabled = await safeInstance.isModuleEnabled(flAddr);
+            expect(isFlEnabled).to.be.equal(false);
+
+            const isFlBalancerEnabled = await safeInstance.isModuleEnabled(flBalancer);
+            expect(isFlBalancerEnabled).to.be.equal(true);
         });
     });
 };
-
 const authDeployContracts = async () => {
     await redeploy('AdminAuth');
     await redeploy('AdminVault');

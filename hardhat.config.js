@@ -1,17 +1,15 @@
-/* eslint-disable import/no-extraneous-dependencies */
-require('hardhat-tracer');
 require('dotenv-safe').config();
 require('@nomiclabs/hardhat-waffle');
-require('@nomiclabs/hardhat-etherscan');
-const tdly = require('@tenderly/hardhat-tenderly');
+require('@nomicfoundation/hardhat-verify');
 require('@nomiclabs/hardhat-ethers');
-// require("hardhat-gas-reporter");
+require('hardhat-gas-reporter');
 require('hardhat-log-remover');
+// require('hardhat-tracer');
+require('@tenderly/hardhat-tenderly');
+require('solidity-coverage');
 
 const Dec = require('decimal.js');
 const dfs = require('@defisaver/sdk');
-
-tdly.setup({ automaticVerifications: false });
 
 dfs.configure({
     testingMode: true,
@@ -29,17 +27,23 @@ Dec.set({
 });
 
 const MAX_NODE_COUNT = 22;
-const testNetworks = Object.fromEntries([...Array(MAX_NODE_COUNT).keys()].map((c, i) => [
-    `local${i}`, { url: `http://127.0.0.1:${8545 + i}`, timeout: 10000000, name: 'mainnet' },
-]));
+const testNetworks = Object.fromEntries(
+    [...Array(MAX_NODE_COUNT).keys()].map((c, i) => [
+        `local${i}`,
+        { url: `http://127.0.0.1:${8545 + i}`, timeout: 10000000, name: 'mainnet' },
+    ]),
+);
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-    saveOnTenderly: false,
-    defaultNetwork: 'fork',
+    defaultNetwork: 'hardhat',
     lightTesting: true,
     isWalletSafe: true,
+    gasReporter: {
+        currency: 'EUR',
+        enabled: false,
+    },
     networks: {
         ...testNetworks,
         local: {
@@ -47,32 +51,62 @@ module.exports = {
             timeout: 1000000,
             gasPrice: 170000000000,
             name: 'mainnet',
+            chainId: 1,
+            hardfork: 'cancun',
         },
         localOptimism: {
             url: 'http://127.0.0.1:8545',
             timeout: 1000000,
             gasPrice: 1883022292,
             name: 'optimism',
+            chainId: 10,
         },
         localArbitrum: {
             url: 'http://127.0.0.1:8545',
             timeout: 1000000,
             gasPrice: 1700000000,
             name: 'arbitrum',
+            chainId: 42161,
         },
         localBase: {
             url: 'http://127.0.0.1:8545',
             timeout: 1000000,
             gasPrice: 1700000000,
             name: 'base',
+            chainId: 8453,
+        },
+        anvil: {
+            name: 'mainnet',
+            isAnvil: true,
+            url: 'http://127.0.0.1:8545',
+            chainId: 1,
         },
         fork: {
-            url: `https://rpc.tenderly.co/fork/${process.env.FORK_ID}`,
+            url: `https://virtual.mainnet.rpc.tenderly.co/${process.env.FORK_ID}`,
             timeout: 1000000,
             type: 'tenderly',
             name: 'mainnet',
+            hardfork: 'cancun',
+            chainId: 1,
         },
         hardhat: {
+            chains: {
+                42161: {
+                    hardforkHistory: {
+                        london: 1,
+                    },
+                },
+                10: {
+                    hardforkHistory: {
+                        london: 1,
+                    },
+                },
+                8453: {
+                    hardforkHistory: {
+                        london: 1,
+                    },
+                },
+            },
             forking: {
                 url: process.env.ETHEREUM_NODE,
                 timeout: 1000000,
@@ -80,6 +114,12 @@ module.exports = {
                 // blockNumber: 12068716
             },
             name: 'mainnet',
+            hardfork: 'cancun',
+            accounts: {
+                balance: '10000000000000000000000000000',
+                privateKey: process.env.PRIV_KEY_MAINNET,
+            },
+            chainId: 1,
         },
         // NETWORKS FOR DEPLOYING
         mainnet: {
@@ -87,7 +127,7 @@ module.exports = {
             accounts: [process.env.PRIV_KEY_MAINNET],
             name: 'mainnet',
             txType: 2,
-            blockExplorer: 'etherscan',
+            blockExplorer: 'etherscan.io',
             contractVerification: true,
         },
         optimism: {
@@ -95,8 +135,8 @@ module.exports = {
             accounts: [process.env.PRIV_KEY_OPTIMISM],
             chainId: 10,
             name: 'optimistic',
-            txType: 0,
-            blockExplorer: 'etherscan',
+            txType: 2,
+            blockExplorer: 'optimistic.etherscan.io',
             contractVerification: true,
         },
         base: {
@@ -104,8 +144,8 @@ module.exports = {
             accounts: [process.env.PRIV_KEY_BASE],
             chainId: 8453,
             name: 'base',
-            txType: 0,
-            blockExplorer: 'etherscan',
+            txType: 2,
+            blockExplorer: 'basescan.org',
             contractVerification: true,
         },
         arbitrum: {
@@ -114,18 +154,41 @@ module.exports = {
             chainId: 42161,
             name: 'arbitrum',
             txType: 0,
-            blockExplorer: 'arbiscan',
+            blockExplorer: 'arbiscan.io',
+            contractVerification: true,
+        },
+        linea: {
+            url: process.env.LINEA_NODE,
+            accounts: [process.env.PRIV_KEY_LINEA],
+            chainId: 59144,
+            name: 'linea',
+            txType: 0,
+            blockExplorer: 'lineascan.build',
+            contractVerification: true,
+        },
+        plasma: {
+            url: process.env.PLASMA_NODE,
+            accounts: [process.env.PRIV_KEY_PLASMA],
+            chainId: 9745,
+            name: 'plasma',
+            txType: 2,
+            blockExplorer: 'plasmascan.to',
             contractVerification: true,
         },
     },
     solidity: {
-        version: '0.8.10',
-        settings: {
-            optimizer: {
-                enabled: true,
-                runs: 1000,
+        compilers: [
+            {
+                version: '0.8.24',
+                settings: {
+                    optimizer: {
+                        enabled: true,
+                        runs: 1000,
+                    },
+                    evmVersion: 'cancun', // london used only for Linea
+                },
             },
-        },
+        ],
     },
     paths: {
         sources: './contracts',
@@ -149,6 +212,8 @@ module.exports = {
         Arbitrum: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
         Optimism: '0x4200000000000000000000000000000000000006',
         Base: '0x4200000000000000000000000000000000000006',
+        Linea: '0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f',
+        Plasma: '0x6100E367285b01F48D07953803A2d8dCA5D19873',
     },
 };
 

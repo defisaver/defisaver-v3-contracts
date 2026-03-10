@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "./MainnetWrapperAddresses.sol";
+import { MainnetWrapperAddresses } from "./MainnetWrapperAddresses.sol";
 
-contract WrapperHelper is MainnetWrapperAddresses {
-}
+contract WrapperHelper is MainnetWrapperAddresses { }

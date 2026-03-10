@@ -1,20 +1,23 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../auth/AdminAuth.sol";
-import "../utils/TransientStorage.sol";
-import "../actions/morpho-blue/helpers/MorphoBlueHelper.sol";
-import "../interfaces/ITrigger.sol";
-import "./helpers/TriggerHelper.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { TransientStorage } from "../utils/transient/TransientStorage.sol";
+import { MorphoBlueHelper } from "../actions/morpho-blue/helpers/MorphoBlueHelper.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
+import { TriggerHelper } from "./helpers/TriggerHelper.sol";
+import { Id } from "../interfaces/protocols/morpho-blue/IMorphoBlue.sol";
 
 /// @title Trigger contract that verifies if the MorphoBlue position went over/under the subbed ratio
 contract MorphoBlueRatioTrigger is ITrigger, AdminAuth, MorphoBlueHelper, TriggerHelper {
+    enum RatioState {
+        OVER,
+        UNDER
+    }
 
-    enum RatioState { OVER, UNDER }
+    TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE_CANCUN);
 
-    TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
-    
     /// @param marketId bytes32 representing a MorphoBlue market
     /// @param user address of the user whose position we check
     /// @param ratio ratio that represents the triggerable point
@@ -25,14 +28,10 @@ contract MorphoBlueRatioTrigger is ITrigger, AdminAuth, MorphoBlueHelper, Trigge
         uint256 ratio;
         uint8 state;
     }
-    
+
     /// @dev checks current safety ratio of a MorphoBlue position and triggers if it's in a correct state
-    function isTriggered(bytes memory, bytes memory _subData)
-        public
-        override
-        returns (bool)
-    {   
-        SubParams memory triggerSubData = parseInputs(_subData);
+    function isTriggered(bytes memory, bytes memory _subData) external override returns (bool) {
+        SubParams memory triggerSubData = parseSubInputs(_subData);
         uint256 currRatio = getRatioUsingId(triggerSubData.marketId, triggerSubData.user);
 
         if (currRatio == 0) return false;
@@ -50,14 +49,13 @@ contract MorphoBlueRatioTrigger is ITrigger, AdminAuth, MorphoBlueHelper, Trigge
         return false;
     }
 
-    function parseInputs(bytes memory _subData) internal pure returns (SubParams memory params) {
+    function parseSubInputs(bytes memory _subData) public pure returns (SubParams memory params) {
         params = abi.decode(_subData, (SubParams));
     }
-    function changedSubData(bytes memory _subData) public pure override  returns (bytes memory) {
-    }
-    
-    function isChangeable() public pure override returns (bool){
+
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
+
+    function isChangeable() public pure override returns (bool) {
         return false;
     }
-
 }

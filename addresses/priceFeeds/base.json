@@ -30,8 +30,26 @@
         "feedAddress": "0x71041dddad3595f9ced3dccfbe3d1f4b0a16bb70"
     },
     {
-        "name": "USDC / USD",
+        "name": "USDbC / USD",
         "base": "0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x7e860098f58bbfc8648a4311b374b1d669a2bc6b"
+    },
+    {
+        "name": "cbBTC / USD",
+        "base": "0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0x07da0e54543a844a80abe69c8a12f22b3aa59f9d"
+    },
+    {
+        "name": "EURC / USD",
+        "base": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42",
+        "quote": "0x0000000000000000000000000000000000000348",
+        "feedAddress": "0xdae398520e2b67cd3f27aef9cf14d93d927f8250"
+    },
+    {
+        "name": "USDC / USD",
+        "base": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
         "quote": "0x0000000000000000000000000000000000000348",
         "feedAddress": "0x7e860098f58bbfc8648a4311b374b1d669a2bc6b"
     }

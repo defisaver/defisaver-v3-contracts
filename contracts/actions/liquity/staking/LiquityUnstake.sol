@@ -1,19 +1,24 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../helpers/LiquityHelper.sol";
-import "../../../utils/TokenUtils.sol";
-import "../../ActionBase.sol";
+import { LiquityHelper } from "../helpers/LiquityHelper.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
+import { ActionBase } from "../../ActionBase.sol";
 
+/// @title Action for unstaking LQTY tokens in Liquity
 contract LiquityUnstake is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
+    /// @param lqtyAmount Amount of LQTY tokens to unstake
+    /// @param to Address that will receive the tokens
+    /// @param wethTo Address that will receive ETH(wrapped) gains
+    /// @param lusdTo Address that will receive LUSD token gains
     struct Params {
-        uint256 lqtyAmount; // Amount of LQTY tokens to unstake
-        address to;         // Address that will receive the tokens
-        address wethTo;     // Address that will receive ETH(wrapped) gains
-        address lusdTo;     // Address that will receive LUSD token gains
+        uint256 lqtyAmount;
+        address to;
+        address wethTo;
+        address lusdTo;
     }
 
     /// @inheritdoc ActionBase
@@ -24,7 +29,8 @@ contract LiquityUnstake is ActionBase, LiquityHelper {
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
-        params.lqtyAmount = _parseParamUint(params.lqtyAmount, _paramMapping[0], _subData, _returnValues);
+        params.lqtyAmount =
+            _parseParamUint(params.lqtyAmount, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
         params.wethTo = _parseParamAddr(params.wethTo, _paramMapping[2], _subData, _returnValues);
         params.lusdTo = _parseParamAddr(params.lusdTo, _paramMapping[3], _subData, _returnValues);
@@ -48,7 +54,6 @@ contract LiquityUnstake is ActionBase, LiquityHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Unstakes LQTY tokens
     function _liquityUnstake(Params memory _params) internal returns (uint256, bytes memory) {
         uint256 ethGain = LQTYStaking.getPendingETHGain(address(this));
         uint256 lusdGain = LQTYStaking.getPendingLUSDGain(address(this));

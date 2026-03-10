@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 import { BotAuth } from "../../contracts/core/strategy/BotAuth.sol";
 import { AdminAuth } from "../../contracts/auth/AdminAuth.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
-import { Const } from "../Const.sol";
+import { Addresses } from "../utils/Addresses.sol";
 
 contract TestCore_BotAuth is BaseTest {
-
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -27,23 +26,23 @@ contract TestCore_BotAuth is BaseTest {
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_add_caller() public {
-        startPrank(Const.OWNER_ACC);
-        
+        startPrank(Addresses.OWNER_ACC);
+
         cut.addCaller(bob);
         assertTrue(cut.approvedCallers(bob));
-        
+
         stopPrank();
     }
 
     function test_should_remove_caller() public {
-        startPrank(Const.OWNER_ACC);
-        
+        startPrank(Addresses.OWNER_ACC);
+
         cut.addCaller(bob);
         assertTrue(cut.approvedCallers(bob));
 
         cut.removeCaller(bob);
         assertFalse(cut.approvedCallers(bob));
-        
+
         stopPrank();
     }
 

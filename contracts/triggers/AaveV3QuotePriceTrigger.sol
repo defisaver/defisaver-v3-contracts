@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../interfaces/ITrigger.sol";
-import "../interfaces/aaveV3/IAaveV3Oracle.sol";
-import "../auth/AdminAuth.sol";
-import "../DS/DSMath.sol";
-import "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
+import { IAaveV3Oracle } from "../interfaces/protocols/aaveV3/IAaveV3Oracle.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { DSMath } from "../_vendor/DS/DSMath.sol";
+import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 
 /// @title Trigger contract that verifies if current token price ratio is over/under the price ratio specified during subscription
 contract AaveV3QuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelper {
-
     enum PriceState {
         OVER,
         UNDER
@@ -27,10 +26,9 @@ contract AaveV3QuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelp
         uint8 state;
     }
 
-    IAaveV3Oracle public constant aaveOracleV3 =
-        IAaveV3Oracle(AAVE_ORACLE_V3);
+    IAaveV3Oracle public constant aaveOracleV3 = IAaveV3Oracle(AAVE_ORACLE_V3);
 
-    /// @dev checks chainlink oracle for current prices and triggers if it's in a correct state
+    /// @notice Checks chainlink oracle for current prices and triggers if it's in a correct state
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
@@ -48,31 +46,28 @@ contract AaveV3QuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelp
     }
 
     /// @dev helper function that returns latest base token price in quote tokens
-    function getPrice(address _baseTokenAddr, address _quoteTokenAddr) public view returns (uint256 price) {
+    function getPrice(address _baseTokenAddr, address _quoteTokenAddr)
+        public
+        view
+        returns (uint256 price)
+    {
         address[] memory assets = new address[](2);
         assets[0] = _baseTokenAddr;
         assets[1] = _quoteTokenAddr;
-        uint256[] memory assetPrices = aaveOracleV3.getAssetsPrices(
-            assets
-        );
+        uint256[] memory assetPrices = aaveOracleV3.getAssetsPrices(assets);
 
         price = assetPrices[0] * 1e8 / assetPrices[1];
 
         return uint256(price);
     }
-    
-    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {
-    }
-    
-    function isChangeable() public pure override returns (bool){
+
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
+
+    function isChangeable() public pure override returns (bool) {
         return false;
     }
 
-    function parseSubInputs(bytes memory _callData)
-        internal
-        pure
-        returns (SubParams memory params)
-    {
+    function parseSubInputs(bytes memory _callData) public pure returns (SubParams memory params) {
         params = abi.decode(_callData, (SubParams));
     }
 }

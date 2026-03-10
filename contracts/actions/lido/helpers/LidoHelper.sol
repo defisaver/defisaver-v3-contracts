@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
-import "./MainnetLidoAddresses.sol";
+pragma solidity =0.8.24;
 
-contract LidoHelper is MainnetLidoAddresses{
-}
+import { MainnetLidoAddresses } from "./MainnetLidoAddresses.sol";
+
+contract LidoHelper is MainnetLidoAddresses { }

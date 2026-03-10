@@ -1,19 +1,24 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/mcd/IManager.sol";
-import "../../interfaces/mcd/IJoin.sol";
-import "../../interfaces/mcd/ICropper.sol";
-import "../../interfaces/mcd/ICdpRegistry.sol";
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/McdHelper.sol";
+import { IManager } from "../../interfaces/protocols/mcd/IManager.sol";
+import { IJoin } from "../../interfaces/protocols/mcd/IJoin.sol";
+import { ICropper } from "../../interfaces/protocols/mcd/ICropper.sol";
+import { ICdpRegistry } from "../../interfaces/protocols/mcd/ICdpRegistry.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { McdHelper } from "./helpers/McdHelper.sol";
 
 /// @title Supply collateral to a Maker vault
 contract McdSupply is ActionBase, McdHelper {
     using TokenUtils for address;
 
+    /// @param vaultId Id of the vault
+    /// @param amount Amount of tokens to supply
+    /// @param joinAddr Join address of the maker collateral
+    /// @param from Address where to pull the collateral from
+    /// @param mcdManager The manager address we are using [mcd, b.protocol]
     struct Params {
         uint256 vaultId;
         uint256 amount;
@@ -31,13 +36,23 @@ contract McdSupply is ActionBase, McdHelper {
     ) public payable override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
-        inputData.joinAddr = _parseParamAddr(inputData.joinAddr, _paramMapping[2], _subData, _returnValues);
+        inputData.vaultId =
+            _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
+        inputData.joinAddr =
+            _parseParamAddr(inputData.joinAddr, _paramMapping[2], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[3], _subData, _returnValues);
-        inputData.mcdManager = _parseParamAddr(inputData.mcdManager, _paramMapping[4], _subData, _returnValues);
+        inputData.mcdManager =
+            _parseParamAddr(inputData.mcdManager, _paramMapping[4], _subData, _returnValues);
 
-        (uint256 returnAmount, bytes memory logData) = _mcdSupply(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.from, inputData.mcdManager);
+        (uint256 returnAmount, bytes memory logData) = _mcdSupply(
+            inputData.vaultId,
+            inputData.amount,
+            inputData.joinAddr,
+            inputData.from,
+            inputData.mcdManager
+        );
         emit ActionEvent("McdSupply", logData);
         return bytes32(returnAmount);
     }
@@ -45,7 +60,13 @@ contract McdSupply is ActionBase, McdHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-        (, bytes memory logData) = _mcdSupply(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.from, inputData.mcdManager);
+        (, bytes memory logData) = _mcdSupply(
+            inputData.vaultId,
+            inputData.amount,
+            inputData.joinAddr,
+            inputData.from,
+            inputData.mcdManager
+        );
         logger.logActionDirectEvent("McdSupply", logData);
     }
 
@@ -56,7 +77,6 @@ contract McdSupply is ActionBase, McdHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Supplies collateral to the vault
     /// @param _vaultId Id of the vault
     /// @param _amount Amount of tokens to supply
     /// @param _joinAddr Join address of the maker collateral
@@ -82,7 +102,7 @@ contract McdSupply is ActionBase, McdHelper {
         // format the amount we need for frob
         int256 vatAmount = toPositiveInt(convertTo18(_joinAddr, _amount));
 
-        if (_mcdManager == CROPPER) {         
+        if (_mcdManager == CROPPER) {
             _cropperSupply(_vaultId, tokenAddr, _joinAddr, _amount, vatAmount);
         } else {
             _mcdManagerSupply(_mcdManager, _vaultId, tokenAddr, _joinAddr, _amount, vatAmount);

@@ -1,16 +1,19 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "./helpers/AaveHelper.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { AaveHelper } from "./helpers/AaveHelper.sol";
 
+/// @title Action to claim stkAave rewards
 contract AaveClaimStkAave is ActionBase, AaveHelper {
-
+    /// @param assets Assets to claim rewards from.
+    /// @param amount Amount of rewards to claim.
+    /// @param to Address that will be receiving the rewards.
     struct Params {
         address[] assets;
-        uint256 amount;     // Amount of rewards to claim
-        address to;         // Address that will be receiving the rewards
+        uint256 amount;
+        address to;
     }
 
     /// @inheritdoc ActionBase
@@ -45,20 +48,19 @@ contract AaveClaimStkAave is ActionBase, AaveHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Claims stkAave rewards on the assets of the lending pool
-    function _aaveClaimStkAave(Params memory _params) internal returns (uint256 claimedAmount, bytes memory logData) {
+    function _aaveClaimStkAave(Params memory _params)
+        internal
+        returns (uint256 claimedAmount, bytes memory logData)
+    {
         // amount 0 is safe
         // amount > unclaimedRewards is safe
-        claimedAmount = AaveIncentivesController.claimRewards(
-            _params.assets,
-            _params.amount,
-            _params.to
-        );
+        claimedAmount =
+            AaveIncentivesController.claimRewards(_params.assets, _params.amount, _params.to);
 
         logData = abi.encode(_params, claimedAmount);
     }
 
-    function parseInputs(bytes memory _callData) internal pure returns (Params memory params)
-    {
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
     }
 }

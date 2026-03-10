@@ -1,15 +1,19 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/FeeRecipient.sol";
-import "../ActionBase.sol";
-import "./helpers/GasFeeHelper.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { GasFeeHelper } from "./helpers/GasFeeHelper.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
-/// @title Helper action to send a token to the specified address
+/// @title Helper action to take gas fee from the user's wallet and send it to the fee recipient.
 contract GasFeeTaker is ActionBase, GasFeeHelper {
     using TokenUtils for address;
 
+    /// @param gasUsed Gas used by the transaction
+    /// @param feeToken Address of the token to send
+    /// @param availableAmount Amount of tokens available to send
+    /// @param dfsFeeDivider Divider for the DFS fee
     struct GasFeeTakerParams {
         uint256 gasUsed;
         address feeToken;
@@ -26,9 +30,12 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
     ) public payable virtual override returns (bytes32) {
         GasFeeTakerParams memory inputData = parseInputsGasFeeTaker(_callData);
 
-        inputData.feeToken = _parseParamAddr(inputData.feeToken, _paramMapping[0], _subData, _returnValues);
-        inputData.availableAmount = _parseParamUint(inputData.availableAmount, _paramMapping[1], _subData, _returnValues);
-        inputData.dfsFeeDivider = _parseParamUint(inputData.dfsFeeDivider, _paramMapping[2], _subData, _returnValues);
+        inputData.feeToken =
+            _parseParamAddr(inputData.feeToken, _paramMapping[0], _subData, _returnValues);
+        inputData.availableAmount =
+            _parseParamUint(inputData.availableAmount, _paramMapping[1], _subData, _returnValues);
+        inputData.dfsFeeDivider =
+            _parseParamUint(inputData.dfsFeeDivider, _paramMapping[2], _subData, _returnValues);
 
         /// @dev This means inputData.availableAmount is not being piped into
         /// @dev To stop sender from sending any value here, if not piped take user's wallet balance
@@ -51,7 +58,7 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
         }
 
         if (_inputData.dfsFeeDivider != 0) {
-            /// @dev If divider is lower the fee is greater, should be max 5 bps
+            /// @notice If divider is lower the fee is greater, should be max 5 bps
             if (_inputData.dfsFeeDivider < MAX_DFS_FEE) {
                 _inputData.dfsFeeDivider = MAX_DFS_FEE;
             }
@@ -66,14 +73,18 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
 
     /// @inheritdoc ActionBase
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes memory _callData) public payable virtual override {}
+    function executeActionDirect(bytes memory _callData) public payable virtual override { }
 
     /// @inheritdoc ActionBase
     function actionType() public pure virtual override returns (uint8) {
         return uint8(ActionType.FEE_ACTION);
     }
 
-    function parseInputsGasFeeTaker(bytes memory _callData) public pure returns (GasFeeTakerParams memory inputData) {
+    function parseInputsGasFeeTaker(bytes memory _callData)
+        public
+        pure
+        returns (GasFeeTakerParams memory inputData)
+    {
         inputData = abi.decode(_callData, (GasFeeTakerParams));
     }
 }

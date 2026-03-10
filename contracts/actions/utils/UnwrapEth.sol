@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
 
 /// @title Helper action to un-wrap WETH9 to Eth
 contract UnwrapEth is ActionBase {
     using TokenUtils for address;
 
+    /// @param amount Amount of Weth to unwrap
+    /// @param to Address where to send the unwrapped Eth
     struct Params {
         uint256 amount;
         address to;
@@ -23,7 +25,8 @@ contract UnwrapEth is ActionBase {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[1], _subData, _returnValues);
 
         return bytes32(_unwrapEth(inputData.amount, inputData.to));
@@ -53,7 +56,7 @@ contract UnwrapEth is ActionBase {
 
         TokenUtils.withdrawWeth(_amount);
 
-        // if _to == user's wallet, it will stay on user's wallet
+        /// @notice If _to == user's wallet, it will stay on user's wallet.
         TokenUtils.ETH_ADDR.withdrawTokens(_to, _amount);
 
         return _amount;

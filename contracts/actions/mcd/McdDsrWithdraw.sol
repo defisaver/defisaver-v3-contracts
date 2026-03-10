@@ -1,18 +1,22 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "../../interfaces/mcd/IPot.sol";
-import "../../interfaces/mcd/IDaiJoin.sol";
-import "./helpers/McdHelper.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { IPot } from "../../interfaces/protocols/mcd/IPot.sol";
+import { IDaiJoin } from "../../interfaces/protocols/mcd/IDaiJoin.sol";
+import { McdHelper } from "./helpers/McdHelper.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
+/// @title Action for withdrawing DAI from Maker DSR
 contract McdDsrWithdraw is McdHelper, ActionBase {
     using TokenUtils for address;
 
+    /// @param amount Amount of DAI to withdraw from DSR
+    /// @param to Address that will receive the withdrawn DAI
     struct Params {
-        uint256 amount; // amount of DAI to withdraw from DSR
-        address to; // address that will receive withdrawn DAI
+        uint256 amount;
+        address to;
     }
 
     /// @inheritdoc ActionBase
@@ -48,8 +52,10 @@ contract McdDsrWithdraw is McdHelper, ActionBase {
         return (x * RAY + y - 1) / y;
     }
 
-    /// @notice Withdraws DAI from Maker DSR
-    function _withdraw(Params memory _params) internal returns (uint256 withdrawn, bytes memory logData) {
+    function _withdraw(Params memory _params)
+        internal
+        returns (uint256 withdrawn, bytes memory logData)
+    {
         IPot pot = IPot(POT_ADDR);
 
         uint256 chi = (block.timestamp > pot.rho()) ? pot.drip() : pot.chi();
@@ -74,11 +80,7 @@ contract McdDsrWithdraw is McdHelper, ActionBase {
         withdrawn = _params.amount;
     }
 
-    function parseInputs(bytes memory _callData)
-        internal
-        pure
-        returns (Params memory inputData)
-    {
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
         inputData = abi.decode(_callData, (Params));
     }
 }

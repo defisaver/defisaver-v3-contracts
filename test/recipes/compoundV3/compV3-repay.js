@@ -2,7 +2,7 @@ const { expect } = require('chai');
 const hre = require('hardhat');
 const { getAssetInfo } = require('@defisaver/tokens');
 const dfs = require('@defisaver/sdk');
-const { supplyCompV3, borrowCompV3, executeAction } = require('../../actions');
+const { supplyCompV3, borrowCompV3, executeAction } = require('../../utils/actions');
 
 const {
     getProxy,
@@ -14,7 +14,7 @@ const {
     nullAddress,
     approve,
     getAddrFromRegistry,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 describe('CompoundV3 Repay recipe test', function () {
     this.timeout(80000);
@@ -56,12 +56,7 @@ describe('CompoundV3 Repay recipe test', function () {
             );
 
             // Supply action
-            await supplyCompV3(
-                proxy,
-                tokenData.address,
-                colAmount,
-                senderAcc.address,
-            );
+            await supplyCompV3(proxy, tokenData.address, colAmount, senderAcc.address);
 
             const borrowingAmount = hre.ethers.utils.parseUnits(
                 fetchAmountinUSDPrice('USDC', '2000'),
@@ -136,12 +131,7 @@ describe('CompoundV3 Repay recipe test', function () {
             );
 
             // Supply action
-            await supplyCompV3(
-                proxy,
-                tokenData.address,
-                colAmount,
-                senderAcc.address,
-            );
+            await supplyCompV3(proxy, tokenData.address, colAmount, senderAcc.address);
 
             const borrowingAmount = hre.ethers.utils.parseUnits(
                 fetchAmountinUSDPrice('USDC', '2000'),

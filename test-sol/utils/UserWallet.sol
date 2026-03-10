@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../contracts/DS/DSProxyFactoryInterface.sol";
-import "../../contracts/interfaces/safe/ISafeProxyFactory.sol";
-import "../../contracts/interfaces/safe/ISafe.sol";
-import "../Const.sol";
-
+import { IDSProxyFactory } from "../../contracts/interfaces/DS/IDSProxyFactory.sol";
+import { IDSProxy } from "../../contracts/interfaces/DS/IDSProxy.sol";
+import { ISafeProxyFactory } from "../../contracts/interfaces/protocols/safe/ISafeProxyFactory.sol";
+import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
+import { Addresses } from "../utils/Addresses.sol";
 
 abstract contract UserWallet {
-    DSProxy public proxy;
+    IDSProxy public proxy;
     address public proxyAddr;
 
     ISafe public safe;
@@ -20,7 +20,7 @@ abstract contract UserWallet {
     }
 
     function createDSProxy() internal {
-        proxy = DSProxyFactoryInterface(Const.DS_PROXY_FACTORY).build();
+        proxy = IDSProxyFactory(Addresses.DS_PROXY_FACTORY).build();
         proxyAddr = address(proxy);
     }
 
@@ -40,11 +40,8 @@ abstract contract UserWallet {
             0,
             payable(address(0))
         );
-        safeAddr = ISafeProxyFactory(Const.SAFE_PROXY_FACTORY).createProxyWithNonce(
-            Const.SAFE_SINGLETON,
-            setupData,
-            saltNonce
-        );
+        safeAddr = ISafeProxyFactory(Addresses.SAFE_PROXY_FACTORY)
+            .createProxyWithNonce(Addresses.SAFE_SINGLETON, setupData, saltNonce);
         safe = ISafe(safeAddr);
     }
 

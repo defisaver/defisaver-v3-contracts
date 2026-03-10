@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
-
+pragma solidity =0.8.24;
 
 /// @title StrategyModel - contract that implements the structs used in the core system
 contract StrategyModel {
-        
     /// @dev Group of strategies bundled together so user can sub to multiple strategies at once
     /// @param creator Address of the user who created the bundle
     /// @param strategyIds Array of strategy ids stored in StrategyStorage
@@ -65,5 +63,19 @@ contract StrategyModel {
         bool isBundle;
         bytes[] triggerData;
         bytes32[] subData;
+    }
+
+    /// @dev Data needed when signing relay transaction
+    /// @param maxTxCostInFeeToken Max tx cost user is willing to pay in fee token
+    /// @param feeToken Address of the token user is willing to pay fee in
+    /// @param tokenPriceInEth Price of the token in ETH
+    /// @param deadline Deadline for the relay transaction to be executed
+    /// @param shouldTakeFeeFromPosition Flag to indicate if fee should be taken from position, otherwise from EOA/wallet
+    struct TxSaverSignedData {
+        uint256 maxTxCostInFeeToken;
+        address feeToken;
+        uint256 tokenPriceInEth;
+        uint256 deadline;
+        bool shouldTakeFeeFromPosition;
     }
 }

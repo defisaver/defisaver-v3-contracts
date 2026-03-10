@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../auth/AdminAuth.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
 
 contract ExchangeAggregatorRegistry is AdminAuth {
     mapping(address => bool) public exchangeTargetAddresses;
@@ -10,9 +10,9 @@ contract ExchangeAggregatorRegistry is AdminAuth {
     error EmptyAddrError();
 
     function setExchangeTargetAddr(address _exchangeAddr, bool _state) public onlyOwner {
-        if(_exchangeAddr == address(0)) {
-			revert EmptyAddrError();
-		}
+        if (_exchangeAddr == address(0)) {
+            revert EmptyAddrError();
+        }
 
         exchangeTargetAddresses[_exchangeAddr] = _state;
     }

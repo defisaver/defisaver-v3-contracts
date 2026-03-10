@@ -1,15 +1,17 @@
-/* eslint-disable import/no-extraneous-dependencies */
 require('dotenv-safe').config();
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const { program } = require('commander');
+const { createFork, topUp } = require('../scripts/utils/fork');
 
 const supportedNetworks = {
     mainnet: '1',
     arbitrum: '42161',
     optimism: '10',
     base: '8453',
+    linea: '59144',
+    plasma: '9745',
 };
 
 const getNetworkId = (network) => supportedNetworks[network];
@@ -49,17 +51,20 @@ const getContractsFromTenderly = async (networkId) => {
 };
 
 const sendContractsToTenderly = async (formattedContractsToSend) => {
-    const url = 'https://api.tenderly.co/api/v2/accounts/defisaver-v2/projects/Strategies/contracts';
+    const url =
+        'https://api.tenderly.co/api/v2/accounts/defisaver-v2/projects/Strategies/contracts';
     const headersParams = {
         'Content-Type': 'application/json',
         'X-Access-Key': process.env.TENDERLY_ACCESS_KEY,
     };
-    const body = { contracts: formattedContractsToSend };
-    try {
-        await axios.post(url, body, { headers: headersParams });
-        console.log('Contract(s) successfully sent to Tenderly');
-    } catch (error) {
-        console.error('Error sending contracts to Tenderly', error.response.data);
+    for (let i = 0; i < formattedContractsToSend.length; i += 1) {
+        const body = { contracts: [formattedContractsToSend[i]] };
+        try {
+            await axios.post(url, body, { headers: headersParams });
+            console.log('Contract successfully sent to Tenderly');
+        } catch (error) {
+            console.error('Error sending contracts to Tenderly', error.response.data);
+        }
     }
 };
 
@@ -93,10 +98,11 @@ const sync = async (idOrNameOrAddress, options) => {
     const contracts = readContractsFromJson(network);
 
     const found = contracts.find(
-        (c) => c.name === idOrNameOrAddress
-        || c.address === idOrNameOrAddress
-        || c.id === idOrNameOrAddress
-        || c.history.includes(idOrNameOrAddress),
+        (c) =>
+            c.name === idOrNameOrAddress ||
+            c.address === idOrNameOrAddress ||
+            c.id === idOrNameOrAddress ||
+            c?.history?.includes(idOrNameOrAddress),
     );
 
     if (!found) {
@@ -147,15 +153,12 @@ const syncAll = async (options) => {
         return;
     }
 
-    if (contractsFromTenderly.length === 0) {
-        console.log(`No contracts found in Tenderly for network: ${network}`);
-        return;
-    }
-
     const contractsFromJson = readContractsFromJson(network);
 
     const contractsToSync = findContractsToSync(
-        contractsFromJson, contractsFromTenderly, networkId,
+        contractsFromJson,
+        contractsFromTenderly,
+        networkId,
     );
 
     if (contractsToSync.length === 0) {
@@ -184,6 +187,28 @@ const syncAll = async (options) => {
         .description('Add all missing contracts to tenderly project')
         .action(async (options) => {
             await syncAll(options);
+            process.exit(0);
+        });
+
+    program
+        .command('createFork')
+        .option('-n, --network <network>', 'Specify network (defaults to mainnet)', [])
+        .description('Creates a new tenderly vnet fork')
+        .action(async (options) => {
+            const network = options.network.length === 0 ? 'mainnet' : options.network;
+            const rpcUrl = await createFork(network);
+            console.log(`Rpc url: ${rpcUrl}`);
+            process.exit(0);
+        });
+
+    program
+        .command('gibMoney <account>')
+        .option('-n, --network <network>', 'Specify network (defaults to mainnet)', [])
+        .description('Gives 1000 Eth to account on vnet')
+        .action(async (account, options) => {
+            const network = options.network.length === 0 ? 'mainnet' : options.network;
+            await topUp(account, network);
+            console.log(`Acc: ${account} credited with 1000 Eth on ${network} vnet`);
             process.exit(0);
         });
 

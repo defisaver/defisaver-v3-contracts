@@ -1,86 +1,79 @@
 # defisaver-v3-contracts
+
 All the contracts related to the Defi Saver ecosystem.
 
-Detailed overview about the code can be found at https://docs.defisaver.com
+A detailed overview of the code can be found at [Defi Saver Docs](https://docs.defisaver.com).
 
-## To install
-Run `yarn` in the repo folder.
-You will also need to create a `.env` file as in the `.env.example` and fill it in with appropriate api keys.
-For a quick start, you can copy `.env.example` with default values and rename it to `.env`.
+### Install
 
-#### Link @defisaver/sdk package
-1. Clone sdk repo (https://github.com/defisaver/defisaver-sdk)
-2. Checkout to `refactor/v3.1` branch
-3. Run `yarn`
-4. Run `yarn build`
-5. Run `yarn link`
-6. Go back to defisaver-v3-contracts repo and run `yarn link @defisaver/sdk`
+Run `yarn` in the repository folder.  
+You will also need to create a `.env` file based on `.env.example` and fill it in with the appropriate API keys.  
+For a quick start, you can copy `.env.example` (which contains default values) and rename it to `.env`.
 
-## How to run tests
+### Foundry tests
 
-All of the tests are ran from the forked state of the mainnet. In the hardhat config you can change the 
-block number the fork starts from. If it starts from an old state some tests might not work.
+1. Ensure you have Foundry installed (check with `forge --version`).
+2. Set the `ETHEREUM_NODE` variable in the `.env` file with a mainnet RPC URL.
+3. Install dependencies:
+    ```sh
+    forge install foundry-rs/forge-std dapphub/ds-test
+    ```
+4. Run tests:
+    ```sh
+    forge test
+    ```
 
-Before running tests compile all contracts at start: `npx hardhat compile`
+All tests are run from a forked state of mainnet.
+You can specify the block number in `test-sol/config/config.json`.
 
-#### Run tests with default hardhat network
+To run only core tests:
 
-In `hardhat.config.js` hardhat network will fork mainnet by default. For example, you can run tests as:
+```sh
+forge test --mc TestCore
+```
 
-`npx hardhat test ./test/aaveV3/full-test.js --network hardhat`
+To run coverage on core:
 
-#### Run tests with separate hardhat node running
-First You need to start a hardhat node from the forked mainnet with the following command:
+```sh
+bash run-core-coverage.sh
+```
 
-`npx hardhat node --max-memory 8192  --fork ETHEREUM_NODE_URL`
+### Hardhat tests
 
-After that you can run the tests, for example:
+Before running tests, compile all contracts:
 
-`npm run test local ./aaveV3/full-test.js`
+```sh
+npx hardhat compile
+```
 
-### Running strategy core tests
-`npx hardhat test ./test/run-core-tests.js --network hardhat`
+In `hardhat.config.js` hardhat network will fork mainnet by default.
 
-### Running foundry tests
+You can change the block number from which the fork starts in the Hardhat config; note that if it starts from an old state, some tests might not work.
 
-In `test-sol` folder you can find foundry setup.
+Running core tests:
 
-Before running tests make sure you have foundry installed (check it with `forge --version`)
+```sh
+npx hardhat test ./test/run-core-tests.js
+```
 
-To run tests execute:
+Example of running tests with a specified network:
 
-`forge test --fork-url <INSERT_MAINNET_FORK>`
+```sh
+npx hardhat test ./test/aaveV3/full-test.js --network hardhat
+```
 
-<b>Notice:</b> 
-Currently, foundry tests are used just as an example. Although, we plan to add them more in the future, all protocols and core tests
-should be run in hardhat environment
+### Custom hardhat tasks
 
-## How to deploy on a tenderly fork
+`npx hardhat customFlatten [contract-name]` - will flatten contract that is ready for deployment and put it in contracts/flattened folder
 
-1. In the .env file add the tenderly fork id where you want to deploy
+`npx hardhat customVerify [contract-address] [contract-name] --network [hardhat-settings-network-name]` - will verify on etherscan if a contract was deployed using a single file from customFlatten task
 
-2. In the `scripts/deploy-on-fork.js` add contracts you want to deploy using the `redeploy()` function and make sure to specify `reg.address` as second parameter. 
-
-3. To deploy on fork run the following command: `npm run deploy fork deploy-on-fork`
-
-## Common commands
-
-`npm run compile` -  will compile all the contracts
-
-`npm run deploy [network] [deploy-script]` - will deploy to the specified network by calling the script from the `/scripts` folder
-
-`npm run test [network] [test-file]` - will run a test to the specified network by calling the script from the `/test` folder
-
-`npm run verify [network] [contract-name]` - will verify contract based on address and arguments from `/deployments` folder
-
-## Custom hardhat tasks
-
-`npx hardhat changeRepoNetwork [current-network-name] [new-network-name]` -  will change which contract the helper contracts import and extend
-
-`npx hardhat customFlatten [contract-name]` -  will flatten contract that is ready for deployment and put it in contracts/flattened folder
-
-`npx hardhat customVerify [contract-address] [contract-name] --network [hardhat-settings-network-name]`  - will verify on etherscan if a contract was deployed using a single file from customFlatten task 
-
-`npx hardhat fladepver [contract-name] [gas-in-gwei] [nonce (optional)] --network [hardhat-settings-network-name]` - will flatten to a single file (save it in contracts/flattened), deploy from it and then verify it on etherscan
+`npx hardhat fladepver [gas-in-gwei] [ContractName1 ContractNam2 ... ContractNameN] [nonce (optional)] --network [hardhat-settings-network-name]` - will flatten to a single file (save it in contracts/flattened), deploy from it and then verify it on etherscan
 
 `npx hardhat encryptPrivateKey` - will encrypt the key with the secretWord. Put the output in .env as ENCRYPTED_KEY. Later on during deployment process it will ask you for secret word to decrypt the key for deployment use.
+
+`npx hardhat deployOnFork [Contract1] [Contract2] [ContractN]` - deploys the specified contracts on a Tenderly fork. Before running this command, add the Tenderly fork ID to the .env file where you want to deploy.
+
+### Custom commands
+
+`node ./cmd/change-repo-network [current-network-name] [new-network-name]` - will change which contract the helper contracts import and extend

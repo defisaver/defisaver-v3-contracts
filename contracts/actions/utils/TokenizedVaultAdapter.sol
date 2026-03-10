@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/IERC4626.sol";
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-
+import { IERC4626 } from "../../interfaces/token/IERC4626.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
 
 /// @notice Action that handles ERC4626 vault operations
 /// @dev MAXUINT amount is possible for DEPOSIT and REDEEM operations
@@ -13,6 +12,9 @@ contract TokenizedVaultAdapter is ActionBase {
 
     error TokenizedVaultSlippageHit(Params, uint256 returnAmount);
     error TokenizedVaultUndefinedAction();
+
+    uint16 constant SKY_REFERRAL_CODE = 1002;
+    address constant SKY_STAKED_USDS = 0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD;
 
     enum OperationId {
         DEPOSIT,
@@ -45,11 +47,15 @@ contract TokenizedVaultAdapter is ActionBase {
         Params memory params = parseInputs(_callData);
 
         params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
-        params.minOutOrMaxIn = _parseParamUint(params.minOutOrMaxIn, _paramMapping[1], _subData, _returnValues);
-        params.vaultAddress = _parseParamAddr(params.vaultAddress, _paramMapping[2], _subData, _returnValues);
+        params.minOutOrMaxIn =
+            _parseParamUint(params.minOutOrMaxIn, _paramMapping[1], _subData, _returnValues);
+        params.vaultAddress =
+            _parseParamAddr(params.vaultAddress, _paramMapping[2], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
-        params.operationId = OperationId(_parseParamUint(uint8(params.operationId), _paramMapping[5], _subData, _returnValues));
+        params.operationId = OperationId(
+            _parseParamUint(uint8(params.operationId), _paramMapping[5], _subData, _returnValues)
+        );
 
         (bytes memory logData, uint256 returnAmount) = _executeOperation(params);
         emit ActionEvent("TokenizedVaultAdapter", logData);
@@ -58,11 +64,14 @@ contract TokenizedVaultAdapter is ActionBase {
 
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
-        (bytes memory logData, ) = _executeOperation(params);
+        (bytes memory logData,) = _executeOperation(params);
         logger.logActionDirectEvent("TokenizedVaultAdapter", logData);
     }
 
-    function _executeOperation(Params memory _params) internal returns (bytes memory logData, uint256) {
+    function _executeOperation(Params memory _params)
+        internal
+        returns (bytes memory logData, uint256)
+    {
         IERC4626 vault = IERC4626(_params.vaultAddress);
 
         if (_params.from == address(0)) {
@@ -78,14 +87,18 @@ contract TokenizedVaultAdapter is ActionBase {
                 _params.amount = vault.balanceOf(_params.from);
             }
             uint256 assetsWithdrawn = vault.redeem(_params.amount, _params.to, _params.from);
-            if (assetsWithdrawn < _params.minOutOrMaxIn) revert TokenizedVaultSlippageHit(_params, assetsWithdrawn);
+            if (assetsWithdrawn < _params.minOutOrMaxIn) {
+                revert TokenizedVaultSlippageHit(_params, assetsWithdrawn);
+            }
             logData = abi.encode(_params, assetsWithdrawn);
             return (logData, assetsWithdrawn);
         }
 
         if (_params.operationId == OperationId.WITHDRAW) {
             uint256 sharesBurned = vault.withdraw(_params.amount, _params.to, _params.from);
-            if (sharesBurned > _params.minOutOrMaxIn) revert TokenizedVaultSlippageHit(_params, sharesBurned);
+            if (sharesBurned > _params.minOutOrMaxIn) {
+                revert TokenizedVaultSlippageHit(_params, sharesBurned);
+            }
             logData = abi.encode(_params, sharesBurned);
             return (logData, sharesBurned);
         }
@@ -95,21 +108,38 @@ contract TokenizedVaultAdapter is ActionBase {
         if (_params.operationId == OperationId.DEPOSIT) {
             _params.amount = assetAddress.pullTokensIfNeeded(_params.from, _params.amount);
             assetAddress.approveToken(address(vault), _params.amount);
+            uint256 sharesMinted;
 
-            uint256 sharesMinted = vault.deposit(_params.amount, _params.to);
-            if (sharesMinted < _params.minOutOrMaxIn) revert TokenizedVaultSlippageHit(_params, sharesMinted);
+            if (address(vault) == SKY_STAKED_USDS && block.chainid == 1) {
+                sharesMinted = vault.deposit(_params.amount, _params.to, SKY_REFERRAL_CODE);
+            } else {
+                sharesMinted = vault.deposit(_params.amount, _params.to);
+            }
+
+            if (sharesMinted < _params.minOutOrMaxIn) {
+                revert TokenizedVaultSlippageHit(_params, sharesMinted);
+            }
             logData = abi.encode(_params, sharesMinted);
             return (logData, sharesMinted);
         }
 
         if (_params.operationId == OperationId.MINT) {
             uint256 assetsToDeposit = vault.previewMint(_params.amount);
-            if (assetsToDeposit > _params.minOutOrMaxIn) revert TokenizedVaultSlippageHit(_params, assetsToDeposit);
+            if (assetsToDeposit > _params.minOutOrMaxIn) {
+                revert TokenizedVaultSlippageHit(_params, assetsToDeposit);
+            }
 
-            uint256 pulledAssetAmount = assetAddress.pullTokensIfNeeded(_params.from, assetsToDeposit);
+            uint256 pulledAssetAmount =
+                assetAddress.pullTokensIfNeeded(_params.from, assetsToDeposit);
             assetAddress.approveToken(address(vault), pulledAssetAmount);
 
-            uint256 assetsDeposited = vault.mint(_params.amount, _params.to);
+            uint256 assetsDeposited;
+            if (address(vault) == SKY_STAKED_USDS && block.chainid == 1) {
+                assetsDeposited = vault.mint(_params.amount, _params.to, SKY_REFERRAL_CODE);
+            } else {
+                assetsDeposited = vault.mint(_params.amount, _params.to);
+            }
+
             if (pulledAssetAmount > assetsDeposited) {
                 assetAddress.withdrawTokens(_params.to, pulledAssetAmount - assetsDeposited);
             }

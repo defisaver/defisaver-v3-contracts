@@ -1,4 +1,3 @@
-/* eslint-disable import/no-dynamic-require */
 const { exec } = require('child_process');
 const { getFile } = require('./utils');
 const { DEPLOYMENTS_FOLDER_NAME } = require('./writer');
@@ -13,7 +12,7 @@ if (!contractName || !networkName) {
 
 (async () => {
     const filename = (await getFile(`./${DEPLOYMENTS_FOLDER_NAME}`, `${contractName}.json`))[0];
-    // eslint-disable-next-line global-require
+    // -next-line global-require
     const file = require(filename);
     const address = file.networks[networkName].address;
     const args = file.networks[networkName].args.join(' ');

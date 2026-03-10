@@ -1,0 +1,15 @@
+# Ignore Solidity — handled by forge fmt
+*.sol
+
+# Common folder
+node_modules
+artifacts
+cache
+coverage
+deployments
+lib
+broadcast
+.env
+out
+dist
+deprecated

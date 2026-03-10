@@ -1,15 +1,20 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/SparkHelper.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { SparkHelper } from "./helpers/SparkHelper.sol";
+import { ISparkPool } from "../../interfaces/protocols/spark/ISparkPool.sol";
+import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Set positions eMode
 contract SparkSetEMode is ActionBase, SparkHelper {
     using TokenUtils for address;
 
+    /// @param categoryId eMode category id (0 - 255)
+    /// @param useDefaultMarket Whether to use the default market
+    /// @param market Address of the market to set the eMode for
     struct Params {
         uint8 categoryId;
         bool useDefaultMarket;
@@ -18,7 +23,7 @@ contract SparkSetEMode is ActionBase, SparkHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes calldata _callData,
+        bytes memory _callData,
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -33,7 +38,7 @@ contract SparkSetEMode is ActionBase, SparkHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes calldata _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
         (, bytes memory logData) = _setEmode(params.market, params.categoryId);
         logger.logActionDirectEvent("SparkSetEMode", logData);
@@ -59,7 +64,7 @@ contract SparkSetEMode is ActionBase, SparkHelper {
         internal
         returns (uint256, bytes memory)
     {
-        IPoolV3 lendingPool = getLendingPool(_market);
+        ISparkPool lendingPool = getSparkLendingPool(_market);
         lendingPool.setUserEMode(_categoryId);
 
         bytes memory logData = abi.encode(_market, _categoryId);
@@ -76,7 +81,7 @@ contract SparkSetEMode is ActionBase, SparkHelper {
     function encodeInputs(Params memory _params) public pure returns (bytes memory encodedInput) {
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
         encodedInput = bytes.concat(encodedInput, bytes1(_params.categoryId));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useDefaultMarket));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useDefaultMarket));
         if (!_params.useDefaultMarket) {
             encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
         }
@@ -84,7 +89,7 @@ contract SparkSetEMode is ActionBase, SparkHelper {
 
     function decodeInputs(bytes calldata _encodedInput) public pure returns (Params memory params) {
         params.categoryId = uint8(bytes1(_encodedInput[0:1]));
-        params.useDefaultMarket = bytesToBool(bytes1(_encodedInput[1:2]));
+        params.useDefaultMarket = DFSLib.bytesToBool(bytes1(_encodedInput[1:2]));
         if (params.useDefaultMarket) {
             params.market = DEFAULT_SPARK_MARKET;
         } else {
