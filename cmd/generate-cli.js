@@ -1144,9 +1144,11 @@ const findSdkTriggerSignaturesFromTemplateFile = (triggerName) => {
         const signatures = readFileSync(signaturesPath, 'utf8');
         // Convert trigger name to camelCase for matching
         const camelCaseName = triggerName[0].toLowerCase() + triggerName.slice(1);
+        // Escape any special regex characters in the trigger name
+        const safeCamelCaseName = escapeRegExp(camelCaseName);
         // Look for the signature block
         const regex = new RegExp(
-            `const ${camelCaseName} = new dfs\\.triggers\\.[\\w.]+\\([\\s\\S]+?\\);`,
+            `const ${safeCamelCaseName} = new dfs\\.triggers\\.[\\w.]+\\([\\s\\S]+?\\);`,
             'g',
         );
         const match = signatures.match(regex);
