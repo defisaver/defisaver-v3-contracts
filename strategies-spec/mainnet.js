@@ -6939,6 +6939,9 @@ const createAaveV4RepayStrategy = () => {
     s.addSubSlot('&user', 'address');
     s.addSubSlot('&ratioState', 'uint256');
     s.addSubSlot('&targetRatio', 'uint256');
+    // @dev Unused at the moment. Left for future use.
+    s.addSubSlot('&additionalField1', 'uint256');
+    s.addSubSlot('&additionalField2', 'uint256');
 
     const trigger = new dfs.triggers.AaveV4RatioTrigger('0', '0', '0', '0');
     s.addTrigger(trigger);
@@ -6990,6 +6993,9 @@ const createAaveV4FLRepayStrategy = () => {
     s.addSubSlot('&user', 'address');
     s.addSubSlot('&ratioState', 'uint256');
     s.addSubSlot('&targetRatio', 'uint256');
+    // @dev Unused at the moment. Left for future use.
+    s.addSubSlot('&additionalField1', 'uint256');
+    s.addSubSlot('&additionalField2', 'uint256');
 
     const trigger = new dfs.triggers.AaveV4RatioTrigger('0', '0', '0', '0');
     s.addTrigger(trigger);
@@ -7047,6 +7053,9 @@ const createAaveV4BoostStrategy = () => {
     s.addSubSlot('&user', 'address');
     s.addSubSlot('&ratioState', 'uint256');
     s.addSubSlot('&targetRatio', 'uint256');
+    // @dev Unused at the moment. Left for future use.
+    s.addSubSlot('&additionalField1', 'uint256');
+    s.addSubSlot('&additionalField2', 'uint256');
 
     const aaveV4RatioTrigger = new dfs.triggers.AaveV4RatioTrigger('0', '0', '0', '0');
     s.addTrigger(aaveV4RatioTrigger);
@@ -7099,6 +7108,9 @@ const createAaveV4FLBoostStrategy = () => {
     s.addSubSlot('&user', 'address');
     s.addSubSlot('&ratioState', 'uint256');
     s.addSubSlot('&targetRatio', 'uint256');
+    // @dev Unused at the moment. Left for future use.
+    s.addSubSlot('&additionalField1', 'uint256');
+    s.addSubSlot('&additionalField2', 'uint256');
 
     const aaveV4RatioTrigger = new dfs.triggers.AaveV4RatioTrigger('0', '0', '0', '0');
     s.addTrigger(aaveV4RatioTrigger);
@@ -7162,6 +7174,9 @@ const createAaveV4RepayOnPriceStrategy = () => {
     s.addSubSlot('&debtAssetId', 'uint256');
     s.addSubSlot('&ratioState', 'uint256');
     s.addSubSlot('&targetRatio', 'uint256');
+    // @dev Unused at the moment. Left for future use.
+    s.addSubSlot('&additionalField1', 'uint256');
+    s.addSubSlot('&additionalField2', 'uint256');
 
     const trigger = new dfs.triggers.AaveV4QuotePriceTrigger('0', '0', '0', '0', '0');
     s.addTrigger(trigger);
@@ -7219,6 +7234,9 @@ const createAaveV4FLRepayOnPriceStrategy = () => {
     s.addSubSlot('&debtAssetId', 'uint256');
     s.addSubSlot('&ratioState', 'uint256');
     s.addSubSlot('&targetRatio', 'uint256');
+    // @dev Unused at the moment. Left for future use.
+    s.addSubSlot('&additionalField1', 'uint256');
+    s.addSubSlot('&additionalField2', 'uint256');
 
     const trigger = new dfs.triggers.AaveV4QuotePriceTrigger('0', '0', '0', '0', '0');
     s.addTrigger(trigger);
@@ -7283,6 +7301,9 @@ const createAaveV4BoostOnPriceStrategy = () => {
     s.addSubSlot('&debtAssetId', 'uint256');
     s.addSubSlot('&ratioState', 'uint256');
     s.addSubSlot('&targetRatio', 'uint256');
+    // @dev Unused at the moment. Left for future use.
+    s.addSubSlot('&additionalField1', 'uint256');
+    s.addSubSlot('&additionalField2', 'uint256');
 
     const trigger = new dfs.triggers.AaveV4QuotePriceTrigger('0', '0', '0', '0', '0');
     s.addTrigger(trigger);
@@ -7341,6 +7362,9 @@ const createAaveV4FLBoostOnPriceStrategy = () => {
     s.addSubSlot('&debtAssetId', 'uint256');
     s.addSubSlot('&ratioState', 'uint256');
     s.addSubSlot('&targetRatio', 'uint256');
+    // @dev Unused at the moment. Left for future use.
+    s.addSubSlot('&additionalField1', 'uint256');
+    s.addSubSlot('&additionalField2', 'uint256');
 
     const trigger = new dfs.triggers.AaveV4QuotePriceTrigger('0', '0', '0', '0', '0');
     s.addTrigger(trigger);
@@ -7407,6 +7431,9 @@ const createAaveV4FLCloseToDebtStrategy = () => {
     s.addSubSlot('&debtAssetId', 'uint256');
     // Only used by backend to determine which action to call.
     s.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8');
+    // @dev Unused at the moment. Left for future use.
+    s.addSubSlot('&additionalField1', 'uint256');
+    s.addSubSlot('&additionalField2', 'uint256');
 
     const trigger = new dfs.triggers.AaveV4QuotePriceRangeTrigger('0', '0', '0', '0', '0');
     s.addTrigger(trigger);
@@ -7472,6 +7499,9 @@ const createAaveV4FLCloseToCollStrategy = () => {
     s.addSubSlot('&debtAssetId', 'uint256');
     // Only used by backend to determine which action to call.
     s.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8');
+    // @dev Unused at the moment. Left for future use.
+    s.addSubSlot('&additionalField1', 'uint256');
+    s.addSubSlot('&additionalField2', 'uint256');
 
     const trigger = new dfs.triggers.AaveV4QuotePriceRangeTrigger('0', '0', '0', '0', '0');
     s.addTrigger(trigger);
@@ -7540,6 +7570,9 @@ const createAaveV4FLCollateralSwitchStrategy = () => {
     s.addSubSlot('&toAsset', 'address');
     s.addSubSlot('&toAssetId', 'uint256');
     s.addSubSlot('&amountToSwitch', 'uint256');
+    // @dev Unused at the moment. Left for future use.
+    s.addSubSlot('&additionalField1', 'uint256');
+    s.addSubSlot('&additionalField2', 'uint256');
 
     const trigger = new dfs.triggers.AaveV4QuotePriceTrigger('0', '0', '0', '0', '0');
     s.addTrigger(trigger);
