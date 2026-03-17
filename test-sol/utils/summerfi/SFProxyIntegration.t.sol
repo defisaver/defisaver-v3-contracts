@@ -6,12 +6,10 @@ import { BaseTest } from "../BaseTest.sol";
 import { ActionsUtils } from "../ActionsUtils.sol";
 import { RegistryUtils } from "../RegistryUtils.sol";
 
-import {
-    IAccountImplementation
-} from "../../../contracts/interfaces/protocols/summerfi/IAccountImplementation.sol";
-import {
-    IAccountFactory
-} from "../../../contracts/interfaces/protocols/summerfi/IAccountFactory.sol";
+import { IAccountImplementation } from
+    "../../../contracts/interfaces/protocols/summerfi/IAccountImplementation.sol";
+import { IAccountFactory } from
+    "../../../contracts/interfaces/protocols/summerfi/IAccountFactory.sol";
 import { IAccountGuard } from "../../../contracts/interfaces/protocols/summerfi/IAccountGuard.sol";
 import { IL2PoolV3 } from "../../../contracts/interfaces/protocols/aaveV3/IL2PoolV3.sol";
 import { IDebtToken } from "../../../contracts/interfaces/protocols/aaveV3/IDebtToken.sol";
@@ -30,9 +28,8 @@ import { SendToken } from "../../../contracts/actions/utils/SendToken.sol";
 import { DFSSell } from "../../../contracts/actions/exchange/DFSSell.sol";
 import { SFProxyEntryPoint } from "../../../contracts/actions/summerfi/SFProxyEntryPoint.sol";
 import { Addresses } from "../helpers/MainnetAddresses.sol";
-import {
-    SFProxyFactoryHelper
-} from "../../../contracts/utils/addresses/sfProxyFactory/SFProxyFactoryHelper.sol";
+import { SFProxyFactoryHelper } from
+    "../../../contracts/utils/addresses/sfProxyFactory/SFProxyFactoryHelper.sol";
 import { SFProxyUtils } from "./SFProxyUtils.sol";
 
 contract SFProxyIntegration is
@@ -50,18 +47,6 @@ contract SFProxyIntegration is
 
     uint256 constant SUPPLY_AMOUNT_USD = 4000; // $4000 in USD
     uint256 constant BORROW_AMOUNT_USD = 1000; // $1000 in USD
-
-    address constant UNI_WRAPPER_ARBI = 0x37236458C59F4dCF17b96Aa67FC07Bbf5578d873;
-    address constant UNI_WRAPPER_BASE = 0x914A50910fF1404Fe62D04846a559c49C55219c3;
-    address constant UNI_WRAPPER_OPT = 0xF723B39fe2Aa9102dE45Bc8ECd3417805aAC79Aa;
-
-    address constant USDC_ADDR_ARBI = 0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8;
-    address constant USDC_ADDR_BASE = 0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA;
-    address constant USDC_ADDR_OPT = 0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85;
-
-    address constant WETH_ADDR_ARBI = 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1;
-    address constant WETH_ADDR_BASE = 0x4200000000000000000000000000000000000006;
-    address constant WETH_ADDR_OPT = 0x4200000000000000000000000000000000000006;
 
     /*//////////////////////////////////////////////////////////////////////////
                                     VARIABLES
@@ -186,11 +171,9 @@ contract SFProxyIntegration is
         uint256 accountWethBefore = balanceOf(SUPPLY_ASSET, sfProxy);
 
         vm.prank(sfProxyOwner);
-        IAccountImplementation(sfProxy)
-            .execute(
-                sfProxyEntryPoint,
-                abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
-            );
+        IAccountImplementation(sfProxy).execute(
+            sfProxyEntryPoint, abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
+        );
 
         assertEq(balanceOf(SUPPLY_ASSET, sfProxy), accountWethBefore);
 
@@ -260,11 +243,9 @@ contract SFProxyIntegration is
         StrategyModel.Recipe memory recipe = _createRecipe(actionsCalldata, actionIds);
 
         vm.prank(sfProxyOwner);
-        IAccountImplementation(sfProxy)
-            .execute(
-                sfProxyEntryPoint,
-                abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
-            );
+        IAccountImplementation(sfProxy).execute(
+            sfProxyEntryPoint, abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
+        );
 
         assertEq(balanceOf(SUPPLY_ASSET, sfProxy), 0);
         assertEq(balanceOf(BORROW_ASSET, sfProxy), 0);
@@ -317,11 +298,9 @@ contract SFProxyIntegration is
         });
 
         vm.prank(sfProxyOwner);
-        IAccountImplementation(sfProxy)
-            .execute(
-                sfProxyEntryPoint,
-                abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
-            );
+        IAccountImplementation(sfProxy).execute(
+            sfProxyEntryPoint, abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
+        );
     }
 
     function _createAaveV3Position(address _onBehalf) internal {
@@ -330,8 +309,9 @@ contract SFProxyIntegration is
 
         if (_onBehalf != sfProxy) {
             vm.prank(_onBehalf);
-            IDebtToken(borrowReserve.variableDebtTokenAddress)
-                .approveDelegation(sfProxy, borrowAmount);
+            IDebtToken(borrowReserve.variableDebtTokenAddress).approveDelegation(
+                sfProxy, borrowAmount
+            );
         }
 
         bytes[] memory actionsCalldata = new bytes[](2);
@@ -353,11 +333,9 @@ contract SFProxyIntegration is
         uint256 aTokenBefore = balanceOf(supplyReserve.aTokenAddress, _onBehalf);
 
         vm.prank(sfProxyOwner);
-        IAccountImplementation(sfProxy)
-            .execute(
-                sfProxyEntryPoint,
-                abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
-            );
+        IAccountImplementation(sfProxy).execute(
+            sfProxyEntryPoint, abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
+        );
 
         assertEq(balanceOf(SUPPLY_ASSET, bob), bobSupplyBefore - supplyAmount);
         assertEq(balanceOf(BORROW_ASSET, bob), bobBorrowBefore + borrowAmount);
@@ -398,23 +376,9 @@ contract SFProxyIntegration is
     }
 
     function initValues() internal {
-        if (block.chainid == 42_161) {
-            BORROW_ASSET = USDC_ADDR_ARBI;
-            EXCHANGE_WRAPPER = UNI_WRAPPER_ARBI;
-            SUPPLY_ASSET = WETH_ADDR_ARBI;
-        } else if (block.chainid == 8453) {
-            BORROW_ASSET = USDC_ADDR_BASE;
-            EXCHANGE_WRAPPER = UNI_WRAPPER_BASE;
-            SUPPLY_ASSET = WETH_ADDR_BASE;
-        } else if (block.chainid == 10) {
-            BORROW_ASSET = USDC_ADDR_OPT;
-            EXCHANGE_WRAPPER = UNI_WRAPPER_OPT;
-            SUPPLY_ASSET = WETH_ADDR_OPT;
-        } else {
-            BORROW_ASSET = Addresses.USDC_ADDR;
-            EXCHANGE_WRAPPER = Addresses.UNI_V3_WRAPPER;
-            SUPPLY_ASSET = Addresses.WETH_ADDR;
-        }
+        BORROW_ASSET = Addresses.USDC_ADDR;
+        EXCHANGE_WRAPPER = Addresses.UNI_V3_WRAPPER;
+        SUPPLY_ASSET = Addresses.WETH_ADDR;
 
         // Convert USD amounts to token amounts
         supplyAmount = amountInUSDPrice(SUPPLY_ASSET, SUPPLY_AMOUNT_USD);
