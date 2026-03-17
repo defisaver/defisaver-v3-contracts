@@ -28,11 +28,11 @@ no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,
 no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation,aaveV3/umbrella,fluid,AaveView}*"
 
 [profile.linea]
-no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation,aaveV3/umbrella,fluid,AaveView}*"
+no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation,aaveV3/umbrella,fluid,AaveView,Comp,Morpho}*"
 evm_version = "london"
 
 [profile.plasma]
-no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation,aaveV3/umbrella,fluid,AaveView}*"
+no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation,aaveV3/umbrella,fluid,AaveView,Comp,Morpho}*"
 
 
 # Formatting -> https://getfoundry.sh/config/reference/formatter/
