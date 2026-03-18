@@ -2,12 +2,12 @@
 pragma solidity =0.8.24;
 
 import { IPoolV3 } from "../../interfaces/protocols/aaveV3/IPoolV3.sol";
-import {
-    IPoolAddressesProvider
-} from "../../interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
+import { IPoolAddressesProvider } from
+    "../../interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
 import { IERC20 } from "../../interfaces/token/IERC20.sol";
 import { ITrigger } from "../../interfaces/core/ITrigger.sol";
 import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
+import { DataTypes } from "../../interfaces/protocols/aaveV3/DataTypes.sol";
 
 import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
 import { BundleStorage } from "../../core/strategy/BundleStorage.sol";
@@ -20,7 +20,12 @@ import { AaveV3Helper } from "../../actions/aaveV3/helpers/AaveV3Helper.sol";
 
 /// @title StrategyTriggerViewNoRevert - Helper contract to check whether a trigger is triggered or not for a given sub.
 /// @dev This contract is designed to avoid reverts from checking triggers.
-contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, SmartWalletUtils, AaveV3Helper {
+contract StrategyTriggerViewNoRevert is
+    StrategyModel,
+    CoreHelper,
+    SmartWalletUtils,
+    AaveV3Helper
+{
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     address internal constant DEFAULT_SPARK_MARKET_MAINNET =
@@ -124,10 +129,8 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, SmartWalletUt
 
         for (uint256 i = 0; i < triggerIds.length; i++) {
             triggerAddr = registry.getAddr(triggerIds[i]);
-            try ITrigger(triggerAddr)
-                .isTriggered(_triggerCallData[i], _sub.triggerData[i]) returns (
-                bool isTriggered
-            ) {
+            try ITrigger(triggerAddr).isTriggered(_triggerCallData[i], _sub.triggerData[i])
+            returns (bool isTriggered) {
                 if (!isTriggered) {
                     return TriggerStatus.FALSE;
                 }
@@ -141,8 +144,13 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, SmartWalletUt
             return _tryToVerifyRequiredAmountAndAllowance(smartWallet, _sub.subData);
         }
 
-        // check AaveV3 leverage management and close strategies for all chains
-        if (strategyId.isAaveV3LeverageManagementStrategy() || strategyId.isAaveV3CloseStrategy()) {
+        // check min debt and ltv0 for AaveV3 leverage management strategies
+        if (strategyId.isAaveV3LeverageManagementStrategy()) {
+            return _tryToVerifyAaveV3Conditions(smartWallet);
+        }
+
+        // check min debt for AaveV3 close strategies
+        if (strategyId.isAaveV3CloseStrategy()) {
             return _verifyAaveV3MinDebtPosition(smartWallet);
         }
 
@@ -157,10 +165,11 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, SmartWalletUt
     /*//////////////////////////////////////////////////////////////
                               VERIFY LOGIC
     //////////////////////////////////////////////////////////////*/
-    function _tryToVerifyRequiredAmountAndAllowance(
-        address _smartWallet,
-        bytes32[] memory _subData
-    ) internal view returns (TriggerStatus) {
+    function _tryToVerifyRequiredAmountAndAllowance(address _smartWallet, bytes32[] memory _subData)
+        internal
+        view
+        returns (TriggerStatus)
+    {
         try this.verifyRequiredAmountAndAllowance(_smartWallet, _subData) returns (
             TriggerStatus status
         ) {
@@ -224,5 +233,89 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, SmartWalletUt
         }
 
         return _userDebtInUSD >= MIN_DEBT_IN_USD_L2;
+    }
+
+    function _tryToVerifyAaveV3Conditions(address _smartWallet)
+        internal
+        view
+        returns (TriggerStatus)
+    {
+        try this.verifyAaveV3Conditions(_smartWallet) returns (TriggerStatus status) {
+            return status;
+        } catch {
+            return TriggerStatus.REVERT;
+        }
+    }
+
+    function verifyAaveV3Conditions(address _smartWallet) external view returns (TriggerStatus) {
+        // If not enough debt, return FALSE
+        if (_verifyAaveV3MinDebtPosition(_smartWallet) == TriggerStatus.FALSE) {
+            return TriggerStatus.FALSE;
+        }
+        // If any collateral is at 0% LTV, return FALSE
+        if (_verifyAaveV3Ltv0Position(_smartWallet) == TriggerStatus.FALSE) {
+            return TriggerStatus.FALSE;
+        }
+
+        // Otherwise, return TRUE
+        return TriggerStatus.TRUE;
+    }
+
+    function _verifyAaveV3Ltv0Position(address _smartWallet)
+        internal
+        view
+        returns (TriggerStatus)
+    {
+        IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(DEFAULT_AAVE_MARKET).getPool());
+        address[] memory reserveList = lendingPool.getReservesList();
+        DataTypes.UserConfigurationMap memory userConfig =
+            lendingPool.getUserConfiguration(_smartWallet);
+
+        // Emode info
+        uint256 eModeId = lendingPool.getUserEMode(_smartWallet);
+        bool isInEmode = eModeId != 0;
+        uint128 emodeCollateralBitmap;
+        uint128 emodeLtvZeroBitmap;
+        if (isInEmode) {
+            emodeCollateralBitmap = lendingPool.getEModeCategoryCollateralBitmap(uint8(eModeId));
+            emodeLtvZeroBitmap = lendingPool.getEModeCategoryLtvzeroBitmap(uint8(eModeId));
+        }
+
+        for (uint256 i = 0; i < reserveList.length; ++i) {
+            DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(reserveList[i]);
+            if (!_isUsingAsCollateral(userConfig, reserveData.id)) continue;
+
+            bool isLtvZero;
+            if (isInEmode && _isAssetInBitmap(reserveData.id, emodeCollateralBitmap)) {
+                isLtvZero = _isAssetInBitmap(reserveData.id, emodeLtvZeroBitmap);
+            } else {
+                isLtvZero = _isReserveLtvZero(reserveData.configuration);
+            }
+
+            if (isLtvZero) return TriggerStatus.FALSE;
+        }
+
+        return TriggerStatus.TRUE;
+    }
+
+    function _isUsingAsCollateral(
+        DataTypes.UserConfigurationMap memory _userConfig,
+        uint256 _reserveIndex
+    ) internal pure returns (bool) {
+        unchecked {
+            return (_userConfig.data >> ((_reserveIndex << 1) + 1)) & 1 != 0;
+        }
+    }
+
+    function _isAssetInBitmap(uint256 _assetId, uint128 _bitmap) internal pure returns (bool) {
+        return (_bitmap & (uint128(1) << _assetId)) != 0;
+    }
+
+    function _isReserveLtvZero(DataTypes.ReserveConfigurationMap memory _reserveConfig)
+        internal
+        pure
+        returns (bool)
+    {
+        return (_reserveConfig.data & uint256(type(uint16).max)) == 0;
     }
 }
