@@ -30,7 +30,6 @@ no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,
 [profile.linea]
 # TODO -> Include some core tests too (without strategies/automations)
 match_path = "test-sol/{actions,views}/{aaveV3/AaveV3,AaveV3}*"
-evm_version = "fusaka"
 
 [profile.plasma]
 # TODO -> Include some core tests too (without strategies/automations)
