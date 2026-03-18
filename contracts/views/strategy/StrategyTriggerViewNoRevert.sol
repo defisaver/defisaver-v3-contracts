@@ -28,6 +28,9 @@ contract StrategyTriggerViewNoRevert is
 {
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
+    uint256 internal constant LTV_MASK =
+        0x000000000000000000000000000000000000000000000000000000000000FFFF;
+
     address internal constant DEFAULT_SPARK_MARKET_MAINNET =
         0x02C3eA4e34C0cBd694D2adFa2c690EECbC1793eE;
 
@@ -286,8 +289,8 @@ contract StrategyTriggerViewNoRevert is
             if (!_isUsingAsCollateral(userConfig, reserveData.id)) continue;
 
             bool isLtvZero;
-            if (isInEmode && _isAssetInBitmap(reserveData.id, emodeCollateralBitmap)) {
-                isLtvZero = _isAssetInBitmap(reserveData.id, emodeLtvZeroBitmap);
+            if (isInEmode && _isReserveEnabledOnBitmap(emodeCollateralBitmap, reserveData.id)) {
+                isLtvZero = _isReserveEnabledOnBitmap(emodeLtvZeroBitmap, reserveData.id);
             } else {
                 isLtvZero = _isReserveLtvZero(reserveData.configuration);
             }
@@ -307,8 +310,14 @@ contract StrategyTriggerViewNoRevert is
         }
     }
 
-    function _isAssetInBitmap(uint256 _assetId, uint128 _bitmap) internal pure returns (bool) {
-        return (_bitmap & (uint128(1) << _assetId)) != 0;
+    function _isReserveEnabledOnBitmap(uint128 _bitmap, uint256 _reserveIndex)
+        internal
+        pure
+        returns (bool)
+    {
+        unchecked {
+            return (_bitmap >> _reserveIndex) & 1 != 0;
+        }
     }
 
     function _isReserveLtvZero(DataTypes.ReserveConfigurationMap memory _reserveConfig)
@@ -316,6 +325,6 @@ contract StrategyTriggerViewNoRevert is
         pure
         returns (bool)
     {
-        return (_reserveConfig.data & uint256(type(uint16).max)) == 0;
+        return (_reserveConfig.data & LTV_MASK) == 0;
     }
 }

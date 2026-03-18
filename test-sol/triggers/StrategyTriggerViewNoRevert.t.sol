@@ -5,9 +5,8 @@ pragma solidity =0.8.24;
 import { BaseTest } from "../utils/BaseTest.sol";
 import { Addresses } from "../utils/Addresses.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
-import {
-    StrategyTriggerViewNoRevert
-} from "../../contracts/views/strategy/StrategyTriggerViewNoRevert.sol";
+import { StrategyTriggerViewNoRevert } from
+    "../../contracts/views/strategy/StrategyTriggerViewNoRevert.sol";
 
 contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRevert {
     /*//////////////////////////////////////////////////////////////////////////
@@ -21,7 +20,7 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRever
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("StrategyTriggerViewNoRevert");
+        forkMainnetLatest();
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -85,7 +84,7 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRever
         );
     }
 
-    function test_verifyAaveV3LeverageManagementConditions() public view {
+    function test_verifyAaveV3MinDebtCondition() public view {
         //vm.warp(1748518160);
         address walletWithEnoughDebt = 0xaB5a28B6Ca2D1E12FE5AcC7341352d5032b74438;
         assertEq(
@@ -103,7 +102,7 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRever
     }
 
     function test_verifySparkLeverageManagementConditions() public view {
-        address walletWithEnoughDebt = 0xc0c790F61a1721B70F0D4b1Aa1133687Fa3fd900;
+        address walletWithEnoughDebt = 0x3a0DC3fC4b84E2427ced214C9CE858eA218E97d9;
         assertEq(
             uint256(_verifySparkMinDebtPosition(walletWithEnoughDebt)),
             uint256(TriggerStatus.TRUE),
@@ -115,6 +114,29 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRever
             uint256(_verifySparkMinDebtPosition(walletWithNotEnoughDebt)),
             uint256(TriggerStatus.FALSE),
             "trigger status should be false"
+        );
+    }
+
+    function test_verifyAaveV3Ltv0() public view {
+        address walletWithLTV0Asset = 0xeCA1395C29527b4CeA5AF5517138Ac01754bcfC8;
+        assertEq(
+            uint256(_verifyAaveV3Ltv0Position(walletWithLTV0Asset)),
+            uint256(TriggerStatus.FALSE),
+            "trigger status should be FALSE"
+        );
+
+        address walletWithLTV0Asset2 = 0x9495D189896FCb04e3d2E5bB102Ad76C6782c41A;
+        assertEq(
+            uint256(_verifyAaveV3Ltv0Position(walletWithLTV0Asset2)),
+            uint256(TriggerStatus.FALSE),
+            "trigger status should be FALSE"
+        );
+
+        address walletWithLinkInEmode = 0x3bb52B3101324197d765c7E27e79C6b0b5BE8BaB;
+        assertEq(
+            uint256(_verifyAaveV3Ltv0Position(walletWithLinkInEmode)),
+            uint256(TriggerStatus.TRUE),
+            "trigger status should be TRUE"
         );
     }
 }
