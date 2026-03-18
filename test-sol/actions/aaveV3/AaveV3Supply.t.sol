@@ -5,9 +5,8 @@ pragma solidity =0.8.24;
 import { AaveV3Supply } from "../../../contracts/actions/aaveV3/AaveV3Supply.sol";
 import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
 import { IL2PoolV3 } from "../../../contracts/interfaces/protocols/aaveV3/IL2PoolV3.sol";
-import {
-    IAaveProtocolDataProvider
-} from "../../../contracts/interfaces/protocols/aaveV3/IAaveProtocolDataProvider.sol";
+import { IAaveProtocolDataProvider } from
+    "../../../contracts/interfaces/protocols/aaveV3/IAaveProtocolDataProvider.sol";
 import { DataTypes } from "../../../contracts/interfaces/protocols/aaveV3/DataTypes.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
@@ -33,7 +32,7 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkFromEnv("AaveV3Supply");
+        forkFromEnv("");
         initTestPairs("AaveV3");
 
         wallet = new SmartWallet(bob);
@@ -161,7 +160,7 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
         }
     }
 
-    function testFuzz_encode_decode_inputs_no_market_no_onbehalf(
+    function testFuzz_encode_decode_inputs_no_market_no_onBehalf(
         uint256 _amount,
         address _from,
         uint16 _assetId
@@ -179,7 +178,7 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
         _assertParams(params);
     }
 
-    function testFuzz_encode_decode_inputs_no_onbehalf(
+    function testFuzz_encode_decode_inputs_no_onBehalf(
         uint256 _amount,
         address _from,
         uint16 _assetId,
