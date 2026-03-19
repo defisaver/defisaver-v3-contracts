@@ -7,6 +7,11 @@ import { Addresses } from "../utils/Addresses.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
 import { StrategyTriggerViewNoRevert } from
     "../../contracts/views/strategy/StrategyTriggerViewNoRevert.sol";
+import { AaveV3CollateralSwitch } from "../../contracts/actions/aaveV3/AaveV3CollateralSwitch.sol";
+import { IPoolV3 } from "../../contracts/interfaces/protocols/aaveV3/IPoolV3.sol";
+import { IPoolAddressesProvider } from
+    "../../contracts/interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
+import { IDSProxy } from "../../contracts/interfaces/DS/IDSProxy.sol";
 
 contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRevert {
     /*//////////////////////////////////////////////////////////////////////////
@@ -137,6 +142,39 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRever
             uint256(_verifyAaveV3Ltv0Position(walletWithLinkInEmode)),
             uint256(TriggerStatus.TRUE),
             "trigger status should be TRUE"
+        );
+    }
+
+    function test_verifyAaveV3Ltv0_afterDisablingLinkCollateral() public {
+        address walletWithLTV0Asset2 = 0x9495D189896FCb04e3d2E5bB102Ad76C6782c41A;
+        address walletOwner = 0x3745AF941FbBF3336aB21bB3a9853e75320382ab;
+        IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(DEFAULT_AAVE_MARKET).getPool());
+        uint16 linkAssetId = lendingPool.getReserveData(Addresses.LINK_ADDR).id;
+        AaveV3CollateralSwitch collSwitch = new AaveV3CollateralSwitch();
+
+        uint16[] memory assetIds = new uint16[](1);
+        assetIds[0] = linkAssetId;
+        bool[] memory useAsCollateral = new bool[](1);
+        useAsCollateral[0] = false;
+
+        AaveV3CollateralSwitch.Params memory params = AaveV3CollateralSwitch.Params({
+            arrayLength: 1,
+            useDefaultMarket: true,
+            assetIds: assetIds,
+            useAsCollateral: useAsCollateral,
+            market: address(0)
+        });
+
+        vm.prank(walletOwner);
+        IDSProxy(payable(walletWithLTV0Asset2)).execute(
+            address(collSwitch),
+            abi.encodeWithSelector(collSwitch.executeActionDirect.selector, abi.encode(params))
+        );
+
+        assertEq(
+            uint256(_verifyAaveV3Ltv0Position(walletWithLTV0Asset2)),
+            uint256(TriggerStatus.TRUE),
+            "trigger status should be TRUE after using LINK as collateral is disabled"
         );
     }
 }
