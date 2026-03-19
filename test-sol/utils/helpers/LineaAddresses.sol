@@ -7,10 +7,10 @@ library Addresses {
     address public constant WETH_ADDR = 0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f;
     address public constant DAI_ADDR = 0x4AF15ec2A0BD43Db75dd04E62FAA3B8EF36b00d5;
     address public constant USDC_ADDR = 0x176211869cA2b568f2A7D4EE941E073a821EE1ff;
-    address public constant USDT_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant USDT_ADDR = 0xA219439258ca9da29E9Cc4cE5596924745e12B93;
     address internal constant WSTETH_ADDR = 0xB5beDd42000b71FddE22D3eE8a79Bd49A568fC8F;
     address internal constant STETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address public constant WBTC_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant WBTC_ADDR = 0x3aAB2285ddcDdaD8edf438C1bAB47e1a9D05a9b4;
     address public constant RENBTC_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant BANNED_TOKEN_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant YFI_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;

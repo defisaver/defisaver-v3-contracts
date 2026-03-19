@@ -143,9 +143,8 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         vm.startPrank(sender);
         SafeERC20.safeApprove(IERC20(config.supplyToken), walletAddr, type(uint256).max);
         SafeERC20.safeApprove(IERC20(reserveData.aTokenAddress), walletAddr, type(uint256).max);
-        IDebtToken(reserveDataDebt.variableDebtTokenAddress).approveDelegation(
-            walletAddr, type(uint256).max
-        );
+        IDebtToken(reserveDataDebt.variableDebtTokenAddress)
+            .approveDelegation(walletAddr, type(uint256).max);
         vm.stopPrank();
 
         _createAaveV3Position(true, config);
@@ -265,7 +264,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
                 supplyAmount: 40e18, // 40 WETH
                 borrowAmount: 50_000e6, // 50k USDT
                 initialBalance: 100e18 // 100 WETH
-             })
+            })
         );
 
         // WETH/USDC
@@ -276,7 +275,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
                 supplyAmount: 40e18, // 40 WETH
                 borrowAmount: 50_000e6, // 50k USDC
                 initialBalance: 100e18 // 100 WETH
-             })
+            })
         );
 
         // WBTC/USDT
@@ -287,18 +286,22 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
                 supplyAmount: 4e8, // 4 WBTC
                 borrowAmount: 100_000e6, // 100k USDT
                 initialBalance: 10e8 // 10 WBTC
-             })
+            })
         );
 
         // WBTC/GHO
         testConfigs.push(
             TestConfig({
                 supplyToken: Addresses.WBTC_ADDR,
-                borrowToken: block.chainid == 10 ? Addresses.USDT_ADDR : Addresses.GHO_TOKEN,
+                borrowToken: (block.chainid == 10 || block.chainid == 59_144)
+                    ? Addresses.USDT_ADDR
+                    : Addresses.GHO_TOKEN,
                 supplyAmount: 4e8, // 4 WBTC
-                borrowAmount: block.chainid == 10 ? 100_000e6 : 100_000e8, // 100k GHO
+                borrowAmount: (block.chainid == 10 || block.chainid == 59_144)
+                    ? 100_000e6
+                    : 100_000e8, // 100k GHO
                 initialBalance: 10e8 // 10 WBTC
-             })
+            })
         );
 
         // USDT/WETH
@@ -309,7 +312,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
                 supplyAmount: 75_000e6, // 75k USDT
                 borrowAmount: 5e18, // 5 WETH
                 initialBalance: 1_000_000e6 // 1M USDT
-             })
+            })
         );
     }
 }
