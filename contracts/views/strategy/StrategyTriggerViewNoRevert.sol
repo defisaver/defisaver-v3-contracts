@@ -2,8 +2,9 @@
 pragma solidity =0.8.24;
 
 import { IPoolV3 } from "../../interfaces/protocols/aaveV3/IPoolV3.sol";
-import { IPoolAddressesProvider } from
-    "../../interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
+import {
+    IPoolAddressesProvider
+} from "../../interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
 import { IERC20 } from "../../interfaces/token/IERC20.sol";
 import { ITrigger } from "../../interfaces/core/ITrigger.sol";
 import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
@@ -20,12 +21,7 @@ import { AaveV3Helper } from "../../actions/aaveV3/helpers/AaveV3Helper.sol";
 
 /// @title StrategyTriggerViewNoRevert - Helper contract to check whether a trigger is triggered or not for a given sub.
 /// @dev This contract is designed to avoid reverts from checking triggers.
-contract StrategyTriggerViewNoRevert is
-    StrategyModel,
-    CoreHelper,
-    SmartWalletUtils,
-    AaveV3Helper
-{
+contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, SmartWalletUtils, AaveV3Helper {
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     uint256 internal constant LTV_MASK =
@@ -132,8 +128,10 @@ contract StrategyTriggerViewNoRevert is
 
         for (uint256 i = 0; i < triggerIds.length; i++) {
             triggerAddr = registry.getAddr(triggerIds[i]);
-            try ITrigger(triggerAddr).isTriggered(_triggerCallData[i], _sub.triggerData[i])
-            returns (bool isTriggered) {
+            try ITrigger(triggerAddr)
+                .isTriggered(_triggerCallData[i], _sub.triggerData[i]) returns (
+                bool isTriggered
+            ) {
                 if (!isTriggered) {
                     return TriggerStatus.FALSE;
                 }
@@ -168,11 +166,10 @@ contract StrategyTriggerViewNoRevert is
     /*//////////////////////////////////////////////////////////////
                               VERIFY LOGIC
     //////////////////////////////////////////////////////////////*/
-    function _tryToVerifyRequiredAmountAndAllowance(address _smartWallet, bytes32[] memory _subData)
-        internal
-        view
-        returns (TriggerStatus)
-    {
+    function _tryToVerifyRequiredAmountAndAllowance(
+        address _smartWallet,
+        bytes32[] memory _subData
+    ) internal view returns (TriggerStatus) {
         try this.verifyRequiredAmountAndAllowance(_smartWallet, _subData) returns (
             TriggerStatus status
         ) {
@@ -264,17 +261,11 @@ contract StrategyTriggerViewNoRevert is
         return TriggerStatus.TRUE;
     }
 
-    function _verifyAaveV3Ltv0Position(address _smartWallet)
-        internal
-        view
-        returns (TriggerStatus)
-    {
+    function _verifyAaveV3Ltv0Position(address _smartWallet) internal view returns (TriggerStatus) {
         IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(DEFAULT_AAVE_MARKET).getPool());
-        address[] memory reserveList = lendingPool.getReservesList();
         DataTypes.UserConfigurationMap memory userConfig =
             lendingPool.getUserConfiguration(_smartWallet);
-
-        // Emode info
+        // eMode info
         uint256 eModeId = lendingPool.getUserEMode(_smartWallet);
         bool isInEmode = eModeId != 0;
         uint128 emodeCollateralBitmap;
@@ -283,21 +274,30 @@ contract StrategyTriggerViewNoRevert is
             emodeCollateralBitmap = lendingPool.getEModeCategoryCollateralBitmap(uint8(eModeId));
             emodeLtvZeroBitmap = lendingPool.getEModeCategoryLtvzeroBitmap(uint8(eModeId));
         }
-
-        for (uint256 i = 0; i < reserveList.length; ++i) {
-            DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(reserveList[i]);
-            if (!_isUsingAsCollateral(userConfig, reserveData.id)) continue;
-
-            bool isLtvZero;
-            if (isInEmode && _isReserveEnabledOnBitmap(emodeCollateralBitmap, reserveData.id)) {
-                isLtvZero = _isReserveEnabledOnBitmap(emodeLtvZeroBitmap, reserveData.id);
-            } else {
-                isLtvZero = _isReserveLtvZero(reserveData.configuration);
+        uint256 i = 0;
+        uint256 cachedUserConfig = userConfig.data;
+        while (cachedUserConfig != 0) {
+            // bits per reserve: [borrowingBit, collateralBit]
+            bool isEnabledAsCollateral = (cachedUserConfig & 2) != 0;
+            if (isEnabledAsCollateral) {
+                address asset = lendingPool.getReserveAddressById(uint16(i));
+                if (asset != address(0)) {
+                    DataTypes.ReserveConfigurationMap memory reserveConfig =
+                        lendingPool.getConfiguration(asset);
+                    bool isLtvZero;
+                    if (isInEmode && _isReserveEnabledOnBitmap(emodeCollateralBitmap, i)) {
+                        isLtvZero = _isReserveEnabledOnBitmap(emodeLtvZeroBitmap, i);
+                    } else {
+                        isLtvZero = _isReserveLtvZero(reserveConfig);
+                    }
+                    if (isLtvZero) return TriggerStatus.FALSE;
+                }
             }
-
-            if (isLtvZero) return TriggerStatus.FALSE;
+            cachedUserConfig = cachedUserConfig >> 2;
+            unchecked {
+                ++i;
+            }
         }
-
         return TriggerStatus.TRUE;
     }
 
