@@ -11,7 +11,7 @@ import {
 } from "../../../contracts/actions/aaveV4/AaveV4DelegateWithdrawWithSig.sol";
 import { AaveV4TestBase } from "./AaveV4TestBase.t.sol";
 
-contract AaveV4DelegateWithdrawWithSigTest is AaveV4TestBase {
+contract TestAaveV4DelegateWithdrawWithSig is AaveV4TestBase {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
