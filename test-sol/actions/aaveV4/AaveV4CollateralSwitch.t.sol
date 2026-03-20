@@ -80,13 +80,22 @@ contract TestAaveV4CollateralSwitch is AaveV4TestBase {
     function _switch(address _spoke, uint256 _reserveId, TestConfig memory _testConfig) internal {
         address onBehalf = _testConfig.isEoa ? sender : walletAddr;
 
-        bytes memory executeActionCallData = executeActionCalldata(
+        bytes memory disableCallData = executeActionCalldata(
             aaveV4CollateralSwitchEncode(_spoke, onBehalf, _reserveId, false), _testConfig.isDirect
         );
 
-        wallet.execute(address(cut), executeActionCallData, 0);
+        wallet.execute(address(cut), disableCallData, 0);
 
         ISpoke.UserAccountData memory userAccountData = ISpoke(_spoke).getUserAccountData(onBehalf);
         assertEq(userAccountData.activeCollateralCount, 0);
+
+        bytes memory enableCallData = executeActionCalldata(
+            aaveV4CollateralSwitchEncode(_spoke, onBehalf, _reserveId, true), _testConfig.isDirect
+        );
+
+        wallet.execute(address(cut), enableCallData, 0);
+
+        userAccountData = ISpoke(_spoke).getUserAccountData(onBehalf);
+        assertEq(userAccountData.activeCollateralCount, 1);
     }
 }

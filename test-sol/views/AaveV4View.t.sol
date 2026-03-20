@@ -38,7 +38,7 @@ contract TestAaveV4View is AaveV4TestBase {
     }
 
     function test_get_reserves_data() public view {
-        uint256[] memory reserveIds = new uint256[](3);
+        uint256[] memory reserveIds = new uint256[](2);
         reserveIds[0] = 0;
         reserveIds[1] = 1;
         AaveV4View.ReserveData[] memory reserveData = cut.getReservesData(CORE_SPOKE, reserveIds);

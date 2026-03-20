@@ -123,7 +123,9 @@ contract TestAaveV4Withdraw is AaveV4TestBase {
         if (_testConfig.takeMaxUint256) {
             assertEq(positionSuppliedAssetsAfter, 0);
         } else {
-            assertApproxEqAbs(positionSuppliedAssetsAfter, withdrawAmount, 1);
+            assertApproxEqAbs(
+                positionSuppliedAssetsAfter, positionSuppliedAssets - withdrawAmount, 1
+            );
         }
     }
 }

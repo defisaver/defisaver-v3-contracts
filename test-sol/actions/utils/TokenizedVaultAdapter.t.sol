@@ -148,14 +148,7 @@ contract TestTokenizedVaultAdapter is BaseTest, ActionsUtils {
     function _testWithdraw(address _vaultAddr) internal revertToSnapshot {
         IERC4626 vault = IERC4626(_vaultAddr);
         address assetAddr = vault.asset();
-
-        // deposit first to get real shares
-        uint256 assetValue = _getTestAmount(assetAddr);
-        give(assetAddr, sender, assetValue);
-        approveAsSender(sender, assetAddr, walletAddr, assetValue);
-        _executeVaultAction(_vaultAddr, assetValue, 0, TokenizedVaultAdapter.OperationId.DEPOSIT);
-
-        uint256 sharesReceived = balanceOf(_vaultAddr, sender);
+        uint256 sharesReceived = _depositAndGetShares(_vaultAddr, assetAddr);
         uint256 assetAmount = vault.previewRedeem(sharesReceived);
 
         approveAsSender(sender, _vaultAddr, walletAddr, sharesReceived);
@@ -171,14 +164,7 @@ contract TestTokenizedVaultAdapter is BaseTest, ActionsUtils {
     function _testRedeem(address _vaultAddr) internal revertToSnapshot {
         IERC4626 vault = IERC4626(_vaultAddr);
         address assetAddr = vault.asset();
-
-        // deposit first to get real shares
-        uint256 assetValue = _getTestAmount(assetAddr);
-        give(assetAddr, sender, assetValue);
-        approveAsSender(sender, assetAddr, walletAddr, assetValue);
-        _executeVaultAction(_vaultAddr, assetValue, 0, TokenizedVaultAdapter.OperationId.DEPOSIT);
-
-        uint256 shareAmount = balanceOf(_vaultAddr, sender);
+        uint256 shareAmount = _depositAndGetShares(_vaultAddr, assetAddr);
         uint256 minAssetsOut = vault.previewRedeem(shareAmount);
 
         approveAsSender(sender, _vaultAddr, walletAddr, shareAmount);
@@ -189,6 +175,18 @@ contract TestTokenizedVaultAdapter is BaseTest, ActionsUtils {
         assertGe(balanceOf(assetAddr, sender), minAssetsOut);
         assertEq(balanceOf(_vaultAddr, walletAddr), 0);
         assertEq(balanceOf(assetAddr, walletAddr), 0);
+    }
+
+    function _depositAndGetShares(address _vaultAddr, address _assetAddr)
+        internal
+        returns (uint256 shareAmount)
+    {
+        uint256 assetValue = _getTestAmount(_assetAddr);
+        give(_assetAddr, sender, assetValue);
+        approveAsSender(sender, _assetAddr, walletAddr, assetValue);
+        _executeVaultAction(_vaultAddr, assetValue, 0, TokenizedVaultAdapter.OperationId.DEPOSIT);
+
+        shareAmount = balanceOf(_vaultAddr, sender);
     }
 
     function _executeVaultAction(

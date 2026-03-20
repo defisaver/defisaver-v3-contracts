@@ -35,7 +35,7 @@ contract AaveV4RatioTrigger is ITrigger, AdminAuth, TriggerHelper, AaveV4RatioHe
 
         uint256 ratio = getRatio(sub.spoke, sub.user);
 
-        // HF will be max uint256 if user has no debt. In that case we don't want to trigger.
+        // Ratio will be max uint256 if user has no debt. In that case we don't want to trigger.
         if (ratio == type(uint256).max) return false;
 
         tempStorage.setBytes32(AAVE_V4_RATIO_KEY, bytes32(ratio));

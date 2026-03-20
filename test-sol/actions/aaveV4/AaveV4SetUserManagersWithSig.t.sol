@@ -54,9 +54,11 @@ contract TestAaveV4SetUserManagersWithSig is AaveV4TestBase {
         ISpoke.PositionManagerUpdate[] memory updates = new ISpoke.PositionManagerUpdate[](3);
         updates[0] = ISpoke.PositionManagerUpdate(GIVER_POSITION_MANAGER, true);
         updates[1] = ISpoke.PositionManagerUpdate(TAKER_POSITION_MANAGER, true);
+        updates[2] = ISpoke.PositionManagerUpdate(CONFIG_POSITION_MANAGER, true);
         _executeSetManagersWithSig(updates);
         assertTrue(spoke.isPositionManager(sender, GIVER_POSITION_MANAGER));
         assertTrue(spoke.isPositionManager(sender, TAKER_POSITION_MANAGER));
+        assertTrue(spoke.isPositionManager(sender, CONFIG_POSITION_MANAGER));
     }
 
     function test_revoke_single_manager() public {
