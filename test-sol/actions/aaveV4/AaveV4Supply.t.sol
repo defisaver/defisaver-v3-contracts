@@ -169,7 +169,7 @@ contract TestAaveV4Supply is AaveV4TestBase {
         if (_useAsCollateral) {
             _spoke.setUserPositionManager(CONFIG_POSITION_MANAGER, true);
             IConfigPositionManager(CONFIG_POSITION_MANAGER)
-                .setCanUpdateUsingAsCollateralPermission(address(_spoke), walletAddr, true);
+                .setCanSetUsingAsCollateralPermission(address(_spoke), walletAddr, true);
         }
         vm.stopPrank();
     }

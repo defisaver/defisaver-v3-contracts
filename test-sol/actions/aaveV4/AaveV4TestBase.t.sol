@@ -23,14 +23,13 @@ import { console2 } from "forge-std/console2.sol";
 contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
     uint256 internal constant RAY = 1e27;
 
-    address internal constant CORE_HUB = 0x3Ed2C9829FBCab6015E331a0352F8ae148217D70;
-    address internal constant CORE_SPOKE = 0x46539e9123A18c427e6b4DFF114c28CF405Cb023;
-    uint256 internal constant CORE_RESERVE_ID_WETH = 8;
-    uint256 internal constant CORE_RESERVE_ID_WSTETH = 9;
-    uint256 internal constant CORE_RESERVE_ID_WBTC = 11;
-    uint256 internal constant CORE_RESERVE_ID_CBBTC = 12;
-    uint256 internal constant CORE_RESERVE_ID_USDT = 0;
-    uint256 internal constant CORE_RESERVE_ID_USDC = 1;
+    address internal constant CORE_HUB = 0x630c2cFF89cb11E62dE047EaeD8C4B396906bD7D;
+    address internal constant CORE_SPOKE = 0x6488A415e9eA693EC7Ef32579507e1907c0AC798;
+    uint256 internal constant CORE_RESERVE_ID_WETH = 0;
+    uint256 internal constant CORE_RESERVE_ID_WSTETH = 1;
+    uint256 internal constant CORE_RESERVE_ID_WBTC = 3;
+    uint256 internal constant CORE_RESERVE_ID_USDC = 7;
+    uint256 internal constant CORE_RESERVE_ID_USDT = 8;
 
     struct AaveV4TestPair {
         address spoke;
@@ -174,7 +173,7 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
         _spoke.setUserPositionManager(GIVER_POSITION_MANAGER, true);
         _spoke.setUserPositionManager(CONFIG_POSITION_MANAGER, true);
         IConfigPositionManager(CONFIG_POSITION_MANAGER)
-            .setCanUpdateUsingAsCollateralPermission(address(_spoke), _walletAddr, true);
+            .setCanSetUsingAsCollateralPermission(address(_spoke), _walletAddr, true);
         vm.stopPrank();
     }
 
@@ -215,7 +214,7 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
     {
         IAaveV4Oracle oracle = IAaveV4Oracle(ISpoke(_spoke).ORACLE());
         uint256 price = oracle.getReservePrice(_reserveId);
-        uint256 oracleDecimals = oracle.DECIMALS();
+        uint256 oracleDecimals = oracle.decimals();
         uint256 tokenDecimals = IERC20(ISpoke(_spoke).getReserve(_reserveId).underlying).decimals();
         return (_amountUSD * 10 ** (tokenDecimals + oracleDecimals)) / price;
     }

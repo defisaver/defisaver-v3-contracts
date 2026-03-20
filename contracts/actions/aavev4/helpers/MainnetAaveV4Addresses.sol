@@ -2,7 +2,7 @@
 pragma solidity =0.8.24;
 
 contract MainnetAaveV4Addresses {
-    address internal constant GIVER_POSITION_MANAGER = 0x8675fBc9B6F8F3097c4C151A7a4838AFE23AB020;
-    address internal constant TAKER_POSITION_MANAGER = 0x063A6DFe3a02Ae18afDF293c86c76A8A6665Cb60;
-    address internal constant CONFIG_POSITION_MANAGER = 0x22a0Ee581644f55E1deB487804Ec9b4188B41457;
+    address internal constant GIVER_POSITION_MANAGER = 0x96795f26b1B70c7908f959862e7cBBbBd72B96cd;
+    address internal constant TAKER_POSITION_MANAGER = 0x1A2cc52338ab89231d0FF7D9530759F6C3fdB7eA;
+    address internal constant CONFIG_POSITION_MANAGER = 0x081454BA40dB1a7CBd42F763AdE36d8ffAEB8913;
 }

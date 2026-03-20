@@ -33,7 +33,6 @@ interface ISpoke {
         uint32 dynamicConfigKey;
     }
 
-    // TODO: Comment misleading, not subset, also why collateralRisk is here, redudant?
     /// @notice Reserve configuration. Subset of the `Reserve` struct.
     /// @dev collateralRisk The risk associated with a collateral asset, expressed in BPS.
     /// @dev paused True if all actions are prevented for the reserve.

@@ -9,11 +9,11 @@ pragma solidity =0.8.24;
 interface IAaveV4Oracle {
     /// @notice Returns the address of the spoke.
     /// @return The address of the spoke.
-    function SPOKE() external view returns (address);
+    function spoke() external view returns (address);
 
     /// @notice Returns the number of decimals used to return prices.
     /// @return The number of decimals.
-    function DECIMALS() external view returns (uint8);
+    function decimals() external view returns (uint8);
 
     /// @notice Returns the reserve price with `decimals` precision.
     /// @param reserveId The identifier of the reserve.

@@ -5,11 +5,11 @@ pragma solidity =0.8.24;
 import { IAaveV4Oracle } from "../interfaces/protocols/aaveV4/IAaveV4Oracle.sol";
 
 contract MockAaveV4Oracle is IAaveV4Oracle {
-    function SPOKE() external view returns (address) {
-        return address(0xBa97c5E52cd5BC3D7950Ae70779F8FfE92d40CdC);
+    function spoke() external view returns (address) {
+        return address(0x6488A415e9eA693EC7Ef32579507e1907c0AC798);
     }
 
-    function DECIMALS() external view returns (uint8) {
+    function decimals() external view returns (uint8) {
         return uint8(8);
     }
 

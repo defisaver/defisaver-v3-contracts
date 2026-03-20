@@ -392,7 +392,7 @@ const enableAaveV4EoaPositionManagers = async (
         );
         await configPM
             .connect(eoaSigner)
-            .setCanUpdateUsingAsCollateralPermission(spoke, proxyAddr, true);
+            .setCanSetUsingAsCollateralPermission(spoke, proxyAddr, true);
     }
 };
 

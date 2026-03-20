@@ -709,7 +709,7 @@ contract AaveV4View is AaveV4Helper {
             healthFactorForMaxBonus: liqConfig.healthFactorForMaxBonus,
             liquidationBonusFactor: liqConfig.liquidationBonusFactor,
             oracle: oracle,
-            oracleDecimals: IAaveV4Oracle(oracle).DECIMALS(),
+            oracleDecimals: IAaveV4Oracle(oracle).decimals(),
             reserveCount: spoke.getReserveCount()
         });
     }
