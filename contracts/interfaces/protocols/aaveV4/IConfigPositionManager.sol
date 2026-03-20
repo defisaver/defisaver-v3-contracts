@@ -12,11 +12,21 @@ interface IConfigPositionManager {
         bool canUpdateUserDynamicConfig;
     }
 
-    /// @notice Sets the global permission for a delegatee.
-    /// @param spoke The address of the spoke.
-    /// @param delegatee The address of the delegatee.
-    /// @param permission The new permission status.
-    function setGlobalPermission(address spoke, address delegatee, bool permission) external;
+    /// @notice Structured parameters for using as collateral permission permit intent.
+    /// @dev spoke The address of the Spoke.
+    /// @dev delegator The address of the delegator.
+    /// @dev delegatee The address of the delegatee.
+    /// @dev permission The new permission status.
+    /// @dev nonce The key-prefixed nonce for the signature.
+    /// @dev deadline The deadline for the intent.
+    struct SetCanSetUsingAsCollateralPermissionPermit {
+        address spoke;
+        address delegator;
+        address delegatee;
+        bool permission;
+        uint256 nonce;
+        uint256 deadline;
+    }
 
     /// @notice Sets the user risk premium permission for a delegatee.
     /// @param spoke The address of the spoke.
@@ -42,7 +52,7 @@ interface IConfigPositionManager {
     /// @param spoke The address of the spoke.
     /// @param delegatee The address of the delegatee.
     /// @param permission The new permission status.
-    function setCanUpdateUsingAsCollateralPermission(
+    function setCanSetUsingAsCollateralPermission(
         address spoke,
         address delegatee,
         bool permission
@@ -85,4 +95,28 @@ interface IConfigPositionManager {
         external
         view
         returns (ConfigPermissionValues memory);
+
+    /// @notice Sets the using as collateral permission for a delegatee using an EIP712-typed intent.
+    /// @dev Uses keyed-nonces where for each key's namespace nonce is consumed sequentially.
+    /// @param params The structured SetCanSetUsingAsCollateralPermissionPermit parameters.
+    /// @param signature The EIP712-compliant signature bytes.
+    function setCanSetUsingAsCollateralPermissionWithSig(
+        SetCanSetUsingAsCollateralPermissionPermit calldata params,
+        bytes calldata signature
+    ) external;
+
+    /// @notice Returns the EIP-712 domain separator.
+    function DOMAIN_SEPARATOR() external view returns (bytes32);
+
+    /// @notice Returns the type hash for the SetCanSetUsingAsCollateralPermissionPermit intent.
+    function SET_CAN_SET_USING_AS_COLLATERAL_PERMISSION_PERMIT_TYPEHASH()
+        external
+        view
+        returns (bytes32);
+
+    /// @notice Returns the next unused nonce for an address and key. Result contains the key prefix.
+    /// @param owner The address of the nonce owner.
+    /// @param key The key which specifies namespace of the nonce.
+    /// @return keyNonce The first 24 bytes are for the key, & the last 8 bytes for the nonce.
+    function nonces(address owner, uint192 key) external view returns (uint256 keyNonce);
 }
