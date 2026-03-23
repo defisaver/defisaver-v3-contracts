@@ -14,7 +14,7 @@ import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 /// @dev The trigger expects the lowerPrice and upperPrice inputs to be scaled by PRICE_SCALE.
 contract AaveV4QuotePriceRangeTrigger is ITrigger, AdminAuth, TriggerHelper {
     /// @dev Expected subbed price scale.
-    uint256 public constant PRICE_SCALE = 1e8;
+    uint256 public constant PRICE_SCALE = 1e18;
 
     /// @param spoke Address of the spoke.
     /// @param baseTokenId Reserve id of the base token which is quoted.
