@@ -129,9 +129,9 @@ const runCloseTests = () => {
                 pair.collReserveId,
                 debtAsset.address,
                 pair.debtReserveId,
-                config.stopLossPrice,
+                config.stopLossPrice.toString(),
                 config.stopLossType,
-                config.takeProfitPrice,
+                config.takeProfitPrice.toString(),
                 config.takeProfitType,
             );
 

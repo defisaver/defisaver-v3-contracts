@@ -92,7 +92,7 @@ const runRepayOnPriceTests = () => {
             const debtAmountInUSD = '300';
             const repayAmountInUSD = '100';
             const targetRatioRepay = 390;
-            const triggerPrice = 1000000;
+            const triggerPrice = '1000000';
 
             const collAsset = getAssetInfo(pair.collSymbol, chainIds[network]);
             const debtAsset = getAssetInfo(pair.debtSymbol, chainIds[network]);
