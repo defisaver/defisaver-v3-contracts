@@ -8,7 +8,7 @@ async function main() {
     await topUp(senderAcc.address, network);
 
     const mockArtifact = await hre.artifacts.readArtifact('MockAuthorityAaveV4');
-    const spokeConfig = ['1099511627774', '1099511627774', '16777214', true, false];
+    const spokeConfig = ['1099511627775', '1099511627775', '16777215', true, false];
 
     // Set mock authority for all hubs
     for (const hubAddr of HUBS) {

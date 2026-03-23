@@ -23,6 +23,10 @@ async function main() {
     const aaveV4SetUserManagersWithSig = await redeploy('AaveV4SetUserManagersWithSig', true);
     const aaveV4DelegateWithdrawWithSig = await redeploy('AaveV4DelegateWithdrawWithSig', true);
     const aaveV4DelegateBorrowWithSig = await redeploy('AaveV4DelegateBorrowWithSig', true);
+    const aaveV4DelegateSetUsingAsCollateralWithSig = await redeploy(
+        'AaveV4DelegateSetUsingAsCollateralWithSig',
+        true,
+    );
 
     console.log('AaveV4View:', aaveV4View.address);
     console.log('AaveV4Supply:', aaveV4Supply.address);
@@ -39,6 +43,10 @@ async function main() {
     console.log('AaveV4SetUserManagersWithSig:', aaveV4SetUserManagersWithSig.address);
     console.log('AaveV4DelegateWithdrawWithSig:', aaveV4DelegateWithdrawWithSig.address);
     console.log('AaveV4DelegateBorrowWithSig:', aaveV4DelegateBorrowWithSig.address);
+    console.log(
+        'AaveV4DelegateSetUsingAsCollateralWithSig:',
+        aaveV4DelegateSetUsingAsCollateralWithSig.address,
+    );
 
     await deployAndLogAllStrategiesAndBundles();
 }
