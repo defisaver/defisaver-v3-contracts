@@ -8,6 +8,7 @@ import {
 import { IERC20 } from "../../interfaces/token/IERC20.sol";
 import { ITrigger } from "../../interfaces/core/ITrigger.sol";
 import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
+import { DataTypes } from "../../interfaces/protocols/aaveV3/DataTypes.sol";
 
 import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
 import { BundleStorage } from "../../core/strategy/BundleStorage.sol";
@@ -22,6 +23,9 @@ import { AaveV3Helper } from "../../actions/aaveV3/helpers/AaveV3Helper.sol";
 /// @dev This contract is designed to avoid reverts from checking triggers.
 contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, SmartWalletUtils, AaveV3Helper {
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
+
+    uint256 internal constant LTV_MASK =
+        0x000000000000000000000000000000000000000000000000000000000000FFFF;
 
     address internal constant DEFAULT_SPARK_MARKET_MAINNET =
         0x02C3eA4e34C0cBd694D2adFa2c690EECbC1793eE;
@@ -141,8 +145,13 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, SmartWalletUt
             return _tryToVerifyRequiredAmountAndAllowance(smartWallet, _sub.subData);
         }
 
-        // check AaveV3 leverage management and close strategies for all chains
-        if (strategyId.isAaveV3LeverageManagementStrategy() || strategyId.isAaveV3CloseStrategy()) {
+        // check min debt and ltv0 for AaveV3 leverage management strategies
+        if (strategyId.isAaveV3LeverageManagementStrategy()) {
+            return _tryToVerifyAaveV3Conditions(smartWallet);
+        }
+
+        // check min debt for AaveV3 close strategies
+        if (strategyId.isAaveV3CloseStrategy()) {
             return _verifyAaveV3MinDebtPosition(smartWallet);
         }
 
@@ -224,5 +233,98 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, SmartWalletUt
         }
 
         return _userDebtInUSD >= MIN_DEBT_IN_USD_L2;
+    }
+
+    function _tryToVerifyAaveV3Conditions(address _smartWallet)
+        internal
+        view
+        returns (TriggerStatus)
+    {
+        try this.verifyAaveV3Conditions(_smartWallet) returns (TriggerStatus status) {
+            return status;
+        } catch {
+            return TriggerStatus.REVERT;
+        }
+    }
+
+    function verifyAaveV3Conditions(address _smartWallet) external view returns (TriggerStatus) {
+        // If not enough debt, return FALSE
+        if (_verifyAaveV3MinDebtPosition(_smartWallet) == TriggerStatus.FALSE) {
+            return TriggerStatus.FALSE;
+        }
+        // If any collateral is at 0% LTV, return FALSE
+        if (_verifyAaveV3Ltv0Position(_smartWallet) == TriggerStatus.FALSE) {
+            return TriggerStatus.FALSE;
+        }
+
+        // Otherwise, return TRUE
+        return TriggerStatus.TRUE;
+    }
+
+    function _verifyAaveV3Ltv0Position(address _smartWallet) internal view returns (TriggerStatus) {
+        IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(DEFAULT_AAVE_MARKET).getPool());
+        DataTypes.UserConfigurationMap memory userConfig =
+            lendingPool.getUserConfiguration(_smartWallet);
+        // eMode info
+        uint256 eModeId = lendingPool.getUserEMode(_smartWallet);
+        bool isInEmode = eModeId != 0;
+        uint128 emodeCollateralBitmap;
+        uint128 emodeLtvZeroBitmap;
+        if (isInEmode) {
+            emodeCollateralBitmap = lendingPool.getEModeCategoryCollateralBitmap(uint8(eModeId));
+            emodeLtvZeroBitmap = lendingPool.getEModeCategoryLtvzeroBitmap(uint8(eModeId));
+        }
+        uint256 i = 0;
+        uint256 cachedUserConfig = userConfig.data;
+        while (cachedUserConfig != 0) {
+            // bits per reserve: [borrowingBit, collateralBit]
+            bool isEnabledAsCollateral = (cachedUserConfig & 2) != 0;
+            if (isEnabledAsCollateral) {
+                address asset = lendingPool.getReserveAddressById(uint16(i));
+                if (asset != address(0)) {
+                    DataTypes.ReserveConfigurationMap memory reserveConfig =
+                        lendingPool.getConfiguration(asset);
+                    bool isLtvZero;
+                    if (isInEmode && _isReserveEnabledOnBitmap(emodeCollateralBitmap, i)) {
+                        isLtvZero = _isReserveEnabledOnBitmap(emodeLtvZeroBitmap, i);
+                    } else {
+                        isLtvZero = _isReserveLtvZero(reserveConfig);
+                    }
+                    if (isLtvZero) return TriggerStatus.FALSE;
+                }
+            }
+            cachedUserConfig = cachedUserConfig >> 2;
+            unchecked {
+                ++i;
+            }
+        }
+        return TriggerStatus.TRUE;
+    }
+
+    function _isUsingAsCollateral(
+        DataTypes.UserConfigurationMap memory _userConfig,
+        uint256 _reserveIndex
+    ) internal pure returns (bool) {
+        unchecked {
+            return (_userConfig.data >> ((_reserveIndex << 1) + 1)) & 1 != 0;
+        }
+    }
+
+    function _isReserveEnabledOnBitmap(uint128 _bitmap, uint256 _reserveIndex)
+        internal
+        pure
+        returns (bool)
+    {
+        unchecked {
+            return (_bitmap >> _reserveIndex) & 1 != 0;
+        }
+    }
+
+    function _isReserveLtvZero(DataTypes.ReserveConfigurationMap memory _reserveConfig)
+        internal
+        pure
+        returns (bool)
+    {
+        return (_reserveConfig.data & LTV_MASK) == 0;
     }
 }
