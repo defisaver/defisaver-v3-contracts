@@ -7,8 +7,8 @@ async function main() {
     const senderAcc = new hre.ethers.Wallet(process.env.PRIV_KEY_MAINNET, hre.ethers.provider);
     await topUp(senderAcc.address, network);
 
-    const spokeAddr = '0x46539e9123A18c427e6b4DFF114c28CF405Cb023';
-    const debtReserveId = 1;
+    const spokeAddr = '0xF1Fa1042474dC8bd4Ef830Fe70aE22C85A326729';
+    const debtReserveId = 4;
     const proxyAddress = '0xf1f66f2C743C8f786b2cC7F4fe4425d9F6dF7843';
 
     const {
