@@ -45,13 +45,7 @@ contract TestTokenizedVaultAdapter is BaseTest, ActionsUtils {
         vaults.push(0x90551c1795392094FE6D29B758EcCD233cFAa260); // Fluid WETH
         vaults.push(0x5C20B550819128074FD538Edf79791733ccEdd18); // Fluid USDT
         // ----------------------------- AAVE V4 -----------------------------
-        // TODO:AaveV4 Uncomment when tokenized spokes are deployed.
-        // vaults.push(0x320Bec4fB7a25e64c003A007D0AeF7AB3D6C30d7); // USDC_PLUS
-        // vaults.push(0x0A0507F7A1129892b5cf74b8B4e911442c466b87); // USDC_PRIME
-        // vaults.push(0x837Ab872A665e0CF467d41cF56a054031b4A38bc); // WBTC_CORE
-        // vaults.push(0xeae98b8a1798738182B2123DF1eB93d97BD29F34); // WBTC_PRIME
-        // vaults.push(0x3961a75099E986F59a1a31c6f945061641dFD2b2); // WETH_CORE
-        // vaults.push(0xa411826a6ef5d289c0FAa7d5B45FE8aAB52257F6); // WETH_PRIME
+        vaults.push(0x486415fb1F8b062c89ED548f871cf64304AACb31); // USDC_PRIME
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -210,6 +204,6 @@ contract TestTokenizedVaultAdapter is BaseTest, ActionsUtils {
 
     function _getTestAmount(address _asset) internal view returns (uint256) {
         uint256 decimals = IERC20(_asset).decimals();
-        return 1000 * (10 ** decimals);
+        return 100 * (10 ** decimals);
     }
 }

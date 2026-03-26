@@ -196,29 +196,28 @@ contract TestAaveV4View is AaveV4TestBase {
         _logEOAApprovalData(data);
     }
 
-    // TODO:AaveV4 Uncomment when tokenized spokes are deployed.
-    // function test_get_tokenization_spokes_data() public {
-    //     address USDC_PRIME = 0x0A0507F7A1129892b5cf74b8B4e911442c466b87;
-    //     ITokenizationSpoke ts = ITokenizationSpoke(USDC_PRIME);
-    //     address usdc = ts.asset();
+    function test_get_tokenization_spokes_data() public {
+        address USDC_PRIME = 0x486415fb1F8b062c89ED548f871cf64304AACb31;
+        ITokenizationSpoke ts = ITokenizationSpoke(USDC_PRIME);
+        address usdc = ts.asset();
 
-    //     uint256 depositAmount = 1000 * (10 ** IERC20(usdc).decimals());
-    //     give(usdc, bob, depositAmount);
+        uint256 depositAmount = 1000 * (10 ** IERC20(usdc).decimals());
+        give(usdc, bob, depositAmount);
 
-    //     vm.startPrank(bob);
-    //     IERC20(usdc).approve(USDC_PRIME, depositAmount);
-    //     ts.deposit(depositAmount, bob);
-    //     vm.stopPrank();
+        vm.startPrank(bob);
+        IERC20(usdc).approve(USDC_PRIME, depositAmount);
+        ts.deposit(depositAmount, bob);
+        vm.stopPrank();
 
-    //     address[] memory spokes = new address[](1);
-    //     spokes[0] = USDC_PRIME;
+        address[] memory spokes = new address[](1);
+        spokes[0] = USDC_PRIME;
 
-    //     AaveV4View.TokenizationSpokeData[] memory data = cut.getTokenizationSpokesData(spokes, bob);
-    //     for (uint256 i = 0; i < data.length; i++) {
-    //         _logTokenizationSpokeData(data[i]);
-    //         _logSeparator();
-    //     }
-    // }
+        AaveV4View.TokenizationSpokeData[] memory data = cut.getTokenizationSpokesData(spokes, bob);
+        for (uint256 i = 0; i < data.length; i++) {
+            _logTokenizationSpokeData(data[i]);
+            _logSeparator();
+        }
+    }
 
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
