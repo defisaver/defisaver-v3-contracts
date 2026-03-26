@@ -23,8 +23,8 @@ import { console2 } from "forge-std/console2.sol";
 contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
     uint256 internal constant RAY = 1e27;
 
-    address internal constant CORE_HUB = 0x630c2cFF89cb11E62dE047EaeD8C4B396906bD7D;
-    address internal constant CORE_SPOKE = 0x6488A415e9eA693EC7Ef32579507e1907c0AC798;
+    address internal constant CORE_HUB = 0xCca852Bc40e560adC3b1Cc58CA5b55638ce826c9;
+    address internal constant CORE_SPOKE = 0x94e7A5dCbE816e498b89aB752661904E2F56c485;
     uint256 internal constant CORE_RESERVE_ID_WETH = 0;
     uint256 internal constant CORE_RESERVE_ID_WSTETH = 1;
     uint256 internal constant CORE_RESERVE_ID_WBTC = 3;
@@ -101,7 +101,9 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
         uint256 supplyAmount =
             _amountInUSDPrice(_testPair.spoke, _testPair.collReserveId, _supplyAmountInUSD);
 
-        if (!_isValidSupply(_testPair.spoke, supplyAmount, reserve)) return false;
+        if (!_isValidSupply(_testPair.spoke, _testPair.collReserveId, supplyAmount, reserve)) {
+            return false;
+        }
 
         if (_isEoaPosition) {
             _enableEoaSupplyPositionManagers(ISpoke(_testPair.spoke), sender, walletAddr);
@@ -141,7 +143,7 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
 
         uint256 borrowAmount = _amountInUSDPrice(_spoke, _reserveId, _borrowAmountInUSD);
 
-        if (!_isValidBorrow(_spoke, borrowAmount, reserve)) {
+        if (!_isValidBorrow(_spoke, _reserveId, borrowAmount, reserve)) {
             console2.log("Invalid borrow. Check caps and reserve/spoke status.");
             return false;
         }
@@ -219,13 +221,13 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
         return (_amountUSD * 10 ** (tokenDecimals + oracleDecimals)) / price;
     }
 
-    function _isValidSupply(address _spoke, uint256 _amount, ISpoke.Reserve memory _reserve)
-        internal
-        view
-        returns (bool)
-    {
-        ISpoke.ReserveConfig memory reserveConfig =
-            ISpoke(_spoke).getReserveConfig(_reserve.assetId);
+    function _isValidSupply(
+        address _spoke,
+        uint256 _reserveId,
+        uint256 _amount,
+        ISpoke.Reserve memory _reserve
+    ) internal view returns (bool) {
+        ISpoke.ReserveConfig memory reserveConfig = ISpoke(_spoke).getReserveConfig(_reserveId);
         if (reserveConfig.paused || reserveConfig.frozen) {
             console2.log("Reserve is halted or frozen, skipping test");
             return false;
@@ -250,13 +252,13 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
         return true;
     }
 
-    function _isValidBorrow(address _spoke, uint256 _amount, ISpoke.Reserve memory _reserve)
-        internal
-        view
-        returns (bool)
-    {
-        ISpoke.ReserveConfig memory reserveConfig =
-            ISpoke(_spoke).getReserveConfig(_reserve.assetId);
+    function _isValidBorrow(
+        address _spoke,
+        uint256 _reserveId,
+        uint256 _amount,
+        ISpoke.Reserve memory _reserve
+    ) internal view returns (bool) {
+        ISpoke.ReserveConfig memory reserveConfig = ISpoke(_spoke).getReserveConfig(_reserveId);
         if (reserveConfig.paused || reserveConfig.frozen || !reserveConfig.borrowable) {
             console2.log("Reserve is paused or frozen or not borrowable, skipping test");
             return false;
