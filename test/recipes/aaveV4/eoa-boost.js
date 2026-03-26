@@ -306,12 +306,7 @@ describe('AaveV4-EOA-Boost', function () {
             refundReceiver: hre.ethers.constants.AddressZero,
             nonce: 0,
         };
-        const safeSig = await signSafeTx(
-            { address: predictedSafe },
-            safeTxParams,
-            senderAcc,
-            123456789, // TODO:AaveV4 return back to 1 once deployed.
-        );
+        const safeSig = await signSafeTx({ address: predictedSafe }, safeTxParams, senderAcc, 1);
 
         const view = await (await hre.ethers.getContractFactory('AaveV4View')).deploy();
         const loanDataPre = await view.getLoanData(spokeAddr, senderAcc.address);

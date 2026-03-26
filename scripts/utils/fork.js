@@ -61,12 +61,9 @@ const topUp = async (account, network = 'mainnet') => {
         'Content-Type': 'application/json',
     };
 
-    console.log(network); // TODO:AaveV4: Remove once live.
-
     try {
-        // TODO:AaveV4: Return back to https://virtual.mainnet.rpc.tenderly.co/${process.env.FORK_ID} once live.
         await axios.post(
-            `https://virtual.mainnet.us-east.rpc.tenderly.co/${process.env.FORK_ID}`,
+            `https://virtual.${network}.eu.rpc.tenderly.co/${process.env.FORK_ID}`,
             body,
             { headers },
         );
