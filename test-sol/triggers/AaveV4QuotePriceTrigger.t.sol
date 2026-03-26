@@ -60,7 +60,7 @@ contract TestAaveV4QuotePriceTrigger is AaveV4TestBase {
             uint256 collPrice = oracle.getReservePrice(pair.collReserveId);
             uint256 debtPrice = oracle.getReservePrice(pair.debtReserveId);
 
-            uint256 currentPrice = collPrice * 1e8 / debtPrice;
+            uint256 currentPrice = collPrice * 1e18 / debtPrice;
 
             uint256 triggerPrice = _shouldTrigger
                 ? _isOver ? currentPrice / 2 : currentPrice * 2

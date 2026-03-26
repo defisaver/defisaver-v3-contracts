@@ -114,7 +114,9 @@ contract TestAaveV4Supply is AaveV4TestBase {
         ISpoke.Reserve memory reserve = spoke.getReserve(_testPair.collReserveId);
         uint256 supplyAmount = _amountInUSDPrice(_testPair.spoke, _testPair.collReserveId, 10);
 
-        if (!_isValidSupply(_testPair.spoke, supplyAmount, reserve)) return;
+        if (!_isValidSupply(_testPair.spoke, _testPair.collReserveId, supplyAmount, reserve)) {
+            return;
+        }
 
         address onBehalf = _testConfig.isEoa ? sender : walletAddr;
 
