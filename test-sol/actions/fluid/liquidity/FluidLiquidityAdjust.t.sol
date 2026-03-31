@@ -435,6 +435,10 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
 
     function _baseTest(TestConfig memory _config) internal {
         for (uint256 i = 0; i < vaults.length; ++i) {
+            if (isMissingVault(vaults[i])) {
+                logVaultNotFound(vaults[i]);
+                continue;
+            }
             IFluidVaultT1.ConstantViews memory constants = IFluidVaultT1(vaults[i]).constantsView();
             TempLocalVars memory vars;
 

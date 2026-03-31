@@ -63,4 +63,25 @@ library Addresses {
     // Summerfi
     address public constant SF_PROXY_FACTORY = 0xF7B75183A2829843dB06266c114297dfbFaeE2b6;
     address public constant SF_PROXY_GUARD = 0xCe91349d2A4577BBd0fC91Fe6019600e047f2847;
+
+    // Fluid vaults
+    address internal constant FLUID_VAULT_NOT_FOUND = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant FLUID_T1_VAULT_0 = 0x1982CC7b1570C2503282d0A0B41F69b3B28fdcc3; // id:14 - wstETH/USDC
+    address public constant FLUID_T1_VAULT_1 = 0xb4F3bf2d96139563777C0231899cE06EE95Cc946; // id:15 - wstETH/USDT
+    address public constant FLUID_T1_VAULT_2 = 0x6F72895Cf6904489Bcd862c941c3D02a3eE4f03e; // id:21 - WBTC/USDC
+    address public constant FLUID_T1_VAULT_3 = 0x6F72895Cf6904489Bcd862c941c3D02a3eE4f03e; // id:25 - wstETH/WBTC
+    address public constant FLUID_T1_VAULT_4 = 0x025C1494b7d15aa931E011f6740E0b46b2136cb9; // id:79 - rsETH/wstETH
+    address public constant FLUID_T1_VAULT_5 = 0x01c7c1c41dea58b043e700eFb23Dc077F12a125e; // id:29 - cbBTC/USDC
+    address public constant FLUID_T1_VAULT_6 = 0x0C8C77B7FF4c2aF7F6CEBbe67350A490E3DD6cB3; // id:11 - ETH/USDC
+    address public constant FLUID_T1_VAULT_7 = 0x82B27fA821419F5689381b565a8B0786aA2548De; // id:13 - wstETH/ETH
+    address public constant FLUID_T2_VAULT_0 = 0xf7FA55D14C71241e3c970E30C509Ff58b5f5D557; // id:53 - WBTC-cbBTC/USDT
+    address public constant FLUID_T2_VAULT_1 = 0xb4a15526d427f4d20b0dAdaF3baB4177C85A699A; // id:74 - weETH-ETH/wstETH
+    address public constant FLUID_T2_VAULT_2 = 0x7503b58Bb29937e7E2980f70D3FD021B7ebeA6d0; // id:92 - sUSDe-USDT/USDT
+    address public constant FLUID_T3_VAULT_0 = 0x3E11B9aEb9C7dBbda4DD41477223Cc2f3f24b9d7; // id:45 - ETH/USDC-USDT
+    address public constant FLUID_T3_VAULT_1 = 0x221E35b5655A1eEB3C42c4DeFc39648531f6C9CF; // id:46 - wstETH/USDC-USDT
+    address public constant FLUID_T3_VAULT_2 = 0x47b6e2c8a0cB072198f17ccC6C7634dCc7126c3E; // id:49 - cbBTC/USDC-USDT
+    address public constant FLUID_T4_VAULT_0 = 0x528CF7DBBff878e02e48E83De5097F8071af768D; // id:44 - wstETH-ETH/wstETH-ETH
+    address public constant FLUID_T4_VAULT_1 = 0xDCe03288F9A109150f314ED0Ca9b59a690300d9d; // id:51 - WBTC-cbBTC/WBTC-cbBTC
+    address public constant FLUID_T4_VAULT_2 = 0xB170B94BeFe21098966aa9905Da6a2F569463A21; // id:98 - sUSDe-USDT/USDC-USDT
+    address public constant FLUID_T4_VAULT_3 = 0xaEac94D417BF8d8bb3A44507100Ab8c0D3b12cA1; // id:99 - USDe-USDT/USDC-USDT
 }

@@ -63,4 +63,25 @@ library Addresses {
     // Summerfi
     address public constant SF_PROXY_FACTORY = 0xCcB155E5B2A3201d5e10EdAa6e9F908871d1722B;
     address public constant SF_PROXY_GUARD = 0x746a6f9Acb42bcB43C08C829A035DBa7Db9E7385;
+
+    // Fluid vaults
+    address internal constant FLUID_VAULT_NOT_FOUND = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant FLUID_T1_VAULT_0 = 0xA0F83Fc5885cEBc0420ce7C7b139Adc80c4F4D91; // wstETH/USDC
+    address public constant FLUID_T1_VAULT_1 = 0x51197586F6A9e2571868b6ffaef308f3bdfEd3aE; // wstETH/USDT
+    address public constant FLUID_T1_VAULT_2 = 0xE16A6f5359ABB1f61cE71e25dD0932e3E00B00eB; // WBTC/USDC
+    address public constant FLUID_T1_VAULT_3 = 0x92643E964CA4b2c165a95CA919b0A819acA6D5F1; // wstETH/WBTC
+    address public constant FLUID_T1_VAULT_4 = FLUID_VAULT_NOT_FOUND; // rsETH/wstETH not found
+    address public constant FLUID_T1_VAULT_5 = 0x1982CC7b1570C2503282d0A0B41F69b3B28fdcc3; // cbBTC/USDC
+    address public constant FLUID_T1_VAULT_6 = 0xeAbBfca72F8a8bf14C4ac59e69ECB2eB69F0811C; // ETH/USDC
+    address public constant FLUID_T1_VAULT_7 = 0x1c2bB46f36561bc4F05A94BD50916496aa501078; // wstETH/ETH
+    address public constant FLUID_T2_VAULT_0 = FLUID_VAULT_NOT_FOUND; // WBTC-cbBTC/USDT not found
+    address public constant FLUID_T2_VAULT_1 = 0x3996464c0fCCa8183e13ea5E5e74375e2c8744Dd; // weETH-ETH/wstETH
+    address public constant FLUID_T2_VAULT_2 = FLUID_VAULT_NOT_FOUND; // sUSDe-USDT/USDT not found
+    address public constant FLUID_T3_VAULT_0 = FLUID_VAULT_NOT_FOUND; // ETH/USDC-USDT not found
+    address public constant FLUID_T3_VAULT_1 = FLUID_VAULT_NOT_FOUND; // wstETH/USDC-USDT not found
+    address public constant FLUID_T3_VAULT_2 = FLUID_VAULT_NOT_FOUND; // cbBTC/USDC-USDT not found
+    address public constant FLUID_T4_VAULT_0 = 0xeAEf563015634a9d0EE6CF1357A3b205C35e028D; // wstETH-ETH/wstETH-ETH
+    address public constant FLUID_T4_VAULT_1 = FLUID_VAULT_NOT_FOUND; // WBTC-cbBTC/WBTC-cbBTC not found
+    address public constant FLUID_T4_VAULT_2 = FLUID_VAULT_NOT_FOUND; // sUSDe-USDT/USDC-USDT not found
+    address public constant FLUID_T4_VAULT_3 = FLUID_VAULT_NOT_FOUND; // USDe-USDT/USDC-USDT not found
 }
