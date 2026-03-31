@@ -61,4 +61,25 @@ library Addresses {
     address public constant INSTADAPP_MASTER_ACCOUNT = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant SF_PROXY_FACTORY = 0xaaf64927BaFe68E389DE3627AA6b52D81bdA2323;
     address public constant SF_PROXY_GUARD = 0x916411367fC2f0dc828790eA03CF317eC74E24E4;
+
+    // Fluid vaults
+    address public constant FLUID_VAULT_NOT_FOUND = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant FLUID_T1_VAULT_0 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T1_VAULT_1 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T1_VAULT_2 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T1_VAULT_3 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T1_VAULT_4 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T1_VAULT_5 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T1_VAULT_6 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T1_VAULT_7 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T2_VAULT_0 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T2_VAULT_1 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T2_VAULT_2 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T3_VAULT_0 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T3_VAULT_1 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T3_VAULT_2 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T4_VAULT_0 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T4_VAULT_1 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T4_VAULT_2 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T4_VAULT_3 = FLUID_VAULT_NOT_FOUND;
 }
