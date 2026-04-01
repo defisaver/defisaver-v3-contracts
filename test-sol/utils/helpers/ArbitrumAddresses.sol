@@ -69,9 +69,9 @@ library Addresses {
     address public constant FLUID_T1_VAULT_0 = 0xA0F83Fc5885cEBc0420ce7C7b139Adc80c4F4D91; // wstETH/USDC
     address public constant FLUID_T1_VAULT_1 = 0x51197586F6A9e2571868b6ffaef308f3bdfEd3aE; // wstETH/USDT
     address public constant FLUID_T1_VAULT_2 = 0xE16A6f5359ABB1f61cE71e25dD0932e3E00B00eB; // WBTC/USDC
-    address public constant FLUID_T1_VAULT_3 = 0x92643E964CA4b2c165a95CA919b0A819acA6D5F1; // wstETH/WBTC
+    address public constant FLUID_T1_VAULT_3 = FLUID_VAULT_NOT_FOUND; // wstETH/WBTC
     address public constant FLUID_T1_VAULT_4 = FLUID_VAULT_NOT_FOUND; // rsETH/wstETH not found
-    address public constant FLUID_T1_VAULT_5 = 0x1982CC7b1570C2503282d0A0B41F69b3B28fdcc3; // cbBTC/USDC
+    address public constant FLUID_T1_VAULT_5 = FLUID_VAULT_NOT_FOUND; // cbBTC/USDC
     address public constant FLUID_T1_VAULT_6 = 0xeAbBfca72F8a8bf14C4ac59e69ECB2eB69F0811C; // ETH/USDC
     address public constant FLUID_T1_VAULT_7 = 0x1c2bB46f36561bc4F05A94BD50916496aa501078; // wstETH/ETH
     address public constant FLUID_T2_VAULT_0 = FLUID_VAULT_NOT_FOUND; // WBTC-cbBTC/USDT not found
