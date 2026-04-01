@@ -36,7 +36,7 @@ contract TestAaveV4RatioCheck is AaveV4TestBase {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkAaveV4DevNet();
+        forkMainnetLatest();
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

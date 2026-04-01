@@ -30,7 +30,7 @@ contract TestAaveV4SetUserManagersWithSig is AaveV4TestBase {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkAaveV4DevNet();
+        forkMainnetLatest();
 
         sender = vm.addr(SIGNER_PK);
         wallet = new SmartWallet(sender);

@@ -17,7 +17,7 @@ contract TestAaveV4QuotePriceTrigger is AaveV4TestBase {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkAaveV4DevNet();
+        forkMainnetLatest();
 
         cut = new AaveV4QuotePriceTrigger();
     }
