@@ -4854,47 +4854,47 @@
     },
     {
         "name": "AaveV4Supply",
-        "address": "0x089c2b1DB0f68D94E67e8d969509D45B26fD0ceC",
+        "address": "0x64702507aFbB61cCB5e116Eb5664b4CDC8e45100",
         "id": "0x06ecb781",
         "path": "contracts/actions/aaveV4/AaveV4Supply.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x089c2b1DB0f68D94E67e8d969509D45B26fD0ceC"]
     },
     {
         "name": "AaveV4Withdraw",
-        "address": "0x563EC9e76b335A8218c04Ac4Ae9A58ae464CaAD6",
+        "address": "0x5AAffaf14bFf54DcE21304056d3156EBfb67720c",
         "id": "0x13a9a106",
         "path": "contracts/actions/aaveV4/AaveV4Withdraw.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x563EC9e76b335A8218c04Ac4Ae9A58ae464CaAD6"]
     },
     {
         "name": "AaveV4Borrow",
-        "address": "0x2a560B72Fb88b9Bb90dd997CD94D7611740961B9",
+        "address": "0x01aEEA62EF580C4BCf54e9CA0856104FE3F01b3B",
         "id": "0x3f528c6f",
         "path": "contracts/actions/aaveV4/AaveV4Borrow.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x2a560B72Fb88b9Bb90dd997CD94D7611740961B9"]
     },
     {
         "name": "AaveV4Payback",
-        "address": "0xEBafec920888E735e61353A8792cBd452B8406a0",
+        "address": "0x6d7BfbfaD68Ea48C423493c92026e920931d343d",
         "id": "0xe5585d1e",
         "path": "contracts/actions/aaveV4/AaveV4Payback.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xEBafec920888E735e61353A8792cBd452B8406a0"]
     },
     {
         "name": "AaveV4CollateralSwitch",
