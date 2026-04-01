@@ -68,22 +68,23 @@ contract AaveV4Borrow is ActionBase, AaveV4Helper {
     function _borrow(Params memory _params) internal returns (uint256, bytes memory) {
         ISpoke spoke = ISpoke(_params.spoke);
         address underlying = spoke.getReserve(_params.reserveId).underlying;
-        _params.onBehalf = _params.onBehalf == address(0) ? address(this) : _params.onBehalf;
+        address onBehalf = _params.onBehalf == address(0) ? address(this) : _params.onBehalf;
 
-        bool borrowForSmartWallet = _params.onBehalf == address(this);
+        bool borrowForSmartWallet = onBehalf == address(this);
 
         if (borrowForSmartWallet) {
-            (, _params.amount) = spoke.borrow(_params.reserveId, _params.amount, _params.onBehalf);
+            (, _params.amount) = spoke.borrow(_params.reserveId, _params.amount, onBehalf);
         } else {
             (, _params.amount) = ITakerPositionManager(TAKER_POSITION_MANAGER)
-                .borrowOnBehalfOf(
-                    _params.spoke, _params.reserveId, _params.amount, _params.onBehalf
-                );
+                .borrowOnBehalfOf(address(spoke), _params.reserveId, _params.amount, onBehalf);
         }
 
         underlying.withdrawTokens(_params.to, _params.amount);
 
-        return (_params.amount, abi.encode(_params));
+        bytes memory logData =
+            abi.encode(address(spoke), onBehalf, _params.to, underlying, _params.amount);
+
+        return (_params.amount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

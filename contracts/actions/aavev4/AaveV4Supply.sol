@@ -79,41 +79,42 @@ contract AaveV4Supply is ActionBase, AaveV4Helper {
         ISpoke spoke = ISpoke(_params.spoke);
         address underlying = spoke.getReserve(_params.reserveId).underlying;
 
-        _params.onBehalf = _params.onBehalf == address(0) ? address(this) : _params.onBehalf;
-        _params.amount = underlying.pullTokensIfNeeded(_params.from, _params.amount);
+        address onBehalf = _params.onBehalf == address(0) ? address(this) : _params.onBehalf;
+        uint256 amount = underlying.pullTokensIfNeeded(_params.from, _params.amount);
 
-        bool supplyForSmartWallet = _params.onBehalf == address(this);
+        bool supplyForSmartWallet = onBehalf == address(this);
 
         // Supply tokens.
         // -------------------------------
         if (supplyForSmartWallet) {
-            underlying.approveToken(_params.spoke, _params.amount);
-            (, _params.amount) = spoke.supply(_params.reserveId, _params.amount, _params.onBehalf);
+            underlying.approveToken(address(spoke), amount);
+            (, amount) = spoke.supply(_params.reserveId, amount, onBehalf);
         } else {
-            underlying.approveToken(GIVER_POSITION_MANAGER, _params.amount);
-            (, _params.amount) = IGiverPositionManager(GIVER_POSITION_MANAGER)
-                .supplyOnBehalfOf(
-                    _params.spoke, _params.reserveId, _params.amount, _params.onBehalf
-                );
+            underlying.approveToken(GIVER_POSITION_MANAGER, amount);
+            (, amount) = IGiverPositionManager(GIVER_POSITION_MANAGER)
+                .supplyOnBehalfOf(address(spoke), _params.reserveId, amount, onBehalf);
         }
 
         // Enable as collateral if needed.
         // -------------------------------
-        (bool isUsingAsCollateral,) =
-            spoke.getUserReserveStatus(_params.reserveId, _params.onBehalf);
+        (bool isUsingAsCollateral,) = spoke.getUserReserveStatus(_params.reserveId, onBehalf);
 
         if (_params.useAsCollateral && !isUsingAsCollateral) {
             if (supplyForSmartWallet) {
-                spoke.setUsingAsCollateral(_params.reserveId, true, _params.onBehalf);
+                spoke.setUsingAsCollateral(_params.reserveId, true, onBehalf);
             } else {
                 IConfigPositionManager(CONFIG_POSITION_MANAGER)
                     .setUsingAsCollateralOnBehalfOf(
-                        _params.spoke, _params.reserveId, true, _params.onBehalf
+                        address(spoke), _params.reserveId, true, onBehalf
                     );
             }
         }
 
-        return (_params.amount, abi.encode(_params));
+        bytes memory logData = abi.encode(
+            address(spoke), onBehalf, _params.from, underlying, amount, _params.useAsCollateral
+        );
+
+        return (amount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

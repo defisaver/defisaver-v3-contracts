@@ -66,25 +66,28 @@ contract AaveV4Payback is ActionBase, AaveV4Helper {
     function _payback(Params memory _params) internal returns (uint256, bytes memory) {
         ISpoke spoke = ISpoke(_params.spoke);
         address underlying = spoke.getReserve(_params.reserveId).underlying;
-        _params.onBehalf = _params.onBehalf == address(0) ? address(this) : _params.onBehalf;
+        address onBehalf = _params.onBehalf == address(0) ? address(this) : _params.onBehalf;
 
-        uint256 userDebt = spoke.getUserTotalDebt(_params.reserveId, _params.onBehalf);
-        _params.amount = _params.amount > userDebt ? userDebt : _params.amount;
+        uint256 userDebt = spoke.getUserTotalDebt(_params.reserveId, onBehalf);
+        uint256 amount = _params.amount > userDebt ? userDebt : _params.amount;
 
-        underlying.pullTokensIfNeeded(_params.from, _params.amount);
+        underlying.pullTokensIfNeeded(_params.from, amount);
 
-        bool paybackForSmartWallet = _params.onBehalf == address(this);
+        bool paybackForSmartWallet = onBehalf == address(this);
 
         if (paybackForSmartWallet) {
-            underlying.approveToken(_params.spoke, _params.amount);
-            (, _params.amount) = spoke.repay(_params.reserveId, _params.amount, _params.onBehalf);
+            underlying.approveToken(address(spoke), amount);
+            (, amount) = spoke.repay(_params.reserveId, amount, onBehalf);
         } else {
-            underlying.approveToken(GIVER_POSITION_MANAGER, _params.amount);
-            (, _params.amount) = IGiverPositionManager(GIVER_POSITION_MANAGER)
-                .repayOnBehalfOf(_params.spoke, _params.reserveId, _params.amount, _params.onBehalf);
+            underlying.approveToken(GIVER_POSITION_MANAGER, amount);
+            (, amount) = IGiverPositionManager(GIVER_POSITION_MANAGER)
+                .repayOnBehalfOf(address(spoke), _params.reserveId, amount, onBehalf);
         }
 
-        return (_params.amount, abi.encode(_params));
+        bytes memory logData =
+            abi.encode(address(spoke), onBehalf, _params.from, underlying, amount);
+
+        return (amount, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
