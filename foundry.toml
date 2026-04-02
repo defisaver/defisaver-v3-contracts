@@ -28,12 +28,10 @@ no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,
 no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation,aaveV3/umbrella,fluid,AaveView}*"
 
 [profile.linea]
-# TODO -> Include some core tests too (without strategies/automations)
-match_path = "test-sol/{actions,views}/{aaveV3/AaveV3,AaveV3}*"
+match_path = "test-sol/{actions,core,views}/{aaveV3/AaveV3,AaveV3,DFSRegistry,RecipeExecutor,SafeModuleAuth,SmartWalletUtils}*"
 
 [profile.plasma]
-# TODO -> Include some core tests too (without strategies/automations)
-match_path = "test-sol/{actions,views}/{aaveV3/AaveV3,AaveV3}*"
+match_path = "test-sol/{actions,core,views}/{aaveV3/AaveV3,AaveV3,DFSRegistry,RecipeExecutor,SafeModuleAuth,SmartWalletUtils}*"
 
 
 # Formatting -> https://getfoundry.sh/config/reference/formatter/

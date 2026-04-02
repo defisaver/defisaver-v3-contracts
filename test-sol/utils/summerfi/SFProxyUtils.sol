@@ -18,6 +18,10 @@ contract SFProxyUtils is RegistryUtils {
     }
 
     function _whitelistSFProxyEntryPoint() internal {
+        if (block.chainid == 59_144 || block.chainid == 9745) {
+            return;
+        }
+
         IAccountGuard accountGuard = IAccountGuard(Addresses.SF_PROXY_GUARD);
         address guardOwner = accountGuard.owner();
 

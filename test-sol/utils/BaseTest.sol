@@ -41,6 +41,23 @@ contract BaseTest is Config {
         _initConfigIfNeeded();
     }
 
+    function skipIfLineaOrPlasma() internal {
+        skipIfLinea();
+        skipIfPlasma();
+    }
+
+    function skipIfLinea() internal {
+        if (block.chainid == 59_144) {
+            vm.skip(true, "Skipping test on Linea");
+        }
+    }
+
+    function skipIfPlasma() internal {
+        if (block.chainid == 9745) {
+            vm.skip(true, "Skipping test on Plasma");
+        }
+    }
+
     function forkFromEnv(string memory testName) internal {
         _initConfigIfNeeded();
         string memory chain = _chainFromProfile();
