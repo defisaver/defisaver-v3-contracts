@@ -20,6 +20,7 @@ contract TestAaveView is BaseTest {
 
     address internal constant STETH = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
     address internal constant REN = 0x408e41876cCCDC0F92210600ef50372656052a38;
+    uint256 internal constant REN_PRICE = 1_977_943_724_421;
 
     bytes32 internal constant DATA_PROVIDER_ID =
         0x0100000000000000000000000000000000000000000000000000000000000000;
@@ -45,7 +46,7 @@ contract TestAaveView is BaseTest {
         assertEq(infos[0].underlyingTokenAddress, STETH);
         assertEq(infos[1].underlyingTokenAddress, REN);
         assertTrue(infos[0].price > 0);
-        assertTrue(infos[1].price == 0);
+        assertTrue(infos[1].price == REN_PRICE);
     }
 
     function test_getTokenInfoFull_stETH() public view {
@@ -70,6 +71,6 @@ contract TestAaveView is BaseTest {
         AaveView.TokenInfoFull memory info = cut.getTokenInfoFull(dataProvider, priceOracle, REN);
 
         assertEq(info.underlyingTokenAddress, REN);
-        assertTrue(info.price == 0);
+        assertTrue(info.price == REN_PRICE);
     }
 }

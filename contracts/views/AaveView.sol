@@ -135,7 +135,14 @@ contract AaveView is AaveHelper, DSMath {
         returns (uint256[] memory prices)
     {
         address priceOracleAddress = ILendingPoolAddressesProviderV2(_market).getPriceOracle();
-        prices = IPriceOracleGetterAave(priceOracleAddress).getAssetsPrices(_tokens);
+        prices = new uint256[](_tokens.length);
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            if (_tokens[i] == 0x408e41876cCCDC0F92210600ef50372656052a38) {
+                prices[i] = 1_977_943_724_421;
+            } else {
+                prices[i] = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokens[i]);
+            }
+        }
     }
 
     /// @notice Fetches Aave collateral factors for tokens
@@ -211,18 +218,22 @@ contract AaveView is AaveHelper, DSMath {
         for (uint256 i = 0; i < _tokenAddresses.length; ++i) {
             (, uint256 ltv,,,,,,,,) = dataProvider.getReserveConfigurationData(_tokenAddresses[i]);
             (address aToken,,) = dataProvider.getReserveTokensAddresses(_tokenAddresses[i]);
-
-            uint256 price = 0;
-            if (_tokenAddresses[i] != REN_TOKEN_ADDR) {
-                price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddresses[i]);
+            if (_tokenAddresses[i] == 0x408e41876cCCDC0F92210600ef50372656052a38) {
+                tokens[i] = TokenInfo({
+                    aTokenAddress: aToken,
+                    underlyingTokenAddress: _tokenAddresses[i],
+                    collateralFactor: ltv,
+                    price: 1_977_943_724_421
+                });
+            } else {
+                tokens[i] = TokenInfo({
+                    aTokenAddress: aToken,
+                    underlyingTokenAddress: _tokenAddresses[i],
+                    collateralFactor: ltv,
+                    price: IPriceOracleGetterAave(priceOracleAddress)
+                        .getAssetPrice(_tokenAddresses[i])
+                });
             }
-
-            tokens[i] = TokenInfo({
-                aTokenAddress: aToken,
-                underlyingTokenAddress: _tokenAddresses[i],
-                collateralFactor: ltv,
-                price: price
-            });
         }
     }
 
@@ -255,8 +266,10 @@ contract AaveView is AaveHelper, DSMath {
 
         (address aToken,,) = _dataProvider.getReserveTokensAddresses(_token);
 
-        uint256 price = 0;
-        if (_token != REN_TOKEN_ADDR) {
+        uint256 price;
+        if (_token == 0x408e41876cCCDC0F92210600ef50372656052a38) {
+            price = 1_977_943_724_421;
+        } else {
             price = IPriceOracleGetterAave(_priceOracleAddress).getAssetPrice(_token);
         }
 
@@ -340,8 +353,10 @@ contract AaveView is AaveHelper, DSMath {
                 bool usageAsCollateralEnabled
             ) = dataProvider.getUserReserveData(reserve, _user);
 
-            uint256 price = 0;
-            if (reserve != REN_TOKEN_ADDR) {
+            uint256 price;
+            if (reserve == 0x408e41876cCCDC0F92210600ef50372656052a38) {
+                price = 1_977_943_724_421;
+            } else {
                 price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(reserve);
             }
 
@@ -457,9 +472,9 @@ contract AaveView is AaveHelper, DSMath {
                     : totalVariableDebt - _reserveParams[i].liquidityAdded;
             }
 
-            uint256 availableLiquidity =
-                IERC20(_reserveParams[i].reserveAddress).balanceOf(reserve.aTokenAddress)
-                    + _reserveParams[i].liquidityAdded - _reserveParams[i].liquidityTaken;
+            uint256 availableLiquidity = IERC20(_reserveParams[i].reserveAddress)
+                .balanceOf(reserve.aTokenAddress) + _reserveParams[i].liquidityAdded
+            - _reserveParams[i].liquidityTaken;
 
             (estimatedRate.supplyRate,, estimatedRate.variableBorrowRate) = IReserveInterestRateStrategyV2(
                     reserve.interestRateStrategyAddress
