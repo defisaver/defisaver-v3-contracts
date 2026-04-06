@@ -816,7 +816,7 @@
     },
     {
         "name": "AaveView",
-        "address": "0x792c56838Ab06015da7E298e4bD2Cc31248a18Aa",
+        "address": "0x9ec780f37b0f66f0c7bafd0204588db374ae59be",
         "id": "0x0a55b48c",
         "path": "contracts/views/AaveView.sol",
         "version": "1.0.4",
@@ -824,6 +824,7 @@
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x792c56838Ab06015da7E298e4bD2Cc31248a18Aa",
             "0x6102E50F88f039976bd1909a9CC368c7dd1d1A1d",
             "0xD0bA40A400f9e045D54978E3B78Cd9aD9FA92144",
             "0xf585d53f568d226449a94d48c4ea122cdeffe52d",
