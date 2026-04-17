@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 import { IAaveV3Oracle } from "../interfaces/protocols/aaveV3/IAaveV3Oracle.sol";
-import { IPriceOracleSentinel } from "../interfaces/protocols/aaveV3/IPriceOracleSentinel.sol";
 import { IPoolV3 } from "../interfaces/protocols/aaveV3/IPoolV3.sol";
 import { IPoolAddressesProvider } from "../interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
 import {
@@ -24,6 +23,8 @@ import { IStaticATokenV2 } from "../interfaces/protocols/aaveV3/IStaticATokenV2.
 import { IDebtToken } from "../interfaces/protocols/aaveV3/IDebtToken.sol";
 
 import { DataTypes } from "../interfaces/protocols/aaveV3/DataTypes.sol";
+import { ReserveConfiguration } from "../_vendor/aave/v3/ReserveConfiguration.sol";
+import { UserConfiguration } from "../_vendor/aave/v3/UserConfiguration.sol";
 import { WadRayMath } from "../_vendor/aave/WadRayMath.sol";
 import { MathUtils } from "../_vendor/aave/MathUtils.sol";
 import { AaveV3Helper } from "../actions/aaveV3/helpers/AaveV3Helper.sol";
@@ -32,48 +33,10 @@ import { TokenUtils } from "../utils/token/TokenUtils.sol";
 
 /// @title Helper contract to aggregate data from AaveV3 protocol
 contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
-    uint256 internal constant LIQUIDATION_BONUS_MASK =
-        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFF; // prettier-ignore
-    uint256 internal constant BORROW_CAP_MASK =
-        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFF; // prettier-ignore
-    uint256 internal constant SUPPLY_CAP_MASK =
-        0xFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
-    uint256 internal constant EMODE_CATEGORY_MASK =
-        0xFFFFFFFFFFFFFFFFFFFF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
-    uint256 internal constant BORROWABLE_IN_ISOLATION_MASK =
-        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFDFFFFFFFFFFFFFFF; // prettier-ignore
-    uint256 internal constant BORROWING_MASK =
-        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFFFFFFFFFFFFFF; // prettier-ignore
-    uint256 internal constant LTV_MASK =
-        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000; // prettier-ignore
-    uint256 internal constant RESERVE_FACTOR_MASK =
-        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFF; // prettier-ignore
-    uint256 internal constant LIQUIDATION_THRESHOLD_MASK =
-        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFF; // prettier-ignore
-    uint256 internal constant DEBT_CEILING_MASK =
-        0xF0000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
-    uint256 internal constant FLASHLOAN_ENABLED_MASK =
-        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFFF; // prettier-ignore
-    uint256 internal constant ACTIVE_MASK =
-        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFF; // prettier-ignore
-    uint256 internal constant FROZEN_MASK =
-        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFDFFFFFFFFFFFFFF; // prettier-ignore
-    uint256 internal constant PAUSED_MASK =
-        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFF; // prettier-ignore
-    uint256 internal constant VIRTUAL_ACC_ACTIVE =
-        0xEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
-
-    uint256 internal constant LIQUIDATION_THRESHOLD_START_BIT_POSITION = 16;
-    uint256 internal constant LIQUIDATION_BONUS_START_BIT_POSITION = 32;
-    uint256 internal constant RESERVE_FACTOR_START_BIT_POSITION = 64;
-    uint256 internal constant BORROWING_ENABLED_START_BIT_POSITION = 58;
-    uint256 internal constant BORROW_CAP_START_BIT_POSITION = 80;
-    uint256 internal constant SUPPLY_CAP_START_BIT_POSITION = 116;
-    uint256 internal constant DEBT_CEILING_START_BIT_POSITION = 212;
-    uint256 internal constant FLASHLOAN_ENABLED_START_BIT_POSITION = 63;
-
     using TokenUtils for address;
     using WadRayMath for uint256;
+    using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
+    using UserConfiguration for DataTypes.UserConfigurationMap;
 
     /**
      *
@@ -89,23 +52,23 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         bool[] enabledAsColl;
         address[] borrowAddr;
         uint256[] collAmounts;
-        uint256[] borrowStableAmounts;
+        uint256[] borrowStableAmounts; // Note: deprecated in v3.2, left for backwards compatibility
         uint256[] borrowVariableAmounts;
         // emode category data
         uint16 ltv;
         uint16 liquidationThreshold;
         uint16 liquidationBonus;
-        address priceSource; // deprecated
-        string label;
+        address priceSource; // Note: deprecated, left for backwards compatibility
+        string label; // Note: deprecated, left for backwards compatibility
     }
 
     /// @notice User token data
     struct UserToken {
         address token;
         uint256 balance;
-        uint256 borrowsStable;
+        uint256 borrowsStable; // Note: deprecated in v3.2, left for backwards compatibility
         uint256 borrowsVariable;
-        uint256 stableBorrowRate;
+        uint256 stableBorrowRate; // Note: deprecated in v3.2, left for backwards compatibility
         bool enabledAsCollateral;
     }
 
@@ -124,33 +87,33 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         uint16 assetId;
         uint256 supplyRate; //pool.config
         uint256 borrowRateVariable; //pool.config
-        uint256 borrowRateStable; //pool.config
+        uint256 borrowRateStable; // Note: deprecated in v3.2, left for backwards compatibility
         uint256 totalSupply; //total supply
         uint256 availableLiquidity; //reserveData.liq rate
         uint256 totalBorrow; // total supply of both debt assets
         uint256 totalBorrowVar;
-        uint256 totalBorrowStab;
+        uint256 totalBorrowStab; // Note: deprecated in v3.2, left for backwards compatibility
         uint256 collateralFactor; //pool.config
         uint256 liquidationRatio; //pool.config
         uint256 price; //oracle
         uint256 supplyCap; //pool.config
         uint256 borrowCap; //pool.config
         uint256 emodeCategory; //pool.config
-        uint256 debtCeilingForIsolationMode; //pool.config 212-251
-        uint256 isolationModeTotalDebt; //pool.isolationModeTotalDebt
+        uint256 debtCeilingForIsolationMode; // Note: deprecated in v3.7, left for backwards compatibility
+        uint256 isolationModeTotalDebt; // Note: deprecated in v3.7, left for backwards compatibility
         bool usageAsCollateralEnabled; //usageAsCollateralEnabled = liquidationThreshold > 0;
         bool borrowingEnabled; //pool.config
-        bool stableBorrowRateEnabled; //pool.config
-        bool isolationModeBorrowingEnabled; //pool.config
-        bool isSiloedForBorrowing; //AaveProtocolDataProvider.getSiloedBorrowing
+        bool stableBorrowRateEnabled; // Note: deprecated in v3.2, left for backwards compatibility
+        bool isolationModeBorrowingEnabled; // Note: deprecated in v3.7, left for backwards compatibility
+        bool isSiloedForBorrowing; // Note: deprecated in v3.7, left for backwards compatibility
         uint256 eModeCollateralFactor; //pool.getEModeCategoryData.ltv
         bool isFlashLoanEnabled;
         // emode category data
-        uint16 ltv; // deprecated
-        uint16 liquidationThreshold; // deprecated
-        uint16 liquidationBonus; // deprecated
-        address priceSource; // deprecated
-        string label; // deprecated
+        uint16 ltv; // Note: deprecated, left for backwards compatibility
+        uint16 liquidationThreshold; // Note: deprecated, left for backwards compatibility
+        uint16 liquidationBonus; // Note: deprecated, left for backwards compatibility
+        address priceSource; // Note: deprecated, left for backwards compatibility
+        string label; // Note: deprecated, left for backwards compatibility
         bool isActive;
         bool isPaused;
         bool isFrozen;
@@ -262,9 +225,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         collFactors = new uint256[](_tokens.length);
 
         for (uint256 i = 0; i < _tokens.length; ++i) {
-            DataTypes.ReserveConfigurationMap memory config =
-                lendingPool.getConfiguration(_tokens[i]);
-            collFactors[i] = getReserveFactor(config);
+            collFactors[i] = lendingPool.getConfiguration(_tokens[i]).getReserveFactor();
         }
     }
 
@@ -287,8 +248,8 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             userTokens[i].borrowsStable = 0;
             userTokens[i].borrowsVariable = reserveData.variableDebtTokenAddress.getBalance(_user);
             userTokens[i].stableBorrowRate = 0;
-            DataTypes.UserConfigurationMap memory map = lendingPool.getUserConfiguration(_user);
-            userTokens[i].enabledAsCollateral = isUsingAsCollateral(map, reserveData.id);
+            userTokens[i].enabledAsCollateral =
+                lendingPool.getUserConfiguration(_user).isUsingAsCollateral(reserveData.id);
         }
     }
 
@@ -307,7 +268,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         for (uint256 i = 0; i < _tokenAddresses.length; i++) {
             DataTypes.ReserveConfigurationMap memory config =
                 lendingPool.getConfiguration(_tokenAddresses[i]);
-            uint256 collFactor = config.data & ~LTV_MASK;
+            uint256 collFactor = config.getLtv();
             address aTokenAddr = lendingPool.getReserveAToken(_tokenAddresses[i]);
             address priceOracleAddress = IPoolAddressesProvider(_market).getPriceOracle();
             uint256 price = IAaveV3Oracle(priceOracleAddress).getAssetPrice(_tokenAddresses[i]);
@@ -336,7 +297,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
 
         uint256 totalVariableBorrow = IERC20(reserveData.variableDebtTokenAddress).totalSupply();
 
-        (bool isActive, bool isFrozen,, bool isPaused) = getFlags(config);
+        (bool isActive, bool isFrozen,, bool isPaused) = config.getFlags();
 
         _tokenInfo = TokenInfoFull({
             aTokenAddress: reserveData.aTokenAddress,
@@ -351,24 +312,24 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             totalBorrow: totalVariableBorrow,
             totalBorrowVar: totalVariableBorrow,
             totalBorrowStab: 0,
-            collateralFactor: getLtv(config),
-            liquidationRatio: getLiquidationThreshold(config),
+            collateralFactor: config.getLtv(),
+            liquidationRatio: config.getLiquidationThreshold(),
             price: getAssetPrice(_market, _tokenAddr),
-            supplyCap: getSupplyCap(config),
-            borrowCap: getBorrowCap(config),
+            supplyCap: config.getSupplyCap(),
+            borrowCap: config.getBorrowCap(),
             emodeCategory: 0,
-            usageAsCollateralEnabled: getLiquidationThreshold(config) > 0,
-            borrowingEnabled: getBorrowingEnabled(config),
-            stableBorrowRateEnabled: false,
-            isolationModeBorrowingEnabled: getBorrowableInIsolation(config),
-            debtCeilingForIsolationMode: getDebtCeiling(config),
-            isolationModeTotalDebt: reserveData.isolationModeTotalDebt,
-            isSiloedForBorrowing: isSiloedForBorrowing(_market, _tokenAddr),
+            usageAsCollateralEnabled: config.getLiquidationThreshold() > 0,
+            borrowingEnabled: config.getBorrowingEnabled(),
+            stableBorrowRateEnabled: false, // deprecated in v3.2
+            isolationModeBorrowingEnabled: false, // deprecated in v3.7
+            debtCeilingForIsolationMode: 0, // deprecated in v3.7
+            isolationModeTotalDebt: 0, // deprecated in v3.7
+            isSiloedForBorrowing: false, // deprecated in v3.7
             eModeCollateralFactor: 0,
-            isFlashLoanEnabled: getFlashLoanEnabled(config),
+            isFlashLoanEnabled: config.getFlashLoanEnabled(),
             ltv: 0, // same as collateralFactor
             liquidationThreshold: 0, // same as liquidationRatio
-            liquidationBonus: uint16(getLiquidationBonus(config)),
+            liquidationBonus: uint16(config.getLiquidationBonus()),
             priceSource: address(0), // deprecated, not 1:1 related to asset
             label: "", // deprecated, not 1:1 related to asset
             isActive: isActive,
@@ -429,9 +390,9 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         DataTypes.CollateralConfig memory config =
             _lendingPool.getEModeCategoryCollateralConfig(_id);
 
-        uint128 ltvzeroBitmap;
-        try _lendingPool.getEModeCategoryLtvzeroBitmap(_id) returns (uint128 _ltvzeroBitmap) {
-            ltvzeroBitmap = _ltvzeroBitmap;
+        bool isolated;
+        try _lendingPool.getIsEModeCategoryIsolated(_id) returns (bool _isolated) {
+            isolated = _isolated;
         } catch (bytes memory) { /*lowLevelData*/ }
 
         string memory label = "";
@@ -439,14 +400,20 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             label = _label;
         } catch (bytes memory) { /*lowLevelData*/ }
 
+        uint128 ltvzeroBitmap;
+        try _lendingPool.getEModeCategoryLtvzeroBitmap(_id) returns (uint128 _ltvzeroBitmap) {
+            ltvzeroBitmap = _ltvzeroBitmap;
+        } catch (bytes memory) { /*lowLevelData*/ }
+
         emodeData = DataTypes.EModeCategoryNew({
             ltv: config.ltv,
             liquidationThreshold: config.liquidationThreshold,
             liquidationBonus: config.liquidationBonus,
             collateralBitmap: _lendingPool.getEModeCategoryCollateralBitmap(_id),
+            isolated: isolated,
+            label: label,
             borrowableBitmap: _lendingPool.getEModeCategoryBorrowableBitmap(_id),
-            ltvzeroBitmap: ltvzeroBitmap,
-            label: label
+            ltvzeroBitmap: ltvzeroBitmap
         });
     }
 
@@ -491,9 +458,8 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
                 uint256 aTokenBalance = reserveData.aTokenAddress.getBalance(_user);
                 if (aTokenBalance > 0) {
                     data.collAddr[collPos] = reserve;
-                    data.enabledAsColl[collPos] = isUsingAsCollateral(
-                        lendingPool.getUserConfiguration(_user), reserveData.id
-                    );
+                    data.enabledAsColl[collPos] =
+                        lendingPool.getUserConfiguration(_user).isUsingAsCollateral(reserveData.id);
                     uint256 userTokenBalanceEth =
                         (aTokenBalance * price) / (10 ** (reserve.getTokenDecimals()));
                     data.collAmounts[collPos] = userTokenBalanceEth;
@@ -534,24 +500,6 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         }
     }
 
-    /// @notice Fetches the ltv of a reserve
-    /// @param self The reserve configuration
-    /// @return ltv The ltv of the reserve
-    function getLtv(DataTypes.ReserveConfigurationMap memory self) public pure returns (uint256) {
-        return self.data & ~LTV_MASK;
-    }
-
-    /// @notice Fetches the reserve factor of a reserve
-    /// @param self The reserve configuration
-    /// @return reserveFactor The reserve factor of the reserve
-    function getReserveFactor(DataTypes.ReserveConfigurationMap memory self)
-        internal
-        pure
-        returns (uint256)
-    {
-        return (self.data & ~RESERVE_FACTOR_MASK) >> RESERVE_FACTOR_START_BIT_POSITION;
-    }
-
     /// @notice Fetches the price of a token
     /// @param _market Address of LendingPoolAddressesProvider for specific market
     /// @param _tokenAddr Address of the token
@@ -582,11 +530,9 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     /// @notice Checks if borrow is allowed for a market
     /// @param _market Address of LendingPoolAddressesProvider for specific market
     /// @return isBorrowAllowed True if borrow is allowed
+    /// @dev Removed in v3.7 along with priceOracleSentinel, left for backwards compatibility
     function isBorrowAllowed(address _market) public view returns (bool) {
-        address priceOracleSentinelAddress =
-            IPoolAddressesProvider(_market).getPriceOracleSentinel();
-        return (priceOracleSentinelAddress == address(0)
-                || IPriceOracleSentinel(priceOracleSentinelAddress).isBorrowAllowed());
+        return true;
     }
 
     /// @notice Fetches the apy after values estimation
@@ -622,7 +568,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
                         liquidityAdded: _reserveParams[i].liquidityAdded,
                         liquidityTaken: _reserveParams[i].liquidityTaken,
                         totalDebt: totalVarDebt,
-                        reserveFactor: getReserveFactor(reserve.configuration),
+                        reserveFactor: reserve.configuration.getReserveFactor(),
                         reserve: asset,
                         usingVirtualBalance: true,
                         virtualUnderlyingBalance: lendingPool.getVirtualUnderlyingBalance(asset)
@@ -759,145 +705,6 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             retVal.userEndOfCooldown = cooldownSnapshot.endOfCooldown;
             retVal.userWithdrawalWindow = cooldownSnapshot.withdrawalWindow;
         }
-    }
-
-    /// @notice Checks if a reserve is used as collateral
-    /// @param self The user configuration
-    /// @param reserveIndex Index of the reserve
-    /// @return isUsingAsCollateral True if the reserve is used as collateral
-    function isUsingAsCollateral(DataTypes.UserConfigurationMap memory self, uint256 reserveIndex)
-        internal
-        pure
-        returns (bool)
-    {
-        unchecked {
-            return (self.data >> ((reserveIndex << 1) + 1)) & 1 != 0;
-        }
-    }
-
-    /// @notice Fetches the liquidation threshold of a reserve
-    /// @param self The reserve configuration
-    /// @return liquidationThreshold The liquidation threshold of the reserve
-    function getLiquidationThreshold(DataTypes.ReserveConfigurationMap memory self)
-        internal
-        pure
-        returns (uint256)
-    {
-        return (self.data & ~LIQUIDATION_THRESHOLD_MASK) >> LIQUIDATION_THRESHOLD_START_BIT_POSITION;
-    }
-
-    /// @notice Fetches the liquidation bonus of a reserve
-    /// @param self The reserve configuration
-    /// @return liquidationBonus The liquidation bonus of the reserve
-    function getLiquidationBonus(DataTypes.ReserveConfigurationMap memory self)
-        internal
-        pure
-        returns (uint256)
-    {
-        return (self.data & ~LIQUIDATION_BONUS_MASK) >> LIQUIDATION_BONUS_START_BIT_POSITION;
-    }
-
-    /// @notice Fetches the borrow cap of a reserve
-    /// @param self The reserve configuration
-    /// @return borrowCap The borrow cap of the reserve
-    function getBorrowCap(DataTypes.ReserveConfigurationMap memory self)
-        internal
-        pure
-        returns (uint256)
-    {
-        return (self.data & ~BORROW_CAP_MASK) >> BORROW_CAP_START_BIT_POSITION;
-    }
-
-    /// @notice Fetches the supply cap of a reserve
-    /// @param self The reserve configuration
-    /// @return supplyCap The supply cap of the reserve
-    function getSupplyCap(DataTypes.ReserveConfigurationMap memory self)
-        internal
-        pure
-        returns (uint256)
-    {
-        return (self.data & ~SUPPLY_CAP_MASK) >> SUPPLY_CAP_START_BIT_POSITION;
-    }
-
-    /// @notice Fetches if borrowing is enabled for a reserve
-    /// @param self The reserve configuration
-    /// @return borrowingEnabled True if borrowing is enabled
-    function getBorrowingEnabled(DataTypes.ReserveConfigurationMap memory self)
-        internal
-        pure
-        returns (bool)
-    {
-        return (self.data & ~BORROWING_MASK) != 0;
-    }
-
-    /// @notice Fetches if borrowing is enabled for a reserve in isolation mode
-    /// @param self The reserve configuration
-    /// @return borrowableInIsolation True if borrowing is enabled in isolation mode
-    function getBorrowableInIsolation(DataTypes.ReserveConfigurationMap memory self)
-        internal
-        pure
-        returns (bool)
-    {
-        return (self.data & ~BORROWABLE_IN_ISOLATION_MASK) != 0;
-    }
-
-    /**
-     * @notice Gets the debt ceiling for the asset if the asset is in isolation mode
-     * @param self The reserve configuration
-     * @return The debt ceiling (0 = isolation mode disabled)
-     *
-     */
-    function getDebtCeiling(DataTypes.ReserveConfigurationMap memory self)
-        internal
-        pure
-        returns (uint256)
-    {
-        return (self.data & ~DEBT_CEILING_MASK) >> DEBT_CEILING_START_BIT_POSITION;
-    }
-
-    /// @notice Checks if a reserve is siloed for borrowing
-    /// @param _market Address of LendingPoolAddressesProvider for specific market
-    /// @param _tokenAddr Address of the token
-    /// @return isSiloedForBorrowing True if the reserve is siloed for borrowing
-    function isSiloedForBorrowing(address _market, address _tokenAddr)
-        internal
-        view
-        returns (bool)
-    {
-        IAaveProtocolDataProvider dataProvider = getDataProvider(_market);
-        return dataProvider.getSiloedBorrowing(_tokenAddr);
-    }
-
-    /// @notice Fetches if flash loans are enabled for a reserve
-    function getFlashLoanEnabled(DataTypes.ReserveConfigurationMap memory self)
-        internal
-        pure
-        returns (bool)
-    {
-        return (self.data & ~FLASHLOAN_ENABLED_MASK) != 0;
-    }
-
-    /**
-     * @notice Gets the configuration flags of the reserve
-     * @param self The reserve configuration
-     * @return The state flag representing active
-     * @return The state flag representing frozen
-     * @return The state flag representing borrowing enabled
-     * @return The state flag representing paused
-     */
-    function getFlags(DataTypes.ReserveConfigurationMap memory self)
-        internal
-        pure
-        returns (bool, bool, bool, bool)
-    {
-        uint256 dataLocal = self.data;
-
-        return (
-            (dataLocal & ~ACTIVE_MASK) != 0,
-            (dataLocal & ~FROZEN_MASK) != 0,
-            (dataLocal & ~BORROWING_MASK) != 0,
-            (dataLocal & ~PAUSED_MASK) != 0
-        );
     }
 
     /// @notice Fetches the next variable borrow index

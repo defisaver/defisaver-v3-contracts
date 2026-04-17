@@ -270,9 +270,13 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, SmartWalletUt
         bool isInEmode = eModeId != 0;
         uint128 emodeCollateralBitmap;
         uint128 emodeLtvZeroBitmap;
+        bool isolated;
         if (isInEmode) {
             emodeCollateralBitmap = lendingPool.getEModeCategoryCollateralBitmap(uint8(eModeId));
             emodeLtvZeroBitmap = lendingPool.getEModeCategoryLtvzeroBitmap(uint8(eModeId));
+            try lendingPool.getIsEModeCategoryIsolated(uint8(eModeId)) returns (bool _isolated) {
+                isolated = _isolated;
+            } catch (bytes memory) { /*lowLevelData*/ }
         }
         uint256 i = 0;
         uint256 cachedUserConfig = userConfig.data;
@@ -287,6 +291,8 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, SmartWalletUt
                     bool isLtvZero;
                     if (isInEmode && _isReserveEnabledOnBitmap(emodeCollateralBitmap, i)) {
                         isLtvZero = _isReserveEnabledOnBitmap(emodeLtvZeroBitmap, i);
+                    } else if (isInEmode && isolated) {
+                        isLtvZero = true;
                     } else {
                         isLtvZero = _isReserveLtvZero(reserveConfig);
                     }
