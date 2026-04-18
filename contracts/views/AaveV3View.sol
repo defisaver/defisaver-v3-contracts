@@ -528,10 +528,8 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     }
 
     /// @notice Checks if borrow is allowed for a market
-    /// @param _market Address of LendingPoolAddressesProvider for specific market
-    /// @return isBorrowAllowed True if borrow is allowed
     /// @dev Removed in v3.7 along with priceOracleSentinel, left for backwards compatibility
-    function isBorrowAllowed(address _market) public view returns (bool) {
+    function isBorrowAllowed(address) public pure returns (bool) {
         return true;
     }
 
