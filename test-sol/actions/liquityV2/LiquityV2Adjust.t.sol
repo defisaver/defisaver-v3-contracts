@@ -238,8 +238,8 @@ contract TestLiquityV2Adjust is LiquityV2ExecuteActions {
                 vars.collAmount,
                 vars.debtAmount,
                 vars.maxUpfrontFee,
-                vars.collAction,
-                vars.debtAction
+                uint8(vars.collAction),
+                uint8(vars.debtAction)
             ),
             _config.isDirect
         );

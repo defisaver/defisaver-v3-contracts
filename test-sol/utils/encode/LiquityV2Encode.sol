@@ -155,8 +155,8 @@ library LiquityV2Encode {
         uint256 _collAmount,
         uint256 _debtAmount,
         uint256 _maxUpfrontFee,
-        LiquityV2Adjust.CollActionType _collAction,
-        LiquityV2Adjust.DebtActionType _debtAction
+        uint8 _collAction,
+        uint8 _debtAction
     ) public pure returns (bytes memory params) {
         params = abi.encode(
             LiquityV2Adjust.Params({
@@ -167,8 +167,8 @@ library LiquityV2Encode {
                 collAmount: _collAmount,
                 debtAmount: _debtAmount,
                 maxUpfrontFee: _maxUpfrontFee,
-                collAction: _collAction,
-                debtAction: _debtAction
+                collAction: LiquityV2Adjust.CollActionType(_collAction),
+                debtAction: LiquityV2Adjust.DebtActionType(_debtAction)
             })
         );
     }
@@ -183,8 +183,8 @@ library LiquityV2Encode {
         uint256 _upperHint,
         uint256 _lowerHint,
         uint256 _maxUpfrontFee,
-        LiquityV2AdjustZombieTrove.CollActionType _collAction,
-        LiquityV2AdjustZombieTrove.DebtActionType _debtAction
+        uint8 _collAction,
+        uint8 _debtAction
     ) public pure returns (bytes memory params) {
         params = abi.encode(
             LiquityV2AdjustZombieTrove.Params({
@@ -197,8 +197,8 @@ library LiquityV2Encode {
                 maxUpfrontFee: _maxUpfrontFee,
                 upperHint: _upperHint,
                 lowerHint: _lowerHint,
-                collAction: _collAction,
-                debtAction: _debtAction
+                collAction: LiquityV2AdjustZombieTrove.CollActionType(_collAction),
+                debtAction: LiquityV2AdjustZombieTrove.DebtActionType(_debtAction)
             })
         );
     }

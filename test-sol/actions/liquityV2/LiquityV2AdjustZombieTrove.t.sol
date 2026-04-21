@@ -312,8 +312,8 @@ contract TestLiquityV2AdjustZombieTrove is LiquityV2ExecuteActions {
                 vars.upperHint,
                 vars.lowerHint,
                 vars.maxUpfrontFee,
-                vars.collAction,
-                vars.debtAction
+                uint8(vars.collAction),
+                uint8(vars.debtAction)
             ),
             _config.isDirect
         );

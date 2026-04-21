@@ -113,8 +113,8 @@ library FluidEncode {
         address _from,
         address _to,
         bool _sendWrappedEth,
-        FluidVaultT1Adjust.CollActionType _collAction,
-        FluidVaultT1Adjust.DebtActionType _debtAction
+        uint8 _collAction,
+        uint8 _debtAction
     ) public pure returns (bytes memory params) {
         params = abi.encode(
             FluidVaultT1Adjust.Params({
@@ -125,8 +125,8 @@ library FluidEncode {
                 from: _from,
                 to: _to,
                 sendWrappedEth: _sendWrappedEth,
-                collAction: _collAction,
-                debtAction: _debtAction
+                collAction: FluidVaultT1Adjust.CollActionType(_collAction),
+                debtAction: FluidVaultT1Adjust.DebtActionType(_debtAction)
             })
         );
     }

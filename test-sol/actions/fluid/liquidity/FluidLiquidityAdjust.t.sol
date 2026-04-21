@@ -528,8 +528,8 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                     sender,
                     sender,
                     _config.sendWrappedEth,
-                    _config.supplyActionType,
-                    _config.borrowActionType
+                    uint8(_config.supplyActionType),
+                    uint8(_config.borrowActionType)
                 ),
                 _config.isDirect
             );

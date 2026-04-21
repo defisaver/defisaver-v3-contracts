@@ -8,6 +8,24 @@ require('hardhat-log-remover');
 require('@tenderly/hardhat-tenderly');
 require('solidity-coverage');
 
+const path = require('path');
+const { subtask } = require('hardhat/config');
+const { TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS } = require('hardhat/builtin-tasks/task-names');
+const { glob } = require('hardhat/internal/util/glob');
+
+// Compile test-only encoder helpers alongside the regular `contracts/` tree
+// without changing `paths.sources` (which only accepts a single directory).
+// This lets JS tests call `test-sol/utils/ActionsUtils.sol` and the libraries
+// under `test-sol/utils/encode/` directly
+subtask(TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS, async (_, { config }, runSuper) => {
+    const defaultPaths = await runSuper();
+    const extraPatterns = ['test-sol/utils/ActionsUtils.sol', 'test-sol/utils/encode/**/*.sol'];
+    const extraPaths = (
+        await Promise.all(extraPatterns.map((p) => glob(path.join(config.paths.root, p))))
+    ).flat();
+    return [...new Set([...defaultPaths, ...extraPaths])];
+});
+
 const Dec = require('decimal.js');
 const dfs = require('@defisaver/sdk');
 
