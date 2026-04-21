@@ -5,12 +5,12 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { Permission } from "../../auth/Permission.sol";
 import { SubStorage } from "../../core/strategy/SubStorage.sol";
-import { CheckWalletType } from "../../utils/CheckWalletType.sol";
+import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 /// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
-contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType {
+contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, SmartWalletUtils {
     uint64 public immutable REPAY_BUNDLE_ID;
     uint64 public immutable BOOST_BUNDLE_ID;
 
@@ -56,8 +56,8 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
     function subToCompV3Automation(bytes calldata _encodedInput) public {
-        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission(isDSProxy(address(this)));
+        /// @dev Give wallet permission to our auth contract to be able to execute the strategy
+        _givePermissionToAuthContract(_isDSProxy(address(this)));
 
         CompV3SubData memory subData = parseSubData(_encodedInput);
         StrategySub memory repaySub = formatRepaySub(subData, address(this), msg.sender);
@@ -75,8 +75,9 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
     /// @dev Updating sub data will activate it as well
     /// @dev If we don't have a boost subId, send 0
     function updateSubData(bytes calldata _encodedInput) public {
-        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission(isDSProxy(address(this)));
+        /// @dev Give wallet permission to our auth contract to be able to execute the strategy
+        _givePermissionToAuthContract(_isDSProxy(address(this)));
+
         (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
         CompV3SubData memory subData = parseSubData(_encodedInput[8:]);
@@ -107,8 +108,8 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
 
     /// @notice Activates Repay sub and Boost sub if exists
     function activateSub(bytes calldata _encodedInput) public {
-        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission(isDSProxy(address(this)));
+        /// @dev Give wallet permission to our auth contract to be able to execute the strategy
+        _givePermissionToAuthContract(_isDSProxy(address(this)));
         (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
         SubStorage(SUB_STORAGE_ADDR).activateSub(subId1);

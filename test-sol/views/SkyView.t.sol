@@ -131,7 +131,7 @@ contract TestSkyView is SkyExecuteActions {
         SkyView.UrnInfo[] memory urnsInfoAfterAYear = cut.getUserInfo(walletAddr, farms);
 
         for (uint256 i = 0; i < urnsInfoAfterAYear[index].amountsEarned.length; i++) {
-            if (_farm == USDS_FARM) continue; // USDS farm is currently not earning any rewards
+            if (_farm == USDS_FARM || _farm == SPARK_FARM) continue; // USDS and SPARK farm are currently not earning any rewards
             if (urnsInfoAfterAYear[index].amountsEarned[i].farm == _farm) {
                 assertGt(
                     urnsInfoAfterAYear[index].amountsEarned[i].amountEarned,

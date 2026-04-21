@@ -2,11 +2,12 @@
 
 pragma solidity =0.8.24;
 
+import { IStrategyStorage } from "../../interfaces/core/IStrategyStorage.sol";
 import { StrategyModel } from "./StrategyModel.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 
 /// @title StrategyStorage - Record of all the Strategies created
-contract StrategyStorage is StrategyModel, AdminAuth {
+contract StrategyStorage is StrategyModel, AdminAuth, IStrategyStorage {
     Strategy[] public strategies;
     bool public openToPublic = false;
 
@@ -35,7 +36,7 @@ contract StrategyStorage is StrategyModel, AdminAuth {
         bytes4[] memory _actionIds,
         uint8[][] memory _paramMapping,
         bool _continuous
-    ) public onlyAuthCreators returns (uint256) {
+    ) public override onlyAuthCreators returns (uint256) {
         strategies.push(
             Strategy({
                 name: _name,
@@ -55,23 +56,24 @@ contract StrategyStorage is StrategyModel, AdminAuth {
     /// @notice Switch to determine if bundles can be created by anyone
     /// @dev Callable only by the owner
     /// @param _openToPublic Flag if true anyone can create bundles
-    function changeEditPermission(bool _openToPublic) public onlyOwner {
+    function changeEditPermission(bool _openToPublic) public override onlyOwner {
         openToPublic = _openToPublic;
     }
 
     ////////////////////////////// VIEW METHODS /////////////////////////////////
 
-    function getStrategy(uint256 _strategyId) public view returns (Strategy memory) {
+    function getStrategy(uint256 _strategyId) public view override returns (Strategy memory) {
         return strategies[_strategyId];
     }
 
-    function getStrategyCount() public view returns (uint256) {
+    function getStrategyCount() public view override returns (uint256) {
         return strategies.length;
     }
 
     function getPaginatedStrategies(uint256 _page, uint256 _perPage)
         public
         view
+        override
         returns (Strategy[] memory)
     {
         Strategy[] memory strategiesPerPage = new Strategy[](_perPage);

@@ -451,14 +451,16 @@
     },
     {
         "name": "StrategyTriggerViewNoRevert",
-        "address": "0xEEfc5edc8dEDeeD92834469F2da3e2D415731137",
+        "address": "0xD00644919f1F6a816Fb88454065f0f6586C928Ae",
         "id": "0x37a21cb5",
         "path": "contracts/views/strategy/StrategyTriggerViewNoRevert.sol",
-        "version": "1.0.4",
+        "version": "1.0.6",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x6f4bD4F45cA40EB95f070A9A4AeC9e47cEF05a3E",
+            "0xEEfc5edc8dEDeeD92834469F2da3e2D415731137",
             "0x395079428c66C1AB0144057366c7493C92326860",
             "0x40F282Eb32995A1763619dd4200d19e79BC61CE8",
             "0xe3d31D3e005B55e72B7c3ECE4E0e2a5Aee2B8C63",
@@ -815,14 +817,17 @@
     },
     {
         "name": "AaveView",
-        "address": "0xD0bA40A400f9e045D54978E3B78Cd9aD9FA92144",
+        "address": "0x9ec780f37b0f66f0c7bafd0204588db374ae59be",
         "id": "0x0a55b48c",
         "path": "contracts/views/AaveView.sol",
-        "version": "1.0.2",
+        "version": "1.0.4",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x792c56838Ab06015da7E298e4bD2Cc31248a18Aa",
+            "0x6102E50F88f039976bd1909a9CC368c7dd1d1A1d",
+            "0xD0bA40A400f9e045D54978E3B78Cd9aD9FA92144",
             "0xf585d53f568d226449a94d48c4ea122cdeffe52d",
             "0xEDf1087544a01596b70Da746F861B878F245B08f"
         ]
@@ -917,28 +922,31 @@
     },
     {
         "name": "StrategyExecutor",
-        "address": "0xFaa763790b26E7ea354373072baB02e680Eeb07F",
+        "address": "0x8278DA54b4A47c0f6F4a0a4b00B6f31678f30181",
         "id": "0xdcb15eef",
         "path": "contracts/core/strategy/StrategyExecutor.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "604800",
         "registryIds": [],
         "history": [
+            "0xFaa763790b26E7ea354373072baB02e680Eeb07F",
             "0x252025dF8680C275D0bA80D084e5967D8BD26caf",
             "0x6a1C1B8a27E7613a595Ffb7cCE225bdda7e04832"
         ]
     },
     {
         "name": "RecipeExecutor",
-        "address": "0x2ee96cf53ae5fbd5309284704f978d0ca66cb963",
+        "address": "0xbc3Fc959FeF3F12a41738f406c02198cdeE7481F",
         "id": "0x4c69ee1e",
         "path": "contracts/core/RecipeExecutor.sol",
-        "version": "1.0.4",
+        "version": "1.0.6",
         "inRegistry": true,
         "changeTime": "604800",
         "registryIds": [],
         "history": [
+            "0x4677c84699ab29637102609cD2868d0743a48DdF",
+            "0x2ee96cf53ae5fbd5309284704f978d0ca66cb963",
             "0x5029336642814bC51a42bA80BF83a6322110035D",
             "0x5029336642814bC51a42bA80BF83a6322110035D",
             "0xe822d76c2632FC52f3eaa686bDA9Cea3212579D8",
@@ -2141,14 +2149,15 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xDABC9914Ce4279a351a26038Fa96BFa7a6D1aC6e",
+        "address": "0xA06f99e484F4f880E9F22744e0e9aB72aF32177b",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.13",
+        "version": "1.0.14",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xDABC9914Ce4279a351a26038Fa96BFa7a6D1aC6e",
             "0xB63565026194672f1db42473CB470B570bba78ce",
             "0xe5b2f8d31b47f09400d8afb599e0f239179de6b6",
             "0x5BAD7F432e22BcF1937C8361933c9C804179aEDf",
@@ -2359,14 +2368,17 @@
     },
     {
         "name": "FLAction",
-        "address": "0x5f1dC84Ba060Ea3f7429c6A7bBEdd9243CF1209b",
+        "address": "0xE78C05c508405207ecc256781B9415e6De1c8336",
         "id": "0xbcab5e2a",
         "path": "contracts/actions/flashloan/FLAction.sol",
-        "version": "1.0.3",
+        "version": "1.0.6",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xAc83378E8B075F95640d581A42cba80452caEEa3",
+            "0x7A0f3963c666d4549e5909a7162B560abF9f006D",
+            "0x5f1dC84Ba060Ea3f7429c6A7bBEdd9243CF1209b",
             "0xC2b92B6c69e5c3b6b29385C1a17FEe906e0CA910",
             "0x2bE65F12dCc55c8485030E306A1B01F47C437a8A",
             "0x72915D41982DfCAf30b871290618E59C45Edba7F",
@@ -3749,14 +3761,17 @@
     },
     {
         "name": "TxSaverExecutor",
-        "address": "0xac7745d524b780751cc8410224d73ebe7e7acca2",
+        "address": "0xDE0e1B36f54940050D4b1b421f8e3e44e40F64e0",
         "id": "0x91bfbd87",
         "path": "contracts/tx-saver/TxSaverExecutor.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x475f433407205557E8A7aeE7Be53155EB9681c92"]
+        "history": [
+            "0xac7745d524b780751cc8410224d73ebe7e7acca2",
+            "0x475f433407205557E8A7aeE7Be53155EB9681c92"
+        ]
     },
     {
         "name": "AaveV3OpenRatioCheck",
@@ -4765,6 +4780,17 @@
         "history": []
     },
     {
+        "name": "ConnectV2DefiSaver",
+        "address": "0x80E31fE25A6C0087E0487E60da92fCe622757543",
+        "id": "0x1fc6d9e6",
+        "path": "contracts/actions/insta/connectors/ConnectV2DefiSaver.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "SparkQuotePriceRangeTrigger",
         "address": "0x52Cf73d458623c8CAF4D8B5590F7eAFb4c393112",
         "id": "0x83a50237",
@@ -4794,6 +4820,39 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SFProxyEntryPoint",
+        "address": "0xAa15ca459659F35B1064EC546A44d962d54bA89e",
+        "id": "0x06f8038f",
+        "path": "contracts/actions/summerfi/SFProxyEntryPoint.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SummerfiUnsub",
+        "address": "0x926405D69b77A514ED974901095AcFf9e5131366",
+        "id": "0xbcc74767",
+        "path": "contracts/actions/summerfi/SummerfiUnsub.sol",
+        "version": "1.0.1",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": ["0x88bd1819362f395d37a59c58aecA4dee2a855f86"]
+    },
+    {
+        "name": "SummerfiUnsubV2",
+        "address": "0x5E805eD9B7581a9f1398F75833f9663a459F5E30",
+        "id": "0xa7559614",
+        "path": "contracts/actions/summerfi/SummerfiUnsubV2.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     }
