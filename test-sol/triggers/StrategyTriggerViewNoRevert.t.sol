@@ -5,12 +5,14 @@ pragma solidity =0.8.24;
 import { BaseTest } from "../utils/BaseTest.sol";
 import { Addresses } from "../utils/Addresses.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
-import { StrategyTriggerViewNoRevert } from
-    "../../contracts/views/strategy/StrategyTriggerViewNoRevert.sol";
+import {
+    StrategyTriggerViewNoRevert
+} from "../../contracts/views/strategy/StrategyTriggerViewNoRevert.sol";
 import { AaveV3CollateralSwitch } from "../../contracts/actions/aaveV3/AaveV3CollateralSwitch.sol";
 import { IPoolV3 } from "../../contracts/interfaces/protocols/aaveV3/IPoolV3.sol";
-import { IPoolAddressesProvider } from
-    "../../contracts/interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
+import {
+    IPoolAddressesProvider
+} from "../../contracts/interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
 import { IDSProxy } from "../../contracts/interfaces/DS/IDSProxy.sol";
 
 contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRevert {
@@ -166,10 +168,11 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRever
         });
 
         vm.prank(walletOwner);
-        IDSProxy(payable(walletWithLTV0Asset2)).execute(
-            address(collSwitch),
-            abi.encodeWithSelector(collSwitch.executeActionDirect.selector, abi.encode(params))
-        );
+        IDSProxy(payable(walletWithLTV0Asset2))
+            .execute(
+                address(collSwitch),
+                abi.encodeWithSelector(collSwitch.executeActionDirect.selector, abi.encode(params))
+            );
 
         assertEq(
             uint256(_verifyAaveV3Ltv0Position(walletWithLTV0Asset2)),

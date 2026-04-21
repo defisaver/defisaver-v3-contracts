@@ -4813,6 +4813,17 @@
         "history": []
     },
     {
+        "name": "SparkTargetRatioCheck",
+        "address": "0x4E5044F622C0FcAb587106847F4889d3AB065c79",
+        "id": "0x66d60c1e",
+        "path": "contracts/actions/checkers/SparkTargetRatioCheck.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "SFProxyEntryPoint",
         "address": "0xAa15ca459659F35B1064EC546A44d962d54bA89e",
         "id": "0x06f8038f",

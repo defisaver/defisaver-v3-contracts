@@ -6932,6 +6932,276 @@ const createMorphoBlueFLCloseToDebtStrategy = () => {
     return morphoBlueFLCloseToDebtStrategy.encodeForDsProxyCall();
 };
 
+const createSparkRepayOnPriceStrategy = () => {
+    const sparkRepayOnPriceStrategy = new dfs.Strategy('SparkRepayOnPriceStrategy');
+
+    sparkRepayOnPriceStrategy.addSubSlot('&collAsset', 'address');
+    sparkRepayOnPriceStrategy.addSubSlot('&collAssetId', 'uint16');
+    sparkRepayOnPriceStrategy.addSubSlot('&debtAsset', 'address');
+    sparkRepayOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
+    sparkRepayOnPriceStrategy.addSubSlot('&marketAddr', 'address');
+    sparkRepayOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
+    sparkRepayOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
+
+    const trigger = new dfs.triggers.SparkQuotePriceTrigger(nullAddress, nullAddress, '0', '0');
+    sparkRepayOnPriceStrategy.addTrigger(trigger);
+
+    const withdrawAction = new dfs.actions.spark.SparkWithdrawAction(
+        '%false', // useDefaultMarket, hardcoded to false - Sent by backend.
+        '&marketAddr',
+        '%amount', // amount to withdraw - Sent by backend.
+        '&proxy',
+        '&collAssetId',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collAsset',
+            '&debtAsset',
+            '$1',
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction('%gasStart', '&debtAsset', '$2');
+
+    const paybackAction = new dfs.actions.spark.SparkPaybackAction(
+        '%false', // useDefaultMarket, hardcoded to false - Sent by backend.
+        '&marketAddr',
+        '$3',
+        '&proxy',
+        '%rateMode', // variable type of debt, sent by backend
+        '&debtAsset',
+        '&debtAssetId',
+        '&useOnBehalf',
+        '%onBehalfAddr', // set to empty because flag is false
+    );
+
+    const checkerAction = new dfs.actions.checkers.SparkTargetRatioCheck(
+        '&targetRatio',
+        '&marketAddr',
+    );
+
+    sparkRepayOnPriceStrategy.addAction(withdrawAction);
+    sparkRepayOnPriceStrategy.addAction(sellAction);
+    sparkRepayOnPriceStrategy.addAction(feeTakingAction);
+    sparkRepayOnPriceStrategy.addAction(paybackAction);
+    sparkRepayOnPriceStrategy.addAction(checkerAction);
+
+    return sparkRepayOnPriceStrategy.encodeForDsProxyCall();
+};
+
+const createSparkFLRepayOnPriceStrategy = () => {
+    const sparkFLRepayOnPriceStrategy = new dfs.Strategy('SparkFLRepayOnPriceStrategy');
+
+    sparkFLRepayOnPriceStrategy.addSubSlot('&collAsset', 'address');
+    sparkFLRepayOnPriceStrategy.addSubSlot('&collAssetId', 'uint16');
+    sparkFLRepayOnPriceStrategy.addSubSlot('&debtAsset', 'address');
+    sparkFLRepayOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
+    sparkFLRepayOnPriceStrategy.addSubSlot('&marketAddr', 'address');
+    sparkFLRepayOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
+    sparkFLRepayOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
+
+    const trigger = new dfs.triggers.SparkQuotePriceTrigger(nullAddress, nullAddress, '0', '0');
+    sparkFLRepayOnPriceStrategy.addTrigger(trigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.SparkFlashLoanAction(
+            ['%collAsset'], // sent by backend
+            ['%flAmount'], // sent by backend
+            nullAddress,
+            [],
+        ),
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collAsset',
+            '&debtAsset',
+            '%amount',
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction('%gasStart', '&debtAsset', '$2');
+
+    const paybackAction = new dfs.actions.spark.SparkPaybackAction(
+        '%false', // useDefaultMarket, hardcoded to false - Sent by backend.
+        '&marketAddr',
+        '$3',
+        '&proxy',
+        '%rateMode', // variable type of debt, sent by backend
+        '&debtAsset',
+        '&debtAssetId',
+        '&useOnBehalf',
+        '%onBehalfAddr', // set to empty because flag is false
+    );
+
+    const withdrawAction = new dfs.actions.spark.SparkWithdrawAction(
+        '%false', // useDefaultMarket, hardcoded to false - Sent by backend.
+        '&marketAddr',
+        '$1',
+        '%flAddress', // sent by backend
+        '&collAssetId',
+    );
+
+    const checkerAction = new dfs.actions.checkers.SparkTargetRatioCheck(
+        '&targetRatio',
+        '&marketAddr',
+    );
+
+    sparkFLRepayOnPriceStrategy.addAction(flAction);
+    sparkFLRepayOnPriceStrategy.addAction(sellAction);
+    sparkFLRepayOnPriceStrategy.addAction(feeTakingAction);
+    sparkFLRepayOnPriceStrategy.addAction(paybackAction);
+    sparkFLRepayOnPriceStrategy.addAction(withdrawAction);
+    sparkFLRepayOnPriceStrategy.addAction(checkerAction);
+
+    return sparkFLRepayOnPriceStrategy.encodeForDsProxyCall();
+};
+
+const createSparkBoostOnPriceStrategy = () => {
+    const sparkBoostOnPriceStrategy = new dfs.Strategy('SparkBoostOnPriceStrategy');
+
+    sparkBoostOnPriceStrategy.addSubSlot('&collAsset', 'address');
+    sparkBoostOnPriceStrategy.addSubSlot('&collAssetId', 'uint16');
+    sparkBoostOnPriceStrategy.addSubSlot('&debtAsset', 'address');
+    sparkBoostOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
+    sparkBoostOnPriceStrategy.addSubSlot('&marketAddr', 'address');
+    sparkBoostOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
+    sparkBoostOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
+
+    const trigger = new dfs.triggers.SparkQuotePriceTrigger(nullAddress, nullAddress, '0', '0');
+    sparkBoostOnPriceStrategy.addTrigger(trigger);
+
+    const borrowAction = new dfs.actions.spark.SparkBorrowAction(
+        '%false', // useDefaultMarket, hardcoded to false - Sent by backend.
+        '&marketAddr',
+        '%amount', // amount to borrow - Sent by backend.
+        '&proxy',
+        '%rateMode',
+        '&debtAssetId',
+        '&useOnBehalf',
+        '%onBehalfAddr', // set to empty because flag is false
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&debtAsset',
+            '&collAsset',
+            '$1',
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction('%gasStart', '&collAsset', '$2');
+
+    const supplyAction = new dfs.actions.spark.SparkSupplyAction(
+        '%false', // useDefaultMarket, hardcoded to false - Sent by backend.
+        '&marketAddr',
+        '$3',
+        '&proxy',
+        '&collAsset',
+        '&collAssetId',
+        '%enableAsColl', // hardcoded always enable as coll
+        '%false', // useOnBehalf, set to false - Sent by backend.
+        '%onBehalfAddr', // set to empty because flag is false
+    );
+
+    const checkerAction = new dfs.actions.checkers.SparkTargetRatioCheck(
+        '&targetRatio',
+        '&marketAddr',
+    );
+
+    sparkBoostOnPriceStrategy.addAction(borrowAction);
+    sparkBoostOnPriceStrategy.addAction(sellAction);
+    sparkBoostOnPriceStrategy.addAction(feeTakingAction);
+    sparkBoostOnPriceStrategy.addAction(supplyAction);
+    sparkBoostOnPriceStrategy.addAction(checkerAction);
+
+    return sparkBoostOnPriceStrategy.encodeForDsProxyCall();
+};
+
+const createSparkFLBoostOnPriceStrategy = () => {
+    const sparkFLBoostOnPriceStrategy = new dfs.Strategy('SparkFLBoostOnPriceStrategy');
+
+    sparkFLBoostOnPriceStrategy.addSubSlot('&collAsset', 'address');
+    sparkFLBoostOnPriceStrategy.addSubSlot('&collAssetId', 'uint16');
+    sparkFLBoostOnPriceStrategy.addSubSlot('&debtAsset', 'address');
+    sparkFLBoostOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
+    sparkFLBoostOnPriceStrategy.addSubSlot('&marketAddr', 'address');
+    sparkFLBoostOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
+    sparkFLBoostOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
+
+    const trigger = new dfs.triggers.SparkQuotePriceTrigger(nullAddress, nullAddress, '0', '0');
+    sparkFLBoostOnPriceStrategy.addTrigger(trigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.SparkFlashLoanAction(
+            ['%debtAsset'], // sent by backend
+            ['%flAmount'], // sent by backend
+            nullAddress,
+            [],
+        ),
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&debtAsset',
+            '&collAsset',
+            '%amount', //sent by backend
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction('%gasStart', '&collAsset', '$2');
+
+    const supplyAction = new dfs.actions.spark.SparkSupplyAction(
+        '%false', // useDefaultMarket, hardcoded to false - Sent by backend.
+        '&marketAddr',
+        '$3',
+        '&proxy',
+        '&collAsset',
+        '&collAssetId',
+        '%enableAsColl', // hardcoded always enable as coll
+        '&useOnBehalf',
+        '%onBehalfAddr', // set to empty because flag is false
+    );
+
+    const borrowAction = new dfs.actions.spark.SparkBorrowAction(
+        '%false', // useDefaultMarket, hardcoded to false - Sent by backend.
+        '&marketAddr',
+        '$1',
+        '%flAddress',
+        '%rateMode',
+        '&debtAssetId',
+        '&useOnBehalf',
+        '%onBehalfAddr', // set to empty because flag is false
+    );
+
+    const checkerAction = new dfs.actions.checkers.SparkTargetRatioCheck(
+        '&targetRatio',
+        '&marketAddr',
+    );
+
+    sparkFLBoostOnPriceStrategy.addAction(flAction);
+    sparkFLBoostOnPriceStrategy.addAction(sellAction);
+    sparkFLBoostOnPriceStrategy.addAction(feeTakingAction);
+    sparkFLBoostOnPriceStrategy.addAction(supplyAction);
+    sparkFLBoostOnPriceStrategy.addAction(borrowAction);
+    sparkFLBoostOnPriceStrategy.addAction(checkerAction);
+
+    return sparkFLBoostOnPriceStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createRepayStrategy,
     createFLRepayStrategy,
@@ -7046,4 +7316,8 @@ module.exports = {
     createSparkGenericFLCloseToDebtStrategy,
     createMorphoBlueFLCloseToCollStrategy,
     createMorphoBlueFLCloseToDebtStrategy,
+    createSparkRepayOnPriceStrategy,
+    createSparkFLRepayOnPriceStrategy,
+    createSparkBoostOnPriceStrategy,
+    createSparkFLBoostOnPriceStrategy,
 };
