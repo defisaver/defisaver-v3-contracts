@@ -58,6 +58,7 @@ contract SmartWalletUtils is DSProxyFactoryHelper, DSAProxyFactoryHelper, SFProx
 
         // Otherwise, we assume we are in context of Safe
         address[] memory owners = ISafe(_wallet).getOwners();
-        return owners.length == 1 ? owners[0] : _wallet;
+        if (owners.length == 1 && owners[0].code.length == 0) return owners[0];
+        return _wallet;
     }
 }
