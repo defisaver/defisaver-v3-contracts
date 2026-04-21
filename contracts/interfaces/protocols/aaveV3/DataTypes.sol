@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
 library DataTypes {
@@ -32,7 +32,7 @@ library DataTypes {
         uint128 accruedToTreasury;
         // DEPRECATED on v3.4.0
         uint128 unbacked;
-        //the outstanding debt borrowed against this asset in isolation mode
+        // DEPRECATED on v3.7.0
         uint128 isolationModeTotalDebt;
     }
 
@@ -46,8 +46,8 @@ library DataTypes {
         //bit 58: borrowing is enabled
         //bit 59: DEPRECATED: stable rate borrowing enabled
         //bit 60: asset is paused
-        //bit 61: borrowing in isolation mode is enabled
-        //bit 62: siloed borrowing enabled
+        //bit 61: DEPRECATED: borrowing in isolation mode is enabled
+        //bit 62: DEPRECATED: siloed borrowing enabled
         //bit 63: flashloaning enabled
         //bit 64-79: reserve factor
         //bit 80-115: borrow cap in whole tokens, borrowCap == 0 => no cap
@@ -55,7 +55,7 @@ library DataTypes {
         //bit 152-167: liquidation protocol fee
         //bit 168-175: DEPRECATED: eMode category
         //bit 176-211: DEPRECATED: unbacked mint cap
-        //bit 212-251: debt ceiling for isolation mode with (ReserveConfiguration::DEBT_CEILING_DECIMALS) decimals
+        //bit 212-251: DEPRECATED: debt ceiling for isolation mode with (ReserveConfiguration::DEBT_CEILING_DECIMALS) decimals
         //bit 252: DEPRECATED: virtual accounting is enabled for the reserve
         //bit 253-255 unused
         uint256 data;
@@ -87,36 +87,22 @@ library DataTypes {
         uint16 liquidationBonus;
     }
 
-    struct EModeCategoryBaseConfiguration {
-        uint16 ltv;
-        uint16 liquidationThreshold;
-        uint16 liquidationBonus;
-        string label;
-    }
-
     struct EModeCategoryNew {
         // each eMode category has a custom ltv and liquidation threshold
         uint16 ltv;
         uint16 liquidationThreshold;
         uint16 liquidationBonus;
         uint128 collateralBitmap;
-        string label; // soft deprecated, will not be used after aave v3.6
+        bool isolated; // if true, only assets in collateralBitmap can be used as collateral, and all others will have ltv0 rules applying
+        string label;
         uint128 borrowableBitmap;
-        uint128 ltvzeroBitmap; // if true, the asset will be treated as ltv0 and ltv0 rules apply. Added in aave v3.6
+        uint128 ltvzeroBitmap; // if true, the asset will be treated as ltv0 and ltv0 rules apply
     }
 
     enum InterestRateMode {
         NONE,
         _DEPRECATED,
         VARIABLE
-    }
-
-    struct CalculateUserAccountDataParams {
-        UserConfigurationMap userConfig;
-        uint256 reservesCount;
-        address user;
-        address oracle;
-        uint8 userEModeCategory;
     }
 
     struct CalculateInterestRatesParams {

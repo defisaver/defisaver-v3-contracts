@@ -1242,6 +1242,92 @@ const subMorphoBlueClose = async (
     return { subId, strategySub };
 };
 
+const _subSparkLeverageManagementOnPrice = async (
+    proxy,
+    bundleId,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+    marketAddr,
+    price,
+    ratioState,
+    targetRatio,
+) => {
+    const triggerData = {
+        baseTokenAddr: collAsset,
+        quoteTokenAddr: debtAsset,
+        price,
+        ratioState,
+    };
+    const subData = {
+        collAsset,
+        collAssetId,
+        debtAsset,
+        debtAssetId,
+        marketAddr,
+        targetRatio,
+    };
+    const strategySub = automationSdk.strategySubService.sparkEncode.leverageManagementOnPrice(
+        bundleId,
+        true,
+        triggerData,
+        subData,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
+const subSparkRepayOnPriceBundle = async (
+    proxy,
+    bundleId,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+    marketAddr,
+    price,
+    ratioState,
+    targetRatio,
+) =>
+    _subSparkLeverageManagementOnPrice(
+        proxy,
+        bundleId,
+        collAsset,
+        collAssetId,
+        debtAsset,
+        debtAssetId,
+        marketAddr,
+        price,
+        ratioState,
+        targetRatio,
+    );
+
+const subSparkBoostOnPriceBundle = async (
+    proxy,
+    bundleId,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+    marketAddr,
+    price,
+    ratioState,
+    targetRatio,
+) =>
+    _subSparkLeverageManagementOnPrice(
+        proxy,
+        bundleId,
+        collAsset,
+        collAssetId,
+        debtAsset,
+        debtAssetId,
+        marketAddr,
+        price,
+        ratioState,
+        targetRatio,
+    );
+
 const subAaveV4LeverageManagement = async (
     bundleId,
     proxy,
@@ -1397,6 +1483,8 @@ module.exports = {
     subAaveV3FLCollateralSwitchStrategy,
     subSparkCloseGeneric,
     subMorphoBlueClose,
+    subSparkRepayOnPriceBundle,
+    subSparkBoostOnPriceBundle,
     subAaveV4LeverageManagement,
     subAaveV4LeverageManagementOnPrice,
     subAaveV4CloseOnPrice,
