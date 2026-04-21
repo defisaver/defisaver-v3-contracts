@@ -17,6 +17,7 @@ import { AaveV3Borrow } from "../../contracts/actions/aaveV3/AaveV3Borrow.sol";
 
 import { AaveV3View } from "../../contracts/views/AaveV3View.sol";
 import { AaveV3Helper } from "../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
+import { AaveV3Encode } from "../utils/encode/AaveV3Encode.sol";
 
 contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
     /*//////////////////////////////////////////////////////////////////////////
@@ -226,7 +227,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
             lendingPool.getReserveData(_config.borrowToken);
 
         // Execute Supply
-        bytes memory supplyParams = aaveV3SupplyEncode(
+        bytes memory supplyParams = AaveV3Encode.supply(
             _config.supplyAmount,
             sender,
             reserveDataColl.id,
@@ -241,7 +242,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         wallet.execute(address(supplyContract), supplyCalldata, 0);
 
         // Execute Borrow
-        bytes memory borrowParams = aaveV3BorrowEncode(
+        bytes memory borrowParams = AaveV3Encode.borrow(
             _config.borrowAmount,
             sender,
             2, // rateMode (variable)

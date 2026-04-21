@@ -10,6 +10,7 @@ import { AaveV4RatioCheck } from "../../../contracts/actions/checkers/AaveV4Rati
 import { SmartWallet } from "test-sol/utils/SmartWallet.sol";
 import { AaveV4TestBase } from "../aaveV4/AaveV4TestBase.t.sol";
 import { console2 } from "forge-std/console2.sol";
+import { AaveV4Encode } from "test-sol/utils/encode/AaveV4Encode.sol";
 
 contract TestAaveV4RatioCheck is AaveV4TestBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -144,7 +145,7 @@ contract TestAaveV4RatioCheck is AaveV4TestBase {
             tempStorage.setBytes32(AAVE_V4_RATIO_KEY, bytes32(startRatio));
 
             bytes memory executeActionCallData = executeActionCalldata(
-                aaveV4RatioCheckEncode(
+                AaveV4Encode.ratioCheck(
                     uint8(config.ratioState), targetRatio, testPair.spoke, walletAddr
                 ),
                 false

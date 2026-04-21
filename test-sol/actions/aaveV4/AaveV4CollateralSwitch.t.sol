@@ -8,6 +8,7 @@ import {
     AaveV4CollateralSwitch
 } from "../../../contracts/actions/aaveV4/AaveV4CollateralSwitch.sol";
 import { AaveV4TestBase } from "./AaveV4TestBase.t.sol";
+import { AaveV4Encode } from "test-sol/utils/encode/AaveV4Encode.sol";
 
 contract TestAaveV4CollateralSwitch is AaveV4TestBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -81,7 +82,7 @@ contract TestAaveV4CollateralSwitch is AaveV4TestBase {
         address onBehalf = _testConfig.isEoa ? sender : walletAddr;
 
         bytes memory disableCallData = executeActionCalldata(
-            aaveV4CollateralSwitchEncode(_spoke, onBehalf, _reserveId, false), _testConfig.isDirect
+            AaveV4Encode.collateralSwitch(_spoke, onBehalf, _reserveId, false), _testConfig.isDirect
         );
 
         wallet.execute(address(cut), disableCallData, 0);
@@ -90,7 +91,7 @@ contract TestAaveV4CollateralSwitch is AaveV4TestBase {
         assertEq(userAccountData.activeCollateralCount, 0);
 
         bytes memory enableCallData = executeActionCalldata(
-            aaveV4CollateralSwitchEncode(_spoke, onBehalf, _reserveId, true), _testConfig.isDirect
+            AaveV4Encode.collateralSwitch(_spoke, onBehalf, _reserveId, true), _testConfig.isDirect
         );
 
         wallet.execute(address(cut), enableCallData, 0);

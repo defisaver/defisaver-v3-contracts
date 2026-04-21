@@ -6,6 +6,7 @@ import { ISpoke } from "../../../contracts/interfaces/protocols/aaveV4/ISpoke.so
 import { SmartWallet } from "test-sol/utils/SmartWallet.sol";
 import { AaveV4Payback } from "../../../contracts/actions/aaveV4/AaveV4Payback.sol";
 import { AaveV4TestBase } from "./AaveV4TestBase.t.sol";
+import { AaveV4Encode } from "test-sol/utils/encode/AaveV4Encode.sol";
 
 contract TestAaveV4Payback is AaveV4TestBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -105,7 +106,7 @@ contract TestAaveV4Payback is AaveV4TestBase {
         approveAsSender(sender, underlying, walletAddr, topUpAmount);
 
         bytes memory executeActionCallData = executeActionCalldata(
-            aaveV4PaybackEncode(
+            AaveV4Encode.payback(
                 _spoke,
                 onBehalf,
                 sender,

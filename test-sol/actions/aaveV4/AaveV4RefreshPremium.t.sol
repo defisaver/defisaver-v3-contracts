@@ -7,6 +7,7 @@ import { SmartWallet } from "test-sol/utils/SmartWallet.sol";
 import { AaveV4RefreshPremium } from "../../../contracts/actions/aaveV4/AaveV4RefreshPremium.sol";
 import { AaveV4TestBase } from "./AaveV4TestBase.t.sol";
 import { console2 } from "forge-std/console2.sol";
+import { AaveV4Encode } from "test-sol/utils/encode/AaveV4Encode.sol";
 
 contract TestAaveV4RefreshPremium is AaveV4TestBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -95,7 +96,7 @@ contract TestAaveV4RefreshPremium is AaveV4TestBase {
         }
 
         bytes memory executeActionCallData = executeActionCalldata(
-            aaveV4RefreshPremiumEncode(
+            AaveV4Encode.refreshPremium(
                 _testPair.spoke, onBehalf, _testConfig.refreshDynamicReserveConfig
             ),
             _testConfig.isDirect

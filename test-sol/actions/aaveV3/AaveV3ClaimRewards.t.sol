@@ -9,6 +9,7 @@ import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3He
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
+import { AaveV3Encode } from "../../utils/encode/AaveV3Encode.sol";
 
 /// @notice Testing interaction with mock contract as claiming rewards is deprecated
 contract TestAaveV3ClaimRewards is AaveV3Helper, ActionsUtils, BaseTest {
@@ -96,7 +97,7 @@ contract TestAaveV3ClaimRewards is AaveV3Helper, ActionsUtils, BaseTest {
             wallet.execute(address(cut), cut.encodeInputs(params), 0);
         } else {
             bytes memory paramsCallData =
-                aaveV3ClaimRewardsEncode(100, sender, address(0), new address[](0));
+                AaveV3Encode.claimRewards(100, sender, address(0), new address[](0));
 
             bytes memory _calldata = abi.encodeWithSelector(
                 AaveV3ClaimRewards.executeAction.selector,

@@ -6,6 +6,7 @@ import { AaveV3DelegateCredit } from "../../../contracts/actions/aaveV3/AaveV3De
 import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
 import { IL2PoolV3 } from "../../../contracts/interfaces/protocols/aaveV3/IL2PoolV3.sol";
 import { DataTypes } from "../../../contracts/interfaces/protocols/aaveV3/DataTypes.sol";
+import { AaveV3Encode } from "../../utils/encode/AaveV3Encode.sol";
 
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
@@ -145,7 +146,7 @@ contract TestAaveV3DelegateCredit is AaveV3Helper, ActionsUtils, BaseTest {
             });
             wallet.execute(address(cut), cut.encodeInputs(params), 0);
         } else {
-            bytes memory paramsCalldata = aaveV3DelegateCreditEncode(
+            bytes memory paramsCalldata = AaveV3Encode.delegateCredit(
                 _amount,
                 _delegatee,
                 tokenData.id,

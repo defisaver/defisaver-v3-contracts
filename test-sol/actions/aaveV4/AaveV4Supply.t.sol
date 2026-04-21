@@ -9,6 +9,7 @@ import {
 import { SmartWallet } from "test-sol/utils/SmartWallet.sol";
 import { AaveV4Supply } from "../../../contracts/actions/aaveV4/AaveV4Supply.sol";
 import { AaveV4TestBase } from "./AaveV4TestBase.t.sol";
+import { AaveV4Encode } from "test-sol/utils/encode/AaveV4Encode.sol";
 
 contract TestAaveV4Supply is AaveV4TestBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -128,7 +129,7 @@ contract TestAaveV4Supply is AaveV4TestBase {
         approveAsSender(sender, reserve.underlying, walletAddr, supplyAmount);
 
         bytes memory executeActionCallData = executeActionCalldata(
-            aaveV4SupplyEncode(
+            AaveV4Encode.supply(
                 _testPair.spoke,
                 onBehalf,
                 sender,

@@ -25,6 +25,7 @@ import { AaveV3Payback } from "../../../contracts/actions/aaveV3/AaveV3Payback.s
 import { AaveV3Withdraw } from "../../../contracts/actions/aaveV3/AaveV3Withdraw.sol";
 import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
 import { AaveV3RatioHelper } from "../../../contracts/actions/aaveV3/helpers/AaveV3RatioHelper.sol";
+import { AaveV3Encode } from "../encode/AaveV3Encode.sol";
 import { FLAction } from "../../../contracts/actions/flashloan/FLAction.sol";
 import { SendToken } from "../../../contracts/actions/utils/SendToken.sol";
 import { DFSSell } from "../../../contracts/actions/exchange/DFSSell.sol";
@@ -223,7 +224,7 @@ contract SFProxyIntegration is
 
         bytes[] memory actionsCalldata = new bytes[](6);
         actionsCalldata[0] = flActionEncode(BORROW_ASSET, flAmount, FLSource.BALANCER);
-        actionsCalldata[1] = aaveV3PaybackEncode(
+        actionsCalldata[1] = AaveV3Encode.payback(
             type(uint256).max,
             sfProxy,
             2,
@@ -233,7 +234,7 @@ contract SFProxyIntegration is
             DEFAULT_AAVE_MARKET,
             sfProxy
         );
-        actionsCalldata[2] = aaveV3WithdrawEncode(
+        actionsCalldata[2] = AaveV3Encode.withdraw(
             supplyReserve.id, false, type(uint256).max, sfProxy, DEFAULT_AAVE_MARKET
         );
         actionsCalldata[3] = sellEncodeV3(
@@ -289,10 +290,10 @@ contract SFProxyIntegration is
         actionsCalldata[1] = sellEncodeV3(
             SUPPLY_ASSET, BORROW_ASSET, flAmount, sfProxy, sfProxy, EXCHANGE_WRAPPER, 3000
         );
-        actionsCalldata[2] = aaveV3PaybackEncode(
+        actionsCalldata[2] = AaveV3Encode.payback(
             paybackAmount, sfProxy, 2, borrowReserve.id, false, false, DEFAULT_AAVE_MARKET, sfProxy
         );
-        actionsCalldata[3] = aaveV3WithdrawEncode(
+        actionsCalldata[3] = AaveV3Encode.withdraw(
             supplyReserve.id, false, flAmount, address(flAction), DEFAULT_AAVE_MARKET
         );
 
@@ -335,10 +336,10 @@ contract SFProxyIntegration is
         }
 
         bytes[] memory actionsCalldata = new bytes[](2);
-        actionsCalldata[0] = aaveV3SupplyEncode(
+        actionsCalldata[0] = AaveV3Encode.supply(
             supplyAmount, bob, supplyReserve.id, false, true, DEFAULT_AAVE_MARKET, _onBehalf
         );
-        actionsCalldata[1] = aaveV3BorrowEncode(
+        actionsCalldata[1] = AaveV3Encode.borrow(
             borrowAmount, bob, 2, borrowReserve.id, false, true, DEFAULT_AAVE_MARKET, _onBehalf
         );
 

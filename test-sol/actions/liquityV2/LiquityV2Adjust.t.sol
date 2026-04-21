@@ -13,6 +13,7 @@ import { LiquityV2Adjust } from "../../../contracts/actions/liquityV2/trove/Liqu
 
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
+import { LiquityV2Encode } from "../../utils/encode/LiquityV2Encode.sol";
 
 contract TestLiquityV2Adjust is LiquityV2ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
@@ -155,18 +156,17 @@ contract TestLiquityV2Adjust is LiquityV2ExecuteActions {
                 registerBatchManager(markets[i]);
                 vm.stopPrank();
             }
-            uint256 troveId = executeLiquityOpenTrove(
-                markets[i],
-                _config.interestBatchManager,
-                _config.openCollateralAmountInUSD,
-                i,
-                _config.openBorrowAmountInUSD,
-                1e18 / 10,
-                0,
-                wallet,
-                openContract,
-                viewContract
-            );
+            OpenTroveParams memory openTroveParams = OpenTroveParams({
+                market: markets[i],
+                batchManager: _config.interestBatchManager,
+                collAmountInUSD: _config.openCollateralAmountInUSD,
+                collIndex: i,
+                borrowAmountInUSD: _config.openBorrowAmountInUSD,
+                annualInterestRate: 1e18 / 10,
+                nonce: 0
+            });
+            uint256 troveId =
+                executeLiquityOpenTrove(openTroveParams, wallet, openContract, viewContract);
             _adjust(markets[i], troveId, _config, i);
         }
     }
@@ -230,7 +230,7 @@ contract TestLiquityV2Adjust is LiquityV2ExecuteActions {
                 .predictAdjustTroveUpfrontFee(_collIndex, _troveId, vars.borrowAmount);
 
         vars.executeActionCallData = executeActionCalldata(
-            liquityV2AdjustEncode(
+            LiquityV2Encode.adjust(
                 address(_market),
                 sender,
                 sender,

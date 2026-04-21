@@ -12,6 +12,7 @@ import {
 } from "../../../contracts/actions/eulerV2/EulerV2ReorderCollaterals.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
+import { EulerV2Encode } from "../../utils/encode/EulerV2Encode.sol";
 
 contract TestEulerV2ReorderCollaterals is EulerV2TestHelper {
     /*//////////////////////////////////////////////////////////////////////////
@@ -143,7 +144,7 @@ contract TestEulerV2ReorderCollaterals is EulerV2TestHelper {
         bool _isDirect
     ) internal {
         bytes memory executeActionCallData = executeActionCalldata(
-            eulerV2ReorderCollaterals(_account, _indexes), _isDirect
+            EulerV2Encode.reorderCollaterals(_account, _indexes), _isDirect
         );
 
         address account = _account == address(0) ? walletAddr : _account;
@@ -159,7 +160,7 @@ contract TestEulerV2ReorderCollaterals is EulerV2TestHelper {
 
     function _enableCollateral(address _account, address _vault) internal {
         bytes memory executeActionCallData =
-            executeActionCalldata(eulerV2CollateralSwitchEncode(_vault, _account, true), true);
+            executeActionCalldata(EulerV2Encode.collateralSwitch(_vault, _account, true), true);
         wallet.execute(address(collateralSwitch), executeActionCallData, 0);
     }
 }

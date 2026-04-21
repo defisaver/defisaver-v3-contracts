@@ -11,6 +11,7 @@ import { DataTypes } from "../../../contracts/interfaces/protocols/aaveV3/DataTy
 import { Addresses } from "../../utils/Addresses.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { AaveV3ExecuteActions } from "../../utils/executeActions/AaveV3ExecuteActions.sol";
+import { AaveV3Encode } from "../../utils/encode/AaveV3Encode.sol";
 
 contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
@@ -103,7 +104,7 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
             });
             wallet.execute(address(cut), cut.encodeInputs(params), 0);
         } else {
-            bytes memory paramsCalldata = aaveV3SetEModeEncode(_categoryId, true, address(0));
+            bytes memory paramsCalldata = AaveV3Encode.setEMode(_categoryId, true, address(0));
 
             bytes memory _calldata = abi.encodeWithSelector(
                 AaveV3SetEMode.executeAction.selector,

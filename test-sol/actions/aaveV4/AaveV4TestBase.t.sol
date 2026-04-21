@@ -19,6 +19,7 @@ import { AaveV4Supply } from "../../../contracts/actions/aaveV4/AaveV4Supply.sol
 import { AaveV4Borrow } from "../../../contracts/actions/aaveV4/AaveV4Borrow.sol";
 import { SmartWallet } from "test-sol/utils/SmartWallet.sol";
 import { console2 } from "forge-std/console2.sol";
+import { AaveV4Encode } from "test-sol/utils/encode/AaveV4Encode.sol";
 
 contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
     uint256 internal constant RAY = 1e27;
@@ -94,10 +95,7 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
         SmartWallet _wallet,
         bool _isEoaPosition
     ) internal returns (bool success) {
-        address walletAddr = _wallet.walletAddr();
-        address sender = _wallet.owner();
         ISpoke.Reserve memory reserve = ISpoke(_testPair.spoke).getReserve(_testPair.collReserveId);
-        address underlying = reserve.underlying;
         uint256 supplyAmount =
             _amountInUSDPrice(_testPair.spoke, _testPair.collReserveId, _supplyAmountInUSD);
 
@@ -106,17 +104,19 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
         }
 
         if (_isEoaPosition) {
-            _enableEoaSupplyPositionManagers(ISpoke(_testPair.spoke), sender, walletAddr);
+            _enableEoaSupplyPositionManagers(
+                ISpoke(_testPair.spoke), _wallet.owner(), _wallet.walletAddr()
+            );
         }
 
-        give(underlying, sender, supplyAmount);
-        approveAsSender(sender, underlying, walletAddr, supplyAmount);
+        give(reserve.underlying, _wallet.owner(), supplyAmount);
+        approveAsSender(_wallet.owner(), reserve.underlying, _wallet.walletAddr(), supplyAmount);
 
         bytes memory executeActionCallData = executeActionCalldata(
-            aaveV4SupplyEncode(
+            AaveV4Encode.supply(
                 _testPair.spoke,
-                _isEoaPosition ? sender : walletAddr, // onBehalf
-                sender,
+                _isEoaPosition ? _wallet.owner() : _wallet.walletAddr(), // onBehalf
+                _wallet.owner(),
                 _testPair.collReserveId,
                 supplyAmount,
                 true // useAsCollateral
@@ -138,9 +138,6 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
         bool _isEoaPosition
     ) internal returns (bool success) {
         ISpoke.Reserve memory reserve = ISpoke(_spoke).getReserve(_reserveId);
-        address walletAddr = _wallet.walletAddr();
-        address sender = _wallet.owner();
-
         uint256 borrowAmount = _amountInUSDPrice(_spoke, _reserveId, _borrowAmountInUSD);
 
         if (!_isValidBorrow(_spoke, _reserveId, borrowAmount, reserve)) {
@@ -149,13 +146,15 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
         }
 
         if (_isEoaPosition) {
-            _enableEoaTakerPositionManager(ISpoke(_spoke), sender, walletAddr, _reserveId);
+            _enableEoaTakerPositionManager(
+                ISpoke(_spoke), _wallet.owner(), _wallet.walletAddr(), _reserveId
+            );
         }
 
         bytes memory executeActionCallData = executeActionCalldata(
-            aaveV4BorrowEncode(
+            AaveV4Encode.borrow(
                 _spoke,
-                _isEoaPosition ? sender : walletAddr, // onBehalf
+                _isEoaPosition ? _wallet.owner() : _wallet.walletAddr(), // onBehalf
                 _to,
                 _reserveId,
                 borrowAmount

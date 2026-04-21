@@ -8,6 +8,7 @@ import { EulerV2Supply } from "../../../contracts/actions/eulerV2/EulerV2Supply.
 import { EulerV2TestHelper } from "./EulerV2TestHelper.t.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
+import { EulerV2Encode } from "../../utils/encode/EulerV2Encode.sol";
 
 contract TestEulerV2Supply is EulerV2TestHelper {
     /*//////////////////////////////////////////////////////////////////////////
@@ -178,7 +179,7 @@ contract TestEulerV2Supply is EulerV2TestHelper {
         approveAsSender(sender, assetToken, walletAddr, supplyAmount);
 
         bytes memory executeActionCallData = executeActionCalldata(
-            eulerV2SupplyEncode(
+            EulerV2Encode.supply(
                 _config.vault,
                 _config.account,
                 sender,

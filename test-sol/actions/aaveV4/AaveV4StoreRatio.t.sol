@@ -11,6 +11,7 @@ import { Addresses } from "test-sol/utils/Addresses.sol";
 import { SmartWallet } from "test-sol/utils/SmartWallet.sol";
 import { AaveV4TestBase } from "./AaveV4TestBase.t.sol";
 import { console2 } from "forge-std/console2.sol";
+import { AaveV4Encode } from "test-sol/utils/encode/AaveV4Encode.sol";
 
 contract TestAaveV4StoreRatio is AaveV4TestBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -57,7 +58,7 @@ contract TestAaveV4StoreRatio is AaveV4TestBase {
             }
 
             bytes memory executeActionCallData =
-                executeActionCalldata(aaveV4StoreRatioEncode(testPair.spoke, walletAddr), false);
+                executeActionCalldata(AaveV4Encode.storeRatio(testPair.spoke, walletAddr), false);
 
             wallet.execute(address(cut), executeActionCallData, 0);
 

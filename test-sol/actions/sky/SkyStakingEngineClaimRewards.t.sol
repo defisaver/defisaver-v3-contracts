@@ -18,6 +18,7 @@ import { ILockstakeEngine } from "../../../contracts/interfaces/protocols/sky/IL
 import { IERC20 } from "../../../contracts/interfaces/token/IERC20.sol";
 
 import { SkyExecuteActions } from "../../utils/executeActions/SkyExecuteActions.sol";
+import { SkyStakingEncode } from "../../utils/encode/SkyStakingEncode.sol";
 
 contract TestSkyStakingEngineClaimRewards is SkyExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
@@ -105,7 +106,7 @@ contract TestSkyStakingEngineClaimRewards is SkyExecuteActions {
 
         //  Execution logic of claiming rewards
         bytes memory executeActionCallData = executeActionCalldata(
-            skyStakingEngineClaimRewardsEncode(STAKING_ENGINE, index, _farm, sender), _isDirect
+            SkyStakingEncode.claimRewards(STAKING_ENGINE, index, _farm, sender), _isDirect
         );
         vm.expectEmit(true, true, true, false, address(STAKING_ENGINE));
         emit ILockstakeEngine.GetReward(walletAddr, index, _farm, sender, 0);

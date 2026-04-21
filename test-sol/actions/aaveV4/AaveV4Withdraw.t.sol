@@ -7,6 +7,7 @@ import { SmartWallet } from "test-sol/utils/SmartWallet.sol";
 import { AaveV4Withdraw } from "../../../contracts/actions/aaveV4/AaveV4Withdraw.sol";
 import { AaveV4TestBase } from "./AaveV4TestBase.t.sol";
 import { console2 } from "forge-std/console2.sol";
+import { AaveV4Encode } from "test-sol/utils/encode/AaveV4Encode.sol";
 
 contract TestAaveV4Withdraw is AaveV4TestBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -96,7 +97,7 @@ contract TestAaveV4Withdraw is AaveV4TestBase {
             _testConfig.takeMaxUint256 ? positionSuppliedAssets : positionSuppliedAssets / 2;
 
         bytes memory executeActionCallData = executeActionCalldata(
-            aaveV4WithdrawEncode(
+            AaveV4Encode.withdraw(
                 _spoke,
                 onBehalf,
                 sender,

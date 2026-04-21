@@ -17,6 +17,7 @@ import {
 
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
+import { LiquityV2Encode } from "../../utils/encode/LiquityV2Encode.sol";
 
 contract TestLiquityV2AdjustZombieTrove is LiquityV2ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
@@ -161,18 +162,17 @@ contract TestLiquityV2AdjustZombieTrove is LiquityV2ExecuteActions {
                 registerBatchManager(markets[i]);
                 vm.stopPrank();
             }
-            uint256 troveId = executeLiquityOpenTrove(
-                markets[i],
-                _config.interestBatchManager,
-                _config.openCollateralAmountInUSD,
-                i,
-                _config.openBorrowAmountInUSD,
-                1e18 / 10,
-                0,
-                wallet,
-                openContract,
-                viewContract
-            );
+            OpenTroveParams memory openTroveParams = OpenTroveParams({
+                market: markets[i],
+                batchManager: _config.interestBatchManager,
+                collAmountInUSD: _config.openCollateralAmountInUSD,
+                collIndex: i,
+                borrowAmountInUSD: _config.openBorrowAmountInUSD,
+                annualInterestRate: 1e18 / 10,
+                nonce: 0
+            });
+            uint256 troveId =
+                executeLiquityOpenTrove(openTroveParams, wallet, openContract, viewContract);
 
             _makeTroveZombie(markets[i], troveId);
 
@@ -302,7 +302,7 @@ contract TestLiquityV2AdjustZombieTrove is LiquityV2ExecuteActions {
             getInsertPosition(viewContract, _market, _collIndex, 1e18 / 10);
 
         vars.executeActionCallData = executeActionCalldata(
-            liquityV2AdjustZombieTroveEncode(
+            LiquityV2Encode.adjustZombieTrove(
                 address(_market),
                 sender,
                 sender,

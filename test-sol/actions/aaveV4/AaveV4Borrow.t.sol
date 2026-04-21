@@ -7,6 +7,7 @@ import { SmartWallet } from "test-sol/utils/SmartWallet.sol";
 import { AaveV4Borrow } from "../../../contracts/actions/aaveV4/AaveV4Borrow.sol";
 import { AaveV4TestBase } from "./AaveV4TestBase.t.sol";
 import { console2 } from "forge-std/console2.sol";
+import { AaveV4Encode } from "test-sol/utils/encode/AaveV4Encode.sol";
 
 contract TestAaveV4Borrow is AaveV4TestBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -105,7 +106,7 @@ contract TestAaveV4Borrow is AaveV4TestBase {
         }
 
         bytes memory executeActionCallData = executeActionCalldata(
-            aaveV4BorrowEncode(_spoke, onBehalf, sender, _reserveId, borrowAmount),
+            AaveV4Encode.borrow(_spoke, onBehalf, sender, _reserveId, borrowAmount),
             _testConfig.isDirect
         );
 

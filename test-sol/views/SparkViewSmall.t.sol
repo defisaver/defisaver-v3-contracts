@@ -17,6 +17,7 @@ import { SparkBorrow } from "../../contracts/actions/spark/SparkBorrow.sol";
 import { SparkSetEMode } from "../../contracts/actions/spark/SparkSetEMode.sol";
 import { SparkViewSmall } from "../../contracts/views/SparkViewSmall.sol";
 import { SparkHelper } from "../../contracts/actions/spark/helpers/SparkHelper.sol";
+import { SparkEncode } from "../utils/encode/SparkEncode.sol";
 
 contract TestSparkViewSmall is BaseTest, ActionsUtils, SparkHelper {
     /*//////////////////////////////////////////////////////////////////////////
@@ -187,7 +188,7 @@ contract TestSparkViewSmall is BaseTest, ActionsUtils, SparkHelper {
             lendingPool.getReserveData(_config.borrowToken);
 
         // Execute Supply
-        bytes memory supplyParams = sparkSupplyEncode(
+        bytes memory supplyParams = SparkEncode.supply(
             _config.supplyAmount,
             sender,
             reserveDataColl.id,
@@ -203,7 +204,7 @@ contract TestSparkViewSmall is BaseTest, ActionsUtils, SparkHelper {
         wallet.execute(address(supplyContract), supplyCalldata, 0);
 
         // Execute Borrow
-        bytes memory borrowParams = sparkBorrowEncode(
+        bytes memory borrowParams = SparkEncode.borrow(
             _config.borrowAmount,
             sender,
             2, // rateMode (variable)
@@ -220,7 +221,7 @@ contract TestSparkViewSmall is BaseTest, ActionsUtils, SparkHelper {
 
     function _setEMode(uint8 _categoryId, bool _useDefaultMarket, address _market) internal {
         // Execute SparkSetEMode
-        bytes memory setEModeParams = sparkSetEModeEncode(_categoryId, _useDefaultMarket, _market);
+        bytes memory setEModeParams = SparkEncode.setEMode(_categoryId, _useDefaultMarket, _market);
 
         bytes memory setEModeCalldata =
             abi.encodeWithSelector(bytes4(keccak256("executeActionDirect(bytes)")), setEModeParams);

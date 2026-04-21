@@ -13,6 +13,7 @@ import { LiquityV2Claim } from "../../../contracts/actions/liquityV2/trove/Liqui
 
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
+import { LiquityV2Encode } from "../../utils/encode/LiquityV2Encode.sol";
 
 contract TestLiquityV2Claim is LiquityV2ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
@@ -79,7 +80,7 @@ contract TestLiquityV2Claim is LiquityV2ExecuteActions {
         give(collToken, address(collSurplusPool), claimableColl);
 
         bytes memory executeActionCallData =
-            executeActionCalldata(liquityV2ClaimEncode(address(_market), sender), _isDirect);
+            executeActionCalldata(LiquityV2Encode.claim(address(_market), sender), _isDirect);
 
         uint256 senderCollBalanceBefore = balanceOf(collToken, sender);
         wallet.execute(address(cut), executeActionCallData, 0);
