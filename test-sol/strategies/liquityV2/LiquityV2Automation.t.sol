@@ -22,6 +22,7 @@ import { LiquityV2View } from "../../../contracts/views/LiquityV2View.sol";
 import { LiquityV2RatioTrigger } from "../../../contracts/triggers/LiquityV2RatioTrigger.sol";
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
 import { LiquityV2Utils } from "../../utils/liquityV2/LiquityV2Utils.sol";
+import { LiquityV2Encode } from "../../utils/encode/LiquityV2Encode.sol";
 
 import { SubProxy, StrategyModel } from "../../../contracts/core/strategy/SubProxy.sol";
 import { SubStorage } from "../../../contracts/core/strategy/SubStorage.sol";
@@ -124,18 +125,17 @@ contract TestLiquityV2Automation is LiquityV2ExecuteActions, LiquityV2Utils {
                 borrowAmountInUSD: 150_000
             });
 
-            troveId = executeLiquityOpenTrove(
-                markets[i],
-                address(0),
-                config.collateralAmountInUSD,
-                i,
-                config.borrowAmountInUSD,
-                config.annualInterestRate,
-                0,
-                wallet,
-                openTrove,
-                liquityV2View
-            );
+            OpenTroveParams memory openTroveParams = OpenTroveParams({
+                market: markets[i],
+                batchManager: address(0),
+                collAmountInUSD: config.collateralAmountInUSD,
+                collIndex: i,
+                borrowAmountInUSD: config.borrowAmountInUSD,
+                annualInterestRate: config.annualInterestRate,
+                nonce: 0
+            });
+
+            troveId = executeLiquityOpenTrove(openTroveParams, wallet, openTrove, liquityV2View);
 
             (uint256 beforeRatio,) = trigger.getRatio(address(config.market), troveId);
             assertLe(beforeRatio, config.triggerRatio, "TRIGGER MUST BE TRIGGERABLE");
@@ -170,12 +170,12 @@ contract TestLiquityV2Automation is LiquityV2ExecuteActions, LiquityV2Utils {
             bytes[] memory _triggerCallData = new bytes[](1);
             bytes[] memory _actionsCallData = new bytes[](5);
 
-            _actionsCallData[0] = liquityV2SPWithdrawEncode(
+            _actionsCallData[0] = LiquityV2Encode.spWithdraw(
                 address(_market), address(0), address(0), amountToWithdrawFromSP + dfsFee, false
             );
             _actionsCallData[1] = gasFeeEncode(WITHDRAW_FROM_SP_GAS_COST, address(0));
-            _actionsCallData[2] = liquityV2PaybackEncode(address(0), address(0), 11, 0);
-            _actionsCallData[3] = liquityV2RatioCheckEncode(
+            _actionsCallData[2] = LiquityV2Encode.payback(address(0), address(0), 11, 0);
+            _actionsCallData[3] = LiquityV2Encode.ratioCheck(
                 address(0), 11, LiquityV2RatioCheck.RatioState.IN_REPAY, 0
             );
 
@@ -270,7 +270,7 @@ contract TestLiquityV2Automation is LiquityV2ExecuteActions, LiquityV2Utils {
         giveTokenAndApproveAsSender(sender, BOLD_ADDR, walletAddr, vars.depositAmount);
 
         vars.executeActionCallData = executeActionCalldata(
-            liquityV2SPDepositEncode(
+            LiquityV2Encode.spDeposit(
                 address(_market), sender, sender, sender, vars.depositAmount, false
             ),
             true

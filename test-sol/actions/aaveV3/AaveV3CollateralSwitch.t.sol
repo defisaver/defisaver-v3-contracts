@@ -16,6 +16,7 @@ import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { Addresses } from "../../utils/helpers/MainnetAddresses.sol";
 import { AaveV3ExecuteActions } from "../../utils/executeActions/AaveV3ExecuteActions.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
+import { AaveV3Encode } from "../../utils/encode/AaveV3Encode.sol";
 
 contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
@@ -171,7 +172,7 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
 
             wallet.execute(address(cut), cut.encodeInputs(params), 0);
         } else {
-            bytes memory paramsCallData = aaveV3CollateralSwitchEncode(
+            bytes memory paramsCallData = AaveV3Encode.collateralSwitch(
                 uint8(assets.length), assetIds, newUseAsCollateral, true, address(0)
             );
 

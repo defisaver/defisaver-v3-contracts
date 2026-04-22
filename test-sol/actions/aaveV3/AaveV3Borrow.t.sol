@@ -14,6 +14,7 @@ import { DataTypes } from "../../../contracts/interfaces/protocols/aaveV3/DataTy
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { AaveV3ExecuteActions } from "../../utils/executeActions/AaveV3ExecuteActions.sol";
+import { AaveV3Encode } from "../../utils/encode/AaveV3Encode.sol";
 
 contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
@@ -198,7 +199,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
             });
             wallet.execute(address(cut), cut.encodeInputs(params), 0);
         } else {
-            bytes memory paramsCalldata = aaveV3BorrowEncode(
+            bytes memory paramsCalldata = AaveV3Encode.borrow(
                 _borrowAmount,
                 sender,
                 uint8(DataTypes.InterestRateMode.VARIABLE),

@@ -11,6 +11,7 @@ import { EtherFiHelper } from "../../../contracts/actions/etherfi/helpers/EtherF
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
+import { EtherFiEncode } from "../../utils/encode/EtherFiEncode.sol";
 
 contract TestEtherFiUnwrap is BaseTest, ActionsUtils, EtherFiHelper {
     /*//////////////////////////////////////////////////////////////////////////
@@ -66,7 +67,7 @@ contract TestEtherFiUnwrap is BaseTest, ActionsUtils, EtherFiHelper {
         _giveWeEthTokens(_amount * 2);
 
         bytes memory executeActionCallData = executeActionCalldata(
-            etherFiUnwrapEncode(_isMaxUint256 ? type(uint256).max : _amount, sender, sender),
+            EtherFiEncode.unwrap(_isMaxUint256 ? type(uint256).max : _amount, sender, sender),
             _isDirect
         );
 

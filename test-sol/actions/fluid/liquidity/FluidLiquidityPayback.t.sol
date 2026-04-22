@@ -19,6 +19,7 @@ import { TokenUtils } from "../../../../contracts/utils/token/TokenUtils.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { Vm } from "forge-std/Vm.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
+import { FluidEncode } from "../../../utils/encode/FluidEncode.sol";
 
 contract TestFluidLiquidityPayback is FluidTestBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -221,8 +222,8 @@ contract TestFluidLiquidityPayback is FluidTestBase {
 
             bytes memory executeActionCallData = executeActionCalldata(
                 _t1VaultsSelected
-                    ? fluidVaultT1PaybackEncode(address(vaults[i]), nftId, paybackAmount, sender)
-                    : fluidDexPaybackEncode(
+                    ? FluidEncode.vaultT1Payback(address(vaults[i]), nftId, paybackAmount, sender)
+                    : FluidEncode.dexPayback(
                         address(vaults[i]),
                         sender,
                         nftId,

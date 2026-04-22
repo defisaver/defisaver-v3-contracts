@@ -9,6 +9,7 @@ import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 import { Addresses } from "../../utils/helpers/MainnetAddresses.sol";
+import { EtherFiEncode } from "../../utils/encode/EtherFiEncode.sol";
 
 contract TestEtherFiStake is BaseTest, ActionsUtils, EtherFiHelper {
     /*//////////////////////////////////////////////////////////////////////////
@@ -78,7 +79,7 @@ contract TestEtherFiStake is BaseTest, ActionsUtils, EtherFiHelper {
         approveAsSender(sender, Addresses.WETH_ADDR, walletAddr, _amount);
 
         bytes memory executeActionCallData = executeActionCalldata(
-            etherFiStakeEncode(
+            EtherFiEncode.stake(
                 _isMaxUint256 ? type(uint256).max : _amount, sender, sender, _shouldWrap
             ),
             _isDirect

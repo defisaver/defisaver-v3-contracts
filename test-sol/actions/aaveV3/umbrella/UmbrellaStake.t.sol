@@ -12,6 +12,7 @@ import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { Addresses } from "../../../utils/helpers/MainnetAddresses.sol";
 
 import { TestUmbrellaCommon } from "./UmbrellaCommon.t.sol";
+import { AaveV3Encode } from "../../../utils/encode/AaveV3Encode.sol";
 
 contract TestUmbrellaStake is TestUmbrellaCommon {
     /*//////////////////////////////////////////////////////////////////////////
@@ -77,7 +78,7 @@ contract TestUmbrellaStake is TestUmbrellaCommon {
             uint256 minSharesOut = getMinSharesOut(stkTokens[i], waTokenOrGHO, amount);
 
             bytes memory executeActionCallData = executeActionCalldata(
-                umbrellaStakeEncode(
+                AaveV3Encode.umbrellaStake(
                     stkTokens[i], sender, sender, amount, _useATokens, minSharesOut
                 ),
                 _isDirect

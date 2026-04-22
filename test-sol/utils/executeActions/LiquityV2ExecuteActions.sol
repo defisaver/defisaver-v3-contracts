@@ -14,9 +14,20 @@ import { LiquityV2Open } from "../../../contracts/actions/liquityV2/trove/Liquit
 import { LiquityV2TestHelper } from "../../actions/liquityV2/LiquityV2TestHelper.t.sol";
 import { ExecuteActionsBase } from "./ExecuteActionsBase.sol";
 import { SmartWallet } from "../SmartWallet.sol";
+import { LiquityV2Encode } from "../encode/LiquityV2Encode.sol";
 
 contract LiquityV2ExecuteActions is ExecuteActionsBase, LiquityV2TestHelper {
-    struct OpenTroveVars {
+    struct OpenTroveParams {
+        IAddressesRegistry market;
+        address batchManager;
+        uint256 collAmountInUSD;
+        uint256 collIndex;
+        uint256 borrowAmountInUSD;
+        uint256 annualInterestRate;
+        uint256 nonce;
+    }
+
+    struct LiquityV2OpenLocalVars {
         address collToken;
         address wethToken;
         address bold;
@@ -32,45 +43,42 @@ contract LiquityV2ExecuteActions is ExecuteActionsBase, LiquityV2TestHelper {
     }
 
     function executeLiquityOpenTrove(
-        IAddressesRegistry _market,
-        address _batchManager,
-        uint256 _collAmountInUSD,
-        uint256 _collIndex,
-        uint256 _borrowAmountInUSD,
-        uint256 _annualInterestRate,
-        uint256 _nonce,
+        OpenTroveParams memory _params,
         SmartWallet _wallet,
         LiquityV2Open _openContract,
         LiquityV2View _viewContract
     ) internal returns (uint256 troveId) {
-        OpenTroveVars memory vars;
+        LiquityV2OpenLocalVars memory vars;
 
-        vars.collToken = _market.collToken();
-        vars.wethToken = _market.WETH();
-        vars.bold = _market.boldToken();
-        vars.hintHelpers = IHintHelpers(_market.hintHelpers());
+        vars.collToken = _params.market.collToken();
+        vars.wethToken = _params.market.WETH();
+        vars.bold = _params.market.boldToken();
+        vars.hintHelpers = IHintHelpers(_params.market.hintHelpers());
 
-        vars.interestRate = _batchManager != address(0)
-            ? ITroveManager(_market.troveManager())
-            .getLatestBatchData(_batchManager)
+        vars.interestRate = _params.batchManager != address(0)
+            ? ITroveManager(_params.market.troveManager())
+            .getLatestBatchData(_params.batchManager)
             .annualInterestRate
-            : _annualInterestRate;
+            : _params.annualInterestRate;
 
-        (vars.upperHint, vars.lowerHint) =
-            getInsertPosition(_viewContract, _market, _collIndex, _annualInterestRate);
+        (vars.upperHint, vars.lowerHint) = getInsertPosition(
+            _viewContract, _params.market, _params.collIndex, _params.annualInterestRate
+        );
 
-        vars.collPriceWAD = IPriceFeed(_market.priceFeed()).lastGoodPrice();
+        vars.collPriceWAD = IPriceFeed(_params.market.priceFeed()).lastGoodPrice();
         vars.collAmount =
-            amountInUSDPriceMock(vars.collToken, _collAmountInUSD, vars.collPriceWAD / 1e10);
-        vars.borrowAmount = amountInUSDPriceMock(vars.bold, _borrowAmountInUSD, 1e8);
+            amountInUSDPriceMock(vars.collToken, _params.collAmountInUSD, vars.collPriceWAD / 1e10);
+        vars.borrowAmount = amountInUSDPriceMock(vars.bold, _params.borrowAmountInUSD, 1e8);
 
-        vars.predictMaxUpfrontFee = _batchManager != address(0)
+        vars.predictMaxUpfrontFee = _params.batchManager != address(0)
             ? vars.hintHelpers
                 .predictOpenTroveAndJoinBatchUpfrontFee(
-                    _collIndex, vars.borrowAmount, _batchManager
+                    _params.collIndex, vars.borrowAmount, _params.batchManager
                 )
             : vars.hintHelpers
-                    .predictOpenTroveUpfrontFee(_collIndex, vars.borrowAmount, _annualInterestRate);
+                .predictOpenTroveUpfrontFee(
+                    _params.collIndex, vars.borrowAmount, _params.annualInterestRate
+                );
 
         if (vars.collToken == vars.wethToken) {
             give(vars.wethToken, _wallet.owner(), vars.collAmount + ETH_GAS_COMPENSATION);
@@ -84,12 +92,12 @@ contract LiquityV2ExecuteActions is ExecuteActionsBase, LiquityV2TestHelper {
 
         vars.openCalldata = abi.encodeWithSelector(
             EXECUTE_ACTION_DIRECT_SELECTOR,
-            liquityV2OpenEncode(
-                address(_market),
+            LiquityV2Encode.open(
+                address(_params.market),
                 _wallet.owner(),
                 _wallet.owner(),
-                _batchManager,
-                _nonce,
+                _params.batchManager,
+                _params.nonce,
                 vars.collAmount,
                 vars.borrowAmount,
                 vars.upperHint,
@@ -101,6 +109,8 @@ contract LiquityV2ExecuteActions is ExecuteActionsBase, LiquityV2TestHelper {
 
         _wallet.execute(address(_openContract), vars.openCalldata, 0);
 
-        troveId = uint256(keccak256(abi.encode(_wallet.walletAddr(), _wallet.walletAddr(), _nonce)));
+        troveId = uint256(
+            keccak256(abi.encode(_wallet.walletAddr(), _wallet.walletAddr(), _params.nonce))
+        );
     }
 }

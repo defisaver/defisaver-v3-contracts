@@ -12,6 +12,7 @@ import { LiquityV2Close } from "../../../contracts/actions/liquityV2/trove/Liqui
 
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
+import { LiquityV2Encode } from "../../utils/encode/LiquityV2Encode.sol";
 
 contract TestLiquityV2Close is LiquityV2ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
@@ -55,18 +56,16 @@ contract TestLiquityV2Close is LiquityV2ExecuteActions {
         // After closing, at least one trove must remain, so create a test trove.
         SmartWallet testWallet = new SmartWallet(alice);
         for (uint256 i = 0; i < markets.length; ++i) {
-            executeLiquityOpenTrove(
-                markets[i],
-                address(0),
-                100_000,
-                i,
-                10_000,
-                1e18 / 10,
-                0,
-                testWallet,
-                openContract,
-                viewContract
-            );
+            OpenTroveParams memory openTroveParams = OpenTroveParams({
+                market: markets[i],
+                batchManager: address(0),
+                collAmountInUSD: 100_000,
+                collIndex: i,
+                borrowAmountInUSD: 10_000,
+                annualInterestRate: 1e18 / 10,
+                nonce: 0
+            });
+            executeLiquityOpenTrove(openTroveParams, testWallet, openContract, viewContract);
         }
     }
 
@@ -102,18 +101,18 @@ contract TestLiquityV2Close is LiquityV2ExecuteActions {
                 vm.stopPrank();
             }
 
-            uint256 troveId = executeLiquityOpenTrove(
-                markets[i],
-                _interestBatchManager,
-                collAmountInUSD,
-                i,
-                borrowAmountInUSD,
-                1e18 / 10,
-                0,
-                wallet,
-                openContract,
-                viewContract
-            );
+            OpenTroveParams memory openTroveParams = OpenTroveParams({
+                market: markets[i],
+                batchManager: _interestBatchManager,
+                collAmountInUSD: collAmountInUSD,
+                collIndex: i,
+                borrowAmountInUSD: borrowAmountInUSD,
+                annualInterestRate: 1e18 / 10,
+                nonce: 0
+            });
+
+            uint256 troveId =
+                executeLiquityOpenTrove(openTroveParams, wallet, openContract, viewContract);
 
             vm.warp(block.timestamp + 1 days);
 
@@ -132,7 +131,7 @@ contract TestLiquityV2Close is LiquityV2ExecuteActions {
         approveAsSender(sender, BOLD, walletAddr, entireDebt);
 
         bytes memory executeActionCallData = executeActionCalldata(
-            liquityV2CloseEncode(address(_market), sender, sender, _troveId), _isDirect
+            LiquityV2Encode.close(address(_market), sender, sender, _troveId), _isDirect
         );
 
         {

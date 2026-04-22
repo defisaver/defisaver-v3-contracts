@@ -12,6 +12,7 @@ import { LiquityV2Borrow } from "../../../contracts/actions/liquityV2/trove/Liqu
 
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
+import { LiquityV2Encode } from "../../utils/encode/LiquityV2Encode.sol";
 
 contract TestLiquityV2Borrow is LiquityV2ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
@@ -85,18 +86,17 @@ contract TestLiquityV2Borrow is LiquityV2ExecuteActions {
                 vm.stopPrank();
             }
 
-            uint256 troveId = executeLiquityOpenTrove(
-                markets[i],
-                _interestBatchManager,
-                collAmountInUSD,
-                i,
-                borrowAmountInUSD,
-                1e18 / 10,
-                0,
-                wallet,
-                openContract,
-                viewContract
-            );
+            OpenTroveParams memory openTroveParams = OpenTroveParams({
+                market: markets[i],
+                batchManager: _interestBatchManager,
+                collAmountInUSD: collAmountInUSD,
+                collIndex: i,
+                borrowAmountInUSD: borrowAmountInUSD,
+                annualInterestRate: 1e18 / 10,
+                nonce: 0
+            });
+            uint256 troveId =
+                executeLiquityOpenTrove(openTroveParams, wallet, openContract, viewContract);
 
             _borrow(markets[i], troveId, _isDirect, additionalBorrowAmountInUSD, i);
         }
@@ -119,7 +119,7 @@ contract TestLiquityV2Borrow is LiquityV2ExecuteActions {
             .predictAdjustTroveUpfrontFee(_collIndex, _troveId, borrowAmount);
 
         bytes memory executeActionCallData = executeActionCalldata(
-            liquityV2BorrowEncode(address(_market), sender, _troveId, borrowAmount, maxUpfrontFee),
+            LiquityV2Encode.borrow(address(_market), sender, _troveId, borrowAmount, maxUpfrontFee),
             _isDirect
         );
 

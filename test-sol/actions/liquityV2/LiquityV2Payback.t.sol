@@ -11,6 +11,7 @@ import { LiquityV2Payback } from "../../../contracts/actions/liquityV2/trove/Liq
 
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
+import { LiquityV2Encode } from "../../utils/encode/LiquityV2Encode.sol";
 
 contract TestLiquityV2Payback is LiquityV2ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
@@ -96,18 +97,18 @@ contract TestLiquityV2Payback is LiquityV2ExecuteActions {
                 vm.stopPrank();
             }
 
-            uint256 troveId = executeLiquityOpenTrove(
-                markets[i],
-                _interestBatchManager,
-                collAmountInUSD,
-                i,
-                borrowAmountInUSD,
-                1e18 / 10,
-                0,
-                wallet,
-                openContract,
-                viewContract
-            );
+            OpenTroveParams memory openTroveParams = OpenTroveParams({
+                market: markets[i],
+                batchManager: _interestBatchManager,
+                collAmountInUSD: collAmountInUSD,
+                collIndex: i,
+                borrowAmountInUSD: borrowAmountInUSD,
+                annualInterestRate: 1e18 / 10,
+                nonce: 0
+            });
+
+            uint256 troveId =
+                executeLiquityOpenTrove(openTroveParams, wallet, openContract, viewContract);
 
             _payback(markets[i], troveId, _isDirect, _isMaxUint256Payback, paybackAmountInUSD);
         }
@@ -132,7 +133,7 @@ contract TestLiquityV2Payback is LiquityV2ExecuteActions {
         approveAsSender(sender, BOLD, walletAddr, paybackAmount);
 
         bytes memory executeActionCallData = executeActionCalldata(
-            liquityV2PaybackEncode(
+            LiquityV2Encode.payback(
                 address(_market),
                 sender,
                 _troveId,
