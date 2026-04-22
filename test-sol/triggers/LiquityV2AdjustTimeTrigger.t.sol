@@ -20,6 +20,7 @@ import {
 import { MockLiquityV2PriceFeed } from "../../contracts/mocks/MockLiquity2PriceFeed.sol";
 import { LiquityV2ExecuteActions } from "../utils/executeActions/LiquityV2ExecuteActions.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
+import { LiquityV2Encode } from "../utils/encode/LiquityV2Encode.sol";
 
 contract TestLiquityV2AdjustTimeTrigger is LiquityV2ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
@@ -115,19 +116,19 @@ contract TestLiquityV2AdjustTimeTrigger is LiquityV2ExecuteActions {
             registerBatchManager(markets[i]);
             vm.stopPrank();
 
+            OpenTroveParams memory openTroveParams = OpenTroveParams({
+                market: markets[i],
+                batchManager: batchManager,
+                collAmountInUSD: 30_000,
+                collIndex: i,
+                borrowAmountInUSD: 10_000,
+                annualInterestRate: 1e18 / 10,
+                nonce: 0
+            });
+
             // Open trove with batch manager
-            uint256 troveId = executeLiquityOpenTrove(
-                markets[i],
-                batchManager, // Use batch manager
-                30_000, // collAmountInUSD
-                i, // collIndex
-                10_000, // borrowAmountInUSD
-                1e18 / 10, // annualInterestRate (10%)
-                0, // nonce
-                wallet,
-                openContract,
-                viewContract
-            );
+            uint256 troveId =
+                executeLiquityOpenTrove(openTroveParams, wallet, openContract, viewContract);
 
             // Verify the trove actually has a batch manager
             IBorrowerOperations borrowerOperations =
@@ -159,24 +160,21 @@ contract TestLiquityV2AdjustTimeTrigger is LiquityV2ExecuteActions {
         internal
         returns (uint256 troveId)
     {
-        uint256 collAmountInUSD = 30_000;
-        uint256 borrowAmountInUSD = 10_000;
         uint256 initialInterestRate = 6e16; // 6%
         uint256 newInterestRate = initialInterestRate + 1; // slightly higher than initial interest rate
 
+        OpenTroveParams memory openTroveParams = OpenTroveParams({
+            market: _market,
+            batchManager: address(0),
+            collAmountInUSD: 30_000,
+            collIndex: _collIndex,
+            borrowAmountInUSD: 10_000,
+            annualInterestRate: initialInterestRate,
+            nonce: 0
+        });
+
         // Open trove without batch manager
-        troveId = executeLiquityOpenTrove(
-            _market,
-            address(0), // no batch manager
-            collAmountInUSD,
-            _collIndex,
-            borrowAmountInUSD,
-            initialInterestRate,
-            0,
-            wallet,
-            openContract,
-            viewContract
-        );
+        troveId = executeLiquityOpenTrove(openTroveParams, wallet, openContract, viewContract);
 
         // Adjust interest rate to set the lastInterestRateAdjTime
         _adjustInterestRate(_market, troveId, newInterestRate, _collIndex);
@@ -196,7 +194,7 @@ contract TestLiquityV2AdjustTimeTrigger is LiquityV2ExecuteActions {
             getInsertPosition(viewContract, _market, _collIndex, _newInterestRate);
 
         bytes memory executeActionCallData = executeActionCalldata(
-            liquityV2AdjustInterestRateEncode(
+            LiquityV2Encode.adjustInterestRate(
                 address(_market), _troveId, _newInterestRate, upperHint, lowerHint, maxUpfrontFee
             ),
             true // isDirect

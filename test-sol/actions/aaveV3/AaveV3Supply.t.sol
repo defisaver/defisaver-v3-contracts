@@ -13,6 +13,7 @@ import { DataTypes } from "../../../contracts/interfaces/protocols/aaveV3/DataTy
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
+import { AaveV3Encode } from "../../utils/encode/AaveV3Encode.sol";
 
 contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
@@ -123,7 +124,7 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
                 onBehalfOfAddrATokenBalance: balanceOf(supplyTokenData.aTokenAddress, onBehalfOf)
             });
 
-            bytes memory paramsCallData = aaveV3SupplyEncode(
+            bytes memory paramsCallData = AaveV3Encode.supply(
                 supplyAmount, sender, supplyTokenData.id, true, true, address(0), onBehalfOf
             );
 
@@ -276,7 +277,7 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
 
             wallet.execute(address(cut), cut.encodeInputs(params), 0);
         } else {
-            bytes memory paramsCallData = aaveV3SupplyEncode(
+            bytes memory paramsCallData = AaveV3Encode.supply(
                 _supplyAmount, sender, supplyTokenData.id, true, false, address(0), address(0)
             );
 

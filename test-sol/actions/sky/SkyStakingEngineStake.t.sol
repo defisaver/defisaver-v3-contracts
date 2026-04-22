@@ -14,6 +14,7 @@ import { IStakingRewards } from "../../../contracts/interfaces/protocols/sky/ISt
 import { IERC20 } from "../../../contracts/interfaces/token/IERC20.sol";
 
 import { SkyExecuteActions } from "../../utils/executeActions/SkyExecuteActions.sol";
+import { SkyStakingEncode } from "../../utils/encode/SkyStakingEncode.sol";
 
 contract TestSkyStakingEngineStake is SkyExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
@@ -109,7 +110,7 @@ contract TestSkyStakingEngineStake is SkyExecuteActions {
 
         // Execution logic
         bytes memory executeActionCallData = executeActionCalldata(
-            skyStakingEngineStakeEncode(STAKING_ENGINE, index, AMOUNT, sender), _isDirect
+            SkyStakingEncode.stake(STAKING_ENGINE, index, AMOUNT, sender), _isDirect
         );
         vm.expectEmit(true, true, true, true, address(STAKING_ENGINE));
         emit ILockstakeEngine.Lock(walletAddr, index, AMOUNT, SKY_REFERRAL_CODE);

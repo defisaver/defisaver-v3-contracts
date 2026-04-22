@@ -22,6 +22,7 @@ import { TokenUtils } from "../../../contracts/utils/token/TokenUtils.sol";
 import { ExecuteActionsBase } from "../../utils/executeActions/ExecuteActionsBase.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { Vm } from "forge-std/Vm.sol";
+import { FluidEncode } from "../../utils/encode/FluidEncode.sol";
 
 contract FluidTestBase is ExecuteActionsBase, FluidHelper {
     error NftNotFound();
@@ -280,7 +281,7 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
             : 0;
 
         bytes memory executeActionCallData = executeActionCalldata(
-            fluidVaultT1OpenEncode(
+            FluidEncode.vaultT1Open(
                 _vault, collAmount, borrowAmount, _wallet.owner(), _wallet.owner(), false
             ),
             true
@@ -292,6 +293,15 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         nftId = getNftIdFromLogs(logs);
     }
 
+    struct FluidVaultT2OpenLocalVars {
+        uint256 collAmount0;
+        uint256 collAmount1;
+        uint256 borrowAmount;
+        uint256 estimatedShares;
+        bytes executeActionCallData;
+        uint256 nftId;
+    }
+
     function executeFluidVaultT2Open(
         address _vault,
         uint256 _collAmount0InUSD,
@@ -300,21 +310,22 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         SmartWallet _wallet,
         address _openContract
     ) internal returns (uint256 nftId) {
-        FluidView fluidView = new FluidView();
-        FluidView.VaultData memory vaultData = fluidView.getVaultData(address(_vault));
+        FluidView.VaultData memory vaultData = (new FluidView()).getVaultData(address(_vault));
+
+        FluidVaultT2OpenLocalVars memory vars;
 
         // Setup collateral token 0
-        (, uint256 collAmount0) = giveAndApproveToken(
+        (, vars.collAmount0) = giveAndApproveToken(
             vaultData.supplyToken0, _wallet.owner(), _wallet.walletAddr(), _collAmount0InUSD
         );
 
         // Setup collateral token 1
-        (, uint256 collAmount1) = giveAndApproveToken(
+        (, vars.collAmount1) = giveAndApproveToken(
             vaultData.supplyToken1, _wallet.owner(), _wallet.walletAddr(), _collAmount1InUSD
         );
 
         // Setup borrow token 0
-        uint256 borrowAmount = _borrowAmountInUSD != 0
+        vars.borrowAmount = _borrowAmountInUSD != 0
             ? amountInUSDPrice(
                 vaultData.borrowToken0 == TokenUtils.ETH_ADDR
                     ? TokenUtils.WETH_ADDR
@@ -323,22 +334,25 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
             )
             : 0;
 
-        uint256 estimatedShares =
-            estimateDepositShares(vaultData.dexSupplyData.dexPool, collAmount0, collAmount1);
+        vars.estimatedShares = estimateDepositShares(
+            vaultData.dexSupplyData.dexPool, vars.collAmount0, vars.collAmount1
+        );
 
-        if (supplyLimitReached(vaultData.dexSupplyData, estimatedShares)) {
+        if (supplyLimitReached(vaultData.dexSupplyData, vars.estimatedShares)) {
             return 0;
         }
 
         // Encode call
-        bytes memory executeActionCallData = executeActionCalldata(
-            fluidDexOpenEncode(
+        vars.executeActionCallData = executeActionCalldata(
+            FluidEncode.dexOpen(
                 _vault,
                 _wallet.owner(),
                 _wallet.owner(),
                 0, /* supplyAmount */
-                FluidDexModel.SupplyVariableData(collAmount0, collAmount1, estimatedShares),
-                borrowAmount,
+                FluidDexModel.SupplyVariableData(
+                    vars.collAmount0, vars.collAmount1, vars.estimatedShares
+                ),
+                vars.borrowAmount,
                 FluidDexModel.BorrowVariableData(0, 0, 0), /* only used for T3 and T4 vaults */
                 true /* wrapBorrowedEth */
             ),
@@ -346,9 +360,19 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         );
 
         vm.recordLogs();
-        _wallet.execute(_openContract, executeActionCallData, 0);
+        _wallet.execute(_openContract, vars.executeActionCallData, 0);
         Vm.Log[] memory logs = vm.getRecordedLogs();
-        nftId = getNftIdFromLogs(logs);
+        vars.nftId = getNftIdFromLogs(logs);
+        return vars.nftId;
+    }
+
+    struct FluidVaultT3OpenLocalVars {
+        uint256 collAmount;
+        uint256 borrowAmount0;
+        uint256 borrowAmount1;
+        uint256 estimatedDebtShares;
+        bytes executeActionCallData;
+        uint256 nftId;
     }
 
     function executeFluidVaultT3Open(
@@ -359,22 +383,21 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         SmartWallet _wallet,
         address _openContract
     ) internal returns (uint256 nftId) {
-        FluidView fluidView = new FluidView();
-        FluidView.VaultData memory vaultData = fluidView.getVaultData(address(_vault));
+        FluidView.VaultData memory vaultData = (new FluidView()).getVaultData(address(_vault));
 
-        uint256 collAmount;
+        FluidVaultT3OpenLocalVars memory vars;
+
         {
             bool isNativeSupply = vaultData.supplyToken0 == TokenUtils.ETH_ADDR;
             vaultData.supplyToken0 = isNativeSupply ? TokenUtils.WETH_ADDR : vaultData.supplyToken0;
-            collAmount = amountInUSDPrice(vaultData.supplyToken0, _collAmountInUSD);
-            give(vaultData.supplyToken0, _wallet.owner(), collAmount);
-            _wallet.ownerApprove(vaultData.supplyToken0, collAmount);
+            vars.collAmount = amountInUSDPrice(vaultData.supplyToken0, _collAmountInUSD);
+            give(vaultData.supplyToken0, _wallet.owner(), vars.collAmount);
+            _wallet.ownerApprove(vaultData.supplyToken0, vars.collAmount);
         }
 
-        uint256 borrowAmount0;
         {
             bool isNativeBorrow0 = vaultData.borrowToken0 == TokenUtils.ETH_ADDR;
-            borrowAmount0 = _borrowAmount0InUSD != 0
+            vars.borrowAmount0 = _borrowAmount0InUSD != 0
                 ? amountInUSDPrice(
                     isNativeBorrow0 ? TokenUtils.WETH_ADDR : vaultData.borrowToken0,
                     _borrowAmount0InUSD
@@ -382,10 +405,9 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
                 : 0;
         }
 
-        uint256 borrowAmount1;
         {
             bool isNativeBorrow1 = vaultData.borrowToken1 == TokenUtils.ETH_ADDR;
-            borrowAmount1 = _borrowAmount1InUSD != 0
+            vars.borrowAmount1 = _borrowAmount1InUSD != 0
                 ? amountInUSDPrice(
                     isNativeBorrow1 ? TokenUtils.WETH_ADDR : vaultData.borrowToken1,
                     _borrowAmount1InUSD
@@ -393,31 +415,35 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
                 : 0;
         }
 
-        uint256 estimatedDebtShares =
-            estimateBorrowShares(vaultData.dexBorrowData.dexPool, borrowAmount0, borrowAmount1);
+        vars.estimatedDebtShares = estimateBorrowShares(
+            vaultData.dexBorrowData.dexPool, vars.borrowAmount0, vars.borrowAmount1
+        );
 
-        if (borrowLimitReached(vaultData.dexBorrowData, estimatedDebtShares)) {
+        if (borrowLimitReached(vaultData.dexBorrowData, vars.estimatedDebtShares)) {
             return 0;
         }
 
-        bytes memory executeActionCallData = executeActionCalldata(
-            fluidDexOpenEncode(
+        vars.executeActionCallData = executeActionCalldata(
+            FluidEncode.dexOpen(
                 _vault,
                 _wallet.owner(),
                 _wallet.owner(),
-                collAmount,
+                vars.collAmount,
                 FluidDexModel.SupplyVariableData(0, 0, 0), /* only used for T2 and T4  vaults */
                 0, /* borrowAmount */
-                FluidDexModel.BorrowVariableData(borrowAmount0, borrowAmount1, estimatedDebtShares),
+                FluidDexModel.BorrowVariableData(
+                    vars.borrowAmount0, vars.borrowAmount1, vars.estimatedDebtShares
+                ),
                 true /* wrapBorrowedEth */
             ),
             true
         );
 
         vm.recordLogs();
-        _wallet.execute(_openContract, executeActionCallData, 0);
+        _wallet.execute(_openContract, vars.executeActionCallData, 0);
         Vm.Log[] memory logs = vm.getRecordedLogs();
-        nftId = getNftIdFromLogs(logs);
+        vars.nftId = getNftIdFromLogs(logs);
+        return vars.nftId;
     }
 
     struct FluidVaultT4OpenLocalVars {
@@ -502,7 +528,7 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         }
 
         vars.executeActionCallData = executeActionCalldata(
-            fluidDexOpenEncode(
+            FluidEncode.dexOpen(
                 _vault,
                 _wallet.owner(),
                 _wallet.owner(),

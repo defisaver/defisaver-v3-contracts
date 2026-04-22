@@ -12,6 +12,7 @@ import {
 import { ILockstakeEngine } from "../../../contracts/interfaces/protocols/sky/ILockstakeEngine.sol";
 
 import { SkyExecuteActions } from "../../utils/executeActions/SkyExecuteActions.sol";
+import { SkyStakingEncode } from "../../utils/encode/SkyStakingEncode.sol";
 
 contract TestSkyStakingEngineSelectFarm is SkyExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
@@ -89,7 +90,7 @@ contract TestSkyStakingEngineSelectFarm is SkyExecuteActions {
         );
 
         bytes memory executeActionCallData = executeActionCalldata(
-            skyStakingEngineSelectFarmEncode(STAKING_ENGINE, 0, SPARK_FARM), true
+            SkyStakingEncode.selectFarm(STAKING_ENGINE, 0, SPARK_FARM), true
         );
 
         vm.expectEmit(true, true, true, true, address(STAKING_ENGINE));
@@ -106,9 +107,8 @@ contract TestSkyStakingEngineSelectFarm is SkyExecuteActions {
             STAKING_ENGINE, 0, USDS_FARM, AMOUNT, sender, open, cut, stake, wallet
         );
 
-        bytes memory executeActionCallData = executeActionCalldata(
-            skyStakingEngineSelectFarmEncode(STAKING_ENGINE, 0, SKY_FARM), true
-        );
+        bytes memory executeActionCallData =
+            executeActionCalldata(SkyStakingEncode.selectFarm(STAKING_ENGINE, 0, SKY_FARM), true);
 
         vm.expectEmit(true, true, true, true, address(STAKING_ENGINE));
         emit ILockstakeEngine.SelectFarm(walletAddr, 0, SKY_FARM, SKY_REFERRAL_CODE);
@@ -125,7 +125,7 @@ contract TestSkyStakingEngineSelectFarm is SkyExecuteActions {
         );
 
         bytes memory executeActionCallData = executeActionCalldata(
-            skyStakingEngineSelectFarmEncode(STAKING_ENGINE, 0, USDS_FARM), true
+            SkyStakingEncode.selectFarm(STAKING_ENGINE, 0, USDS_FARM), true
         );
 
         vm.expectEmit(true, true, true, true, address(STAKING_ENGINE));
@@ -143,7 +143,7 @@ contract TestSkyStakingEngineSelectFarm is SkyExecuteActions {
         );
 
         bytes memory executeActionCallData = executeActionCalldata(
-            skyStakingEngineSelectFarmEncode(STAKING_ENGINE, 0, USDS_FARM), true
+            SkyStakingEncode.selectFarm(STAKING_ENGINE, 0, USDS_FARM), true
         );
 
         vm.expectEmit(true, true, true, true, address(STAKING_ENGINE));
@@ -161,7 +161,7 @@ contract TestSkyStakingEngineSelectFarm is SkyExecuteActions {
         );
 
         bytes memory executeActionCallData = executeActionCalldata(
-            skyStakingEngineSelectFarmEncode(STAKING_ENGINE, 0, address(0)), true
+            SkyStakingEncode.selectFarm(STAKING_ENGINE, 0, address(0)), true
         );
 
         vm.expectEmit(true, true, true, true, address(STAKING_ENGINE));
@@ -179,7 +179,7 @@ contract TestSkyStakingEngineSelectFarm is SkyExecuteActions {
         );
 
         bytes memory executeActionCallData = executeActionCalldata(
-            skyStakingEngineSelectFarmEncode(STAKING_ENGINE, 0, USDS_FARM), true
+            SkyStakingEncode.selectFarm(STAKING_ENGINE, 0, USDS_FARM), true
         );
 
         vm.expectRevert(); // "LockstakeEngine/same-farm"
@@ -196,7 +196,7 @@ contract TestSkyStakingEngineSelectFarm is SkyExecuteActions {
         );
 
         bytes memory executeActionCallData =
-            executeActionCalldata(skyStakingEngineSelectFarmEncode(STAKING_ENGINE, 0, bob), true);
+            executeActionCalldata(SkyStakingEncode.selectFarm(STAKING_ENGINE, 0, bob), true);
 
         vm.expectRevert(); // "LockstakeEngine/farm-unsupported-or-deleted"
         wallet.execute(address(cut), executeActionCallData, 0);
@@ -213,7 +213,7 @@ contract TestSkyStakingEngineSelectFarm is SkyExecuteActions {
 
         // Execution logic
         bytes memory executeActionCallData = executeActionCalldata(
-            skyStakingEngineSelectFarmEncode(STAKING_ENGINE, index, _farm), _isDirect
+            SkyStakingEncode.selectFarm(STAKING_ENGINE, index, _farm), _isDirect
         );
 
         if (_farm != address(0)) {

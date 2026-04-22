@@ -11,6 +11,7 @@ import { EulerV2Supply } from "../../../contracts/actions/eulerV2/EulerV2Supply.
 import { EulerV2TestHelper } from "./EulerV2TestHelper.t.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
+import { EulerV2Encode } from "../../utils/encode/EulerV2Encode.sol";
 
 contract TestEulerV2PaybackWithShares is EulerV2TestHelper {
     /*//////////////////////////////////////////////////////////////////////////
@@ -187,7 +188,7 @@ contract TestEulerV2PaybackWithShares is EulerV2TestHelper {
             : amountInUSDPrice(IEVault(_vault).asset(), _config.paybackAmountInUsd);
 
         bytes memory callData = executeActionCalldata(
-            eulerV2PaybackWithSharesEncode(_vault, _config.from, _config.account, paybackAmount),
+            EulerV2Encode.paybackWithShares(_vault, _config.from, _config.account, paybackAmount),
             _config.isDirect
         );
 

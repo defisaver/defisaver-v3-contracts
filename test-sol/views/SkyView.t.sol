@@ -12,8 +12,8 @@ import { SkyView } from "../../contracts/views/SkyView.sol";
 
 import { ILockstakeEngine } from "../../contracts/interfaces/protocols/sky/ILockstakeEngine.sol";
 import { IStakingRewards } from "../../contracts/interfaces/protocols/sky/IStakingRewards.sol";
-
 import { SkyExecuteActions } from "../utils/executeActions/SkyExecuteActions.sol";
+import { SkyStakingEncode } from "../utils/encode/SkyStakingEncode.sol";
 
 contract TestSkyView is SkyExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
@@ -103,7 +103,7 @@ contract TestSkyView is SkyExecuteActions {
 
         // Execution logic
         bytes memory executeActionCallData = executeActionCalldata(
-            skyStakingEngineStakeEncode(STAKING_ENGINE, index, AMOUNT, sender), false
+            SkyStakingEncode.stake(STAKING_ENGINE, index, AMOUNT, sender), false
         );
         vm.expectEmit(true, true, true, true, address(STAKING_ENGINE));
         emit ILockstakeEngine.Lock(walletAddr, index, AMOUNT, SKY_REFERRAL_CODE);

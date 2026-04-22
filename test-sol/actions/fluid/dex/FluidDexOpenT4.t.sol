@@ -9,6 +9,7 @@ import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { TokenUtils } from "../../../../contracts/utils/token/TokenUtils.sol";
 import { Vm } from "forge-std/Vm.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
+import { FluidEncode } from "../../../utils/encode/FluidEncode.sol";
 
 contract TestFluidDexOpenT4 is FluidTestBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -304,7 +305,7 @@ contract TestFluidDexOpenT4 is FluidTestBase {
 
             // ------------- ENCODE CALL DATA -------------
             vars.executeActionCallData = executeActionCalldata(
-                fluidDexOpenEncode(
+                FluidEncode.dexOpen(
                     vaults[i],
                     sender, /* from */
                     sender, /* to */

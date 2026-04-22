@@ -11,6 +11,7 @@ import {
 
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
+import { LiquityV2Encode } from "../../utils/encode/LiquityV2Encode.sol";
 
 contract TestLiquityV2SPClaimColl is LiquityV2ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
@@ -66,7 +67,7 @@ contract TestLiquityV2SPClaimColl is LiquityV2ExecuteActions {
         address stabilityPool = _market.stabilityPool();
 
         bytes memory executeActionCallData =
-            executeActionCalldata(liquityV2SPClaimCollEncode(address(_market), sender), _isDirect);
+            executeActionCalldata(LiquityV2Encode.spClaimColl(address(_market), sender), _isDirect);
 
         uint256 amountToClaim = 1000;
         _simulateClaimAmount(amountToClaim, stabilityPool, collToken);

@@ -12,6 +12,7 @@ import { FluidDexModel } from "../../../../contracts/actions/fluid/helpers/Fluid
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { TokenUtils } from "../../../../contracts/utils/token/TokenUtils.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
+import { FluidEncode } from "../../../utils/encode/FluidEncode.sol";
 
 contract TestFluidDexWithdraw is FluidTestBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -392,7 +393,7 @@ contract TestFluidDexWithdraw is FluidTestBase {
             });
 
             vars.executeActionCallData = executeActionCalldata(
-                fluidDexWithdrawEncode(
+                FluidEncode.dexWithdraw(
                     vaults[i],
                     sender,
                     nftId,

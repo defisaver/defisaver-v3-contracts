@@ -15,6 +15,7 @@ import { FluidDexModel } from "../../../../contracts/actions/fluid/helpers/Fluid
 import { TokenUtils } from "../../../../contracts/utils/token/TokenUtils.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
+import { FluidEncode } from "../../../utils/encode/FluidEncode.sol";
 
 contract TestFluidDexBorrow is FluidTestBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -63,6 +64,7 @@ contract TestFluidDexBorrow is FluidTestBase {
         uint256 walletBorrowToken1BalanceAfter;
         IFluidVaultResolver.UserPosition userPositionBefore;
         IFluidVaultResolver.UserPosition userPositionAfter;
+        uint256 nftId;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -161,9 +163,10 @@ contract TestFluidDexBorrow is FluidTestBase {
 
     function _baseTest(TestConfig memory config, bool _t3VaultsSelected) internal {
         address[] memory vaults = _t3VaultsSelected ? t3Vaults : t4Vaults;
+        LocalVars memory vars;
 
         for (uint256 i = 0; i < vaults.length; ++i) {
-            uint256 nftId = _t3VaultsSelected
+            vars.nftId = _t3VaultsSelected
                 ? executeFluidVaultT3Open(
                     vaults[i],
                     200_000, /* initial supply amount in usd */
@@ -182,16 +185,14 @@ contract TestFluidDexBorrow is FluidTestBase {
                     address(openContract)
                 );
 
-            if (nftId == 0) {
+            if (vars.nftId == 0) {
                 logSkipTestBecauseOfOpen(vaults[i]);
                 continue;
             }
 
             IFluidVaultT3.ConstantViews memory constants = IFluidVaultT3(vaults[i]).constantsView();
-            LocalVars memory vars;
 
-            FluidView fluidView = new FluidView();
-            FluidView.VaultData memory vaultData = fluidView.getVaultData(vaults[i]);
+            FluidView.VaultData memory vaultData = (new FluidView()).getVaultData(vaults[i]);
 
             // -------------------- Handle borrow token 0. ---------------------
             vars.isNativeBorrow0 = constants.borrowToken.token0 == TokenUtils.ETH_ADDR;
@@ -223,10 +224,10 @@ contract TestFluidDexBorrow is FluidTestBase {
 
             // -------------------- Encode call data. --------------------
             vars.executeActionCallData = executeActionCalldata(
-                fluidDexBorrowEncode(
+                FluidEncode.dexBorrow(
                     vaults[i],
                     sender,
-                    nftId,
+                    vars.nftId,
                     0, // borrowAmount (not used for T3 or T4 vaults)
                     FluidDexModel.BorrowVariableData(
                         vars.borrowAmount0, vars.borrowAmount1, vars.shares
@@ -238,7 +239,7 @@ contract TestFluidDexBorrow is FluidTestBase {
 
             // -------------------- Take snapshot before. --------------------
 
-            vars.userPositionBefore = fetchPositionByNftId(nftId);
+            vars.userPositionBefore = fetchPositionByNftId(vars.nftId);
             vars.walletEthBalanceBefore = address(walletAddr).balance;
 
             vars.walletBorrowToken0BalanceBefore = vars.isNativeBorrow0
@@ -267,7 +268,7 @@ contract TestFluidDexBorrow is FluidTestBase {
 
             // -------------------- Take snapshot after. --------------------
 
-            vars.userPositionAfter = fetchPositionByNftId(nftId);
+            vars.userPositionAfter = fetchPositionByNftId(vars.nftId);
             vars.walletEthBalanceAfter = address(walletAddr).balance;
 
             vars.walletBorrowToken0BalanceAfter = vars.isNativeBorrow0

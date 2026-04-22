@@ -7,6 +7,7 @@ import { SmartWallet } from "../SmartWallet.sol";
 
 import { AaveV3Supply } from "../../../contracts/actions/aaveV3/AaveV3Supply.sol";
 import { AaveV3Borrow } from "../../../contracts/actions/aaveV3/AaveV3Borrow.sol";
+import { AaveV3Encode } from "../encode/AaveV3Encode.sol";
 
 contract AaveV3ExecuteActions is ExecuteActionsBase {
     function executeAaveV3Supply(
@@ -16,7 +17,7 @@ contract AaveV3ExecuteActions is ExecuteActionsBase {
         bool _useAddressFromDfsRegistry,
         address _contractAddress
     ) public {
-        bytes memory paramsCalldata = aaveV3SupplyEncode(
+        bytes memory paramsCalldata = AaveV3Encode.supply(
             _params.amount,
             _params.from,
             _params.assetId,
@@ -40,7 +41,7 @@ contract AaveV3ExecuteActions is ExecuteActionsBase {
         bool _useAddressFromDfsRegistry,
         address _contractAddress
     ) public {
-        bytes memory paramsCalldata = aaveV3BorrowEncode(
+        bytes memory paramsCalldata = AaveV3Encode.borrow(
             _params.amount,
             _params.to,
             _params.rateMode,
