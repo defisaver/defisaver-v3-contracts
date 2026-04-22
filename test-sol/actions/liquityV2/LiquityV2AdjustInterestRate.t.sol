@@ -14,6 +14,7 @@ import {
 
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
+import { LiquityV2Encode } from "../../utils/encode/LiquityV2Encode.sol";
 
 contract TestLiquityV2AdjustInterestRate is LiquityV2ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
@@ -74,18 +75,17 @@ contract TestLiquityV2AdjustInterestRate is LiquityV2ExecuteActions {
         uint256 newInterestRate = 1e18 / 20;
 
         for (uint256 i = 0; i < markets.length; i++) {
-            uint256 troveId = executeLiquityOpenTrove(
-                markets[i],
-                address(0),
-                collAmountInUSD,
-                i,
-                borrowAmountInUSD,
-                currInterestRate,
-                0,
-                wallet,
-                openContract,
-                viewContract
-            );
+            OpenTroveParams memory openTroveParams = OpenTroveParams({
+                market: markets[i],
+                batchManager: address(0),
+                collAmountInUSD: collAmountInUSD,
+                collIndex: i,
+                borrowAmountInUSD: borrowAmountInUSD,
+                annualInterestRate: currInterestRate,
+                nonce: 0
+            });
+            uint256 troveId =
+                executeLiquityOpenTrove(openTroveParams, wallet, openContract, viewContract);
 
             _adjustInterestRate(markets[i], troveId, _isDirect, newInterestRate, i);
         }
@@ -105,7 +105,7 @@ contract TestLiquityV2AdjustInterestRate is LiquityV2ExecuteActions {
             getInsertPosition(viewContract, _market, _collIndex, _newInterestRate);
 
         bytes memory executeActionCallData = executeActionCalldata(
-            liquityV2AdjustInterestRateEncode(
+            LiquityV2Encode.adjustInterestRate(
                 address(_market), _troveId, _newInterestRate, upperHint, lowerHint, maxUpfrontFee
             ),
             _isDirect

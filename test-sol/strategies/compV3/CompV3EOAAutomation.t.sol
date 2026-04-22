@@ -18,6 +18,7 @@ import { CompV3Supply } from "../../../contracts/actions/compoundV3/CompV3Supply
 import { CompV3Withdraw } from "../../../contracts/actions/compoundV3/CompV3Withdraw.sol";
 import { CompV3Borrow } from "../../../contracts/actions/compoundV3/CompV3Borrow.sol";
 import { CompV3Payback } from "../../../contracts/actions/compoundV3/CompV3Payback.sol";
+import { CompV3Encode } from "../../utils/encode/CompV3Encode.sol";
 import {
     WrapperExchangeRegistry
 } from "../../../contracts/exchangeV3/registries/WrapperExchangeRegistry.sol";
@@ -199,13 +200,13 @@ contract TestCompV3EOAAutomation is BaseTest, RegistryUtils, ActionsUtils {
 
         bytes[] memory _actionsCallData = new bytes[](5);
         _actionsCallData[0] =
-            compV3WithdrawEncode(Addresses.COMET_USDC, wallet, Addresses.WETH_ADDR, wethAmount);
+            CompV3Encode.withdraw(Addresses.COMET_USDC, wallet, Addresses.WETH_ADDR, wethAmount);
         _actionsCallData[1] = sellEncode(
             Addresses.WETH_ADDR, Addresses.USDC_ADDR, 0, wallet, wallet, Addresses.UNI_V2_WRAPPER
         );
         _actionsCallData[2] = gasFeeEncode(repayGasCost, Addresses.USDC_ADDR);
-        _actionsCallData[3] = compV3PaybackEncode(Addresses.COMET_USDC, wallet, 0);
-        _actionsCallData[4] = compV3RatioCheckEncode(0, 0, address(0));
+        _actionsCallData[3] = CompV3Encode.payback(Addresses.COMET_USDC, wallet, 0);
+        _actionsCallData[4] = CompV3Encode.ratioCheck(0, 0, address(0));
 
         uint256 beforeRatio = trigger.getSafetyRatio(Addresses.COMET_USDC, address(user1));
 
@@ -245,11 +246,11 @@ contract TestCompV3EOAAutomation is BaseTest, RegistryUtils, ActionsUtils {
             Addresses.UNI_V2_WRAPPER
         );
         _actionsCallData[2] = gasFeeEncode(repayFLGasCost, Addresses.USDC_ADDR);
-        _actionsCallData[3] = compV3PaybackEncode(Addresses.COMET_USDC, wallet, 0);
-        _actionsCallData[4] = compV3WithdrawEncode(
+        _actionsCallData[3] = CompV3Encode.payback(Addresses.COMET_USDC, wallet, 0);
+        _actionsCallData[4] = CompV3Encode.withdraw(
             Addresses.COMET_USDC, address(flAction), Addresses.WETH_ADDR, wethAmount
         );
-        _actionsCallData[5] = compV3RatioCheckEncode(0, 0, address(0));
+        _actionsCallData[5] = CompV3Encode.ratioCheck(0, 0, address(0));
 
         uint256 beforeRatio = trigger.getSafetyRatio(Addresses.COMET_USDC, address(user1));
 
@@ -274,14 +275,14 @@ contract TestCompV3EOAAutomation is BaseTest, RegistryUtils, ActionsUtils {
         bytes[] memory _triggerCallData = new bytes[](1);
 
         bytes[] memory _actionsCallData = new bytes[](5);
-        _actionsCallData[0] = compV3BorrowEncode(Addresses.COMET_USDC, usdcAmount, wallet);
+        _actionsCallData[0] = CompV3Encode.borrow(Addresses.COMET_USDC, usdcAmount, wallet);
         _actionsCallData[1] = sellEncode(
             Addresses.USDC_ADDR, Addresses.WETH_ADDR, 0, wallet, wallet, Addresses.UNI_V2_WRAPPER
         );
         _actionsCallData[2] = gasFeeEncode(boostGasCost, Addresses.WETH_ADDR);
         _actionsCallData[3] =
-            compV3SupplyEncode(Addresses.COMET_USDC, Addresses.WETH_ADDR, 0, wallet);
-        _actionsCallData[4] = compV3RatioCheckEncode(0, 0, address(0));
+            CompV3Encode.supply(Addresses.COMET_USDC, Addresses.WETH_ADDR, 0, wallet);
+        _actionsCallData[4] = CompV3Encode.ratioCheck(0, 0, address(0));
 
         uint256 beforeRatio = trigger.getSafetyRatio(Addresses.COMET_USDC, address(user1));
 
@@ -316,10 +317,10 @@ contract TestCompV3EOAAutomation is BaseTest, RegistryUtils, ActionsUtils {
         );
         _actionsCallData[2] = gasFeeEncode(boostFLGasCost, Addresses.WETH_ADDR);
         _actionsCallData[3] =
-            compV3SupplyEncode(Addresses.COMET_USDC, Addresses.WETH_ADDR, 0, wallet);
+            CompV3Encode.supply(Addresses.COMET_USDC, Addresses.WETH_ADDR, 0, wallet);
         _actionsCallData[4] =
-            compV3BorrowEncode(Addresses.COMET_USDC, usdcAmount, address(flAction));
-        _actionsCallData[5] = compV3RatioCheckEncode(0, 0, address(0));
+            CompV3Encode.borrow(Addresses.COMET_USDC, usdcAmount, address(flAction));
+        _actionsCallData[5] = CompV3Encode.ratioCheck(0, 0, address(0));
 
         uint256 beforeRatio = trigger.getSafetyRatio(Addresses.COMET_USDC, address(user1));
 

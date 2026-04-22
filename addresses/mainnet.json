@@ -4855,5 +4855,181 @@
         "changeTime": 0,
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "AaveV4View",
+        "address": "0x274C0f0164A82B8771145651A8331A909c939e42",
+        "id": "0x29a71d39",
+        "path": "contracts/views/AaveV4View.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV4Supply",
+        "address": "0x64702507aFbB61cCB5e116Eb5664b4CDC8e45100",
+        "id": "0x06ecb781",
+        "path": "contracts/actions/aaveV4/AaveV4Supply.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": ["0x089c2b1DB0f68D94E67e8d969509D45B26fD0ceC"]
+    },
+    {
+        "name": "AaveV4Withdraw",
+        "address": "0x5AAffaf14bFf54DcE21304056d3156EBfb67720c",
+        "id": "0x13a9a106",
+        "path": "contracts/actions/aaveV4/AaveV4Withdraw.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": ["0x563EC9e76b335A8218c04Ac4Ae9A58ae464CaAD6"]
+    },
+    {
+        "name": "AaveV4Borrow",
+        "address": "0x01aEEA62EF580C4BCf54e9CA0856104FE3F01b3B",
+        "id": "0x3f528c6f",
+        "path": "contracts/actions/aaveV4/AaveV4Borrow.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": ["0x2a560B72Fb88b9Bb90dd997CD94D7611740961B9"]
+    },
+    {
+        "name": "AaveV4Payback",
+        "address": "0x6d7BfbfaD68Ea48C423493c92026e920931d343d",
+        "id": "0xe5585d1e",
+        "path": "contracts/actions/aaveV4/AaveV4Payback.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": ["0xEBafec920888E735e61353A8792cBd452B8406a0"]
+    },
+    {
+        "name": "AaveV4CollateralSwitch",
+        "address": "0x742c8676E90958C8b8e264b70Ca0685c365Eec5f",
+        "id": "0xba79ba14",
+        "path": "contracts/actions/aaveV4/AaveV4CollateralSwitch.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV4StoreRatio",
+        "address": "0xbb25A1fd100c57c4971E6eC3a36de708963268AB",
+        "id": "0x3abbd56a",
+        "path": "contracts/actions/aaveV4/AaveV4StoreRatio.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV4RatioCheck",
+        "address": "0x63711684b09cD80b4E696E5D5Af397d38a511Deb",
+        "id": "0x707ad6fd",
+        "path": "contracts/actions/checkers/AaveV4RatioCheck.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV4RatioTrigger",
+        "address": "0xC46Fe547EAa56C2BbDe5f40C3C125c1A926ACE8a",
+        "id": "0xb611c174",
+        "path": "contracts/triggers/AaveV4RatioTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV4QuotePriceTrigger",
+        "address": "0xe5e1193a1857CC9c89764aF022CC11B876f087cE",
+        "id": "0x5aeba3b5",
+        "path": "contracts/triggers/AaveV4QuotePriceTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV4QuotePriceRangeTrigger",
+        "address": "0xdb1b5083a697fDA908Fe577d57966ADCcC3d8e2C",
+        "id": "0xec27e00e",
+        "path": "contracts/triggers/AaveV4QuotePriceRangeTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV4RefreshPremium",
+        "address": "0xca7Cec8D88Bf495166CAeC045F0d467Aa4ceBE4E",
+        "id": "0xfa2bc34c",
+        "path": "contracts/actions/aaveV4/AaveV4RefreshPremium.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV4SetUserManagersWithSig",
+        "address": "0x70CB26167153298aF397dF58200799A24B060b0d",
+        "id": "0xa6f596a0",
+        "path": "contracts/actions/aaveV4/AaveV4SetUserManagersWithSig.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV4DelegateWithdrawWithSig",
+        "address": "0x81864dBd69c46B19463eC7BEC6cE0B271126531a",
+        "id": "0x9fd66aa7",
+        "path": "contracts/actions/aaveV4/AaveV4DelegateWithdrawWithSig.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV4DelegateBorrowWithSig",
+        "address": "0x9D68b41BB9f9e9Ac1E1ee49d3566CAd4624886BA",
+        "id": "0xf2047db2",
+        "path": "contracts/actions/aaveV4/AaveV4DelegateBorrowWithSig.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV4DelegateSetUsingAsCollateralWithSig",
+        "address": "0xF3D7C7e8F5154c669EAA0dE996cdE0575D7d3A00",
+        "id": "0x5a07161d",
+        "path": "contracts/actions/aaveV4/AaveV4DelegateSetUsingAsCollateralWithSig.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     }
 ]
