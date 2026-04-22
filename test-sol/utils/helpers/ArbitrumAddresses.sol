@@ -35,6 +35,7 @@ library Addresses {
         0xc1cB462033D8319016dF4e8A1810f1afB06b50bB;
     address public constant BUNDLE_ADDR = 0x8332F2a50A9a6C85a476e1ea33031681291cB694;
     address public constant STORAGE_ADDR = 0x6aeA695fcd0655650323e9dc5f80Ac0b15A91Da2;
+    address public constant TRANSIENT_STORAGE_CANCUN = 0x3d5133490db663c6f8F856DA56a8F8F3Dc02768c;
 
     // EULER V2 (mainnet-only)
     address public constant E_WETH_2 = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
