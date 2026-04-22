@@ -4,7 +4,7 @@ icon: ghost
 
 # AaveV4Withdraw
 
-## Description
+### Description
 
 Withdraw a token from an Aave spoke.
 
@@ -13,10 +13,10 @@ Withdraw a token from an Aave spoke.
 > Send type(uint).max to withdraw whole amount.
 
 
-## Action ID
+### Action ID
 `0x13a9a106`
 
-## SDK Action
+### SDK Action
 ````ts
 const aaveV4WithdrawAction = new dfs.actions.aavev4.AaveV4WithdrawAction(
     spoke,
@@ -27,10 +27,10 @@ const aaveV4WithdrawAction = new dfs.actions.aavev4.AaveV4WithdrawAction(
 );
 ````
 
-## Action Type
+### Action Type
 `STANDARD_ACTION`
 
-## Input Parameters
+### Input Parameters
 ```solidity
     /// @param spoke Address of the spoke.
     /// @param onBehalf Address to withdraw tokens on behalf of. Defaults to the user's wallet if not provided.
@@ -46,12 +46,12 @@ const aaveV4WithdrawAction = new dfs.actions.aavev4.AaveV4WithdrawAction(
     }
 ```
 
-## Return Value
+### Return Value
 ```solidity
 return bytes32(amount);
 ```
 
-## Events and Logs
+### Events and Logs
 ```solidity
 emit ActionEvent("AaveV4Withdraw", logData);
 logger.logActionDirectEvent("AaveV4Withdraw", logData);

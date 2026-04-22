@@ -5,14 +5,14 @@ icon: ghost
 
 # AaveV4DelegateBorrowWithSig
 
-## Description
+### Description
 
 Action that approves a spender to borrow from the specified reserve using an EIP712-typed intent.
 
-## Action ID
+### Action ID
 `0xf2047db2`
 
-## SDK Action
+### SDK Action
 ````ts
 const aaveV4DelegateBorrowWithSigAction = new dfs.actions.aavev4.AaveV4DelegateBorrowWithSigAction(
     permit,
@@ -20,10 +20,10 @@ const aaveV4DelegateBorrowWithSigAction = new dfs.actions.aavev4.AaveV4DelegateB
 );
 ````
 
-## Action Type
+### Action Type
 `STANDARD_ACTION`
 
-## Input Parameters
+### Input Parameters
 ```solidity
     /// @notice Structured parameters for borrow permit intent.
     /// @param spoke The address of the spoke.
@@ -51,12 +51,12 @@ const aaveV4DelegateBorrowWithSigAction = new dfs.actions.aavev4.AaveV4DelegateB
     }
 ```
 
-## Return Value
+### Return Value
 ```solidity
 return bytes32(amount);
 ```
 
-## Events and Logs
+### Events and Logs
 ```solidity
 emit ActionEvent("AaveV4DelegateBorrowWithSig", logData);
 logger.logActionDirectEvent("AaveV4DelegateBorrowWithSig", logData);

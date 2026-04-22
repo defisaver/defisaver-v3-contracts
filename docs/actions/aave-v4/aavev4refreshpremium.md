@@ -4,15 +4,15 @@ icon: ghost
 
 # AaveV4RefreshPremium
 
-## Description
+### Description
 
 Allows user to refresh premium or dynamic reserve config.
 
 
-## Action ID
+### Action ID
 `0xfa2bc34c`
 
-## SDK Action
+### SDK Action
 ````ts
 const aaveV4RefreshPremiumAction = new dfs.actions.aavev4.AaveV4RefreshPremiumAction(
     spoke,
@@ -21,10 +21,10 @@ const aaveV4RefreshPremiumAction = new dfs.actions.aavev4.AaveV4RefreshPremiumAc
 );
 ````
 
-## Action Type
+### Action Type
 `STANDARD_ACTION`
 
-## Input Parameters
+### Input Parameters
 ```solidity
     /// @param spoke Address of the spoke.
     /// @param onBehalf Address to refresh the config on behalf of. Defaults to the user's wallet if not provided.
@@ -36,12 +36,12 @@ const aaveV4RefreshPremiumAction = new dfs.actions.aavev4.AaveV4RefreshPremiumAc
     }
 ```
 
-## Return Value
+### Return Value
 ```solidity
 return bytes32(0);
 ```
 
-## Events and Logs
+### Events and Logs
 ```solidity
 emit ActionEvent("AaveV4RefreshPremium", logData);
 logger.logActionDirectEvent("AaveV4RefreshPremium", logData);

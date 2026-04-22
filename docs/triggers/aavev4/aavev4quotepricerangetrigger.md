@@ -4,7 +4,7 @@ icon: ghost
 
 # AaveV4QuotePriceRangeTrigger
 
-## Description
+### Description
 
 Trigger contract that verifies if current token price ratio is outside of given range specified during subscription
 
@@ -17,10 +17,10 @@ Notes
 * Checks Aave V4 oracle for current prices and triggers if it's in a correct state.
 {% endhint %}
 
-## Trigger ID
+### Trigger ID
 `0xec27e00e`
 
-## SDK Action
+### SDK Action
 ```ts
 const aaveV4QuotePriceRangeTrigger = new dfs.triggers.AaveV4QuotePriceRangeTrigger(
     spoke,
@@ -31,7 +31,7 @@ const aaveV4QuotePriceRangeTrigger = new dfs.triggers.AaveV4QuotePriceRangeTrigg
 );
 ```
 
-## Subscription Parameters
+### Subscription Parameters
 ```solidity
 /// @param spoke Address of the spoke.
 /// @param baseTokenId Reserve id of the base token which is quoted.
@@ -47,10 +47,10 @@ struct SubParams {
 }
 ```
 
-## Calldata Parameters
+### Calldata Parameters
 ```solidity
 None
 ```
 
-## IsChangeable
+### IsChangeable
 `false`

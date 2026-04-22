@@ -4,14 +4,14 @@ icon: ghost
 
 # AaveV4RatioTrigger
 
-## Description
+### Description
 
 Trigger that triggers when the ratio of a user's position in aaveV4 spoke is over or under a certain ratio
 
-## Trigger ID
+### Trigger ID
 `0xb611c174`
 
-## SDK Action
+### SDK Action
 ```ts
 const aaveV4RatioTrigger = new dfs.triggers.AaveV4RatioTrigger(
     user,
@@ -21,7 +21,7 @@ const aaveV4RatioTrigger = new dfs.triggers.AaveV4RatioTrigger(
 );
 ```
 
-## Subscription Parameters
+### Subscription Parameters
 ```solidity
 /// @param user Address of the user.
 /// @param spoke Address of the aaveV4 spoke.
@@ -35,10 +35,10 @@ struct SubParams {
 }
 ```
 
-## Calldata Parameters
+### Calldata Parameters
 ```solidity
 None
 ```
 
-## IsChangeable
+### IsChangeable
 `false`

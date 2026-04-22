@@ -4,7 +4,7 @@ icon: check
 
 # AaveV4RatioCheck
 
-## Description
+### Description
 
 Action to check the ratio of the Aave V4 position after strategy execution.
 
@@ -13,10 +13,10 @@ Action to check the ratio of the Aave V4 position after strategy execution.
 > 5% offset acceptable
 
 
-## Action ID
+### Action ID
 `0x707ad6fd`
 
-## SDK Action
+### SDK Action
 ````ts
 const aaveV4RatioCheckAction = new dfs.actions.AaveV4RatioCheckAction(
     ratioState,
@@ -27,10 +27,10 @@ const aaveV4RatioCheckAction = new dfs.actions.AaveV4RatioCheckAction(
 
 ````
 
-## Action Type
+### Action Type
 `CHECK_ACTION`
 
-## Input Parameters
+### Input Parameters
 ```solidity
     /// @param ratioState State of the ratio (IN_BOOST or IN_REPAY)
     /// @param targetRatio Target ratio.
@@ -44,12 +44,12 @@ const aaveV4RatioCheckAction = new dfs.actions.AaveV4RatioCheckAction(
     }
 ```
 
-## Return Value
+### Return Value
 ```solidity
 return bytes32(current);
 ```
 
-## Events and Logs
+### Events and Logs
 ```solidity
 emit ActionEvent("AaveV4RatioCheck", logData);
 bytes memory logData = abi.encode(currRatio);

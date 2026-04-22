@@ -4,15 +4,15 @@ icon: ghost
 
 # AaveV4DelegateSetUsingAsCollateralWithSig
 
-## Description
+### Description
 
 Action that approves a delegatee to set using as collateral on behalf of delegator with EIP712 signature.
 
 
-## Action ID
+### Action ID
 `0x5a07161d`
 
-## SDK Action
+### SDK Action
 ````ts
 const aaveV4DelegateSetUsingAsCollateralWithSigAction = new dfs.actions.aavev4.AaveV4DelegateSetUsingAsCollateralWithSigAction(
     permit,
@@ -20,10 +20,10 @@ const aaveV4DelegateSetUsingAsCollateralWithSigAction = new dfs.actions.aavev4.A
 );
 ````
 
-## Action Type
+### Action Type
 `STANDARD_ACTION`
 
-## Input Parameters
+### Input Parameters
 ```solidity
     /// @notice Structured parameters for using as collateral permission permit intent.
     /// @dev spoke The address of the Spoke.
@@ -49,12 +49,12 @@ const aaveV4DelegateSetUsingAsCollateralWithSigAction = new dfs.actions.aavev4.A
     }
 ```
 
-## Return Value
+### Return Value
 ```solidity
 return bytes32(permission);
 ```
 
-## Events and Logs
+### Events and Logs
 ```solidity
 emit ActionEvent("AaveV4DelegateSetUsingAsCollateralWithSig", logData);
 logger.logActionDirectEvent("AaveV4DelegateSetUsingAsCollateralWithSig", logData);

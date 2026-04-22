@@ -4,7 +4,7 @@ icon: ghost
 
 # AaveV4StoreRatio
 
-## Description
+### Description
 
 Stores the ratio of the Aave V4 position in transient storage.
 
@@ -13,10 +13,10 @@ Stores the ratio of the Aave V4 position in transient storage.
 > This action is used for validating the ratio of the position after strategy execution.
 
 
-## Action ID
+### Action ID
 `0x3abbd56a`
 
-## SDK Action
+### SDK Action
 ````ts
 const aaveV4StoreRatioAction = new dfs.actions.aavev4.AaveV4StoreRatioAction(
     spoke,
@@ -24,10 +24,10 @@ const aaveV4StoreRatioAction = new dfs.actions.aavev4.AaveV4StoreRatioAction(
 );
 ````
 
-## Action Type
+### Action Type
 `CUSTOM_ACTION`
 
-## Input Parameters
+### Input Parameters
 ```solidity
     /// @param spoke Address of the spoke.
     /// @param user Address of the user. Defaults to the user's wallet if not provided.
@@ -37,12 +37,12 @@ const aaveV4StoreRatioAction = new dfs.actions.aavev4.AaveV4StoreRatioAction(
     }
 ```
 
-## Return Value
+### Return Value
 ```solidity
 return bytes32(ratio);
 ```
 
-## Events and Logs
+### Events and Logs
 ```solidity
 emit ActionEvent("AaveV4StoreRatio", logData);
 bytes memory logData = abi.encode(params);

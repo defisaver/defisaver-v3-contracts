@@ -5,15 +5,15 @@ icon: ghost
 
 # AaveV4CollateralSwitch
 
-## Description
+### Description
 
 Switch action if user wants to use tokens for collateral on aaveV4 spoke.
 
 
-## Action ID
+### Action ID
 `0xba79ba14`
 
-## SDK Action
+### SDK Action
 ````ts
 const aaveV4CollateralSwitchAction = new dfs.actions.aavev4.AaveV4CollateralSwitchAction(
     spoke,
@@ -23,10 +23,10 @@ const aaveV4CollateralSwitchAction = new dfs.actions.aavev4.AaveV4CollateralSwit
 );
 ````
 
-## Action Type
+### Action Type
 `STANDARD_ACTION`
 
-## Input Parameters
+### Input Parameters
 ```solidity
     /// @param spoke Address of the spoke.
     /// @param onBehalf Address to switch collateral on behalf of. Defaults to the user's wallet if not provided.
@@ -40,12 +40,12 @@ const aaveV4CollateralSwitchAction = new dfs.actions.aavev4.AaveV4CollateralSwit
     }
 ```
 
-## Return Value
+### Return Value
 ```solidity
 return bytes32(0);
 ```
 
-## Events and Logs
+### Events and Logs
 ```solidity
 emit ActionEvent("AaveV4CollateralSwitch", logData);
 logger.logActionDirectEvent("AaveV4CollateralSwitch", logData);

@@ -4,15 +4,15 @@ icon: ghost
 
 # AaveV4DelegateWithdrawWithSig
 
-## Description
+### Description
 
 Action that approves a spender to withdraw from the specified reserve using an EIP712-typed intent.
 
 
-## Action ID
+### Action ID
 `0x9fd66aa7`
 
-## SDK Action
+### SDK Action
 ````ts
 const aaveV4DelegateWithdrawWithSigAction = new dfs.actions.aavev4.AaveV4DelegateWithdrawWithSigAction(
     permit,
@@ -20,10 +20,10 @@ const aaveV4DelegateWithdrawWithSigAction = new dfs.actions.aavev4.AaveV4Delegat
 );
 ````
 
-## Action Type
+### Action Type
 `STANDARD_ACTION`
 
-## Input Parameters
+### Input Parameters
 ```solidity
     /// @notice Structured parameters for withdraw permit intent.
     /// @param spoke The address of the spoke.
@@ -51,12 +51,12 @@ const aaveV4DelegateWithdrawWithSigAction = new dfs.actions.aavev4.AaveV4Delegat
     }
 ```
 
-## Return Value
+### Return Value
 ```solidity
 return bytes32(amount);
 ```
 
-## Events and Logs
+### Events and Logs
 ```solidity
 emit ActionEvent("AaveV4DelegateWithdrawWithSig", logData);
 logger.logActionDirectEvent("AaveV4DelegateWithdrawWithSig", logData);
