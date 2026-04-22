@@ -15,6 +15,7 @@ import {
 
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
+import { LiquityV2Encode } from "../../utils/encode/LiquityV2Encode.sol";
 
 contract TestLiquityV2Withdraw is LiquityV2ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
@@ -88,18 +89,17 @@ contract TestLiquityV2Withdraw is LiquityV2ExecuteActions {
                 vm.stopPrank();
             }
 
-            uint256 troveId = executeLiquityOpenTrove(
-                markets[i],
-                _interestBatchManager,
-                collAmountInUSD,
-                i,
-                borrowAmountInUSD,
-                1e18 / 10,
-                0,
-                wallet,
-                openContract,
-                viewContract
-            );
+            OpenTroveParams memory openTroveParams = OpenTroveParams({
+                market: markets[i],
+                batchManager: _interestBatchManager,
+                collAmountInUSD: collAmountInUSD,
+                collIndex: i,
+                borrowAmountInUSD: borrowAmountInUSD,
+                annualInterestRate: 1e18 / 10,
+                nonce: 0
+            });
+            uint256 troveId =
+                executeLiquityOpenTrove(openTroveParams, wallet, openContract, viewContract);
 
             _withdraw(markets[i], troveId, _isDirect, withdrawAmountInUSD);
         }
@@ -121,7 +121,7 @@ contract TestLiquityV2Withdraw is LiquityV2ExecuteActions {
         uint256 entireColl = troveData.entireColl;
 
         bytes memory executeActionCallData = executeActionCalldata(
-            liquityV2WithdrawEncode(address(_market), sender, _troveId, withdrawAmount), _isDirect
+            LiquityV2Encode.withdraw(address(_market), sender, _troveId, withdrawAmount), _isDirect
         );
 
         uint256 senderCollBalanceBefore = balanceOf(collToken, sender);

@@ -1,0 +1,135 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity =0.8.24;
+
+import { ISpoke } from "../../../contracts/interfaces/protocols/aaveV4/ISpoke.sol";
+import { SmartWallet } from "test-sol/utils/SmartWallet.sol";
+import { AaveV4Payback } from "../../../contracts/actions/aaveV4/AaveV4Payback.sol";
+import { AaveV4TestBase } from "./AaveV4TestBase.t.sol";
+import { AaveV4Encode } from "test-sol/utils/encode/AaveV4Encode.sol";
+
+contract TestAaveV4Payback is AaveV4TestBase {
+    /*//////////////////////////////////////////////////////////////////////////
+                               CONTRACT UNDER TEST
+    //////////////////////////////////////////////////////////////////////////*/
+    AaveV4Payback cut;
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                    VARIABLES
+    //////////////////////////////////////////////////////////////////////////*/
+    SmartWallet wallet;
+    address walletAddr;
+    address sender;
+
+    struct TestConfig {
+        bool isDirect;
+        bool useMaxUint256;
+        bool isEoa;
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                  SETUP FUNCTION
+    //////////////////////////////////////////////////////////////////////////*/
+    function setUp() public override {
+        forkFromEnv("");
+
+        wallet = new SmartWallet(bob);
+        sender = wallet.owner();
+        walletAddr = wallet.walletAddr();
+
+        cut = new AaveV4Payback();
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                     TESTS
+    //////////////////////////////////////////////////////////////////////////*/
+    function test_payback_partial() public {
+        _baseTest(TestConfig({ isDirect: false, useMaxUint256: false, isEoa: false }));
+    }
+
+    function test_payback_full_direct() public {
+        _baseTest(TestConfig({ isDirect: true, useMaxUint256: true, isEoa: false }));
+    }
+
+    function test_payback_partial_eoa() public {
+        _baseTest(TestConfig({ isDirect: false, useMaxUint256: false, isEoa: true }));
+    }
+
+    function test_payback_full_direct_eoa() public {
+        _baseTest(TestConfig({ isDirect: true, useMaxUint256: true, isEoa: true }));
+    }
+
+    function _baseTest(TestConfig memory _testConfig) internal {
+        AaveV4TestPair[] memory tests = getTestPairs();
+        for (uint256 i = 0; i < tests.length; ++i) {
+            uint256 snapshotId = vm.snapshotState();
+
+            AaveV4TestPair memory testPair = tests[i];
+
+            uint256 supplyAmountUsd = 500;
+            uint256 borrowAmountUsd = 100;
+
+            if (!_executeAaveV4Open(
+                    testPair, supplyAmountUsd, borrowAmountUsd, wallet, _testConfig.isEoa
+                )) {
+                continue;
+            }
+
+            uint256 borrowAmount =
+                _amountInUSDPrice(testPair.spoke, testPair.debtReserveId, borrowAmountUsd);
+
+            _payback(testPair.spoke, testPair.debtReserveId, borrowAmount, _testConfig);
+
+            vm.revertToState(snapshotId);
+        }
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                     HELPERS
+    //////////////////////////////////////////////////////////////////////////*/
+    function _payback(
+        address _spoke,
+        uint256 _reserveId,
+        uint256 _borrowedAmount,
+        TestConfig memory _testConfig
+    ) internal {
+        ISpoke spoke = ISpoke(_spoke);
+        address underlying = spoke.getReserve(_reserveId).underlying;
+        address onBehalf = _testConfig.isEoa ? sender : walletAddr;
+
+        uint256 userDebtBefore = spoke.getUserTotalDebt(_reserveId, onBehalf);
+        uint256 paybackAmount = _testConfig.useMaxUint256 ? userDebtBefore : _borrowedAmount / 2;
+
+        uint256 topUpAmount =
+            _testConfig.useMaxUint256 ? userDebtBefore : (_borrowedAmount * 105 / 100);
+        give(underlying, sender, topUpAmount);
+        approveAsSender(sender, underlying, walletAddr, topUpAmount);
+
+        bytes memory executeActionCallData = executeActionCalldata(
+            AaveV4Encode.payback(
+                _spoke,
+                onBehalf,
+                sender,
+                _reserveId,
+                _testConfig.useMaxUint256 ? type(uint256).max : paybackAmount
+            ),
+            _testConfig.isDirect
+        );
+
+        uint256 senderBalanceBefore = balanceOf(underlying, sender);
+
+        wallet.execute(address(cut), executeActionCallData, 0);
+
+        uint256 userDebtAfter = spoke.getUserTotalDebt(_reserveId, onBehalf);
+        uint256 senderBalanceAfter = balanceOf(underlying, sender);
+
+        assertEq(balanceOf(underlying, walletAddr), 0);
+        assertEq(senderBalanceAfter, senderBalanceBefore - paybackAmount);
+
+        if (_testConfig.useMaxUint256) {
+            assertEq(userDebtAfter, 0);
+        } else {
+            assertApproxEqAbs(userDebtAfter, userDebtBefore - paybackAmount, 1);
+        }
+    }
+}

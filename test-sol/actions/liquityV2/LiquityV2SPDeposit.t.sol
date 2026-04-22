@@ -13,6 +13,7 @@ import {
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
 import { LiquityV2Utils } from "../../utils/liquityV2/LiquityV2Utils.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
+import { LiquityV2Encode } from "../../utils/encode/LiquityV2Encode.sol";
 
 contract TestLiquityV2SPDeposit is LiquityV2ExecuteActions, LiquityV2Utils {
     /*//////////////////////////////////////////////////////////////////////////
@@ -103,7 +104,7 @@ contract TestLiquityV2SPDeposit is LiquityV2ExecuteActions, LiquityV2Utils {
         approveAsSender(sender, BOLD, walletAddr, vars.depositAmount);
 
         vars.executeActionCallData = executeActionCalldata(
-            liquityV2SPDepositEncode(
+            LiquityV2Encode.spDeposit(
                 address(_market), sender, sender, sender, vars.depositAmount, false
             ),
             _isDirect
@@ -123,7 +124,7 @@ contract TestLiquityV2SPDeposit is LiquityV2ExecuteActions, LiquityV2Utils {
             approveAsSender(sender, BOLD, walletAddr, vars.depositAmount);
 
             vars.executeActionCallData = executeActionCalldata(
-                liquityV2SPDepositEncode(
+                LiquityV2Encode.spDeposit(
                     address(_market), sender, sender, sender, vars.depositAmount, true
                 ),
                 _isDirect

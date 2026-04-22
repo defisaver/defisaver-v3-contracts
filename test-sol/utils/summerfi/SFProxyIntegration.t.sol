@@ -6,10 +6,12 @@ import { BaseTest } from "../BaseTest.sol";
 import { ActionsUtils } from "../ActionsUtils.sol";
 import { RegistryUtils } from "../RegistryUtils.sol";
 
-import { IAccountImplementation } from
-    "../../../contracts/interfaces/protocols/summerfi/IAccountImplementation.sol";
-import { IAccountFactory } from
-    "../../../contracts/interfaces/protocols/summerfi/IAccountFactory.sol";
+import {
+    IAccountImplementation
+} from "../../../contracts/interfaces/protocols/summerfi/IAccountImplementation.sol";
+import {
+    IAccountFactory
+} from "../../../contracts/interfaces/protocols/summerfi/IAccountFactory.sol";
 import { IAccountGuard } from "../../../contracts/interfaces/protocols/summerfi/IAccountGuard.sol";
 import { IL2PoolV3 } from "../../../contracts/interfaces/protocols/aaveV3/IL2PoolV3.sol";
 import { IDebtToken } from "../../../contracts/interfaces/protocols/aaveV3/IDebtToken.sol";
@@ -23,13 +25,15 @@ import { AaveV3Payback } from "../../../contracts/actions/aaveV3/AaveV3Payback.s
 import { AaveV3Withdraw } from "../../../contracts/actions/aaveV3/AaveV3Withdraw.sol";
 import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
 import { AaveV3RatioHelper } from "../../../contracts/actions/aaveV3/helpers/AaveV3RatioHelper.sol";
+import { AaveV3Encode } from "../encode/AaveV3Encode.sol";
 import { FLAction } from "../../../contracts/actions/flashloan/FLAction.sol";
 import { SendToken } from "../../../contracts/actions/utils/SendToken.sol";
 import { DFSSell } from "../../../contracts/actions/exchange/DFSSell.sol";
 import { SFProxyEntryPoint } from "../../../contracts/actions/summerfi/SFProxyEntryPoint.sol";
 import { Addresses } from "../helpers/MainnetAddresses.sol";
-import { SFProxyFactoryHelper } from
-    "../../../contracts/utils/addresses/sfProxyFactory/SFProxyFactoryHelper.sol";
+import {
+    SFProxyFactoryHelper
+} from "../../../contracts/utils/addresses/sfProxyFactory/SFProxyFactoryHelper.sol";
 import { SFProxyUtils } from "./SFProxyUtils.sol";
 
 contract SFProxyIntegration is
@@ -171,9 +175,11 @@ contract SFProxyIntegration is
         uint256 accountWethBefore = balanceOf(SUPPLY_ASSET, sfProxy);
 
         vm.prank(sfProxyOwner);
-        IAccountImplementation(sfProxy).execute(
-            sfProxyEntryPoint, abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
-        );
+        IAccountImplementation(sfProxy)
+            .execute(
+                sfProxyEntryPoint,
+                abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
+            );
 
         assertEq(balanceOf(SUPPLY_ASSET, sfProxy), accountWethBefore);
 
@@ -206,7 +212,7 @@ contract SFProxyIntegration is
 
         bytes[] memory actionsCalldata = new bytes[](6);
         actionsCalldata[0] = flActionEncode(BORROW_ASSET, flAmount, FLSource.BALANCER);
-        actionsCalldata[1] = aaveV3PaybackEncode(
+        actionsCalldata[1] = AaveV3Encode.payback(
             type(uint256).max,
             sfProxy,
             2,
@@ -216,7 +222,7 @@ contract SFProxyIntegration is
             DEFAULT_AAVE_MARKET,
             sfProxy
         );
-        actionsCalldata[2] = aaveV3WithdrawEncode(
+        actionsCalldata[2] = AaveV3Encode.withdraw(
             supplyReserve.id, false, type(uint256).max, sfProxy, DEFAULT_AAVE_MARKET
         );
         actionsCalldata[3] = sellEncodeV3(
@@ -243,9 +249,11 @@ contract SFProxyIntegration is
         StrategyModel.Recipe memory recipe = _createRecipe(actionsCalldata, actionIds);
 
         vm.prank(sfProxyOwner);
-        IAccountImplementation(sfProxy).execute(
-            sfProxyEntryPoint, abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
-        );
+        IAccountImplementation(sfProxy)
+            .execute(
+                sfProxyEntryPoint,
+                abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
+            );
 
         assertEq(balanceOf(SUPPLY_ASSET, sfProxy), 0);
         assertEq(balanceOf(BORROW_ASSET, sfProxy), 0);
@@ -270,10 +278,10 @@ contract SFProxyIntegration is
         actionsCalldata[1] = sellEncodeV3(
             SUPPLY_ASSET, BORROW_ASSET, flAmount, sfProxy, sfProxy, EXCHANGE_WRAPPER, 3000
         );
-        actionsCalldata[2] = aaveV3PaybackEncode(
+        actionsCalldata[2] = AaveV3Encode.payback(
             paybackAmount, sfProxy, 2, borrowReserve.id, false, false, DEFAULT_AAVE_MARKET, sfProxy
         );
-        actionsCalldata[3] = aaveV3WithdrawEncode(
+        actionsCalldata[3] = AaveV3Encode.withdraw(
             supplyReserve.id, false, flAmount, address(flAction), DEFAULT_AAVE_MARKET
         );
 
@@ -298,9 +306,11 @@ contract SFProxyIntegration is
         });
 
         vm.prank(sfProxyOwner);
-        IAccountImplementation(sfProxy).execute(
-            sfProxyEntryPoint, abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
-        );
+        IAccountImplementation(sfProxy)
+            .execute(
+                sfProxyEntryPoint,
+                abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
+            );
     }
 
     function _createAaveV3Position(address _onBehalf) internal {
@@ -309,16 +319,15 @@ contract SFProxyIntegration is
 
         if (_onBehalf != sfProxy) {
             vm.prank(_onBehalf);
-            IDebtToken(borrowReserve.variableDebtTokenAddress).approveDelegation(
-                sfProxy, borrowAmount
-            );
+            IDebtToken(borrowReserve.variableDebtTokenAddress)
+                .approveDelegation(sfProxy, borrowAmount);
         }
 
         bytes[] memory actionsCalldata = new bytes[](2);
-        actionsCalldata[0] = aaveV3SupplyEncode(
+        actionsCalldata[0] = AaveV3Encode.supply(
             supplyAmount, bob, supplyReserve.id, false, true, DEFAULT_AAVE_MARKET, _onBehalf
         );
-        actionsCalldata[1] = aaveV3BorrowEncode(
+        actionsCalldata[1] = AaveV3Encode.borrow(
             borrowAmount, bob, 2, borrowReserve.id, false, true, DEFAULT_AAVE_MARKET, _onBehalf
         );
 
@@ -333,9 +342,11 @@ contract SFProxyIntegration is
         uint256 aTokenBefore = balanceOf(supplyReserve.aTokenAddress, _onBehalf);
 
         vm.prank(sfProxyOwner);
-        IAccountImplementation(sfProxy).execute(
-            sfProxyEntryPoint, abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
-        );
+        IAccountImplementation(sfProxy)
+            .execute(
+                sfProxyEntryPoint,
+                abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
+            );
 
         assertEq(balanceOf(SUPPLY_ASSET, bob), bobSupplyBefore - supplyAmount);
         assertEq(balanceOf(BORROW_ASSET, bob), bobBorrowBefore + borrowAmount);

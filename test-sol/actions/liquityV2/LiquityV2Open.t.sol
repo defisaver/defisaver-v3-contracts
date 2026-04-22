@@ -16,6 +16,7 @@ import { LiquityV2TestHelper } from "./LiquityV2TestHelper.t.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
+import { LiquityV2Encode } from "../../utils/encode/LiquityV2Encode.sol";
 
 contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
     /*//////////////////////////////////////////////////////////////////////////
@@ -44,6 +45,17 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
         uint256 collateralAmountInUSD;
         uint256 borrowAmountInUSD;
         bool senderHasEnoughForCollAndGas;
+    }
+
+    struct LiquityV2OpenLocalVars {
+        bytes executeActionCallData;
+        uint256 senderWethBalanceBefore;
+        uint256 senderCollBalanceBefore;
+        uint256 senderWethBalanceAfter;
+        uint256 senderCollBalanceAfter;
+        uint256 troveId;
+        LiquityV2View.TroveData troveData;
+        ITroveNFT troveNft;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -206,8 +218,55 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
             approveAsSender(sender, WETH, walletAddr, ETH_GAS_COMPENSATION);
         }
 
-        bytes memory executeActionCallData = executeActionCalldata(
-            liquityV2OpenEncode(
+        LiquityV2OpenLocalVars memory vars;
+
+        vars.executeActionCallData = _executeOpen(_params, _config);
+        vars.senderWethBalanceBefore = balanceOf(WETH, sender);
+        vars.senderCollBalanceBefore = balanceOf(_collToken, sender);
+
+        if (!_config.senderHasEnoughForCollAndGas && _collToken == WETH) {
+            vm.expectRevert();
+            wallet.execute(address(cut), vars.executeActionCallData, 0);
+            return;
+        } else {
+            wallet.execute(address(cut), vars.executeActionCallData, 0);
+        }
+
+        vars.senderWethBalanceAfter = balanceOf(WETH, sender);
+        vars.senderCollBalanceAfter = balanceOf(_collToken, sender);
+
+        if (_collToken == WETH) {
+            assertEq(
+                vars.senderWethBalanceBefore - vars.senderWethBalanceAfter,
+                _params.collAmount + ETH_GAS_COMPENSATION
+            );
+        } else {
+            assertEq(vars.senderCollBalanceBefore - vars.senderCollBalanceAfter, _params.collAmount);
+            assertEq(
+                vars.senderWethBalanceBefore - vars.senderWethBalanceAfter, ETH_GAS_COMPENSATION
+            );
+        }
+
+        vars.troveId = uint256(keccak256(abi.encode(walletAddr, walletAddr, 0)));
+
+        vars.troveData = liquityV2View.getTroveInfo(_params.market, vars.troveId);
+
+        assertEq(uint256(vars.troveData.status), uint256(ITroveManager.Status.active));
+        assertEq(vars.troveData.collAmount, _params.collAmount);
+        assertEq(vars.troveData.annualInterestRate, _params.annualInterestRate);
+        assertEq(vars.troveData.interestBatchManager, _params.interestBatchManager);
+        assertGe(vars.troveData.debtAmount, _params.boldAmount);
+
+        vars.troveNft = ITroveNFT(IAddressesRegistry(_params.market).troveNFT());
+        assertEq(vars.troveNft.ownerOf(vars.troveId), walletAddr);
+    }
+
+    function _executeOpen(LiquityV2Open.Params memory _params, TestConfig memory _config)
+        internal
+        returns (bytes memory executeActionCallData)
+    {
+        executeActionCallData = executeActionCalldata(
+            LiquityV2Encode.open(
                 _params.market,
                 _params.from,
                 _params.to,
@@ -222,43 +281,5 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
             ),
             _config.isDirect
         );
-
-        uint256 senderWethBalanceBefore = balanceOf(WETH, sender);
-        uint256 senderCollBalanceBefore = balanceOf(_collToken, sender);
-
-        if (!_config.senderHasEnoughForCollAndGas && _collToken == WETH) {
-            vm.expectRevert();
-            wallet.execute(address(cut), executeActionCallData, 0);
-            return;
-        } else {
-            wallet.execute(address(cut), executeActionCallData, 0);
-        }
-
-        uint256 senderWethBalanceAfter = balanceOf(WETH, sender);
-        uint256 senderCollBalanceAfter = balanceOf(_collToken, sender);
-
-        if (_collToken == WETH) {
-            assertEq(
-                senderWethBalanceBefore - senderWethBalanceAfter,
-                _params.collAmount + ETH_GAS_COMPENSATION
-            );
-        } else {
-            assertEq(senderCollBalanceBefore - senderCollBalanceAfter, _params.collAmount);
-            assertEq(senderWethBalanceBefore - senderWethBalanceAfter, ETH_GAS_COMPENSATION);
-        }
-
-        uint256 troveId = uint256(keccak256(abi.encode(walletAddr, walletAddr, 0)));
-
-        LiquityV2View.TroveData memory troveData =
-            liquityV2View.getTroveInfo(_params.market, troveId);
-
-        assertEq(uint256(troveData.status), uint256(ITroveManager.Status.active));
-        assertEq(troveData.collAmount, _params.collAmount);
-        assertEq(troveData.annualInterestRate, _params.annualInterestRate);
-        assertEq(troveData.interestBatchManager, _params.interestBatchManager);
-        assertGe(troveData.debtAmount, _params.boldAmount);
-
-        ITroveNFT troveNft = ITroveNFT(IAddressesRegistry(_params.market).troveNFT());
-        assertEq(troveNft.ownerOf(troveId), walletAddr);
     }
 }

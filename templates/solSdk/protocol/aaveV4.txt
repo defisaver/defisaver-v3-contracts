@@ -1,0 +1,76 @@
+PROTOCOL_NAME = "AaveV4";
+
+ACTION_NAME = "AaveV4Supply";
+
+/// @param spoke Address of the spoke.
+/// @param onBehalf Address to supply tokens on behalf of. Defaults to the user's wallet if not provided.
+/// @param from Address from which to pull collateral asset.
+/// @param reserveId Reserve id.
+/// @param amount Amount of tokens to supply.
+/// @param useAsCollateral Whether to use the tokens as collateral.
+struct Params {
+    address spoke; // p
+    address onBehalf; // p
+    address from; // p
+    uint256 reserveId; // p
+    uint256 amount; // p
+    bool useAsCollateral; // p
+}
+
+ACTION_NAME = "AaveV4Withdraw";
+
+/// @param spoke Address of the spoke.
+/// @param onBehalf Address to withdraw tokens on behalf of. Defaults to the user's wallet if not provided.
+/// @param to Address that will receive the withdrawn tokens.
+/// @param reserveId Reserve id.
+/// @param amount Amount of tokens to withdraw. Send type(uint).max to withdraw whole amount.
+struct Params {
+    address spoke; // p
+    address onBehalf; // p
+    address to; // p
+    uint256 reserveId; // p
+    uint256 amount; // p
+}
+
+ACTION_NAME = "AaveV4Borrow";
+
+/// @param spoke Address of the spoke.
+/// @param onBehalf Address to borrow tokens on behalf of. Defaults to the user's wallet if not provided.
+/// @param to Address that will receive the borrowed tokens.
+/// @param reserveId Reserve id.
+/// @param amount Amount of tokens to borrow.
+struct Params {
+    address spoke; // p
+    address onBehalf; // p
+    address to; // p
+    uint256 reserveId; // p
+    uint256 amount; // p
+}
+
+ACTION_NAME = "AaveV4Payback";
+
+/// @param spoke Address of the spoke.
+/// @param onBehalf Address to payback tokens on behalf of. Defaults to the user's wallet if not provided.
+/// @param from Address from which to pull the payback tokens.
+/// @param reserveId Reserve id.
+/// @param amount Amount of tokens to payback. Send type(uint).max to payback whole amount.
+struct Params {
+    address spoke; // p
+    address onBehalf; // p
+    address from; // p
+    uint256 reserveId; // p
+    uint256 amount; // p
+}
+
+ACTION_NAME = "AaveV4CollateralSwitch";
+
+/// @param spoke Address of the spoke.
+/// @param onBehalf Address to switch collateral on behalf of. Defaults to the user's wallet if not provided.
+/// @param reserveId Reserve id.
+/// @param useAsCollateral Whether to use the tokens as collateral.
+struct Params {
+    address spoke; // p
+    address onBehalf; // p
+    uint256 reserveId; // p
+    bool useAsCollateral; // p
+}

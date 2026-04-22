@@ -36,6 +36,7 @@ library Addresses {
         0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant BUNDLE_ADDR = 0x6AB90ff536f0E2a880DbCdef1bB665C2acC0eDdC;
     address public constant STORAGE_ADDR = 0x3Ca96CebC7779Ee86685c67c999d0f03158Ee9cA;
+    address public constant TRANSIENT_STORAGE_CANCUN = 0x1E44a7ec82432419D5876c4c737f966fdDf2dD5C;
 
     // Euler V2
     address public constant E_WETH_2 = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;

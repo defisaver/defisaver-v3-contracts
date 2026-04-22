@@ -13,6 +13,7 @@ import {
 
 import { ExecuteActionsBase } from "./ExecuteActionsBase.sol";
 import { SmartWallet } from "../SmartWallet.sol";
+import { SkyStakingEncode } from "../encode/SkyStakingEncode.sol";
 
 contract SkyExecuteActions is ExecuteActionsBase, SkyHelper {
     function executeSkyStakingEngineOpen(
@@ -20,7 +21,7 @@ contract SkyExecuteActions is ExecuteActionsBase, SkyHelper {
         SkyStakingEngineOpen _cut,
         SmartWallet _wallet
     ) public {
-        bytes memory paramsCalldata = skyStakingEngineOpenEncode(_stakingEngine);
+        bytes memory paramsCalldata = SkyStakingEncode.open(_stakingEngine);
         bytes memory _calldata = abi.encodeWithSelector(
             SkyStakingEngineOpen.executeActionDirect.selector, paramsCalldata
         );
@@ -40,8 +41,7 @@ contract SkyExecuteActions is ExecuteActionsBase, SkyHelper {
 
         if (_farm == address(0)) return;
 
-        bytes memory paramsCalldata =
-            skyStakingEngineSelectFarmEncode(_stakingEngine, _index, _farm);
+        bytes memory paramsCalldata = SkyStakingEncode.selectFarm(_stakingEngine, _index, _farm);
         bytes memory _calldata = abi.encodeWithSelector(
             SkyStakingEngineSelectFarm.executeActionDirect.selector, paramsCalldata
         );
@@ -64,8 +64,7 @@ contract SkyExecuteActions is ExecuteActionsBase, SkyHelper {
             _stakingEngine, _index, _farm, _open, _selectFarm, _wallet
         );
 
-        bytes memory paramsCalldata =
-            skyStakingEngineStakeEncode(_stakingEngine, _index, _amount, _from);
+        bytes memory paramsCalldata = SkyStakingEncode.stake(_stakingEngine, _index, _amount, _from);
         bytes memory _calldata = abi.encodeWithSelector(
             SkyStakingEngineStake.executeActionDirect.selector, paramsCalldata
         );

@@ -158,14 +158,15 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xa2A878a09639D1ab3AF544566c0CA4D0FeAEE65E",
+        "address": "0xB4c5f33bb5791D0174Df1879b809Bf57eE540B62",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xa2A878a09639D1ab3AF544566c0CA4D0FeAEE65E",
             "0x1420f4977E7B71AFddccBFc6F6e1505CefdF99F0",
             "0x5b0b7e38c2a8e46cfae13c360bc5927570beee94"
         ]

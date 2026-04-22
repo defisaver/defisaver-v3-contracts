@@ -15,6 +15,7 @@ import {
 import { TokenUtils } from "../../../../contracts/utils/token/TokenUtils.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
+import { FluidEncode } from "../../../utils/encode/FluidEncode.sol";
 
 contract TestFluidLiquidityAdjust is FluidTestBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -523,7 +524,7 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
 
             // .--------- EXECUTE ACTION ----------.
             bytes memory executeActionCallData = executeActionCalldata(
-                fluidVaultT1AdjustEncode(
+                FluidEncode.vaultT1Adjust(
                     vaults[i],
                     vars.nftId,
                     _config.isMaxSupplyAmount ? type(uint256).max : vars.supplyTokenAmount,
@@ -531,8 +532,8 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                     sender,
                     sender,
                     _config.sendWrappedEth,
-                    _config.supplyActionType,
-                    _config.borrowActionType
+                    uint8(_config.supplyActionType),
+                    uint8(_config.borrowActionType)
                 ),
                 _config.isDirect
             );

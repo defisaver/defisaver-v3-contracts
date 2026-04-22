@@ -18,6 +18,7 @@ import { IStakingRewards } from "../../../contracts/interfaces/protocols/sky/ISt
 import { IERC20 } from "../../../contracts/interfaces/token/IERC20.sol";
 
 import { SkyExecuteActions } from "../../utils/executeActions/SkyExecuteActions.sol";
+import { SkyStakingEncode } from "../../utils/encode/SkyStakingEncode.sol";
 
 contract TestSkyStakingEngineUnstake is SkyExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
@@ -71,7 +72,7 @@ contract TestSkyStakingEngineUnstake is SkyExecuteActions {
         uint256 index = 0;
         // Execution logic
         bytes memory executeActionCallData = executeActionCalldata(
-            skyStakingEngineUnstakeEncode(STAKING_ENGINE, index, AMOUNT, sender), true
+            SkyStakingEncode.unstake(STAKING_ENGINE, index, AMOUNT, sender), true
         );
 
         vm.expectRevert();
@@ -91,7 +92,7 @@ contract TestSkyStakingEngineUnstake is SkyExecuteActions {
 
         // Execution logic
         bytes memory executeActionCallData = executeActionCalldata(
-            skyStakingEngineUnstakeEncode(STAKING_ENGINE, index, AMOUNT * 2, sender), _isDirect
+            SkyStakingEncode.unstake(STAKING_ENGINE, index, AMOUNT * 2, sender), _isDirect
         );
 
         vm.expectRevert();
@@ -123,7 +124,7 @@ contract TestSkyStakingEngineUnstake is SkyExecuteActions {
 
         // Execution logic
         bytes memory executeActionCallData = executeActionCalldata(
-            skyStakingEngineUnstakeEncode(STAKING_ENGINE, index, AMOUNT, sender), _isDirect
+            SkyStakingEncode.unstake(STAKING_ENGINE, index, AMOUNT, sender), _isDirect
         );
         skip(365 days);
         vm.expectEmit(true, true, true, true, address(STAKING_ENGINE));

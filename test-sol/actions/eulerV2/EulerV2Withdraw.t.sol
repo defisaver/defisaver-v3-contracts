@@ -8,6 +8,7 @@ import { EulerV2Supply } from "../../../contracts/actions/eulerV2/EulerV2Supply.
 import { EulerV2TestHelper } from "./EulerV2TestHelper.t.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
+import { EulerV2Encode } from "../../utils/encode/EulerV2Encode.sol";
 
 contract TestEulerV2Withdraw is EulerV2TestHelper {
     /*//////////////////////////////////////////////////////////////////////////
@@ -137,7 +138,7 @@ contract TestEulerV2Withdraw is EulerV2TestHelper {
             : amountInUSDPrice(assetToken, _withdrawAmountInUsd);
 
         bytes memory executeActionCallData = executeActionCalldata(
-            eulerV2WithdrawEncode(_vault, _account, sender, withdrawAmount), _isDirect
+            EulerV2Encode.withdraw(_vault, _account, sender, withdrawAmount), _isDirect
         );
 
         address account = _account == address(0) ? walletAddr : _account;

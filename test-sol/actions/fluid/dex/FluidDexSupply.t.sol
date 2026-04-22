@@ -11,6 +11,7 @@ import { FluidDexOpen } from "../../../../contracts/actions/fluid/dex/FluidDexOp
 import { FluidDexModel } from "../../../../contracts/actions/fluid/helpers/FluidDexModel.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
+import { FluidEncode } from "../../../utils/encode/FluidEncode.sol";
 
 contract TestFluidDexSupply is FluidTestBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -258,7 +259,7 @@ contract TestFluidDexSupply is FluidTestBase {
             });
 
             vars.executeActionCallData = executeActionCalldata(
-                fluidDexSupplyEncode(
+                FluidEncode.dexSupply(
                     address(vaults[i]),
                     sender,
                     nftId,

@@ -9,6 +9,7 @@ import {
 } from "../../../contracts/actions/eulerV2/EulerV2CollateralSwitch.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
+import { EulerV2Encode } from "../../utils/encode/EulerV2Encode.sol";
 
 contract TestEulerV2CollateralSwitch is EulerV2TestHelper {
     /*//////////////////////////////////////////////////////////////////////////
@@ -95,7 +96,7 @@ contract TestEulerV2CollateralSwitch is EulerV2TestHelper {
         internal
     {
         bytes memory executeActionCallData = executeActionCalldata(
-            eulerV2CollateralSwitchEncode(_vault, _account, _enableAsColl), _isDirect
+            EulerV2Encode.collateralSwitch(_vault, _account, _enableAsColl), _isDirect
         );
 
         address account = _account == address(0) ? walletAddr : _account;

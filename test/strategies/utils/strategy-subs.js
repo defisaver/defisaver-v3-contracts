@@ -1242,6 +1242,204 @@ const subMorphoBlueClose = async (
     return { subId, strategySub };
 };
 
+const _subSparkLeverageManagementOnPrice = async (
+    proxy,
+    bundleId,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+    marketAddr,
+    price,
+    ratioState,
+    targetRatio,
+) => {
+    const triggerData = {
+        baseTokenAddr: collAsset,
+        quoteTokenAddr: debtAsset,
+        price,
+        ratioState,
+    };
+    const subData = {
+        collAsset,
+        collAssetId,
+        debtAsset,
+        debtAssetId,
+        marketAddr,
+        targetRatio,
+    };
+    const strategySub = automationSdk.strategySubService.sparkEncode.leverageManagementOnPrice(
+        bundleId,
+        true,
+        triggerData,
+        subData,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
+const subSparkRepayOnPriceBundle = async (
+    proxy,
+    bundleId,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+    marketAddr,
+    price,
+    ratioState,
+    targetRatio,
+) =>
+    _subSparkLeverageManagementOnPrice(
+        proxy,
+        bundleId,
+        collAsset,
+        collAssetId,
+        debtAsset,
+        debtAssetId,
+        marketAddr,
+        price,
+        ratioState,
+        targetRatio,
+    );
+
+const subSparkBoostOnPriceBundle = async (
+    proxy,
+    bundleId,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+    marketAddr,
+    price,
+    ratioState,
+    targetRatio,
+) =>
+    _subSparkLeverageManagementOnPrice(
+        proxy,
+        bundleId,
+        collAsset,
+        collAssetId,
+        debtAsset,
+        debtAssetId,
+        marketAddr,
+        price,
+        ratioState,
+        targetRatio,
+    );
+
+const subAaveV4LeverageManagement = async (
+    bundleId,
+    proxy,
+    owner,
+    spoke,
+    ratioState,
+    targetRatio,
+    triggerRatio,
+) => {
+    const strategySub = automationSdk.strategySubService.aaveV4Encode.leverageManagement(
+        bundleId,
+        owner,
+        spoke,
+        ratioState,
+        targetRatio,
+        triggerRatio,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
+const subAaveV4LeverageManagementOnPrice = async (
+    bundleId,
+    proxy,
+    owner,
+    spoke,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+    targetRatio,
+    price,
+    priceState,
+    ratioState,
+) => {
+    const strategySub = automationSdk.strategySubService.aaveV4Encode.leverageManagementOnPrice(
+        bundleId,
+        owner,
+        spoke,
+        collAsset,
+        collAssetId,
+        debtAsset,
+        debtAssetId,
+        targetRatio,
+        price,
+        priceState,
+        ratioState,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
+const subAaveV4CloseOnPrice = async (
+    bundleId,
+    proxy,
+    owner,
+    spoke,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+    stopLossPrice,
+    stopLossType,
+    takeProfitPrice,
+    takeProfitType,
+) => {
+    const strategySub = automationSdk.strategySubService.aaveV4Encode.closeOnPrice(
+        bundleId,
+        owner,
+        spoke,
+        collAsset,
+        collAssetId,
+        debtAsset,
+        debtAssetId,
+        stopLossPrice,
+        stopLossType,
+        takeProfitPrice,
+        takeProfitType,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
+const subAaveV4FLCollateralSwitchStrategy = async (
+    strategyId,
+    proxy,
+    owner,
+    spoke,
+    fromAsset,
+    fromAssetId,
+    toAsset,
+    toAssetId,
+    amountToSwitch,
+    price,
+    ratioState,
+) => {
+    const strategySub = automationSdk.strategySubService.aaveV4Encode.collateralSwitch(
+        strategyId,
+        owner,
+        spoke,
+        fromAsset,
+        fromAssetId,
+        toAsset,
+        toAssetId,
+        amountToSwitch,
+        price,
+        ratioState,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
 module.exports = {
     subDcaStrategy,
     subMcdCloseToCollStrategy,
@@ -1285,4 +1483,10 @@ module.exports = {
     subAaveV3FLCollateralSwitchStrategy,
     subSparkCloseGeneric,
     subMorphoBlueClose,
+    subSparkRepayOnPriceBundle,
+    subSparkBoostOnPriceBundle,
+    subAaveV4LeverageManagement,
+    subAaveV4LeverageManagementOnPrice,
+    subAaveV4CloseOnPrice,
+    subAaveV4FLCollateralSwitchStrategy,
 };

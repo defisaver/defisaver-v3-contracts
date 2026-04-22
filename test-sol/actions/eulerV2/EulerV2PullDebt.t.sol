@@ -9,6 +9,7 @@ import { EulerV2Supply } from "../../../contracts/actions/eulerV2/EulerV2Supply.
 import { EulerV2TestHelper } from "./EulerV2TestHelper.t.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
+import { EulerV2Encode } from "../../utils/encode/EulerV2Encode.sol";
 
 contract TestEulerV2PullDebt is EulerV2TestHelper {
     /*//////////////////////////////////////////////////////////////////////////
@@ -237,7 +238,7 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
             : amountInUSDPrice(IEVault(_vault).asset(), _config.pullDebtAmountInUsd);
 
         bytes memory callData = executeActionCalldata(
-            eulerV2PullDebtEncode(_vault, _config.account, _config.from, pullDebtAmount),
+            EulerV2Encode.pullDebt(_vault, _config.account, _config.from, pullDebtAmount),
             _config.isDirect
         );
 

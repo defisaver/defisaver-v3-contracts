@@ -7,6 +7,7 @@ import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { GhoStake } from "../../../contracts/actions/aaveV3/GhoStake.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
+import { AaveV3Encode } from "../../utils/encode/AaveV3Encode.sol";
 
 contract TestGhoStake is BaseTest, ActionsUtils, AaveV3Helper {
     /*//////////////////////////////////////////////////////////////////////////
@@ -60,7 +61,7 @@ contract TestGhoStake is BaseTest, ActionsUtils, AaveV3Helper {
         approveAsSender(_config.from, GHO_TOKEN, walletAddr, _config.amount);
 
         bytes memory callData = executeActionCalldata(
-            ghoStakeEncode(_config.from, _config.to, _config.amount), _config.isDirect
+            AaveV3Encode.ghoStake(_config.from, _config.to, _config.amount), _config.isDirect
         );
 
         uint256 ghoBalanceBefore = balanceOf(GHO_TOKEN, _config.from);

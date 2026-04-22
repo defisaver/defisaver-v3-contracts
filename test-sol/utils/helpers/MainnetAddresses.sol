@@ -36,6 +36,7 @@ library Addresses {
         0x1D6DEdb49AF91A11B5C5F34954FD3E8cC4f03A86;
     address public constant BUNDLE_ADDR = 0x223c6aDE533851Df03219f6E3D8B763Bd47f84cf;
     address public constant STORAGE_ADDR = 0xF52551F95ec4A2B4299DcC42fbbc576718Dbf933;
+    address public constant TRANSIENT_STORAGE_CANCUN = 0x0304E27cccE28bAB4d78C6cb7AfD4cd01c87c1e4;
 
     // EULER V2
     address public constant E_WETH_2 = 0xD8b27CF359b7D15710a5BE299AF6e7Bf904984C2;
@@ -56,10 +57,12 @@ library Addresses {
     address public constant UNISWAP_ROUTER = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
     address public constant UNI_V2_WRAPPER = 0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54;
     address public constant UNI_V3_WRAPPER = 0xfd077F7990AeE7A0F59b1aD98c6dBeB9aBFf0D7a;
+
     // InstaDapp
     address public constant INSTADAPP_INDEX = 0x2971AdFa57b20E5a416aE5a708A8655A9c74f723;
     address public constant INSTADAPP_CONNECTORS_V2 = 0x97b0B3A8bDeFE8cB9563a3c610019Ad10DB8aD11;
     address public constant INSTADAPP_MASTER_ACCOUNT = 0x2386DC45AdDed673317eF068992F19421B481F4c;
+
     // Summerfi
     address public constant SF_PROXY_FACTORY = 0xF7B75183A2829843dB06266c114297dfbFaeE2b6;
     address public constant SF_PROXY_GUARD = 0xCe91349d2A4577BBd0fC91Fe6019600e047f2847;

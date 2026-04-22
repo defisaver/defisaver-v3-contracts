@@ -13,6 +13,7 @@ import { FluidTestBase } from "../FluidTestBase.t.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { TokenUtils } from "../../../../contracts/utils/token/TokenUtils.sol";
 import { Vm } from "forge-std/Vm.sol";
+import { FluidEncode } from "../../../utils/encode/FluidEncode.sol";
 
 contract TestFluidLiquidityOpen is FluidTestBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -130,7 +131,7 @@ contract TestFluidLiquidityOpen is FluidTestBase {
                 : 0;
 
             bytes memory executeActionCallData = executeActionCalldata(
-                fluidVaultT1OpenEncode(
+                FluidEncode.vaultT1Open(
                     vaults[i],
                     takeMaxUint256 ? type(uint256).max : supplyAmount,
                     borrowAmount,

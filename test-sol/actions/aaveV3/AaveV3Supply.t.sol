@@ -5,13 +5,15 @@ pragma solidity =0.8.24;
 import { AaveV3Supply } from "../../../contracts/actions/aaveV3/AaveV3Supply.sol";
 import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
 import { IL2PoolV3 } from "../../../contracts/interfaces/protocols/aaveV3/IL2PoolV3.sol";
-import { IAaveProtocolDataProvider } from
-    "../../../contracts/interfaces/protocols/aaveV3/IAaveProtocolDataProvider.sol";
+import {
+    IAaveProtocolDataProvider
+} from "../../../contracts/interfaces/protocols/aaveV3/IAaveProtocolDataProvider.sol";
 import { DataTypes } from "../../../contracts/interfaces/protocols/aaveV3/DataTypes.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
+import { AaveV3Encode } from "../../utils/encode/AaveV3Encode.sol";
 
 contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
@@ -122,7 +124,7 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
                 onBehalfOfAddrATokenBalance: balanceOf(supplyTokenData.aTokenAddress, onBehalfOf)
             });
 
-            bytes memory paramsCallData = aaveV3SupplyEncode(
+            bytes memory paramsCallData = AaveV3Encode.supply(
                 supplyAmount, sender, supplyTokenData.id, true, true, address(0), onBehalfOf
             );
 
@@ -276,7 +278,7 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
 
             wallet.execute(address(cut), cut.encodeInputs(params), 0);
         } else {
-            bytes memory paramsCallData = aaveV3SupplyEncode(
+            bytes memory paramsCallData = AaveV3Encode.supply(
                 _supplyAmount, sender, supplyTokenData.id, true, false, address(0), address(0)
             );
 

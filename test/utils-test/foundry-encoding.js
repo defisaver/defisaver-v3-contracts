@@ -4,11 +4,10 @@ const sdk = require('@defisaver/sdk');
 const { WETH_ADDRESS, DAI_ADDR, nullAddress } = require('../utils/utils');
 
 describe('Test direct actions encoding for sdk and foundry', () => {
-    const getFoundryEncodingContract = async () => {
-        const FoundryHelper = await hre.ethers.getContractFactory('FoundryHelper');
-        const foundryHelper = await FoundryHelper.deploy();
-        await foundryHelper.deployed();
-        return foundryHelper;
+    const deploy = async (name) => {
+        const factory = await hre.ethers.getContractFactory(name);
+        const instance = await factory.deploy();
+        return await instance.deployed();
     };
 
     describe('CompoundV3', () => {
@@ -16,10 +15,10 @@ describe('Test direct actions encoding for sdk and foundry', () => {
         const tokenAddr = WETH_ADDRESS;
         const amount = 10000;
 
-        let foundryContract;
+        let compV3Encode;
 
         before(async () => {
-            foundryContract = await getFoundryEncodingContract();
+            compV3Encode = await deploy('CompV3Encode');
         });
 
         it('Test compV3SupplyEncode', async () => {
@@ -36,7 +35,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = CompV3Supply.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await foundryContract.compV3SupplyEncode(market, tokenAddr, amount, from.address)],
+                [await compV3Encode.supply(market, tokenAddr, amount, from.address)],
             );
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
@@ -54,7 +53,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = CompV3Withdraw.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await foundryContract.compV3WithdrawEncode(market, to.address, tokenAddr, amount)],
+                [await compV3Encode.withdraw(market, to.address, tokenAddr, amount)],
             );
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
@@ -71,7 +70,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = CompV3Borrow.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await foundryContract.compV3BorrowEncode(market, amount, to.address)],
+                [await compV3Encode.borrow(market, amount, to.address)],
             );
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
@@ -90,7 +89,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = CompV3RatioCheck.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await foundryContract.compV3RatioCheckEncode(ratioState, targetRatio, market)],
+                [await compV3Encode.ratioCheck(ratioState, targetRatio, market)],
             );
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
@@ -107,10 +106,10 @@ describe('Test direct actions encoding for sdk and foundry', () => {
         const enableAsColl = true;
         const rateMode = 1;
 
-        let foundryContract;
+        let aaveV3Encode;
 
         before(async () => {
-            foundryContract = await getFoundryEncodingContract();
+            aaveV3Encode = await deploy('AaveV3Encode');
         });
 
         it('Test aaveV3SupplyEncode', async () => {
@@ -131,7 +130,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             const foundryEncoded = AaveV3Supply.interface.encodeFunctionData(
                 'executeActionDirect',
                 [
-                    await foundryContract.aaveV3SupplyEncode(
+                    await aaveV3Encode.supply(
                         amount,
                         from.address,
                         assetId,
@@ -161,7 +160,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             const foundryEncoded = AaveV3Borrow.interface.encodeFunctionData(
                 'executeActionDirect',
                 [
-                    await foundryContract.aaveV3BorrowEncode(
+                    await aaveV3Encode.borrow(
                         amount,
                         to.address,
                         rateMode,
@@ -189,7 +188,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             const foundryEncoded = AaveV3Withdraw.interface.encodeFunctionData(
                 'executeActionDirect',
                 [
-                    await foundryContract.aaveV3WithdrawEncode(
+                    await aaveV3Encode.withdraw(
                         assetId,
                         useDefaultMarket,
                         amount,
@@ -211,7 +210,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = AaveV3SetEMode.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await foundryContract.aaveV3SetEModeEncode(categoryId, useDefaultMarket, market)],
+                [await aaveV3Encode.setEMode(categoryId, useDefaultMarket, market)],
             );
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
@@ -231,7 +230,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             const foundryEncoded = AaveV3DelegateCredit.interface.encodeFunctionData(
                 'executeActionDirect',
                 [
-                    await foundryContract.aaveV3DelegateCreditEncode(
+                    await aaveV3Encode.delegateCredit(
                         amount,
                         delegatee.address,
                         assetId,
@@ -260,7 +259,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             const foundryEncoded = AaveV3CollateralSwitch.interface.encodeFunctionData(
                 'executeActionDirect',
                 [
-                    await foundryContract.aaveV3CollateralSwitchEncode(
+                    await aaveV3Encode.collateralSwitch(
                         arrayLength,
                         assetIds,
                         useAsCollateral,
@@ -285,14 +284,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = AaveV3ClaimRewards.interface.encodeFunctionData(
                 'executeActionDirect',
-                [
-                    await foundryContract.aaveV3ClaimRewardsEncode(
-                        amount,
-                        to.address,
-                        reward.address,
-                        assets,
-                    ),
-                ],
+                [await aaveV3Encode.claimRewards(amount, to.address, reward.address, assets)],
             );
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
@@ -314,7 +306,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             const foundryEncoded = AaveV3Payback.interface.encodeFunctionData(
                 'executeActionDirect',
                 [
-                    await foundryContract.aaveV3PaybackEncode(
+                    await aaveV3Encode.payback(
                         amount,
                         from.address,
                         rateMode,
@@ -344,7 +336,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             const foundryEncoded = AaveV3ATokenPayback.interface.encodeFunctionData(
                 'executeActionDirect',
                 [
-                    await foundryContract.aaveV3ATokenPaybackEncode(
+                    await aaveV3Encode.aTokenPayback(
                         amount,
                         from.address,
                         rateMode,
@@ -359,9 +351,9 @@ describe('Test direct actions encoding for sdk and foundry', () => {
     });
 
     describe('Exchange', () => {
-        let foundryContract;
+        let actionsUtils;
         before(async () => {
-            foundryContract = await getFoundryEncodingContract();
+            actionsUtils = await deploy('ActionsUtils');
         });
         it('Test sellEncode', async () => {
             const [from, to, wrapper] = await hre.ethers.getSigners();
@@ -393,7 +385,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             ).encodeForDsProxyCall()[1];
 
             const foundryEncoded = DFSSell.interface.encodeFunctionData('executeActionDirect', [
-                await foundryContract
+                await actionsUtils
                     .connect(from)
                     .sellEncode(
                         sourceToken,
@@ -410,9 +402,9 @@ describe('Test direct actions encoding for sdk and foundry', () => {
     });
 
     describe('Misc', () => {
-        let foundryContract;
+        let actionsUtils;
         before(async () => {
-            foundryContract = await getFoundryEncodingContract();
+            actionsUtils = await deploy('ActionsUtils');
         });
         it('Test gasFeeTaker encode', async () => {
             const gasStart = 100;
@@ -429,14 +421,14 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             ).encodeForDsProxyCall()[1];
 
             const foundryEncoded = GasFeeTaker.interface.encodeFunctionData('executeActionDirect', [
-                await foundryContract.gasFeeEncode(gasStart, feeToken),
+                await actionsUtils.gasFeeEncode(gasStart, feeToken),
             ]);
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
     });
 
     describe('FLAction', () => {
-        let foundryContract;
+        let actionsUtils;
         let FLAction;
 
         const tokenAddr = WETH_ADDRESS;
@@ -454,7 +446,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
         };
 
         before(async () => {
-            foundryContract = await getFoundryEncodingContract();
+            actionsUtils = await deploy('ActionsUtils');
             FLAction = await hre.ethers.getContractFactory('FLAction');
         });
         it('Test AaveV2 fl', async () => {
@@ -471,7 +463,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             ).encodeForDsProxyCall()[1];
 
             const foundryEncoded = FLAction.interface.encodeFunctionData('executeActionDirect', [
-                await foundryContract.flActionEncode(tokenAddr, amount, mapFLSources.AAVE_V2),
+                await actionsUtils.flActionEncode(tokenAddr, amount, mapFLSources.AAVE_V2),
             ]);
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
@@ -485,7 +477,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             ).encodeForDsProxyCall()[1];
 
             const foundryEncoded = FLAction.interface.encodeFunctionData('executeActionDirect', [
-                await foundryContract.flActionEncode(tokenAddr, amount, mapFLSources.BALANCER),
+                await actionsUtils.flActionEncode(tokenAddr, amount, mapFLSources.BALANCER),
             ]);
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
@@ -495,7 +487,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             ).encodeForDsProxyCall()[1];
 
             const foundryEncoded = FLAction.interface.encodeFunctionData('executeActionDirect', [
-                await foundryContract.flActionEncode(
+                await actionsUtils.flActionEncode(
                     nullAddress, // ignored, when FLAction is parsed, gho addr will be used
                     amount,
                     mapFLSources.GHO,
@@ -509,7 +501,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             ).encodeForDsProxyCall()[1];
 
             const foundryEncoded = FLAction.interface.encodeFunctionData('executeActionDirect', [
-                await foundryContract.flActionEncode(
+                await actionsUtils.flActionEncode(
                     nullAddress, // ignored, when FLAction is parsed, dai addr will be used
                     amount,
                     mapFLSources.MAKER,
@@ -531,7 +523,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             ).encodeForDsProxyCall()[1];
 
             const foundryEncoded = FLAction.interface.encodeFunctionData('executeActionDirect', [
-                await foundryContract.flActionEncode(tokenAddr, amount, mapFLSources.AAVE_V3),
+                await actionsUtils.flActionEncode(tokenAddr, amount, mapFLSources.AAVE_V3),
             ]);
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
@@ -554,7 +546,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             ).encodeForDsProxyCall()[1];
 
             const foundryEncoded = FLAction.interface.encodeFunctionData('executeActionDirect', [
-                await foundryContract.flUniswapEncode(token0, token1, pool, amount0, amount1),
+                await actionsUtils.flUniswapEncode(token0, token1, pool, amount0, amount1),
             ]);
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
@@ -572,7 +564,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             ).encodeForDsProxyCall()[1];
 
             const foundryEncoded = FLAction.interface.encodeFunctionData('executeActionDirect', [
-                await foundryContract.flActionEncode(tokenAddr, amount, mapFLSources.SPARK),
+                await actionsUtils.flActionEncode(tokenAddr, amount, mapFLSources.SPARK),
             ]);
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
@@ -582,14 +574,14 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             ).encodeForDsProxyCall()[1];
 
             const foundryEncoded = FLAction.interface.encodeFunctionData('executeActionDirect', [
-                await foundryContract.flActionEncode(tokenAddr, amount, mapFLSources.MORPHO_BLUE),
+                await actionsUtils.flActionEncode(tokenAddr, amount, mapFLSources.MORPHO_BLUE),
             ]);
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
     });
 
     describe('EulerV2', () => {
-        let foundryContract;
+        let eulerV2Encode;
         let vault, account, from, receiver;
         const tokenAddr = WETH_ADDRESS;
         const amount = 10000;
@@ -600,7 +592,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
         ];
 
         before(async () => {
-            foundryContract = await getFoundryEncodingContract();
+            eulerV2Encode = await deploy('EulerV2Encode');
             [vault, account, from, receiver] = (await hre.ethers.getSigners()).map(
                 (s) => s.address,
             );
@@ -619,15 +611,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = EulerV2Supply.interface.encodeFunctionData(
                 'executeActionDirect',
-                [
-                    await foundryContract.eulerV2SupplyEncode(
-                        vault,
-                        account,
-                        from,
-                        amount,
-                        enableAsColl,
-                    ),
-                ],
+                [await eulerV2Encode.supply(vault, account, from, amount, enableAsColl)],
             );
 
             expect(sdkEncoded).to.be.eq(foundryEncoded);
@@ -643,7 +627,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = EulerV2Withdraw.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await foundryContract.eulerV2WithdrawEncode(vault, account, receiver, amount)],
+                [await eulerV2Encode.withdraw(vault, account, receiver, amount)],
             );
 
             expect(sdkEncoded).to.be.eq(foundryEncoded);
@@ -659,7 +643,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = EulerV2Borrow.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await foundryContract.eulerV2BorrowEncode(vault, account, receiver, amount)],
+                [await eulerV2Encode.borrow(vault, account, receiver, amount)],
             );
 
             expect(sdkEncoded).to.be.eq(foundryEncoded);
@@ -676,7 +660,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = EulerV2Payback.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await foundryContract.eulerV2PaybackEncode(vault, account, from, amount)],
+                [await eulerV2Encode.payback(vault, account, from, amount)],
             );
 
             expect(sdkEncoded).to.be.eq(foundryEncoded);
@@ -694,14 +678,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = EulerV2PaybackWithShares.interface.encodeFunctionData(
                 'executeActionDirect',
-                [
-                    await foundryContract.eulerV2PaybackWithSharesEncode(
-                        vault,
-                        from,
-                        account,
-                        amount,
-                    ),
-                ],
+                [await eulerV2Encode.paybackWithShares(vault, from, account, amount)],
             );
 
             expect(sdkEncoded).to.be.eq(foundryEncoded);
@@ -717,7 +694,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = EulerV2PullDebt.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await foundryContract.eulerV2PullDebtEncode(vault, account, from, amount)],
+                [await eulerV2Encode.pullDebt(vault, account, from, amount)],
             );
 
             expect(sdkEncoded).to.be.eq(foundryEncoded);
@@ -733,7 +710,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = EulerV2ReorderCollaterals.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await foundryContract.eulerV2ReorderCollaterals(account, indexes)],
+                [await eulerV2Encode.reorderCollaterals(account, indexes)],
             );
 
             expect(sdkEncoded).to.be.eq(foundryEncoded);
@@ -749,7 +726,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = EulerV2CollateralSwitch.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await foundryContract.eulerV2CollateralSwitchEncode(vault, account, enableAsColl)],
+                [await eulerV2Encode.collateralSwitch(vault, account, enableAsColl)],
             );
 
             expect(sdkEncoded).to.be.eq(foundryEncoded);
@@ -757,14 +734,14 @@ describe('Test direct actions encoding for sdk and foundry', () => {
     });
 
     describe('EtherFi', () => {
-        let foundryContract;
+        let etherFiEncode;
         let from;
         let to;
         const amount = 10000;
         const shouldWrap = true;
 
         before(async () => {
-            foundryContract = await getFoundryEncodingContract();
+            etherFiEncode = await deploy('EtherFiEncode');
             [from, to] = (await hre.ethers.getSigners()).map((s) => s.address);
         });
 
@@ -779,7 +756,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = EtherFiStake.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await foundryContract.etherFiStakeEncode(amount, from, to, shouldWrap)],
+                [await etherFiEncode.stake(amount, from, to, shouldWrap)],
             );
 
             expect(sdkEncoded).to.be.eq(foundryEncoded);
@@ -794,7 +771,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             ).encodeForDsProxyCall()[1];
 
             const foundryEncoded = EtherFiWrap.interface.encodeFunctionData('executeActionDirect', [
-                await foundryContract.etherFiWrapEncode(amount, from, to),
+                await etherFiEncode.wrap(amount, from, to),
             ]);
 
             expect(sdkEncoded).to.be.eq(foundryEncoded);
@@ -810,7 +787,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = EtherFiUnwrap.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await foundryContract.etherFiUnwrapEncode(amount, from, to)],
+                [await etherFiEncode.unwrap(amount, from, to)],
             );
 
             expect(sdkEncoded).to.be.eq(foundryEncoded);
@@ -818,12 +795,12 @@ describe('Test direct actions encoding for sdk and foundry', () => {
     });
 
     describe('Renzo', () => {
-        let foundryContract;
+        let actionsUtils;
         let from;
         let to;
         const amount = 10000;
         before(async () => {
-            foundryContract = await getFoundryEncodingContract();
+            actionsUtils = await deploy('ActionsUtils');
             [from, to] = (await hre.ethers.getSigners()).map((s) => s.address);
         });
         it('Test renzoStakeEncode', async () => {
@@ -835,17 +812,17 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             ).encodeForDsProxyCall()[1];
 
             const foundryEncoded = RenzoStake.interface.encodeFunctionData('executeActionDirect', [
-                await foundryContract.renzoStakeEncode(amount, from, to),
+                await actionsUtils.renzoStakeEncode(amount, from, to),
             ]);
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
     });
 
     describe('MorphoBlue', () => {
-        let foundryContract;
+        let actionsUtils;
         let receiver;
         before(async () => {
-            foundryContract = await getFoundryEncodingContract();
+            actionsUtils = await deploy('ActionsUtils');
             [receiver] = (await hre.ethers.getSigners()).map((s) => s.address);
         });
 
@@ -857,7 +834,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             ).encodeForDsProxyCall()[1];
             const foundryEncoded = MorphoTokenWrap.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await foundryContract.morphoTokenWrapEncode(receiver, 1000)],
+                [await actionsUtils.morphoTokenWrapEncode(receiver, 1000)],
             );
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
@@ -870,15 +847,12 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             ).encodeForDsProxyCall()[1];
             const foundryEncoded = MorphoTokenWrap.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await foundryContract.morphoTokenWrapEncode(receiver, maxAmt)],
+                [await actionsUtils.morphoTokenWrapEncode(receiver, maxAmt)],
             );
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
     });
 
-    /* //////////////////////////////////////////////////////////////
-                           LIQUITY_V2
-    ////////////////////////////////////////////////////////////// */
     describe('LiquityV2', () => {
         const market = '0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e';
         const from = '0x0000000000000000000000000000000000000001';
@@ -897,9 +871,9 @@ describe('Test direct actions encoding for sdk and foundry', () => {
         const collAction = 0;
         const debtAction = 0;
         const doClaim = false;
-        let foundryContract;
+        let liquityV2Encode;
         before(async () => {
-            foundryContract = await getFoundryEncodingContract();
+            liquityV2Encode = await deploy('LiquityV2Encode');
         });
         it('Test liquityV2OpenEncode', async () => {
             const LiquityV2Open = await hre.ethers.getContractFactory('LiquityV2Open');
@@ -920,7 +894,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             const foundryEncoded = LiquityV2Open.interface.encodeFunctionData(
                 'executeActionDirect',
                 [
-                    await foundryContract.liquityV2OpenEncode(
+                    await liquityV2Encode.open(
                         market,
                         from,
                         to,
@@ -955,7 +929,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             const foundryEncoded = LiquityV2Adjust.interface.encodeFunctionData(
                 'executeActionDirect',
                 [
-                    await foundryContract.liquityV2AdjustEncode(
+                    await liquityV2Encode.adjust(
                         market,
                         from,
                         to,
@@ -992,7 +966,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             const foundryEncoded = LiquityV2Adjust.interface.encodeFunctionData(
                 'executeActionDirect',
                 [
-                    await foundryContract.liquityV2AdjustZombieTroveEncode(
+                    await liquityV2Encode.adjustZombieTrove(
                         market,
                         from,
                         to,
@@ -1026,7 +1000,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             const foundryEncoded = LiquityV2AdjustInterestRate.interface.encodeFunctionData(
                 'executeActionDirect',
                 [
-                    await foundryContract.liquityV2AdjustInterestRateEncode(
+                    await liquityV2Encode.adjustInterestRate(
                         market,
                         troveId,
                         annualInterestRate,
@@ -1051,15 +1025,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = LiquityV2Borrow.interface.encodeFunctionData(
                 'executeActionDirect',
-                [
-                    await foundryContract.liquityV2BorrowEncode(
-                        market,
-                        to,
-                        troveId,
-                        amount,
-                        maxUpfrontFee,
-                    ),
-                ],
+                [await liquityV2Encode.borrow(market, to, troveId, amount, maxUpfrontFee)],
             );
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
@@ -1073,7 +1039,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = LiquityV2Claim.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await foundryContract.liquityV2ClaimEncode(market, to)],
+                [await liquityV2Encode.claim(market, to)],
             );
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
@@ -1089,7 +1055,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = LiquityV2Close.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await foundryContract.liquityV2CloseEncode(market, from, to, troveId)],
+                [await liquityV2Encode.close(market, from, to, troveId)],
             );
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
@@ -1105,7 +1071,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = LiquityV2Payback.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await foundryContract.liquityV2PaybackEncode(market, from, troveId, amount)],
+                [await liquityV2Encode.payback(market, from, troveId, amount)],
             );
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
@@ -1122,7 +1088,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = LiquityV2Supply.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await foundryContract.liquityV2SupplyEncode(market, from, troveId, amount)],
+                [await liquityV2Encode.supply(market, from, troveId, amount)],
             );
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
@@ -1138,7 +1104,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = LiquityV2Withdraw.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await foundryContract.liquityV2WithdrawEncode(market, to, troveId, amount)],
+                [await liquityV2Encode.withdraw(market, to, troveId, amount)],
             );
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
@@ -1153,7 +1119,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = LiquityV2SPClaimColl.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await foundryContract.liquityV2SPClaimCollEncode(market, to)],
+                [await liquityV2Encode.spClaimColl(market, to)],
             );
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
@@ -1172,7 +1138,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             const foundryEncoded = LiquityV2SPDeposit.interface.encodeFunctionData(
                 'executeActionDirect',
                 [
-                    await foundryContract.liquityV2SPDepositEncode(
+                    await liquityV2Encode.spDeposit(
                         market,
                         from,
                         boldGainTo,
@@ -1197,23 +1163,12 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = LiquityV2SPWithdraw.interface.encodeFunctionData(
                 'executeActionDirect',
-                [
-                    await foundryContract.liquityV2SPWithdrawEncode(
-                        market,
-                        boldGainTo,
-                        collGainTo,
-                        amount,
-                        doClaim,
-                    ),
-                ],
+                [await liquityV2Encode.spWithdraw(market, boldGainTo, collGainTo, amount, doClaim)],
             );
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
     });
 
-    /* //////////////////////////////////////////////////////////////
-                           FLUID_VAULT
-    ////////////////////////////////////////////////////////////// */
     describe('FluidVaultT1', () => {
         const vault = '0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e';
         const nftId = 1;
@@ -1224,10 +1179,10 @@ describe('Test direct actions encoding for sdk and foundry', () => {
         const collAction = 0; // 0: SUPPLY, 1: WITHDRAW
         const debtAction = 0; // 0: PAYBACK, 1: BORROW
         const shouldWrap = true;
-        let foundryContract;
+        let fluidEncode;
 
         before(async () => {
-            foundryContract = await getFoundryEncodingContract();
+            fluidEncode = await deploy('FluidEncode');
         });
         it('Test fluidVaultT1OpenEncode', async () => {
             const FluidVaultT1Open = await hre.ethers.getContractFactory('FluidVaultT1Open');
@@ -1242,7 +1197,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             const foundryEncoded = FluidVaultT1Open.interface.encodeFunctionData(
                 'executeActionDirect',
                 [
-                    await foundryContract.fluidVaultT1OpenEncode(
+                    await fluidEncode.vaultT1Open(
                         vault,
                         collAmount,
                         debtAmount,
@@ -1270,7 +1225,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             const foundryEncoded = FluidVaultT1Adjust.interface.encodeFunctionData(
                 'executeActionDirect',
                 [
-                    await foundryContract.fluidVaultT1AdjustEncode(
+                    await fluidEncode.vaultT1Adjust(
                         vault,
                         nftId,
                         collAmount,
@@ -1295,7 +1250,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             ).encodeForDsProxyCall()[1];
             const foundryEncoded = FluidVaultT1Payback.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await foundryContract.fluidVaultT1PaybackEncode(vault, nftId, debtAmount, from)],
+                [await fluidEncode.vaultT1Payback(vault, nftId, debtAmount, from)],
             );
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
@@ -1311,19 +1266,10 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             ).encodeForDsProxyCall()[1];
             const foundryEncoded = FluidVaultT1Withdraw.interface.encodeFunctionData(
                 'executeActionDirect',
-                [
-                    await foundryContract.fluidVaultT1WithdrawEncode(
-                        vault,
-                        nftId,
-                        collAmount,
-                        to,
-                        shouldWrap,
-                    ),
-                ],
+                [await fluidEncode.vaultT1Withdraw(vault, nftId, collAmount, to, shouldWrap)],
             );
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
-
         it('Test fluidVaultT1SupplyEncode', async () => {
             const FluidVaultT1Supply = await hre.ethers.getContractFactory('FluidVaultT1Supply');
             const sdkEncoded = new sdk.actions.fluid.FluidVaultT1SupplyAction(
@@ -1334,7 +1280,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             ).encodeForDsProxyCall()[1];
             const foundryEncoded = FluidVaultT1Supply.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await foundryContract.fluidVaultT1SupplyEncode(vault, nftId, collAmount, from)],
+                [await fluidEncode.vaultT1Supply(vault, nftId, collAmount, from)],
             );
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
@@ -1349,29 +1295,22 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             ).encodeForDsProxyCall()[1];
             const foundryEncoded = FluidVaultT1Borrow.interface.encodeFunctionData(
                 'executeActionDirect',
-                [
-                    await foundryContract.fluidVaultT1BorrowEncode(
-                        vault,
-                        nftId,
-                        debtAmount,
-                        to,
-                        shouldWrap,
-                    ),
-                ],
+                [await fluidEncode.vaultT1Borrow(vault, nftId, debtAmount, to, shouldWrap)],
             );
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
     });
+
     describe('Umbrella', () => {
         const stkToken = '0xaAFD07D53A7365D3e9fb6F3a3B09EC19676B73Ce';
         const amount = 10000;
         const useATokens = true;
         const minSharesOut = 10000;
 
-        let foundryContract;
+        let aaveV3Encode;
 
         before(async () => {
-            foundryContract = await getFoundryEncodingContract();
+            aaveV3Encode = await deploy('AaveV3Encode');
         });
 
         it('Test umbrellaStakeEncode', async () => {
@@ -1389,7 +1328,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             const foundryEncoded = UmbrellaStake.interface.encodeFunctionData(
                 'executeActionDirect',
                 [
-                    await foundryContract.umbrellaStakeEncode(
+                    await aaveV3Encode.umbrellaStake(
                         stkToken,
                         from.address,
                         to.address,
@@ -1415,7 +1354,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             const foundryEncoded = UmbrellaUnstake.interface.encodeFunctionData(
                 'executeActionDirect',
                 [
-                    await foundryContract.umbrellaUnstakeEncode(
+                    await aaveV3Encode.umbrellaUnstake(
                         stkToken,
                         to.address,
                         amount,
@@ -1435,7 +1374,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             const foundryEncoded = UmbrellaUnstake.interface.encodeFunctionData(
                 'executeActionDirect',
                 [
-                    await foundryContract.umbrellaUnstakeEncode(
+                    await aaveV3Encode.umbrellaUnstake(
                         stkToken,
                         hre.ethers.constants.AddressZero,
                         0,
@@ -1444,6 +1383,328 @@ describe('Test direct actions encoding for sdk and foundry', () => {
                     ),
                 ],
             );
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+    });
+
+    describe('AaveV4', () => {
+        let aaveV4Encode;
+        const spoke = '0x0000000000000000000000000000000000000001';
+        const onBehalf = '0x0000000000000000000000000000000000000002';
+        const from = '0x0000000000000000000000000000000000000003';
+        const to = '0x0000000000000000000000000000000000000004';
+        const tokenAddress = '0x0000000000000000000000000000000000000005';
+        const reserveId = 1;
+        const amount = 10000;
+        const useAsCollateral = true;
+
+        before(async () => {
+            aaveV4Encode = await deploy('AaveV4Encode');
+        });
+
+        it('Test aaveV4SupplyEncode', async () => {
+            const AaveV4Supply = await hre.ethers.getContractFactory('AaveV4Supply');
+            const sdkEncoded = new sdk.actions.aaveV4.AaveV4SupplyAction(
+                spoke,
+                onBehalf,
+                from,
+                reserveId,
+                amount,
+                useAsCollateral,
+                tokenAddress,
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = AaveV4Supply.interface.encodeFunctionData(
+                'executeActionDirect',
+                [
+                    await aaveV4Encode.supply(
+                        spoke,
+                        onBehalf,
+                        from,
+                        reserveId,
+                        amount,
+                        useAsCollateral,
+                    ),
+                ],
+            );
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test aaveV4WithdrawEncode', async () => {
+            const AaveV4Withdraw = await hre.ethers.getContractFactory('AaveV4Withdraw');
+            const sdkEncoded = new sdk.actions.aaveV4.AaveV4WithdrawAction(
+                spoke,
+                onBehalf,
+                to,
+                reserveId,
+                amount,
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = AaveV4Withdraw.interface.encodeFunctionData(
+                'executeActionDirect',
+                [await aaveV4Encode.withdraw(spoke, onBehalf, to, reserveId, amount)],
+            );
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test aaveV4BorrowEncode', async () => {
+            const AaveV4Borrow = await hre.ethers.getContractFactory('AaveV4Borrow');
+            const sdkEncoded = new sdk.actions.aaveV4.AaveV4BorrowAction(
+                spoke,
+                onBehalf,
+                to,
+                reserveId,
+                amount,
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = AaveV4Borrow.interface.encodeFunctionData(
+                'executeActionDirect',
+                [await aaveV4Encode.borrow(spoke, onBehalf, to, reserveId, amount)],
+            );
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test aaveV4PaybackEncode', async () => {
+            const AaveV4Payback = await hre.ethers.getContractFactory('AaveV4Payback');
+            const sdkEncoded = new sdk.actions.aaveV4.AaveV4PaybackAction(
+                spoke,
+                onBehalf,
+                from,
+                reserveId,
+                amount,
+                tokenAddress,
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = AaveV4Payback.interface.encodeFunctionData(
+                'executeActionDirect',
+                [await aaveV4Encode.payback(spoke, onBehalf, from, reserveId, amount)],
+            );
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test aaveV4CollateralSwitchEncode', async () => {
+            const AaveV4CollateralSwitch =
+                await hre.ethers.getContractFactory('AaveV4CollateralSwitch');
+            const sdkEncoded = new sdk.actions.aaveV4.AaveV4CollateralSwitchAction(
+                spoke,
+                onBehalf,
+                reserveId,
+                useAsCollateral,
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = AaveV4CollateralSwitch.interface.encodeFunctionData(
+                'executeActionDirect',
+                [await aaveV4Encode.collateralSwitch(spoke, onBehalf, reserveId, useAsCollateral)],
+            );
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test aaveV4StoreRatioEncode', async () => {
+            const user = '0x0000000000000000000000000000000000000006';
+            const AaveV4StoreRatio = await hre.ethers.getContractFactory('AaveV4StoreRatio');
+            const sdkEncoded = new sdk.actions.aaveV4.AaveV4StoreRatioAction(
+                spoke,
+                user,
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = AaveV4StoreRatio.interface.encodeFunctionData(
+                'executeActionDirect',
+                [await aaveV4Encode.storeRatio(spoke, user)],
+            );
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test aaveV4RefreshPremiumEncode', async () => {
+            const refreshDynamicReserveConfig = true;
+            const AaveV4RefreshPremium =
+                await hre.ethers.getContractFactory('AaveV4RefreshPremium');
+            const sdkEncoded = new sdk.actions.aaveV4.AaveV4RefreshPremiumAction(
+                spoke,
+                onBehalf,
+                refreshDynamicReserveConfig,
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = AaveV4RefreshPremium.interface.encodeFunctionData(
+                'executeActionDirect',
+                [await aaveV4Encode.refreshPremium(spoke, onBehalf, refreshDynamicReserveConfig)],
+            );
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test aaveV4SetUserManagersWithSigEncode', async () => {
+            const nonce = 7;
+            const deadline = 1234567890;
+            const signature = '0xdeadbeef';
+            const updates = [
+                ['0x0000000000000000000000000000000000000011', true],
+                ['0x0000000000000000000000000000000000000012', false],
+            ];
+            const AaveV4SetUserManagersWithSig = await hre.ethers.getContractFactory(
+                'AaveV4SetUserManagersWithSig',
+            );
+            const sdkEncoded = new sdk.actions.aaveV4.AaveV4SetUserManagersWithSigAction(
+                spoke,
+                onBehalf,
+                nonce,
+                deadline,
+                signature,
+                updates,
+            ).encodeForDsProxyCall()[1];
+            const abiCoder = new hre.ethers.utils.AbiCoder();
+            const encodedParams = abiCoder.encode(
+                [
+                    'tuple(address spoke,address onBehalf,uint256 nonce,uint256 deadline,bytes signature,tuple(address positionManager,bool approve)[] updates)',
+                ],
+                [
+                    {
+                        spoke,
+                        onBehalf,
+                        nonce,
+                        deadline,
+                        signature,
+                        updates: updates.map(([positionManager, approve]) => ({
+                            positionManager,
+                            approve,
+                        })),
+                    },
+                ],
+            );
+
+            const foundryEncoded = AaveV4SetUserManagersWithSig.interface.encodeFunctionData(
+                'executeActionDirect',
+                [encodedParams],
+            );
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test aaveV4DelegateBorrowWithSigEncode', async () => {
+            const owner = '0x0000000000000000000000000000000000000021';
+            const spender = '0x0000000000000000000000000000000000000022';
+            const nonce = 3;
+            const deadline = 999999;
+            const signature = '0xdeadbeef';
+            const permit = [spoke, reserveId, owner, spender, amount, nonce, deadline];
+
+            const AaveV4DelegateBorrowWithSig = await hre.ethers.getContractFactory(
+                'AaveV4DelegateBorrowWithSig',
+            );
+            const sdkEncoded = new sdk.actions.aaveV4.AaveV4DelegateBorrowWithSigAction(
+                permit,
+                signature,
+            ).encodeForDsProxyCall()[1];
+            const abiCoder = new hre.ethers.utils.AbiCoder();
+            const encodedParams = abiCoder.encode(
+                [
+                    'tuple(tuple(address spoke,uint256 reserveId,address owner,address spender,uint256 amount,uint256 nonce,uint256 deadline) permit,bytes signature)',
+                ],
+                [
+                    {
+                        permit: {
+                            spoke,
+                            reserveId,
+                            owner,
+                            spender,
+                            amount,
+                            nonce,
+                            deadline,
+                        },
+                        signature,
+                    },
+                ],
+            );
+
+            const foundryEncoded = AaveV4DelegateBorrowWithSig.interface.encodeFunctionData(
+                'executeActionDirect',
+                [encodedParams],
+            );
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test aaveV4DelegateWithdrawWithSigEncode', async () => {
+            const owner = '0x0000000000000000000000000000000000000031';
+            const spender = '0x0000000000000000000000000000000000000032';
+            const nonce = 5;
+            const deadline = 1111111;
+            const signature = '0xbeefdead';
+            const permit = [spoke, reserveId, owner, spender, amount, nonce, deadline];
+
+            const AaveV4DelegateWithdrawWithSig = await hre.ethers.getContractFactory(
+                'AaveV4DelegateWithdrawWithSig',
+            );
+            const sdkEncoded = new sdk.actions.aaveV4.AaveV4DelegateWithdrawWithSigAction(
+                permit,
+                signature,
+            ).encodeForDsProxyCall()[1];
+            const abiCoder = new hre.ethers.utils.AbiCoder();
+            const encodedParams = abiCoder.encode(
+                [
+                    'tuple(tuple(address spoke,uint256 reserveId,address owner,address spender,uint256 amount,uint256 nonce,uint256 deadline) permit,bytes signature)',
+                ],
+                [
+                    {
+                        permit: {
+                            spoke,
+                            reserveId,
+                            owner,
+                            spender,
+                            amount,
+                            nonce,
+                            deadline,
+                        },
+                        signature,
+                    },
+                ],
+            );
+
+            const foundryEncoded = AaveV4DelegateWithdrawWithSig.interface.encodeFunctionData(
+                'executeActionDirect',
+                [encodedParams],
+            );
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test aaveV4DelegateSetUsingAsCollateralWithSigEncode', async () => {
+            const delegator = '0x0000000000000000000000000000000000000041';
+            const delegatee = '0x0000000000000000000000000000000000000042';
+            const permission = true;
+            const nonce = 9;
+            const deadline = 2222222;
+            const signature = '0xcafebabe';
+            const permit = [spoke, delegator, delegatee, permission, nonce, deadline];
+
+            const AaveV4DelegateSetUsingAsCollateralWithSig = await hre.ethers.getContractFactory(
+                'AaveV4DelegateSetUsingAsCollateralWithSig',
+            );
+            const sdkEncoded =
+                new sdk.actions.aaveV4.AaveV4DelegateSetUsingAsCollateralWithSigAction(
+                    permit,
+                    signature,
+                ).encodeForDsProxyCall()[1];
+            const abiCoder = new hre.ethers.utils.AbiCoder();
+            const encodedParams = abiCoder.encode(
+                [
+                    'tuple(tuple(address spoke,address delegator,address delegatee,bool permission,uint256 nonce,uint256 deadline) permit,bytes signature)',
+                ],
+                [
+                    {
+                        permit: {
+                            spoke,
+                            delegator,
+                            delegatee,
+                            permission,
+                            nonce,
+                            deadline,
+                        },
+                        signature,
+                    },
+                ],
+            );
+
+            const foundryEncoded =
+                AaveV4DelegateSetUsingAsCollateralWithSig.interface.encodeFunctionData(
+                    'executeActionDirect',
+                    [encodedParams],
+                );
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
     });

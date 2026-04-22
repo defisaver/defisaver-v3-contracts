@@ -9,8 +9,8 @@ import { EtherFiHelper } from "../../../contracts/actions/etherfi/helpers/EtherF
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
-
 import { console } from "forge-std/console.sol";
+import { EtherFiEncode } from "../../utils/encode/EtherFiEncode.sol";
 
 contract TestEtherFiWrap is BaseTest, ActionsUtils, EtherFiHelper {
     /*//////////////////////////////////////////////////////////////////////////
@@ -66,7 +66,7 @@ contract TestEtherFiWrap is BaseTest, ActionsUtils, EtherFiHelper {
         _giveEethTokens(_amount * 2);
 
         bytes memory executeActionCallData = executeActionCalldata(
-            etherFiWrapEncode(_isMaxUint256 ? type(uint256).max : _amount, sender, sender),
+            EtherFiEncode.wrap(_isMaxUint256 ? type(uint256).max : _amount, sender, sender),
             _isDirect
         );
 
