@@ -3,7 +3,7 @@ pragma solidity =0.8.24;
 
 import { CompV3RatioTrigger } from "../../contracts/triggers/CompV3RatioTrigger.sol";
 import { CompUser } from "../utils/compV3/CompUser.sol";
-import { Addresses } from "../utils/Addresses.sol";
+import { Addresses } from "../utils/helpers/MainnetAddresses.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
 import { console } from "forge-std/console.sol";
@@ -18,7 +18,7 @@ contract TestCompV3RatioTrigger is BaseTest {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("CompV3RatioTrigger");
+        forkFromEnv("CompV3RatioTrigger");
         cut = new CompV3RatioTrigger();
     }
 

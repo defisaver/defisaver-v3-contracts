@@ -24,7 +24,7 @@ contract TestAaveV4View is AaveV4TestBase {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
 
         cut = new AaveV4View();
     }

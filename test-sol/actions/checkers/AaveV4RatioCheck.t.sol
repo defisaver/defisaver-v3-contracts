@@ -5,7 +5,7 @@ pragma solidity =0.8.24;
 import {
     TransientStorageCancun
 } from "../../../contracts/utils/transient/TransientStorageCancun.sol";
-import { Addresses } from "test-sol/utils/Addresses.sol";
+import { Addresses } from "test-sol/utils/helpers/MainnetAddresses.sol";
 import { AaveV4RatioCheck } from "../../../contracts/actions/checkers/AaveV4RatioCheck.sol";
 import { SmartWallet } from "test-sol/utils/SmartWallet.sol";
 import { AaveV4TestBase } from "../aaveV4/AaveV4TestBase.t.sol";
@@ -37,7 +37,7 @@ contract TestAaveV4RatioCheck is AaveV4TestBase {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

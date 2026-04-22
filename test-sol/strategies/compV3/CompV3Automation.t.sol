@@ -27,7 +27,7 @@ import { BundleBuilder } from "../../utils/BundleBuilder.sol";
 import { RegistryUtils } from "../../utils/RegistryUtils.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 import { Strategies } from "../../utils/Strategies.sol";
-import { Addresses } from "../../utils/Addresses.sol";
+import { Addresses } from "../../utils/helpers/MainnetAddresses.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 
 contract TestCompV3Automation is BaseTest, RegistryUtils, ActionsUtils {
@@ -59,7 +59,7 @@ contract TestCompV3Automation is BaseTest, RegistryUtils, ActionsUtils {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
 
         trigger = new CompV3RatioTrigger();
         flAction = new FLAction();

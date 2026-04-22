@@ -19,7 +19,7 @@ contract TestAaveV4QuotePriceRangeTrigger is AaveV4TestBase {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
 
         cut = new AaveV4QuotePriceRangeTrigger();
     }

@@ -13,7 +13,7 @@ import {
 } from "../../../contracts/interfaces/protocols/aaveV3/IAaveProtocolDataProvider.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
-import { Addresses } from "../../utils/Addresses.sol";
+import { Addresses } from "../../utils/helpers/MainnetAddresses.sol";
 import { AaveV3ExecuteActions } from "../../utils/executeActions/AaveV3ExecuteActions.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { AaveV3Encode } from "../../utils/encode/AaveV3Encode.sol";
@@ -46,7 +46,7 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("AaveV3CollateralSwitch");
+        forkFromEnv("AaveV3CollateralSwitch");
 
         wallet = new SmartWallet(bob);
         walletAddr = wallet.walletAddr();

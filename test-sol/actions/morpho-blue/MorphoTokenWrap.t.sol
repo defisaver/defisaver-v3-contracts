@@ -34,7 +34,7 @@ contract TestMorphoTokenWrap is BaseTest, ActionsUtils, MorphoBlueHelper {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("MorphoTokenWrap");
+        forkFromEnv("MorphoTokenWrap");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

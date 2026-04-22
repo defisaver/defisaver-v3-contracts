@@ -67,7 +67,7 @@ contract TestFluidDexOpenT3 is FluidTestBase {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("FluidDexOpen");
+        forkFromEnv("FluidDexOpen");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

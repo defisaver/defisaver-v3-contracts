@@ -28,7 +28,7 @@ contract TestEulerV2CollateralSwitch is EulerV2TestHelper {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("EulerV2CollateralSwitch");
+        forkFromEnv("EulerV2CollateralSwitch");
         initTestPairs("EulerV2");
 
         wallet = new SmartWallet(bob);

@@ -19,7 +19,7 @@ contract TestCurveUsdBorrowRateTrigger is BaseTest {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("CurveUsdBorrowRateTrigger");
+        forkFromEnv("CurveUsdBorrowRateTrigger");
         cut = new CurveUsdBorrowRateTrigger();
     }
 

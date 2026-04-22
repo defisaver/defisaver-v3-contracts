@@ -5,7 +5,7 @@ import { Pausable } from "../../contracts/auth/Pausable.sol";
 import { AdminAuth } from "../../contracts/auth/AdminAuth.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
-import { Addresses } from "../utils/Addresses.sol";
+import { Addresses } from "../utils/helpers/MainnetAddresses.sol";
 
 /// @dev Used so we can call external setPaused function and test notPaused modifier
 contract PausableContract is Pausable {
@@ -24,7 +24,7 @@ contract TestCore_Pausable is Pausable, BaseTest {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
         pausable = new PausableContract();
     }
 

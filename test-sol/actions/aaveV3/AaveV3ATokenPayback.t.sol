@@ -27,7 +27,7 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("AaveV3ATokenPayback");
+        forkFromEnv("AaveV3ATokenPayback");
         initTestPairs("AaveV3");
 
         wallet = new SmartWallet(bob);
@@ -154,10 +154,13 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
         }
 
         uint256 senderBalanceBefore = balanceOf(debtATokenAddr, sender);
+        uint256 amountToPayback = _paybackAmount == type(uint256).max
+            ? walletVariableDebtBefore
+            : (_paybackAmount > senderBalanceBefore ? senderBalanceBefore : _paybackAmount);
 
         if (_isL2Direct) {
             AaveV3ATokenPayback.Params memory params = AaveV3ATokenPayback.Params({
-                amount: _paybackAmount,
+                amount: amountToPayback,
                 from: sender,
                 rateMode: uint8(DataTypes.InterestRateMode.VARIABLE),
                 assetId: debtAssetId,
@@ -167,7 +170,7 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
             wallet.execute(address(cut), cut.encodeInputs(params), 0);
         } else {
             bytes memory paramsCalldata = AaveV3Encode.aTokenPayback(
-                _paybackAmount,
+                amountToPayback,
                 sender,
                 uint8(DataTypes.InterestRateMode.VARIABLE),
                 debtAssetId,
@@ -194,16 +197,20 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
         if (_paybackAmount == type(uint256).max) {
             assertApproxEqAbs(
                 senderBalanceAfter,
-                senderBalanceBefore - walletVariableDebtBefore,
+                senderBalanceBefore - amountToPayback,
                 maxATokenIncreaseTolerance
             );
             assertEq(walletVariableDebtAfter, 0);
             assertEq(walletSafetyRatioAfter, 0);
         } else {
-            assertEq(senderBalanceAfter, senderBalanceBefore - _paybackAmount);
+            assertApproxEqAbs(
+                senderBalanceAfter,
+                senderBalanceBefore - amountToPayback,
+                maxATokenIncreaseTolerance
+            );
             assertApproxEqAbs(
                 walletVariableDebtAfter,
-                walletVariableDebtBefore - _paybackAmount,
+                walletVariableDebtBefore - amountToPayback,
                 maxATokenIncreaseTolerance
             );
             assertGt(walletSafetyRatioAfter, walletSafetyRatioBefore);

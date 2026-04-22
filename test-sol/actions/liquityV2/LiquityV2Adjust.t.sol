@@ -71,7 +71,7 @@ contract TestLiquityV2Adjust is LiquityV2ExecuteActions {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("LiquityV2Adjust");
+        forkFromEnv("LiquityV2Adjust");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

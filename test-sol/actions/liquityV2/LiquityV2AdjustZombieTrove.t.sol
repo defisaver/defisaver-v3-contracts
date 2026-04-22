@@ -77,7 +77,7 @@ contract TestLiquityV2AdjustZombieTrove is LiquityV2ExecuteActions {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("LiquityV2AdjustZombieTrove");
+        forkFromEnv("LiquityV2AdjustZombieTrove");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

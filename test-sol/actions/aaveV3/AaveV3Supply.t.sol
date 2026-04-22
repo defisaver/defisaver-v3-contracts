@@ -34,7 +34,7 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("AaveV3Supply");
+        forkFromEnv("AaveV3Supply");
         initTestPairs("AaveV3");
 
         wallet = new SmartWallet(bob);
@@ -147,9 +147,10 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
             assertEq(dataBefore.senderBalance - supplyAmount, dataAfter.senderBalance);
             assertEq(dataBefore.walletATokenBalance, 0);
             assertEq(dataAfter.walletATokenBalance, 0);
-            assertGe(
+            assertApproxEqAbs(
                 dataAfter.onBehalfOfAddrATokenBalance,
-                dataBefore.onBehalfOfAddrATokenBalance + supplyAmount
+                dataBefore.onBehalfOfAddrATokenBalance + supplyAmount,
+                1
             );
 
             (uint256 walletCurrentATokenBalance,,,,,,,,) =
@@ -157,7 +158,7 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
             assertEq(walletCurrentATokenBalance, 0);
             (uint256 onBehalfOfAddrCurrentATokenBalance,,,,,,,,) =
                 dataProvider.getUserReserveData(testPairs[i].supplyAsset, onBehalfOf);
-            assertGe(onBehalfOfAddrCurrentATokenBalance, supplyAmount);
+            assertApproxEqAbs(onBehalfOfAddrCurrentATokenBalance, supplyAmount, 1);
         }
     }
 
@@ -296,11 +297,13 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
         uint256 walletATokenBalanceAfter = balanceOf(supplyTokenData.aTokenAddress, walletAddr);
 
         assertEq(senderBalanceBefore - realAmountToSupply, senderBalanceAfter);
-        assertGe(walletATokenBalanceAfter, walletATokenBalanceBefore + realAmountToSupply);
+        assertApproxEqAbs(
+            walletATokenBalanceAfter, walletATokenBalanceBefore + realAmountToSupply, 1
+        );
 
         (uint256 currentATokenBalance,,,,,,,, bool usageAsCollateral) =
             dataProvider.getUserReserveData(_supplyAsset, walletAddr);
-        assertGe(currentATokenBalance, realAmountToSupply);
+        assertApproxEqAbs(currentATokenBalance, realAmountToSupply, 1);
         assertTrue(usageAsCollateral);
     }
 }

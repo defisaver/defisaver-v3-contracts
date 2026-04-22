@@ -16,7 +16,7 @@ import { PullToken } from "../../contracts/actions/utils/PullToken.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
 import { ActionsUtils } from "../utils/ActionsUtils.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
-import { Addresses } from "../utils/Addresses.sol";
+import { Addresses } from "../utils/helpers/MainnetAddresses.sol";
 import { StrategyBuilder } from "../utils/StrategyBuilder.sol";
 import { RegistryUtils } from "../utils/RegistryUtils.sol";
 
@@ -48,7 +48,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
 
         wallet = new SmartWallet(bob);
         walletAddr = wallet.walletAddr();

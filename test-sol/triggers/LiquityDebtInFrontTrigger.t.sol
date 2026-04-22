@@ -18,7 +18,7 @@ contract TestLiquityDebtInFront is BaseTest, LiquityHelper {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("LiquityDebtInFrontTrigger");
+        forkFromEnv("LiquityDebtInFrontTrigger");
         cut = new LiquityDebtInFrontTrigger();
     }
 

@@ -34,7 +34,7 @@ contract TestFluidLiquidityOpen is FluidTestBase {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("FluidLiquidityOpen");
+        forkFromEnv("FluidLiquidityOpen");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

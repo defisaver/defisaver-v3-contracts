@@ -12,21 +12,6 @@ const { deployAsOwner, deployContract } = require('../../scripts/utils/deployer'
 
 const { createSafe, executeSafeTx } = require('./safe');
 
-const strategyStorageBytecode =
-    require('../../artifacts/contracts/core/strategy/StrategyStorage.sol/StrategyStorage.json').deployedBytecode;
-const subStorageBytecode =
-    require('../../artifacts/contracts/core/strategy/SubStorage.sol/SubStorage.json').deployedBytecode;
-const subStorageBytecodeL2 =
-    require('../../artifacts/contracts/core/l2/SubStorageL2.sol/SubStorageL2.json').deployedBytecode;
-const bundleStorageBytecode =
-    require('../../artifacts/contracts/core/strategy/BundleStorage.sol/BundleStorage.json').deployedBytecode;
-const recipeExecutorBytecode =
-    require('../../artifacts/contracts/core/RecipeExecutor.sol/RecipeExecutor.json').deployedBytecode;
-const proxyAuthBytecode =
-    require('../../artifacts/contracts/core/strategy/ProxyAuth.sol/ProxyAuth.json').deployedBytecode;
-const mockChainlinkFeedRegistryBytecode =
-    require('../../artifacts/contracts/mocks/MockChainlinkFeedRegistry.sol/MockChainlinkFeedRegistry.json').deployedBytecode;
-
 const addrs = {
     mainnet: {
         PROXY_REGISTRY: '0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4',
@@ -916,6 +901,19 @@ const setContractAt = async ({ name, address, args = [] }) => {
 };
 
 const redeployCore = async (isL2 = false) => {
+    const strategyStorageBytecode =
+        require('../../artifacts/contracts/core/strategy/StrategyStorage.sol/StrategyStorage.json').deployedBytecode;
+    const subStorageBytecode =
+        require('../../artifacts/contracts/core/strategy/SubStorage.sol/SubStorage.json').deployedBytecode;
+    const subStorageBytecodeL2 =
+        require('../../artifacts/contracts/core/l2/SubStorageL2.sol/SubStorageL2.json').deployedBytecode;
+    const bundleStorageBytecode =
+        require('../../artifacts/contracts/core/strategy/BundleStorage.sol/BundleStorage.json').deployedBytecode;
+    const recipeExecutorBytecode =
+        require('../../artifacts/contracts/core/RecipeExecutor.sol/RecipeExecutor.json').deployedBytecode;
+    const proxyAuthBytecode =
+        require('../../artifacts/contracts/core/strategy/ProxyAuth.sol/ProxyAuth.json').deployedBytecode;
+
     const strategyStorageAddr = await getAddrFromRegistry('StrategyStorage');
     await setCode(strategyStorageAddr, strategyStorageBytecode);
 
@@ -1601,8 +1599,9 @@ const resetForkToBlock = async (block) => {
 };
 
 const mockChainlinkPriceFeed = async () => {
+    const mockChainlinkFeedRegistryBytecode =
+        require('../../artifacts/contracts/mocks/MockChainlinkFeedRegistry.sol/MockChainlinkFeedRegistry.json').deployedBytecode;
     await setCode(addrs[network].FEED_REGISTRY, mockChainlinkFeedRegistryBytecode);
-
     const registryInstance = await hre.ethers.getContractFactory('MockChainlinkFeedRegistry');
     const registry = await registryInstance.attach(addrs[network].FEED_REGISTRY);
 

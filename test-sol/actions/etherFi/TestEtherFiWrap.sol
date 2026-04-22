@@ -29,7 +29,7 @@ contract TestEtherFiWrap is BaseTest, ActionsUtils, EtherFiHelper {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("EtherFiWrap");
+        forkFromEnv("EtherFiWrap");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

@@ -11,7 +11,7 @@ import { SafeERC20 } from "../../contracts/_vendor/openzeppelin/SafeERC20.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
 import { ActionsUtils } from "../utils/ActionsUtils.sol";
-import { Addresses } from "../utils/Addresses.sol";
+import { Addresses } from "../utils/helpers/MainnetAddresses.sol";
 import { AaveV3Supply } from "../../contracts/actions/aaveV3/AaveV3Supply.sol";
 import { AaveV3Borrow } from "../../contracts/actions/aaveV3/AaveV3Borrow.sol";
 
@@ -49,7 +49,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -108,13 +108,11 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
             config.supplyToken, sender, walletAddr, DEFAULT_AAVE_MARKET
         );
 
-        bool isWBTC = Addresses.WBTC_ADDR == config.supplyToken;
-
         DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(config.supplyToken);
         assertEq(approvals.asset, config.supplyToken);
         assertEq(approvals.aToken, reserveData.aTokenAddress);
         assertEq(approvals.variableDebtToken, reserveData.variableDebtTokenAddress);
-        assertEq(approvals.assetApproval, type(uint256).max - (isWBTC ? config.supplyAmount : 0)); // WBTC allowance is being decreased when used, even when it is UINT_MAX approval
+        assertGe(approvals.assetApproval, type(uint256).max - config.supplyAmount); // On mainnet WBTC allowance is being decreased when used, even when it is UINT_MAX approval. There are more tokens on L2s having same logic, so we use assertGe instead of assertEq.
 
         assertEq(approvals.aTokenApproval, 0);
         assertEq(approvals.variableDebtDelegation, 0);
@@ -153,11 +151,10 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
             config.supplyToken, sender, walletAddr, DEFAULT_AAVE_MARKET
         );
 
-        bool isWBTC = Addresses.WBTC_ADDR == config.supplyToken;
         assertEq(approvals.asset, config.supplyToken);
         assertEq(approvals.aToken, reserveData.aTokenAddress);
         assertEq(approvals.variableDebtToken, reserveData.variableDebtTokenAddress);
-        assertEq(approvals.assetApproval, type(uint256).max - (isWBTC ? config.supplyAmount : 0)); // WBTC allowance is being decreased when used, even when it is UINT_MAX approval
+        assertGe(approvals.assetApproval, type(uint256).max - config.supplyAmount); // On mainnet WBTC allowance is being decreased when used, even when it is UINT_MAX approval. There are more tokens on L2s having same logic, so we use assertGe instead of assertEq.
         assertEq(approvals.aTokenApproval, type(uint256).max);
         assertEq(approvals.variableDebtDelegation, 0);
         assertEq(approvals.eoaBalance, config.initialBalance - config.supplyAmount);
@@ -190,9 +187,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         assertEq(approvalsAfter.asset, config.supplyToken);
         assertEq(approvalsAfter.aToken, reserveData.aTokenAddress);
         assertEq(approvalsAfter.variableDebtToken, reserveData.variableDebtTokenAddress);
-        assertEq(
-            approvalsAfter.assetApproval, type(uint256).max - (isWBTC ? config.supplyAmount : 0)
-        ); // WBTC allowance is being decreased when used, even when it is UINT_MAX approval
+        assertGe(approvalsAfter.assetApproval, type(uint256).max - config.supplyAmount); // On mainnet WBTC allowance is being decreased when used, even when it is UINT_MAX approval. There are more tokens on L2s having same logic, so we use assertGe instead of assertEq.
         assertEq(approvalsAfter.aTokenApproval, type(uint256).max);
         assertEq(approvalsAfter.variableDebtDelegation, 0);
         assertEq(approvalsAfter.eoaBalance, config.initialBalance - config.supplyAmount);

@@ -32,7 +32,7 @@ contract TestEulerV2ReorderCollaterals is EulerV2TestHelper {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("EulerV2ReorderCollaterals");
+        forkFromEnv("EulerV2ReorderCollaterals");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

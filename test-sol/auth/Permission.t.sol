@@ -41,7 +41,7 @@ contract TestCore_Permission is AuthHelper, BaseTest, SFProxyUtils {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
 
         cut = new MockPermission();
 

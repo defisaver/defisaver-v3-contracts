@@ -9,7 +9,7 @@ import { TokenPriceHelper } from "../../contracts/utils/token/TokenPriceHelper.s
 import { TokenPriceHelperL2 } from "../../contracts/utils/token/TokenPriceHelperL2.sol";
 import { TokenUtils } from "../../contracts/utils/token/TokenUtils.sol";
 
-import { Addresses } from "../utils/Addresses.sol";
+import { Addresses } from "./helpers/MainnetAddresses.sol";
 
 contract Tokens is Test {
     using stdStorage for StdStorage;
@@ -35,6 +35,7 @@ contract Tokens is Test {
             tokenNames["USDC"] = Addresses.USDC_ADDR;
             tokenNames["WSETH"] = Addresses.WSTETH_ADDR;
             tokenNames["LUSD"] = Addresses.LUSD_ADDR;
+            tokenNames["USDT"] = Addresses.USDT_ADDR;
             tokenNames["LINK"] = Addresses.LINK_ADDR;
             tokenNames["AAVE"] = Addresses.AAVE_ADDR;
             tokenNames["eWETH-2"] = Addresses.E_WETH_2;
@@ -75,6 +76,10 @@ contract Tokens is Test {
 
     function give(address _token, address _to, uint256 _amount) internal {
         if (isTokenBlacklistedForDeal(_token)) {
+            if (block.chainid != 1) {
+                gibTokens(_to, _token, _amount);
+                return;
+            }
             vm.deal(_to, type(uint96).max);
 
             IUniswapRouter router = IUniswapRouter(Addresses.UNISWAP_ROUTER);

@@ -36,7 +36,7 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("AaveV3Withdraw");
+        forkFromEnv("AaveV3Withdraw");
         initTestPairs("AaveV3");
 
         wallet = new SmartWallet(bob);

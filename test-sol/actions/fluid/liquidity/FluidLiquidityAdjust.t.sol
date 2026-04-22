@@ -51,7 +51,7 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("FluidLiquidityAdjust");
+        forkFromEnv("FluidLiquidityAdjust");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

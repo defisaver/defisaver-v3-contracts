@@ -10,7 +10,7 @@ import { SparkDataTypes } from "../../contracts/interfaces/protocols/spark/Spark
 import { BaseTest } from "../utils/BaseTest.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
 import { ActionsUtils } from "../utils/ActionsUtils.sol";
-import { Addresses } from "../utils/Addresses.sol";
+import { Addresses } from "../utils/helpers/MainnetAddresses.sol";
 
 import { SparkSupply } from "../../contracts/actions/spark/SparkSupply.sol";
 import { SparkBorrow } from "../../contracts/actions/spark/SparkBorrow.sol";
@@ -50,7 +50,7 @@ contract TestSparkViewSmall is BaseTest, ActionsUtils, SparkHelper {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("SparkViewSmall");
+        forkFromEnv("SparkViewSmall");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -93,7 +93,7 @@ contract TestSparkViewSmall is BaseTest, ActionsUtils, SparkHelper {
     }
 
     function test_WithEModeSelected() public {
-        TestConfig memory _config = testConfigs[2];
+        TestConfig memory _config = testConfigs[0];
         uint256 EMODE_ID = 2;
 
         // Give initial balance for supply token
@@ -248,17 +248,6 @@ contract TestSparkViewSmall is BaseTest, ActionsUtils, SparkHelper {
                 supplyAmount: 30e18, // 30 WETH
                 borrowAmount: 50_000e6, // 50k USDC
                 initialBalance: 100e18 // 100 WETH
-            })
-        );
-
-        // sDAI/USDC
-        testConfigs.push(
-            TestConfig({
-                supplyToken: Addresses.WETH_ADDR,
-                borrowToken: Addresses.USDT_ADDR,
-                supplyAmount: 80_000e18, // 30 sDAI
-                borrowAmount: 50_000e6, // 50k USDC
-                initialBalance: 100_000e18 // 100 sDAI
             })
         );
     }

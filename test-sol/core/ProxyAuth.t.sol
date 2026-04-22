@@ -33,7 +33,7 @@ contract TestCore_ProxyAuth is RegistryUtils, ActionsUtils, BaseTest {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
 
         wallet = new SmartWallet(bob);
         dsProxyAddr = wallet.createDSProxy();

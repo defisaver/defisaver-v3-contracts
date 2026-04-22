@@ -8,7 +8,7 @@ import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3He
 import { IL2PoolV3 } from "../../../contracts/interfaces/protocols/aaveV3/IL2PoolV3.sol";
 import { DataTypes } from "../../../contracts/interfaces/protocols/aaveV3/DataTypes.sol";
 
-import { Addresses } from "../../utils/Addresses.sol";
+import { Addresses } from "../../utils/helpers/MainnetAddresses.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { AaveV3ExecuteActions } from "../../utils/executeActions/AaveV3ExecuteActions.sol";
 import { AaveV3Encode } from "../../utils/encode/AaveV3Encode.sol";
@@ -33,7 +33,7 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("AaveV3SetEMode");
+        forkFromEnv("AaveV3SetEMode");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

@@ -68,7 +68,7 @@ contract TestFluidDexSupply is FluidTestBase {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("FluidDexSupply");
+        forkFromEnv("FluidDexSupply");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

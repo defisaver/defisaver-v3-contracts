@@ -65,7 +65,7 @@ contract TestFluidLiquidityWithdraw is FluidTestBase {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("FluidLiquidityWithdraw");
+        forkFromEnv("FluidLiquidityWithdraw");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

@@ -32,7 +32,7 @@ contract TestAaveV4CollateralSwitch is AaveV4TestBase {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

@@ -10,7 +10,7 @@ import { SFProxyEntryPoint } from "../../contracts/actions/summerfi/SFProxyEntry
 import { BaseTest } from "../utils/BaseTest.sol";
 import { ActionsUtils } from "../utils/ActionsUtils.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
-import { Addresses } from "../utils/Addresses.sol";
+import { Addresses } from "../utils/helpers/MainnetAddresses.sol";
 import { SFProxyUtils } from "../utils/summerfi/SFProxyUtils.sol";
 import { RegistryUtils } from "../utils/RegistryUtils.sol";
 
@@ -33,7 +33,7 @@ contract TestCore_RecipeExecutor is ActionsUtils, RegistryUtils, BaseTest, SFPro
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
 
         SmartWallet safeWallet = new SmartWallet(bob);
 

@@ -22,6 +22,7 @@ library Addresses {
     address public constant USDE_ADDR = 0x4c9EDD5852cd905f086C759E8383e09bff1E68B3;
     address public constant EUSDE_ADDR = 0x90D2af7d622ca3141efA4d8f1F24d86E5974Cc8F;
     address public constant SUSDE_ADDR = 0x9D39A5DE30e57443BfF2A8307A4256c8797A3497;
+    address public constant USDC_E = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     // DFS
     address public constant OWNER_ADDR = 0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00;
@@ -34,6 +35,7 @@ library Addresses {
         0x1D6DEdb49AF91A11B5C5F34954FD3E8cC4f03A86;
     address public constant BUNDLE_ADDR = 0x223c6aDE533851Df03219f6E3D8B763Bd47f84cf;
     address public constant STORAGE_ADDR = 0xF52551F95ec4A2B4299DcC42fbbc576718Dbf933;
+    address public constant TRANSIENT_STORAGE_CANCUN = 0x0304E27cccE28bAB4d78C6cb7AfD4cd01c87c1e4;
 
     // EULER V2
     address public constant E_WETH_2 = 0xD8b27CF359b7D15710a5BE299AF6e7Bf904984C2;
@@ -52,7 +54,6 @@ library Addresses {
     address public constant SAFE_PROXY_FACTORY = 0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67;
     address public constant SAFE_SINGLETON = 0x41675C099F32341bf84BFc5382aF534df5C7461a;
     address public constant UNISWAP_ROUTER = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
-    address public constant TRANSIENT_STORAGE_CANCUN = 0x0304E27cccE28bAB4d78C6cb7AfD4cd01c87c1e4;
     address public constant UNI_V2_WRAPPER = 0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54;
     address public constant UNI_V3_WRAPPER = 0xfd077F7990AeE7A0F59b1aD98c6dBeB9aBFf0D7a;
 

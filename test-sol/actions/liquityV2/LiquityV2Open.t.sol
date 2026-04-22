@@ -62,7 +62,7 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("LiquityV2Open");
+        forkFromEnv("LiquityV2Open");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
