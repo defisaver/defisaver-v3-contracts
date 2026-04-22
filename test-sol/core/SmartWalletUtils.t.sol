@@ -25,7 +25,7 @@ contract TestCore_SmartWalletUtils is BaseTest {
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_create_DSProxy_wallet() public {
-        skipIfLineaOrPlasma();
+        skipIfAutomationNotSupportedOnSelectedNetwork();
 
         SmartWallet wallet = new SmartWallet(bob);
         address dsProxyAddress = wallet.createDSProxy();
@@ -43,7 +43,7 @@ contract TestCore_SmartWalletUtils is BaseTest {
     }
 
     function test_should_create_DSA_wallet() public {
-        skipIfLineaOrPlasma();
+        skipIfAutomationNotSupportedOnSelectedNetwork();
 
         SmartWallet wallet = new SmartWallet(bob);
         address dsaProxyWallet = wallet.createDSAProxy();
@@ -53,7 +53,7 @@ contract TestCore_SmartWalletUtils is BaseTest {
     }
 
     function test_should_create_Summerfi_wallet() public {
-        skipIfLineaOrPlasma();
+        skipIfAutomationNotSupportedOnSelectedNetwork();
 
         SmartWallet wallet = new SmartWallet(bob);
         address sfProxyAddress = wallet.createSFProxy();
@@ -75,7 +75,7 @@ contract TestCore_SmartWalletUtils is BaseTest {
     }
 
     function test_should_return_correct_wallet_type() public {
-        skipIfLineaOrPlasma();
+        skipIfAutomationNotSupportedOnSelectedNetwork();
 
         SmartWallet safeWallet = new SmartWallet(bob);
         address safeAddress = safeWallet.walletAddr();
@@ -102,7 +102,7 @@ contract TestCore_SmartWalletUtils is BaseTest {
         SmartWallet dsProxyWallet = new SmartWallet(alice);
         assertTrue(cut.fetchOwnerOrWallet(safeAddress) == bob);
 
-        if (!(block.chainid == 59_144 || block.chainid == 9745)) {
+        if (isAutomationSupportedOnSelectedNetwork()) {
             address dsProxyAddress = dsProxyWallet.createDSProxy();
             assertTrue(cut.fetchOwnerOrWallet(dsProxyAddress) == alice);
         }

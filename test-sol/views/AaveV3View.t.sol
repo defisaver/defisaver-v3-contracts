@@ -261,7 +261,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         testConfigs.push(
             TestConfig({
                 supplyToken: Addresses.WETH_ADDR,
-                borrowToken: block.chainid == 8453 ? Addresses.USDC_ADDR : Addresses.USDT_ADDR,
+                borrowToken: isBaseSelected() ? Addresses.USDC_ADDR : Addresses.USDT_ADDR,
                 supplyAmount: 40e18, // 40 WETH
                 borrowAmount: 50_000e6, // 50k USDT
                 initialBalance: 100e18 // 100 WETH
@@ -283,7 +283,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         testConfigs.push(
             TestConfig({
                 supplyToken: Addresses.WBTC_ADDR,
-                borrowToken: block.chainid == 8453 ? Addresses.USDC_ADDR : Addresses.USDT_ADDR,
+                borrowToken: isBaseSelected() ? Addresses.USDC_ADDR : Addresses.USDT_ADDR,
                 supplyAmount: 4e8, // 4 WBTC
                 borrowAmount: 100_000e6, // 100k USDT
                 initialBalance: 10e8 // 10 WBTC
@@ -294,13 +294,11 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         testConfigs.push(
             TestConfig({
                 supplyToken: Addresses.WBTC_ADDR,
-                borrowToken: (block.chainid == 10 || block.chainid == 59_144)
+                borrowToken: (isOptimismSelected() || isPlasmaSelected())
                     ? Addresses.USDT_ADDR
                     : Addresses.GHO_TOKEN,
                 supplyAmount: 4e8, // 4 WBTC
-                borrowAmount: (block.chainid == 10 || block.chainid == 59_144)
-                    ? 100_000e6
-                    : 100_000e8, // 100k GHO
+                borrowAmount: (isOptimismSelected() || isPlasmaSelected()) ? 100_000e6 : 100_000e8, // 100k GHO
                 initialBalance: 10e8 // 10 WBTC
             })
         );
@@ -308,7 +306,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         // USDT/WETH
         testConfigs.push(
             TestConfig({
-                supplyToken: block.chainid == 8453 ? Addresses.USDC_ADDR : Addresses.USDT_ADDR,
+                supplyToken: isBaseSelected() ? Addresses.USDC_ADDR : Addresses.USDT_ADDR,
                 borrowToken: Addresses.WETH_ADDR,
                 supplyAmount: 75_000e6, // 75k USDT
                 borrowAmount: 5e18, // 5 WETH

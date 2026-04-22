@@ -41,7 +41,7 @@ contract TestGasFeeTaker is BaseTest, GasFeeTaker, AaveV3Helper {
                                       TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function testGetWbtcPrice() public view {
-        uint256 price = block.chainid == 1
+        uint256 price = isMainnetSelected()
             ? cut.getPriceInUSD(Addresses.WBTC_ADDR)
             : cutL2.getPriceInUSD(Addresses.WBTC_ADDR);
 
@@ -65,7 +65,7 @@ contract TestGasFeeTaker is BaseTest, GasFeeTaker, AaveV3Helper {
     }
 
     function testWBTCPriceInETH() public view {
-        uint256 price = block.chainid == 1
+        uint256 price = isMainnetSelected()
             ? cut.getPriceInETH(Addresses.WBTC_ADDR)
             : cutL2.getPriceInETH(Addresses.WBTC_ADDR);
 
@@ -77,13 +77,13 @@ contract TestGasFeeTaker is BaseTest, GasFeeTaker, AaveV3Helper {
     }
 
     function testDaiPrice() public view {
-        uint256 priceInETH = block.chainid == 1
+        uint256 priceInETH = isMainnetSelected()
             ? cut.getPriceInETH(Addresses.DAI_ADDR)
             : cutL2.getPriceInETH(Addresses.DAI_ADDR);
         console.log(priceInETH);
         assertGt(priceInETH, 0);
 
-        uint256 priceInUSD = block.chainid == 1
+        uint256 priceInUSD = isMainnetSelected()
             ? cut.getPriceInUSD(Addresses.DAI_ADDR)
             : cutL2.getPriceInUSD(Addresses.DAI_ADDR);
         console.log(priceInUSD);
@@ -91,14 +91,14 @@ contract TestGasFeeTaker is BaseTest, GasFeeTaker, AaveV3Helper {
     }
 
     function testPriceForNonTokenAddr() public view {
-        uint256 price = block.chainid == 1 ? cut.getPriceInUSD(aDAI) : cutL2.getPriceInUSD(aDAI);
+        uint256 price = isMainnetSelected() ? cut.getPriceInUSD(aDAI) : cutL2.getPriceInUSD(aDAI);
         console.log(price);
         assertEq(price, 0);
     }
 
     function testGasCost() public {
         // TODO -> Fix this test for L2s
-        if (block.chainid != 1) vm.skip(true);
+        if (isL2NetworkSelected()) vm.skip(true);
 
         vm.fee(100_000_000_000);
         console.log(tx.gasprice);

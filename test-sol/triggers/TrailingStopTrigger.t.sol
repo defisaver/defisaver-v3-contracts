@@ -26,7 +26,7 @@ contract TestTrailingStopTrigger is BaseTest, DSMath, MainnetUtilAddresses {
     function setUp() public override {
         forkFromEnv("TrailingStopTrigger");
 
-        if (block.chainid != 1) vm.skip(true, "TrailingStopTrigger not available on L2s");
+        if (isL2NetworkSelected()) vm.skip(true, "TrailingStopTrigger not available on L2s");
 
         cut = new TrailingStopTrigger();
 

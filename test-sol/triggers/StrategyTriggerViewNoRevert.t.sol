@@ -138,7 +138,7 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRever
     }
 
     function test_verifySparkLeverageManagementConditions() public {
-        if (block.chainid != 1) {
+        if (!isMainnetSelected()) {
             vm.skip(true, "Spark is only supported on Mainnet");
         }
 
@@ -170,6 +170,71 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRever
             uint256(_verifySparkMinDebtPosition(walletWithNotEnoughDebt.walletAddr())),
             uint256(TriggerStatus.FALSE),
             "trigger status should be false"
+        );
+    }
+
+    function test_verifyAaveV3Ltv0() public {
+        if (!isMainnetSelected()) {
+            vm.skip(true, "Test only supported on Mainnet");
+        }
+
+        address walletWithLTV0Asset = 0xeCA1395C29527b4CeA5AF5517138Ac01754bcfC8;
+        assertEq(
+            uint256(_verifyAaveV3Ltv0Position(walletWithLTV0Asset)),
+            uint256(TriggerStatus.FALSE),
+            "trigger status should be FALSE"
+        );
+
+        address walletWithLTV0Asset2 = 0x9495D189896FCb04e3d2E5bB102Ad76C6782c41A;
+        assertEq(
+            uint256(_verifyAaveV3Ltv0Position(walletWithLTV0Asset2)),
+            uint256(TriggerStatus.FALSE),
+            "trigger status should be FALSE"
+        );
+
+        address walletWithLinkInEmode = 0x3bb52B3101324197d765c7E27e79C6b0b5BE8BaB;
+        assertEq(
+            uint256(_verifyAaveV3Ltv0Position(walletWithLinkInEmode)),
+            uint256(TriggerStatus.TRUE),
+            "trigger status should be TRUE"
+        );
+    }
+
+    function test_verifyAaveV3Ltv0_afterDisablingLinkCollateral() public {
+        if (!isMainnetSelected()) {
+            vm.skip(true, "Test only supported on Mainnet");
+        }
+
+        address walletWithLTV0Asset2 = 0x9495D189896FCb04e3d2E5bB102Ad76C6782c41A;
+        address walletOwner = 0x3745AF941FbBF3336aB21bB3a9853e75320382ab;
+        IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(DEFAULT_AAVE_MARKET).getPool());
+        uint16 linkAssetId = lendingPool.getReserveData(Addresses.LINK_ADDR).id;
+        AaveV3CollateralSwitch collSwitch = new AaveV3CollateralSwitch();
+
+        uint16[] memory assetIds = new uint16[](1);
+        assetIds[0] = linkAssetId;
+        bool[] memory useAsCollateral = new bool[](1);
+        useAsCollateral[0] = false;
+
+        AaveV3CollateralSwitch.Params memory params = AaveV3CollateralSwitch.Params({
+            arrayLength: 1,
+            useDefaultMarket: true,
+            assetIds: assetIds,
+            useAsCollateral: useAsCollateral,
+            market: address(0)
+        });
+
+        vm.prank(walletOwner);
+        IDSProxy(payable(walletWithLTV0Asset2))
+            .execute(
+                address(collSwitch),
+                abi.encodeWithSelector(collSwitch.executeActionDirect.selector, abi.encode(params))
+            );
+
+        assertEq(
+            uint256(_verifyAaveV3Ltv0Position(walletWithLTV0Asset2)),
+            uint256(TriggerStatus.TRUE),
+            "trigger status should be TRUE after using LINK as collateral is disabled"
         );
     }
 
@@ -275,62 +340,5 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRever
             )
         );
         _wallet.execute(address(new SparkBorrow()), borrowCalldata, 0);
-    }
-
-    function test_verifyAaveV3Ltv0() public view {
-        address walletWithLTV0Asset = 0xeCA1395C29527b4CeA5AF5517138Ac01754bcfC8;
-        assertEq(
-            uint256(_verifyAaveV3Ltv0Position(walletWithLTV0Asset)),
-            uint256(TriggerStatus.FALSE),
-            "trigger status should be FALSE"
-        );
-
-        address walletWithLTV0Asset2 = 0x9495D189896FCb04e3d2E5bB102Ad76C6782c41A;
-        assertEq(
-            uint256(_verifyAaveV3Ltv0Position(walletWithLTV0Asset2)),
-            uint256(TriggerStatus.FALSE),
-            "trigger status should be FALSE"
-        );
-
-        address walletWithLinkInEmode = 0x3bb52B3101324197d765c7E27e79C6b0b5BE8BaB;
-        assertEq(
-            uint256(_verifyAaveV3Ltv0Position(walletWithLinkInEmode)),
-            uint256(TriggerStatus.TRUE),
-            "trigger status should be TRUE"
-        );
-    }
-
-    function test_verifyAaveV3Ltv0_afterDisablingLinkCollateral() public {
-        address walletWithLTV0Asset2 = 0x9495D189896FCb04e3d2E5bB102Ad76C6782c41A;
-        address walletOwner = 0x3745AF941FbBF3336aB21bB3a9853e75320382ab;
-        IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(DEFAULT_AAVE_MARKET).getPool());
-        uint16 linkAssetId = lendingPool.getReserveData(Addresses.LINK_ADDR).id;
-        AaveV3CollateralSwitch collSwitch = new AaveV3CollateralSwitch();
-
-        uint16[] memory assetIds = new uint16[](1);
-        assetIds[0] = linkAssetId;
-        bool[] memory useAsCollateral = new bool[](1);
-        useAsCollateral[0] = false;
-
-        AaveV3CollateralSwitch.Params memory params = AaveV3CollateralSwitch.Params({
-            arrayLength: 1,
-            useDefaultMarket: true,
-            assetIds: assetIds,
-            useAsCollateral: useAsCollateral,
-            market: address(0)
-        });
-
-        vm.prank(walletOwner);
-        IDSProxy(payable(walletWithLTV0Asset2))
-            .execute(
-                address(collSwitch),
-                abi.encodeWithSelector(collSwitch.executeActionDirect.selector, abi.encode(params))
-            );
-
-        assertEq(
-            uint256(_verifyAaveV3Ltv0Position(walletWithLTV0Asset2)),
-            uint256(TriggerStatus.TRUE),
-            "trigger status should be TRUE after using LINK as collateral is disabled"
-        );
     }
 }

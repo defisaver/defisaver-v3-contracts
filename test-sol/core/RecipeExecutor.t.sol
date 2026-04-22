@@ -38,9 +38,8 @@ contract TestCore_RecipeExecutor is ActionsUtils, RegistryUtils, BaseTest, SFPro
         forkFromEnv("");
 
         SmartWallet safeWallet = new SmartWallet(bob);
-        bool isLineaOrPlasma = block.chainid == 59_144 || block.chainid == 9745;
 
-        if (isLineaOrPlasma) {
+        if (!isAutomationSupportedOnSelectedNetwork()) {
             wallets = new SmartWallet[](1);
             wallets[0] = safeWallet;
         } else {
@@ -70,7 +69,7 @@ contract TestCore_RecipeExecutor is ActionsUtils, RegistryUtils, BaseTest, SFPro
         flAddress = address(new FLAction());
         redeploy("FLAction", flAddress);
 
-        _whitelistSFProxyEntryPoint();
+        if (isSFProxySupportedOnSelectedNetwork()) _whitelistAnyAddr(getAddr("SFProxyEntryPoint"));
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -110,9 +109,7 @@ contract TestCore_RecipeExecutor is ActionsUtils, RegistryUtils, BaseTest, SFPro
         for (uint256 i = 0; i < wallets.length; i++) {
             address tokenAddr = Addresses.WETH_ADDR;
             uint256 amount = 1 ether;
-            // No Balancer on Linea and Plasma
-            bool useAaveV3 = block.chainid == 59_144 || block.chainid == 9745;
-
+            bool useAaveV3 = !isFLBalancerSupportedOnSelectedNetwork();
             bytes[] memory actionsCalldata = new bytes[](2);
             actionsCalldata[0] = flActionEncode(
                 tokenAddr, amount, useAaveV3 ? FLSource.AAVEV3 : FLSource.BALANCER
@@ -147,7 +144,7 @@ contract TestCore_RecipeExecutor is ActionsUtils, RegistryUtils, BaseTest, SFPro
             uint256 walletBalanceAfter = balanceOf(tokenAddr, wallets[i].walletAddr());
 
             assertEq(senderBalanceBefore, senderBalanceAfter);
-            assertEq(walletBalanceBefore, walletBalanceAfter + aaveFLFee); // will be 0 if we arent on linea or plasma. Because we used balancer
+            assertEq(walletBalanceBefore, walletBalanceAfter + aaveFLFee); // will be 0 for balancer fl
         }
     }
 

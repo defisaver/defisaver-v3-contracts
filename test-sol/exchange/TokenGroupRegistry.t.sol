@@ -51,19 +51,19 @@ contract TestTokenGroupRegistry is BaseTest, TokenGroupRegistry {
 
         assertEq(cut.groupIds(Addresses.WETH_ADDR), uint256(Groups.ETH_BASED));
         assertEq(cut.groupIds(Addresses.WSTETH_ADDR), uint256(Groups.ETH_BASED));
-        if (block.chainid == 1) {
+        if (isMainnetSelected()) {
             assertEq(cut.groupIds(Addresses.STETH_ADDR), uint256(Groups.ETH_BASED));
         }
         assertEq(
             cut.getFeeForTokens(
                 Addresses.WETH_ADDR,
-                block.chainid == 1 ? Addresses.STETH_ADDR : Addresses.WSTETH_ADDR
+                isMainnetSelected() ? Addresses.STETH_ADDR : Addresses.WSTETH_ADDR
             ),
             STABLE_FEE_DIVIDER
         );
 
         assertEq(cut.groupIds(Addresses.WBTC_ADDR), uint256(Groups.BTC_BASED));
-        if (block.chainid == 1) {
+        if (isMainnetSelected()) {
             assertEq(cut.groupIds(Addresses.RENBTC_ADDR), uint256(Groups.BTC_BASED));
             assertEq(
                 cut.getFeeForTokens(Addresses.WBTC_ADDR, Addresses.RENBTC_ADDR), STABLE_FEE_DIVIDER
@@ -113,7 +113,7 @@ contract TestTokenGroupRegistry is BaseTest, TokenGroupRegistry {
         assertEq(
             cut.getFeeForTokens(
                 Addresses.WSTETH_ADDR,
-                block.chainid == 1 ? Addresses.STETH_ADDR : Addresses.WETH_ADDR
+                isMainnetSelected() ? Addresses.STETH_ADDR : Addresses.WETH_ADDR
             ),
             100
         );

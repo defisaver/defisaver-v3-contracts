@@ -16,6 +16,13 @@ contract BaseTest is Config {
     address internal constant jane = address(0x11);
     uint256 internal constant SIGNER_PK = 0xA11CE;
 
+    uint256 internal constant MAINNET_CHAIN_ID = 1;
+    uint256 internal constant ARBITRUM_CHAIN_ID = 42_161;
+    uint256 internal constant OPTIMISM_CHAIN_ID = 10;
+    uint256 internal constant BASE_CHAIN_ID = 8453;
+    uint256 internal constant LINEA_CHAIN_ID = 59_144;
+    uint256 internal constant PLASMA_CHAIN_ID = 9745;
+
     error UnsupportedChain(string chain);
 
     using SafeERC20 for IERC20;
@@ -42,21 +49,50 @@ contract BaseTest is Config {
         _initConfigIfNeeded();
     }
 
-    function skipIfLineaOrPlasma() internal {
-        skipIfLinea();
-        skipIfPlasma();
+    function isL2NetworkSelected() internal view returns (bool) {
+        return block.chainid != MAINNET_CHAIN_ID;
     }
 
-    function skipIfLinea() internal {
-        if (block.chainid == 59_144) {
-            vm.skip(true, "Skipping test on Linea");
+    function isMainnetSelected() internal view returns (bool) {
+        return block.chainid == MAINNET_CHAIN_ID;
+    }
+
+    function isArbitrumSelected() internal view returns (bool) {
+        return block.chainid == ARBITRUM_CHAIN_ID;
+    }
+
+    function isOptimismSelected() internal view returns (bool) {
+        return block.chainid == OPTIMISM_CHAIN_ID;
+    }
+
+    function isBaseSelected() internal view returns (bool) {
+        return block.chainid == BASE_CHAIN_ID;
+    }
+
+    function isLineaSelected() internal view returns (bool) {
+        return block.chainid == LINEA_CHAIN_ID;
+    }
+
+    function isPlasmaSelected() internal view returns (bool) {
+        return block.chainid == PLASMA_CHAIN_ID;
+    }
+
+    function isAutomationSupportedOnSelectedNetwork() internal view returns (bool) {
+        return block.chainid != LINEA_CHAIN_ID && block.chainid != PLASMA_CHAIN_ID;
+    }
+
+    function isFLBalancerSupportedOnSelectedNetwork() internal view returns (bool) {
+        return block.chainid != LINEA_CHAIN_ID && block.chainid != PLASMA_CHAIN_ID;
+    }
+
+    function skipIfAutomationNotSupportedOnSelectedNetwork() internal {
+        if (!isAutomationSupportedOnSelectedNetwork()) {
+            vm.skip(true, "Skipping test. Automation not supported on selected network.");
         }
     }
 
-    function skipIfPlasma() internal {
-        if (block.chainid == 9745) {
-            vm.skip(true, "Skipping test on Plasma");
-        }
+    function isSFProxySupportedOnSelectedNetwork() internal view returns (bool) {
+        return block.chainid != LINEA_CHAIN_ID && block.chainid != PLASMA_CHAIN_ID;
     }
 
     function forkFromEnv(string memory testName) internal {
@@ -172,20 +208,22 @@ contract BaseTest is Config {
 
         TestPair[] memory pairs = getTestPairsForProtocol(_protocolName);
         for (uint256 i = 0; i < pairs.length; ++i) {
+            // On Base chain, only borrow USDC
             if (
-                block.chainid == 8453
+                block.chainid == BASE_CHAIN_ID
                     && (pairs[i].borrowAsset == Addresses.USDT_ADDR
                         || pairs[i].borrowAsset == Addresses.DAI_ADDR)
             ) {
                 pairs[i].borrowAsset = Addresses.USDC_ADDR;
             }
 
-            // AAVE's LTV on OP and Arbitrum chain is 0. Can't use WETH/wstETH because then some other tests are failing on approval checks as we are iterating through all pairs, so we supply same token multiple times.
-            if (block.chainid != 1 && pairs[i].supplyAsset == Addresses.AAVE_ADDR) {
+            // AAVE's LTV on OP and Arbitrum chain is 0, so we switch to USDC as supply asset
+            if (block.chainid != MAINNET_CHAIN_ID && pairs[i].supplyAsset == Addresses.AAVE_ADDR) {
                 pairs[i].supplyAsset = Addresses.USDC_ADDR;
             }
 
-            if (block.chainid == 59_144 && pairs[i].borrowAsset == Addresses.DAI_ADDR) {
+            // On Linea chain, only borrow USDC as DAI is not supported
+            if (block.chainid == LINEA_CHAIN_ID && pairs[i].borrowAsset == Addresses.DAI_ADDR) {
                 pairs[i].borrowAsset = Addresses.USDC_ADDR;
             }
 

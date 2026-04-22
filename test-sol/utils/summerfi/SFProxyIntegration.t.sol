@@ -112,7 +112,7 @@ contract SFProxyIntegration is
 
         // Create SSW
         createSummerfiSmartWallet();
-        _whitelistSFProxyEntryPoint();
+        if (isSFProxySupportedOnSelectedNetwork()) _whitelistAnyAddr(sfProxyEntryPoint);
 
         give(SUPPLY_ASSET, bob, supplyAmount);
         approveAsSender(bob, SUPPLY_ASSET, sfProxy, supplyAmount);
