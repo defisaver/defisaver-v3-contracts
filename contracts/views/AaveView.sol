@@ -472,9 +472,9 @@ contract AaveView is AaveHelper, DSMath {
                     : totalVariableDebt - _reserveParams[i].liquidityAdded;
             }
 
-            uint256 availableLiquidity = IERC20(_reserveParams[i].reserveAddress)
-                .balanceOf(reserve.aTokenAddress) + _reserveParams[i].liquidityAdded
-            - _reserveParams[i].liquidityTaken;
+            uint256 availableLiquidity =
+                IERC20(_reserveParams[i].reserveAddress).balanceOf(reserve.aTokenAddress)
+                    + _reserveParams[i].liquidityAdded - _reserveParams[i].liquidityTaken;
 
             (estimatedRate.supplyRate,, estimatedRate.variableBorrowRate) = IReserveInterestRateStrategyV2(
                     reserve.interestRateStrategyAddress

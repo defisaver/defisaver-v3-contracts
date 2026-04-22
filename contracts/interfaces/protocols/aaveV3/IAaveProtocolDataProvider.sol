@@ -33,8 +33,6 @@ interface IAaveProtocolDataProvider {
             bool usageAsCollateralEnabled
         );
 
-    function getSiloedBorrowing(address asset) external view returns (bool);
-
     /**
      * @notice Returns if the pool is paused
      * @param asset The address of the underlying asset of the reserve

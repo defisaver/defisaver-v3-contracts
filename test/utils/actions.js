@@ -2139,41 +2139,6 @@ const aaveV3BorrowCalldataOptimised = async (proxy, market, amount, to, rateMode
     return receipt;
 };
 
-const aaveV3SwapBorrowRate = async (proxy, assetId, rateMode) => {
-    const aaveSwapRateAction = new dfs.actions.aaveV3.AaveV3SwapBorrowRateModeAction(
-        true,
-        nullAddress,
-        rateMode,
-        assetId,
-    );
-    const functionData = aaveSwapRateAction.encodeForDsProxyCall()[1];
-    const receipt = await executeAction('AaveV3SwapBorrowRateMode', functionData, proxy);
-
-    return receipt;
-};
-
-const aaveV3SwapBorrowRateCalldataOptimised = async (proxy, assetId, rateMode) => {
-    const aaveSwapRateAddr = await getAddrFromRegistry('AaveV3SwapBorrowRateMode');
-    let contract = await hre.ethers.getContractAt('AaveV3SwapBorrowRateMode', aaveSwapRateAddr);
-    const signer = (await hre.ethers.getSigners())[0];
-    contract = await contract.connect(signer);
-
-    const encodedInput = await contract.encodeInputs([rateMode, assetId, true, nullAddress]);
-    const aaveSwapRateAction = new dfs.actions.aaveV3.AaveV3SwapBorrowRateModeAction(
-        true,
-        nullAddress,
-        rateMode,
-        assetId,
-    );
-    const functionData = aaveSwapRateAction.encodeForDsProxyCall()[1];
-
-    console.log(functionData.toLowerCase() === encodedInput);
-
-    const receipt = await executeAction('AaveV3SwapBorrowRateMode', functionData, proxy);
-
-    return receipt;
-};
-
 const aaveV3Payback = async (proxy, market, amount, from, rateMode, assetId, tokenAddr) => {
     const aavePaybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
         true,
@@ -4040,8 +4005,6 @@ module.exports = {
     aaveV3SetEModeCalldataOptimised,
     aaveV3SwitchCollateral,
     aaveV3SwitchCollateralCallDataOptimised,
-    aaveV3SwapBorrowRate,
-    aaveV3SwapBorrowRateCalldataOptimised,
     aaveV3ClaimRewards,
     aaveV3DelegateCredit,
     aaveV3DelegateCreditWithSig,
