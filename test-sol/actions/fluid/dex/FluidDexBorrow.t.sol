@@ -166,6 +166,10 @@ contract TestFluidDexBorrow is FluidTestBase {
         LocalVars memory vars;
 
         for (uint256 i = 0; i < vaults.length; ++i) {
+            if (isMissingVault(vaults[i])) {
+                logVaultNotFound(vaults[i]);
+                continue;
+            }
             vars.nftId = _t3VaultsSelected
                 ? executeFluidVaultT3Open(
                     vaults[i],

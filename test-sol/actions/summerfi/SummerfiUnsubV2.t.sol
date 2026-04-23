@@ -49,7 +49,7 @@ contract SummerfiUnsubV2Test is BaseTest, ActionsUtils, RegistryUtils, SFProxyUt
         owner = 0xDDc68f9dE415ba2fE2FD84bc62Be2d2CFF1098dA;
         sfProxy = IAccountImplementation(0xce049ff57d4146d5bE3a55E60Ef4523bB70798b6);
 
-        _whitelistSFProxyEntryPoint();
+        if (isSFProxySupportedOnSelectedNetwork()) _whitelistAnyAddr(sfProxyEntryPoint);
 
         // Initialize triggerIds: 4 arrays, each with 1 element
         triggerIds = new uint256[][](4);

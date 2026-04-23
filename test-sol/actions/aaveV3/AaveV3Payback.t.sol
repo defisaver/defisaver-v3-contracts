@@ -9,6 +9,7 @@ import { DataTypes } from "../../../contracts/interfaces/protocols/aaveV3/DataTy
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { AaveV3PositionCreator } from "../../utils/positions/AaveV3PositionCreator.sol";
 import { AaveV3Encode } from "../../utils/encode/AaveV3Encode.sol";
+import { console2 } from "forge-std/console2.sol";
 
 contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3PositionCreator {
     /*//////////////////////////////////////////////////////////////////////////
@@ -27,7 +28,7 @@ contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3PositionCreator {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkFromEnv("AaveV3Payback");
+        forkFromEnv("");
         initTestPairs("AaveV3");
 
         wallet = new SmartWallet(bob);
@@ -70,11 +71,33 @@ contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3PositionCreator {
                 debtAmount: amountInUSDPrice(testPairs[i].borrowAsset, 40_000)
             });
 
+            if (!isValidSupply(
+                    DEFAULT_AAVE_MARKET, testPairs[i].supplyAsset, positionParams.collAmount
+                )) {
+                console2.log(
+                    "[AaveV3Payback] Can't supply asset (check cap and flags). Skipping test..."
+                );
+                continue;
+            }
+
+            if (!isValidBorrow(
+                    DEFAULT_AAVE_MARKET, testPairs[i].borrowAsset, positionParams.debtAmount
+                )) {
+                console2.log(
+                    "[AaveV3Payback] Can't borrow asset (check cap and flags). Skipping test..."
+                );
+                continue;
+            }
+
             createAaveV3Position(positionParams, wallet);
 
             uint256 paybackAmount = _useMaxUint
                 ? type(uint256).max
                 : amountInUSDPrice(testPairs[i].borrowAsset, 10_000);
+            if (!isValidRepay(DEFAULT_AAVE_MARKET, testPairs[i].borrowAsset)) {
+                console2.log("[AaveV3Payback] Can't repay asset (check flags). Skipping test...");
+                continue;
+            }
             _payback(positionParams, paybackAmount, _isL2Direct);
 
             vm.revertToState(snapshotId);

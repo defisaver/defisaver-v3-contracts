@@ -36,6 +36,8 @@ contract TestMorphoTokenWrap is BaseTest, ActionsUtils, MorphoBlueHelper {
     function setUp() public override {
         forkFromEnv("MorphoTokenWrap");
 
+        if (isL2NetworkSelected()) vm.skip(true, "MorphoTokenWrap not available on L2s");
+
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
         walletAddr = wallet.walletAddr();

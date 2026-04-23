@@ -18,6 +18,9 @@ contract TestChainLinkPriceTrigger is BaseTest, TokenPriceHelper {
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkFromEnv("ChainlinkPriceTrigger");
+
+        if (isL2NetworkSelected()) vm.skip(true, "ChainLinkPriceTrigger not available on L2s");
+
         cut = new ChainLinkPriceTrigger();
     }
 

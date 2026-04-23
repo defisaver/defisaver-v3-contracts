@@ -22,7 +22,8 @@ library Addresses {
     address public constant USDE_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant EUSDE_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant SUSDE_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address public constant USDC_E = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant USDC_E_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant USDbC_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     // DFS
     address public constant OWNER_ADDR = 0x13fa3D42C09E5E15153F08bb90A79A3Bd63E289D;
@@ -61,4 +62,25 @@ library Addresses {
     address public constant INSTADAPP_MASTER_ACCOUNT = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant SF_PROXY_FACTORY = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant SF_PROXY_GUARD = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
+    // Fluid vaults
+    address public constant FLUID_VAULT_NOT_FOUND = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address public constant FLUID_T1_VAULT_0 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T1_VAULT_1 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T1_VAULT_2 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T1_VAULT_3 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T1_VAULT_4 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T1_VAULT_5 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T1_VAULT_6 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T1_VAULT_7 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T2_VAULT_0 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T2_VAULT_1 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T2_VAULT_2 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T3_VAULT_0 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T3_VAULT_1 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T3_VAULT_2 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T4_VAULT_0 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T4_VAULT_1 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T4_VAULT_2 = FLUID_VAULT_NOT_FOUND;
+    address public constant FLUID_T4_VAULT_3 = FLUID_VAULT_NOT_FOUND;
 }

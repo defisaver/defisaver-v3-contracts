@@ -111,6 +111,10 @@ contract TestFluidLiquidityOpen is FluidTestBase {
         bool wrapBorrowedEth
     ) internal {
         for (uint256 i = 0; i < vaults.length; ++i) {
+            if (isMissingVault(vaults[i])) {
+                logVaultNotFound(vaults[i]);
+                continue;
+            }
             IFluidVaultT1.ConstantViews memory constants = IFluidVaultT1(vaults[i]).constantsView();
             bool isNativeSupply = constants.supplyToken == TokenUtils.ETH_ADDR;
             bool isNativeBorrow = constants.borrowToken == TokenUtils.ETH_ADDR;

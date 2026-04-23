@@ -5,6 +5,7 @@ pragma solidity =0.8.24;
 import { IERC20 } from "../../contracts/interfaces/token/IERC20.sol";
 import { SafeERC20 } from "../../contracts/_vendor/openzeppelin/SafeERC20.sol";
 import { Config } from "../config/Config.sol";
+import { Addresses } from "./helpers/MainnetAddresses.sol";
 
 /// @notice Base test - root contract for all tests
 contract BaseTest is Config {
@@ -14,6 +15,13 @@ contract BaseTest is Config {
     address internal constant charlie = address(0xcc);
     address internal constant jane = address(0x11);
     uint256 internal constant SIGNER_PK = 0xA11CE;
+
+    uint256 internal constant MAINNET_CHAIN_ID = 1;
+    uint256 internal constant ARBITRUM_CHAIN_ID = 42_161;
+    uint256 internal constant OPTIMISM_CHAIN_ID = 10;
+    uint256 internal constant BASE_CHAIN_ID = 8453;
+    uint256 internal constant LINEA_CHAIN_ID = 59_144;
+    uint256 internal constant PLASMA_CHAIN_ID = 9745;
 
     error UnsupportedChain(string chain);
 
@@ -39,6 +47,52 @@ contract BaseTest is Config {
         vm.label(address(bob), "Bob");
         vm.label(address(alice), "Alice");
         _initConfigIfNeeded();
+    }
+
+    function isL2NetworkSelected() internal view returns (bool) {
+        return block.chainid != MAINNET_CHAIN_ID;
+    }
+
+    function isMainnetSelected() internal view returns (bool) {
+        return block.chainid == MAINNET_CHAIN_ID;
+    }
+
+    function isArbitrumSelected() internal view returns (bool) {
+        return block.chainid == ARBITRUM_CHAIN_ID;
+    }
+
+    function isOptimismSelected() internal view returns (bool) {
+        return block.chainid == OPTIMISM_CHAIN_ID;
+    }
+
+    function isBaseSelected() internal view returns (bool) {
+        return block.chainid == BASE_CHAIN_ID;
+    }
+
+    function isLineaSelected() internal view returns (bool) {
+        return block.chainid == LINEA_CHAIN_ID;
+    }
+
+    function isPlasmaSelected() internal view returns (bool) {
+        return block.chainid == PLASMA_CHAIN_ID;
+    }
+
+    function isAutomationSupportedOnSelectedNetwork() internal view returns (bool) {
+        return block.chainid != LINEA_CHAIN_ID && block.chainid != PLASMA_CHAIN_ID;
+    }
+
+    function isFLBalancerSupportedOnSelectedNetwork() internal view returns (bool) {
+        return block.chainid != LINEA_CHAIN_ID && block.chainid != PLASMA_CHAIN_ID;
+    }
+
+    function skipIfAutomationNotSupportedOnSelectedNetwork() internal {
+        if (!isAutomationSupportedOnSelectedNetwork()) {
+            vm.skip(true, "Skipping test. Automation not supported on selected network.");
+        }
+    }
+
+    function isSFProxySupportedOnSelectedNetwork() internal view returns (bool) {
+        return block.chainid != LINEA_CHAIN_ID && block.chainid != PLASMA_CHAIN_ID;
     }
 
     function forkFromEnv(string memory testName) internal {
@@ -154,6 +208,25 @@ contract BaseTest is Config {
 
         TestPair[] memory pairs = getTestPairsForProtocol(_protocolName);
         for (uint256 i = 0; i < pairs.length; ++i) {
+            // On Base chain, only borrow USDC
+            if (
+                block.chainid == BASE_CHAIN_ID
+                    && (pairs[i].borrowAsset == Addresses.USDT_ADDR
+                        || pairs[i].borrowAsset == Addresses.DAI_ADDR)
+            ) {
+                pairs[i].borrowAsset = Addresses.USDC_ADDR;
+            }
+
+            // AAVE's LTV on OP and Arbitrum chain is 0, so we switch to USDC as supply asset
+            if (block.chainid != MAINNET_CHAIN_ID && pairs[i].supplyAsset == Addresses.AAVE_ADDR) {
+                pairs[i].supplyAsset = Addresses.USDC_ADDR;
+            }
+
+            // On Linea chain, only borrow USDC as DAI is not supported
+            if (block.chainid == LINEA_CHAIN_ID && pairs[i].borrowAsset == Addresses.DAI_ADDR) {
+                pairs[i].borrowAsset = Addresses.USDC_ADDR;
+            }
+
             testPairs.push(pairs[i]);
         }
     }

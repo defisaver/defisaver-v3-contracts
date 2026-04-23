@@ -25,6 +25,8 @@ contract TestCore_SmartWalletUtils is BaseTest {
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_create_DSProxy_wallet() public {
+        skipIfAutomationNotSupportedOnSelectedNetwork();
+
         SmartWallet wallet = new SmartWallet(bob);
         address dsProxyAddress = wallet.createDSProxy();
         assertTrue(cut.isDSProxy(dsProxyAddress));
@@ -41,6 +43,8 @@ contract TestCore_SmartWalletUtils is BaseTest {
     }
 
     function test_should_create_DSA_wallet() public {
+        skipIfAutomationNotSupportedOnSelectedNetwork();
+
         SmartWallet wallet = new SmartWallet(bob);
         address dsaProxyWallet = wallet.createDSAProxy();
         assertFalse(cut.isDSProxy(dsaProxyWallet));
@@ -49,6 +53,8 @@ contract TestCore_SmartWalletUtils is BaseTest {
     }
 
     function test_should_create_Summerfi_wallet() public {
+        skipIfAutomationNotSupportedOnSelectedNetwork();
+
         SmartWallet wallet = new SmartWallet(bob);
         address sfProxyAddress = wallet.createSFProxy();
         assertFalse(cut.isDSProxy(sfProxyAddress));
@@ -69,6 +75,8 @@ contract TestCore_SmartWalletUtils is BaseTest {
     }
 
     function test_should_return_correct_wallet_type() public {
+        skipIfAutomationNotSupportedOnSelectedNetwork();
+
         SmartWallet safeWallet = new SmartWallet(bob);
         address safeAddress = safeWallet.walletAddr();
 
@@ -92,9 +100,11 @@ contract TestCore_SmartWalletUtils is BaseTest {
         address safeAddress = safeWallet.walletAddr();
 
         SmartWallet dsProxyWallet = new SmartWallet(alice);
-        address dsProxyAddress = dsProxyWallet.createDSProxy();
-
         assertTrue(cut.fetchOwnerOrWallet(safeAddress) == bob);
-        assertTrue(cut.fetchOwnerOrWallet(dsProxyAddress) == alice);
+
+        if (isAutomationSupportedOnSelectedNetwork()) {
+            address dsProxyAddress = dsProxyWallet.createDSProxy();
+            assertTrue(cut.fetchOwnerOrWallet(dsProxyAddress) == alice);
+        }
     }
 }

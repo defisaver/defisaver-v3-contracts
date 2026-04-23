@@ -4,14 +4,14 @@
         "mainnet": 22238839,
         "arbitrum": 435822265,
         "base": 42616958,
-        "linea": 29163196,
+        "linea": 29766718,
         "optimism": 148212260,
         "plasma": 15091553
     },
 
     "SparkViewSmall": { "mainnet": 23764256 },
     "PendleTokenRedeem": { "mainnet": 22875735 },
-    "StrategyTriggerViewNoRevert": { "mainnet": 22595730 },
+    "StrategyTriggerViewNoRevert": { "mainnet": 24741489 },
     "LiquityV2Adjust": { "mainnet": 22519730 },
     "LiquityV2AdjustInterestRate": { "mainnet": 22519730 },
     "LiquityV2AdjustZombieTrove": { "mainnet": 22519730 },
@@ -29,14 +29,17 @@
     "UmbrellaStake": { "mainnet": 22644898 },
     "UmbrellaUnstake": { "mainnet": 22644898 },
     "SummerfiUnsubV2": { "mainnet": 24246520 },
+    "CompV3Automation": { "mainnet": 24741489 },
+    "CompV3EOAAutomation": { "mainnet": 24741489 },
+    "AaveV3View": { "mainnet": 24741489 },
     "AaveV3": {
         "lightTesting": false,
         "lightPairs": [{ "supplyAsset": "WETH", "borrowAsset": "DAI" }],
         "fullPairs": [
             { "supplyAsset": "WETH", "borrowAsset": "DAI" },
             { "supplyAsset": "WBTC", "borrowAsset": "USDC" },
-            { "supplyAsset": "WSETH", "borrowAsset": "WETH" },
-            { "supplyAsset": "LINK", "borrowAsset": "USDT" }
+            { "supplyAsset": "WSTETH", "borrowAsset": "WETH" },
+            { "supplyAsset": "AAVE", "borrowAsset": "USDT" }
         ]
     },
     "EulerV2": {

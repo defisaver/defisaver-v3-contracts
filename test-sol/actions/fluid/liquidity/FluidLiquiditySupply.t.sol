@@ -99,6 +99,10 @@ contract TestFluidLiquiditySupply is FluidTestBase {
         address[] memory vaults = _t1VaultsSelected ? t1Vaults : t3Vaults;
 
         for (uint256 i = 0; i < vaults.length; ++i) {
+            if (isMissingVault(vaults[i])) {
+                logVaultNotFound(vaults[i]);
+                continue;
+            }
             uint256 nftId = _t1VaultsSelected
                 ? executeFluidVaultT1Open(
                     address(vaults[i]),

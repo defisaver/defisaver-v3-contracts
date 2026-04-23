@@ -59,7 +59,7 @@ contract TestCompV3Automation is BaseTest, RegistryUtils, ActionsUtils {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkFromEnv("");
+        forkFromEnv("CompV3Automation");
 
         trigger = new CompV3RatioTrigger();
         flAction = new FLAction();

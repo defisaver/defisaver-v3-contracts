@@ -169,6 +169,10 @@ contract TestFluidLiquidityWithdraw is FluidTestBase {
         FluidLiquidityWithdrawLocalVars memory vars;
 
         for (uint256 i = 0; i < vaults.length; ++i) {
+            if (isMissingVault(vaults[i])) {
+                logVaultNotFound(vaults[i]);
+                continue;
+            }
             vars.nftId = _t1VaultsSelected
                 ? executeFluidVaultT1Open(
                     address(vaults[i]),

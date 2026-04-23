@@ -19,9 +19,10 @@ contract Config is Tokens {
     }
 
     /// @dev Fields have to be placed in alphabetical order for foundry parser to work
+    /// @dev Seems that the comment above is not true anymore, but leaving comments here in case we need to revert to it. Currently on version 1.6.1 of foundry.
     struct TestPairConfig {
-        string borrowAsset;
         string supplyAsset;
+        string borrowAsset;
     }
 
     struct ProtocolTestPairsConfig {

@@ -17,21 +17,19 @@ fs_permissions = [{ access = 'read', path = './test-sol/config/' }]
 
 
 [profile.arbitrum]
-# TODO -> Check fluid tests
-no_match_path = "test-sol/{actions,views}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,aaveV3/umbrella,fluid,AaveView}*"
+no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation,aaveV3/umbrella,AaveView,aaveV4/aavev4/AaveV4View}*"
 
 [profile.base]
-no_match_path = "test-sol/{actions,views}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi}*"
+no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation,aaveV3/umbrella,AaveView,aaveV4/aavev4/AaveV4View}*"
 
 [profile.optimism]
-no_match_path = "test-sol/{actions,views}/*{eulerV2,etherFi,fluid,Fluid,gho,liquityV2,morpho-blue,Morpho,pendle,renzo,sky,Sky,Spark,summerfi}*"
+no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation,aaveV3/umbrella,fluid,AaveView,aaveV4/aavev4/AaveV4View}*"
 
 [profile.linea]
-no_match_path = "test-sol/{actions,views}/*{eulerV2,etherFi,fluid,Fluid,gho,liquityV2,morpho-blue,Morpho,pendle,renzo,sky,Sky,Spark,summerfi}*"
-evm_version = "london"
+match_path = "test-sol/{actions,core,views}/{aaveV3/AaveV3,AaveV3,DFSRegistry,RecipeExecutor,SafeModuleAuth,SmartWalletUtils,aaveV4/aavev4/AaveV4View}*"
 
 [profile.plasma]
-no_match_path = "test-sol/{actions,views}/*{eulerV2,etherFi,fluid,Fluid,gho,liquityV2,morpho-blue,Morpho,pendle,renzo,sky,Sky,Spark,summerfi}*"
+match_path = "test-sol/{actions,core,views}/{aaveV3/AaveV3,AaveV3,DFSRegistry,RecipeExecutor,SafeModuleAuth,SmartWalletUtils,aaveV4/aavev4/AaveV4View}*"
 
 
 # Formatting -> https://getfoundry.sh/config/reference/formatter/
