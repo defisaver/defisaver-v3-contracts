@@ -6,7 +6,7 @@ import {
     AaveV3CollateralSwitch
 } from "../../../contracts/actions/aaveV3/AaveV3CollateralSwitch.sol";
 import { AaveV3Supply } from "../../../contracts/actions/aaveV3/AaveV3Supply.sol";
-import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
+import { AaveV3TestHelper } from "../../utils/aaveV3/AaveV3TestHelper.sol";
 import { IL2PoolV3 } from "../../../contracts/interfaces/protocols/aaveV3/IL2PoolV3.sol";
 import {
     IAaveProtocolDataProvider
@@ -17,8 +17,9 @@ import { Addresses } from "../../utils/helpers/MainnetAddresses.sol";
 import { AaveV3ExecuteActions } from "../../utils/executeActions/AaveV3ExecuteActions.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { AaveV3Encode } from "../../utils/encode/AaveV3Encode.sol";
+import { console2 } from "forge-std/console2.sol";
 
-contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
+contract TestAaveV3CollateralSwitch is AaveV3TestHelper, AaveV3ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -72,13 +73,15 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
                                       TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_switch_collateral() public {
-        _supply();
-        _switchCollateral(false);
+        if (_validSupplyExecuted()) {
+            _switchCollateral(false);
+        }
     }
 
     function test_should_switch_collateral_direct_action_l2() public {
-        _supply();
-        _switchCollateral(true);
+        if (_validSupplyExecuted()) {
+            _switchCollateral(true);
+        }
     }
 
     function test_empty_encoding_decoding_inputs() public view {
@@ -153,6 +156,12 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
     function _switchCollateral(bool _isL2Direct) internal {
         uint16[] memory assetIds = new uint16[](assets.length);
         for (uint256 i = 0; i < assets.length; i++) {
+            if (!isValidSetAsCollateral(DEFAULT_AAVE_MARKET, assets[i].asset)) {
+                console2.log(
+                    "[AaveV3CollateralSwitch] Can't set asset as collateral (check flags). Skipping test..."
+                );
+                return;
+            }
             assetIds[i] = assets[i].assetId;
         }
 
@@ -199,11 +208,18 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
         }
     }
 
-    function _supply() internal {
+    function _validSupplyExecuted() internal returns (bool) {
         for (uint256 i = 0; i < assets.length; ++i) {
             TestAsset memory a = assets[i];
+            uint256 amount = amountInUSDPrice(a.asset, 10_000);
+            if (!isValidSupply(DEFAULT_AAVE_MARKET, a.asset, amount)) {
+                console2.log(
+                    "[AaveV3CollateralSwitch] Can't supply asset (check cap and flags). Skipping test..."
+                );
+                return false;
+            }
             AaveV3Supply.Params memory supplyParams = AaveV3Supply.Params({
-                amount: amountInUSDPrice(a.asset, 10_000),
+                amount: amount,
                 from: sender,
                 assetId: a.assetId,
                 enableAsColl: true,
@@ -214,5 +230,6 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
             });
             executeAaveV3Supply(supplyParams, a.asset, wallet, false, aaveV3SupplyContractAddr);
         }
+        return true;
     }
 }

@@ -11,7 +11,7 @@
 
     "SparkViewSmall": { "mainnet": 23764256 },
     "PendleTokenRedeem": { "mainnet": 22875735 },
-    "StrategyTriggerViewNoRevert": { "mainnet": 22595730 },
+    "StrategyTriggerViewNoRevert": { "mainnet": 24741489 },
     "LiquityV2Adjust": { "mainnet": 22519730 },
     "LiquityV2AdjustInterestRate": { "mainnet": 22519730 },
     "LiquityV2AdjustZombieTrove": { "mainnet": 22519730 },
@@ -29,6 +29,9 @@
     "UmbrellaStake": { "mainnet": 22644898 },
     "UmbrellaUnstake": { "mainnet": 22644898 },
     "SummerfiUnsubV2": { "mainnet": 24246520 },
+    "CompV3Automation": { "mainnet": 24741489 },
+    "CompV3EOAAutomation": { "mainnet": 24741489 },
+    "AaveV3View": { "mainnet": 24741489 },
     "AaveV3": {
         "lightTesting": false,
         "lightPairs": [{ "supplyAsset": "WETH", "borrowAsset": "DAI" }],

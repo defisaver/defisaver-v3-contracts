@@ -33,8 +33,10 @@ import { Strategies } from "../../utils/Strategies.sol";
 import { AaveV3User } from "../../utils/aaveV3/AaveV3User.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { AaveV3Encode } from "../../utils/encode/AaveV3Encode.sol";
+import { AaveV3TestHelper } from "../../utils/aaveV3/AaveV3TestHelper.sol";
+import { console2 } from "forge-std/console2.sol";
 
-contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
+contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils, AaveV3TestHelper {
     /*//////////////////////////////////////////////////////////////////////////
                                      VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
@@ -71,7 +73,9 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
     IPoolV3 internal pool;
 
     DataTypes.ReserveData internal collateralAsset;
+    address internal collateralToken;
     DataTypes.ReserveData internal debtAsset;
+    address internal debtToken;
 
     FLAction internal flAction;
     StrategyExecutor internal executor;
@@ -165,11 +169,27 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
         boostBundleId = uint64(bundleBuilder.init(boostIds));
     }
 
-    function _createAaveV3Position(bool _isSafe, address _wallet) internal {
+    function _createAaveV3Position(bool _isSafe, address _wallet) internal returns (bool) {
         gibTokens(_wallet, Addresses.WETH_ADDR, INITIAL_TOKEN_AMOUNT);
+
+        if (!isValidSupply(AAVE_MARKET, collateralToken, INITIAL_COLLATERAL_WETH_AMOUNT)) {
+            console2.log(
+                "[AaveV3Automation] Can't supply collateral asset (check cap and flags). Skipping test..."
+            );
+            return false;
+        }
+
+        if (!isValidBorrow(AAVE_MARKET, debtToken, INITIAL_DEBT_DAI_AMOUNT)) {
+            console2.log(
+                "[AaveV3Automation] Can't borrow debt asset (check cap and flags). Skipping test..."
+            );
+            return false;
+        }
 
         user.supply(INITIAL_COLLATERAL_WETH_AMOUNT, _isSafe, collateralAsset.id, AAVE_MARKET);
         user.borrow(_isSafe, AAVE_MARKET, INITIAL_DEBT_DAI_AMOUNT, 2, debtAsset.id);
+
+        return true;
     }
 
     function _subToAutomationBundles(bool _isSafe) internal {
@@ -186,10 +206,11 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
         boostSub = _formatBoostSub(params);
     }
 
-    function _walletSetUpBeforeEachTest(bool _isSafe) internal {
+    function _walletSetUpBeforeEachTest(bool _isSafe) internal returns (bool) {
         wallet = _isSafe ? user.safeAddr() : user.proxyAddr();
-        _createAaveV3Position(_isSafe, wallet);
+        if (!_createAaveV3Position(_isSafe, wallet)) return false;
         _subToAutomationBundles(_isSafe);
+        return true;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -216,7 +237,7 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
     }
 
     function _testAaveV3RepayStrategy(bool _isSafe) internal {
-        _walletSetUpBeforeEachTest(_isSafe);
+        if (!_walletSetUpBeforeEachTest(_isSafe)) return;
 
         uint256 beforeRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
 
@@ -255,7 +276,7 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
     }
 
     function _testAaveV3FLRepayStrategy(bool _isSafe) internal {
-        _walletSetUpBeforeEachTest(_isSafe);
+        if (!_walletSetUpBeforeEachTest(_isSafe)) return;
 
         bytes[] memory _triggerCallData = new bytes[](1);
 
@@ -289,7 +310,7 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
     }
 
     function _testAaveV3BoostStrategy(bool _isSafe) internal {
-        _walletSetUpBeforeEachTest(_isSafe);
+        if (!_walletSetUpBeforeEachTest(_isSafe)) return;
 
         user.supply(INITIAL_COLLATERAL_WETH_AMOUNT, _isSafe, collateralAsset.id, AAVE_MARKET);
 
@@ -318,7 +339,7 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
     }
 
     function _testAaveV3BoostFLStrategy(bool _isSafe) internal {
-        _walletSetUpBeforeEachTest(_isSafe);
+        if (!_walletSetUpBeforeEachTest(_isSafe)) return;
 
         user.supply(INITIAL_COLLATERAL_WETH_AMOUNT, _isSafe, collateralAsset.id, AAVE_MARKET);
 

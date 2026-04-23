@@ -16,10 +16,11 @@ import { AaveV3Supply } from "../../contracts/actions/aaveV3/AaveV3Supply.sol";
 import { AaveV3Borrow } from "../../contracts/actions/aaveV3/AaveV3Borrow.sol";
 
 import { AaveV3View } from "../../contracts/views/AaveV3View.sol";
-import { AaveV3Helper } from "../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
+import { AaveV3TestHelper } from "../utils/aaveV3/AaveV3TestHelper.sol";
 import { AaveV3Encode } from "../utils/encode/AaveV3Encode.sol";
+import { console2 } from "forge-std/console2.sol";
 
-contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
+contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3TestHelper {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -49,7 +50,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkFromEnv("");
+        forkFromEnv("AaveV3View");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -97,6 +98,16 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
     }
 
     function _baseTestProxy(TestConfig memory config) internal {
+        if (!isValidSupply(DEFAULT_AAVE_MARKET, config.supplyToken, config.supplyAmount)) {
+            console2.log("[AaveV3View] Can't supply asset (check cap and flags). Skipping test...");
+            return;
+        }
+
+        if (!isValidBorrow(DEFAULT_AAVE_MARKET, config.borrowToken, config.borrowAmount)) {
+            console2.log("[AaveV3View] Can't borrow asset (check cap and flags). Skipping test...");
+            return;
+        }
+
         // Give initial balance for supply token
         give(config.supplyToken, sender, config.initialBalance);
 
@@ -134,6 +145,16 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
     }
 
     function _baseTest(TestConfig memory config) internal {
+        if (!isValidSupply(DEFAULT_AAVE_MARKET, config.supplyToken, config.supplyAmount)) {
+            console2.log("[AaveV3View] Can't supply asset (check cap and flags). Skipping test...");
+            return;
+        }
+
+        if (!isValidBorrow(DEFAULT_AAVE_MARKET, config.borrowToken, config.borrowAmount)) {
+            console2.log("[AaveV3View] Can't borrow asset (check cap and flags). Skipping test...");
+            return;
+        }
+
         // Give initial balance for supply token
         give(config.supplyToken, sender, config.initialBalance);
 

@@ -9,6 +9,7 @@ import { DataTypes } from "../../../contracts/interfaces/protocols/aaveV3/DataTy
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { AaveV3PositionCreator } from "../../utils/positions/AaveV3PositionCreator.sol";
 import { AaveV3Encode } from "../../utils/encode/AaveV3Encode.sol";
+import { console2 } from "forge-std/console2.sol";
 
 contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
     /*//////////////////////////////////////////////////////////////////////////
@@ -69,6 +70,24 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
                 debtAddr: testPairs[i].borrowAsset,
                 debtAmount: amountInUSDPrice(testPairs[i].borrowAsset, 40_000)
             });
+
+            if (!isValidSupply(
+                    DEFAULT_AAVE_MARKET, testPairs[i].supplyAsset, positionParams.collAmount
+                )) {
+                console2.log(
+                    "[AaveV3ATokenPayback] Can't supply asset (check cap and flags). Skipping test..."
+                );
+                continue;
+            }
+
+            if (!isValidBorrow(
+                    DEFAULT_AAVE_MARKET, testPairs[i].borrowAsset, positionParams.debtAmount
+                )) {
+                console2.log(
+                    "[AaveV3ATokenPayback] Can't borrow asset (check cap and flags). Skipping test..."
+                );
+                continue;
+            }
 
             createAaveV3Position(positionParams, wallet);
 
@@ -141,6 +160,13 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
         uint16 debtAssetId = reserveData.id;
         address debtVariableTokenAddr = reserveData.variableDebtTokenAddress;
         address debtATokenAddr = reserveData.aTokenAddress;
+
+        if (!isValidRepay(DEFAULT_AAVE_MARKET, _positionParams.debtAddr)) {
+            console2.log(
+                "[AaveV3ATokenPayback] Can't repay asset (check cap and flags). Skipping test..."
+            );
+            return;
+        }
 
         uint256 walletSafetyRatioBefore = getSafetyRatio(DEFAULT_AAVE_MARKET, walletAddr);
         uint256 walletVariableDebtBefore = balanceOf(debtVariableTokenAddr, walletAddr);

@@ -23,8 +23,8 @@ import { AaveV3Supply } from "../../../contracts/actions/aaveV3/AaveV3Supply.sol
 import { AaveV3Borrow } from "../../../contracts/actions/aaveV3/AaveV3Borrow.sol";
 import { AaveV3Payback } from "../../../contracts/actions/aaveV3/AaveV3Payback.sol";
 import { AaveV3Withdraw } from "../../../contracts/actions/aaveV3/AaveV3Withdraw.sol";
-import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
 import { AaveV3RatioHelper } from "../../../contracts/actions/aaveV3/helpers/AaveV3RatioHelper.sol";
+import { AaveV3TestHelper } from "../aaveV3/AaveV3TestHelper.sol";
 import { AaveV3Encode } from "../encode/AaveV3Encode.sol";
 import { FLAction } from "../../../contracts/actions/flashloan/FLAction.sol";
 import { SendToken } from "../../../contracts/actions/utils/SendToken.sol";
@@ -35,12 +35,13 @@ import {
     SFProxyFactoryHelper
 } from "../../../contracts/utils/addresses/sfProxyFactory/SFProxyFactoryHelper.sol";
 import { SFProxyUtils } from "./SFProxyUtils.sol";
+import { console2 } from "forge-std/console2.sol";
 
-contract SFProxyIntegration is
+contract TestSFProxyIntegration is
     BaseTest,
     ActionsUtils,
     RegistryUtils,
-    AaveV3Helper,
+    AaveV3TestHelper,
     AaveV3RatioHelper,
     SFProxyFactoryHelper,
     SFProxyUtils
@@ -122,14 +123,14 @@ contract SFProxyIntegration is
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function testOpenPositionOnBehalfOfEOA() public {
-        _createAaveV3Position(bob);
+        if (!_createAaveV3Position(bob)) return;
 
         uint256 ratio = getSafetyRatio(DEFAULT_AAVE_MARKET, bob);
         assertGt(ratio, 1e18);
     }
 
     function testOpenPositionForSSW() public {
-        _createAaveV3Position(sfProxy);
+        if (!_createAaveV3Position(sfProxy)) return;
 
         uint256 ratio = getSafetyRatio(DEFAULT_AAVE_MARKET, sfProxy);
         assertGt(ratio, 1e18);
@@ -187,7 +188,7 @@ contract SFProxyIntegration is
     }
 
     function testFlashLoanRepayPosition() public {
-        _createAaveV3Position(sfProxy);
+        if (!_createAaveV3Position(sfProxy)) return;
 
         DataTypes.ReserveData memory borrowReserve = aavePool.getReserveData(BORROW_ASSET);
         uint256 debtBefore = balanceOf(borrowReserve.variableDebtTokenAddress, sfProxy);
@@ -202,7 +203,7 @@ contract SFProxyIntegration is
     }
 
     function testFlashLoanClosePosition() public {
-        _createAaveV3Position(sfProxy);
+        if (!_createAaveV3Position(sfProxy)) return;
 
         DataTypes.ReserveData memory supplyReserve = aavePool.getReserveData(SUPPLY_ASSET);
         DataTypes.ReserveData memory borrowReserve = aavePool.getReserveData(BORROW_ASSET);
@@ -313,7 +314,21 @@ contract SFProxyIntegration is
             );
     }
 
-    function _createAaveV3Position(address _onBehalf) internal {
+    function _createAaveV3Position(address _onBehalf) internal returns (bool) {
+        if (!isValidSupply(DEFAULT_AAVE_MARKET, SUPPLY_ASSET, supplyAmount)) {
+            console2.log(
+                "[SFProxyIntegration] Can't supply asset (check cap and flags). Skipping test..."
+            );
+            return false;
+        }
+
+        if (!isValidBorrow(DEFAULT_AAVE_MARKET, BORROW_ASSET, borrowAmount)) {
+            console2.log(
+                "[SFProxyIntegration] Can't borrow asset (check cap and flags). Skipping test..."
+            );
+            return false;
+        }
+
         DataTypes.ReserveData memory supplyReserve = aavePool.getReserveData(SUPPLY_ASSET);
         DataTypes.ReserveData memory borrowReserve = aavePool.getReserveData(BORROW_ASSET);
 
@@ -353,6 +368,8 @@ contract SFProxyIntegration is
         assertApproxEqAbs(
             balanceOf(supplyReserve.aTokenAddress, _onBehalf), aTokenBefore + supplyAmount, 2
         );
+
+        return true;
     }
 
     function _createRecipe(bytes[] memory _actionsCalldata, bytes4[] memory _actionIds)

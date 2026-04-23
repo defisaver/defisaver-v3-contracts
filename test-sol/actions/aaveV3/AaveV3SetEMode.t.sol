@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { AaveV3SetEMode } from "../../../contracts/actions/aaveV3/AaveV3SetEMode.sol";
 import { AaveV3Supply } from "../../../contracts/actions/aaveV3/AaveV3Supply.sol";
-import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
+import { AaveV3TestHelper } from "../../utils/aaveV3/AaveV3TestHelper.sol";
 import { IL2PoolV3 } from "../../../contracts/interfaces/protocols/aaveV3/IL2PoolV3.sol";
 import { DataTypes } from "../../../contracts/interfaces/protocols/aaveV3/DataTypes.sol";
 
@@ -12,8 +12,9 @@ import { Addresses } from "../../utils/helpers/MainnetAddresses.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { AaveV3ExecuteActions } from "../../utils/executeActions/AaveV3ExecuteActions.sol";
 import { AaveV3Encode } from "../../utils/encode/AaveV3Encode.sol";
+import { console2 } from "forge-std/console2.sol";
 
-contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
+contract TestAaveV3SetEMode is AaveV3TestHelper, AaveV3ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -50,7 +51,7 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
     function test_should_change_eMode() public {
         address token = Addresses.WETH_ADDR;
         uint256 supplyAmount = amountInUSDPrice(token, 100_000);
-        _supply(token, supplyAmount);
+        if (!_validSupplyExecuted(token, supplyAmount)) return;
 
         bool isL2Direct = false;
         uint8 ethCorrelatedCategoryId = 1;
@@ -61,7 +62,7 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
     function test_should_change_eMode_l2_direct() public {
         address token = Addresses.WETH_ADDR;
         uint256 supplyAmount = amountInUSDPrice(token, 100_000);
-        _supply(token, supplyAmount);
+        if (!_validSupplyExecuted(token, supplyAmount)) return;
 
         bool isL2Direct = true;
         uint8 ethCorrelatedCategoryId = 1;
@@ -123,7 +124,14 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
         assertEq(categoryIdAfter, _categoryId);
     }
 
-    function _supply(address _token, uint256 _amount) internal {
+    function _validSupplyExecuted(address _token, uint256 _amount) internal returns (bool) {
+        if (!isValidSupply(DEFAULT_AAVE_MARKET, _token, _amount)) {
+            console2.log(
+                "[AaveV3SetEMode] Can't supply asset (check cap and flags). Skipping test..."
+            );
+            return false;
+        }
+
         DataTypes.ReserveData memory tokenData = pool.getReserveData(_token);
         AaveV3Supply.Params memory supplyParams = AaveV3Supply.Params({
             amount: _amount,
@@ -137,5 +145,6 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
         });
 
         executeAaveV3Supply(supplyParams, _token, wallet, false, aaveV3SupplyContractAddr);
+        return true;
     }
 }
