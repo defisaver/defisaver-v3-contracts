@@ -2,13 +2,14 @@
 
 pragma solidity =0.8.24;
 
+import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
+import { IRecipeExecutor } from "../interfaces/core/IRecipeExecutor.sol";
+import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { BotAuthForTxSaver } from "./BotAuthForTxSaver.sol";
 import { CoreHelper } from "../core/helpers/CoreHelper.sol";
-import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 import { StrategyModel } from "../core/strategy/StrategyModel.sol";
 import { DFSExchangeData } from "../exchangeV3/DFSExchangeData.sol";
-import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
 import { TxSaverBytesTransientStorage } from "./TxSaverBytesTransientStorage.sol";
 import { DFSIds } from "../utils/DFSIds.sol";
 
@@ -22,6 +23,8 @@ contract TxSaverExecutor is StrategyModel, AdminAuth, CoreHelper, TxSaverBytesTr
     error SafeExecutionError();
     /// Revert if signature is expired
     error TxSaverSignatureExpired(uint256 deadline, uint256 currentTimestamp);
+    /// Revert if provided calldata does not target the expected TxSaver entrypoint
+    error WrongSelector(bytes4 providedSelector);
 
     /// @notice Data needed to execute a Safe transaction
     /// @param safe Address of the Safe wallet
@@ -105,6 +108,13 @@ contract TxSaverExecutor is StrategyModel, AdminAuth, CoreHelper, TxSaverBytesTr
         pure
         returns (Recipe memory recipe, TxSaverSignedData memory txSaverData)
     {
+        bytes4 selector = bytes4(_data[:4]);
+        // Make sure we use the correct entry point.
+        // Can be validated off-chain as well, but we add an on-chain sanity check to make the intention clear.
+        if (selector != IRecipeExecutor.executeRecipeFromTxSaver.selector) {
+            revert WrongSelector(selector);
+        }
+
         (recipe, txSaverData) = abi.decode(_data[4:], (Recipe, TxSaverSignedData));
     }
 }
