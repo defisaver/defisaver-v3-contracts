@@ -37,6 +37,11 @@ contract GasFeeHelper is DSMath, TokenPriceHelper {
             _gasUsed = block.gaslimit;
         }
 
+        // additional l1 gas cost must stay 0 for mainnet
+        if (block.chainid == 1 && _l1GasCostInEth > 0) {
+            _l1GasCostInEth = 0;
+        }
+
         // calc gas used
         txCost = (_gasUsed * gasPrice) + _l1GasCostInEth;
 
