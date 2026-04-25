@@ -59,15 +59,15 @@ contract TxSaverBytesTransientStorage is ITxSaverBytesTransientStorage {
         }
         // find out how many full size chunks there are
         uint256 chunks = dataLength / 32;
-        uint256 i = 1;
-        // concat each full size chunk to the result
-        for (i; i <= chunks; ++i) {
+        // pre-allocate result and write chunks directly to memory
+        result = new bytes(dataLength);
+        for (uint256 i = 0; i < chunks; ++i) {
             bytes32 chunk;
-            uint256 slot = i + 1;
+            uint256 slot = i + 2;
             assembly {
                 chunk := tload(slot)
+                mstore(add(add(result, 0x20), mul(i, 0x20)), chunk)
             }
-            result = bytes.concat(result, chunk);
         }
     }
 }
