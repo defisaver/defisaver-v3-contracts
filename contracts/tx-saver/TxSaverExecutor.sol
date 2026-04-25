@@ -13,7 +13,13 @@ import { DFSExchangeData } from "../exchangeV3/DFSExchangeData.sol";
 import { TxSaverBytesTransientStorage } from "./TxSaverBytesTransientStorage.sol";
 import { DFSIds } from "../utils/DFSIds.sol";
 
-/// @title Main entry point for executing TxSaver transactions signed by users through safe wallet
+/// @title Main entry point for executing TxSaver transactions signed by users through a safe wallet.
+/// @dev Only callable by trusted bots.
+/// @notice The bot is allowed to inject the following parameters, which bypass the user signature:
+/// - estimated gas used -> used to calculate gas cost, as we can't be precise enough on-chain due to gas refunds
+/// - additional L1 gas cost -> represents additional L1 data availability costs for Optimism-based L2 chains
+/// - injected exchange data -> allows injecting a new exchange route if the old one is outdated or if a better one can be fetched
+/// Gas cost is capped by the user-signed maxTxCostInFeeToken, and the exchange route can't have a price lower than the user-signed minPrice.
 contract TxSaverExecutor is StrategyModel, AdminAuth, CoreHelper, TxSaverBytesTransientStorage {
     IDFSRegistry private constant registry = IDFSRegistry(REGISTRY_ADDR);
 
