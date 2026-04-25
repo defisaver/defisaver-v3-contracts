@@ -9,6 +9,8 @@ import { UtilAddresses } from "../utils/addresses/UtilAddresses.sol";
 contract TxSaverGasCostCalc is DSMath, UtilAddresses {
     using TokenUtils for address;
 
+    uint256 private constant SANITY_GAS_PRICE = 1000 gwei;
+
     // only support token with decimals <= 18
     error TokenDecimalsTooHigh(uint256 decimals);
     // when injecting price, price must be greater than 0
@@ -20,13 +22,25 @@ contract TxSaverGasCostCalc is DSMath, UtilAddresses {
         uint256 _tokenPriceInEth,
         uint256 _l1GasCostInEth
     ) internal view returns (uint256 txCost) {
+        uint256 gasPrice = tx.gasprice;
+
+        // gas price must be in a reasonable range
+        if (tx.gasprice > SANITY_GAS_PRICE) {
+            gasPrice = SANITY_GAS_PRICE;
+        }
+
         // can't use more gas than the block gas limit
         if (_gasUsed > block.gaslimit) {
             _gasUsed = block.gaslimit;
         }
 
+        // additional l1 gas cost must stay 0 for mainnet
+        if (block.chainid == 1 && _l1GasCostInEth > 0) {
+            _l1GasCostInEth = 0;
+        }
+
         // calc gas used
-        txCost = (_gasUsed * tx.gasprice) + _l1GasCostInEth;
+        txCost = (_gasUsed * gasPrice) + _l1GasCostInEth;
 
         // convert to token amount
         if (_feeToken != TokenUtils.WETH_ADDR) {
