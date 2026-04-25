@@ -20,6 +20,11 @@ import { DFSIds } from "../utils/DFSIds.sol";
 /// - additional L1 gas cost -> represents additional L1 data availability costs for Optimism-based L2 chains
 /// - injected exchange data -> allows injecting a new exchange route if the old one is outdated or if a better one can be fetched
 /// Gas cost is capped by the user-signed maxTxCostInFeeToken, and the exchange route can't have a price lower than the user-signed minPrice.
+/// @notice When taking a fee from a position, the transaction is validated off-chain before execution.
+/// The validation includes, but are not limited to:
+/// - ensuring the recipe contains exactly one sell action
+/// - ensuring the sell source and destination tokens are different
+/// Any invalid recipe will be rejected by the bot.
 contract TxSaverExecutor is StrategyModel, AdminAuth, CoreHelper, TxSaverBytesTransientStorage {
     IDFSRegistry private constant registry = IDFSRegistry(REGISTRY_ADDR);
 
