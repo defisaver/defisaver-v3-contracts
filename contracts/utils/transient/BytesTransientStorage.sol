@@ -48,28 +48,25 @@ contract BytesTransientStorage {
         }
         // find out how many full size chunks there are
         uint256 chunks = dataLength / 32;
-        uint256 i = 1;
-        // concat each full size chunk to the result
-        for (i; i <= chunks; ++i) {
+        // pre-allocate result and write chunks directly to memory
+        result = new bytes(dataLength);
+        for (uint256 i = 0; i < chunks; ++i) {
             bytes32 chunk;
+            uint256 slot = i + 1;
             assembly {
-                chunk := tload(i)
+                chunk := tload(slot)
+                mstore(add(add(result, 0x20), mul(i, 0x20)), chunk)
             }
-            result = bytes.concat(result, chunk);
         }
         uint256 leftover = dataLength % 32;
-        // create a bytes consisting only of the leftover information
+        // write the padded leftover chunk; result.length trims the padding
         if (leftover > 0) {
             bytes32 lastChunk;
+            uint256 slot = chunks + 1;
             assembly {
-                lastChunk := tload(i)
+                lastChunk := tload(slot)
+                mstore(add(add(result, 0x20), mul(chunks, 0x20)), lastChunk)
             }
-            bytes memory cutChunk = new bytes(leftover);
-            for (uint256 j = 0; j < leftover; j++) {
-                cutChunk[j] = bytes1(bytes32(lastChunk << (j * 8))); // Shift the bytes32 by 8 bits each time
-            }
-
-            result = bytes.concat(result, cutChunk);
         }
     }
 }
