@@ -77,3 +77,11 @@ npx hardhat test ./test/aaveV3/full-test.js --network hardhat
 ### Custom commands
 
 `node ./cmd/change-repo-network [current-network-name] [new-network-name]` - will change which contract the helper contracts import and extend
+
+## 💰 Bounty Contribution
+
+- **Task:** Pre-contest audit triage — DeFi Saver V3 automation security
+- **Reward:** $1500
+- **Source:** GitHub-Bounty
+- **Date:** 2026-04-27
+
