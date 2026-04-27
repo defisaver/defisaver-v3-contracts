@@ -30,6 +30,8 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
     // When FL source is not found
     error NonexistentFLSource();
 
+    uint256 internal constant ST_ETH_PAYBACK_ROUNDING_TOLERANCE = 2;
+
     enum FLSource {
         EMPTY,
         AAVEV2,
@@ -64,12 +66,15 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
         FlashLoanParams memory params = abi.decode(_callData, (FlashLoanParams));
         FLSource flSource = FLSource(uint8(bytes1(params.flParamGetterData)));
 
-        handleFlashloan(params, flSource);
+        _handleFlashloan(params, flSource);
 
         return bytes32(params.amounts[0]);
     }
 
-    function handleFlashloan(FlashLoanParams memory _flParams, FLSource _source) internal {
+    /*//////////////////////////////////////////////////////////////
+                         FLASHLOAN INITIATION
+    //////////////////////////////////////////////////////////////*/
+    function _handleFlashloan(FlashLoanParams memory _flParams, FLSource _source) internal {
         if (_source == FLSource.AAVEV2) {
             _flAaveV2(_flParams);
         } else if (_source == FLSource.BALANCER) {
@@ -237,6 +242,9 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
         emit ActionEvent("FLAction", abi.encode("CURVEUSD", _params.amounts[0]));
     }
 
+    /*//////////////////////////////////////////////////////////////
+                              CALLBACKS
+    //////////////////////////////////////////////////////////////*/
     /// @notice Aave callback function that formats and calls back RecipeExecutor
     /// FLSource == AAVE | SPARK
     function executeOperation(
@@ -257,28 +265,14 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
         }
 
         (Recipe memory currRecipe, address wallet) = abi.decode(_params, (Recipe, address));
-        uint256[] memory balancesBefore = new uint256[](_assets.length);
-        // Send FL amounts to user wallet
-        for (uint256 i = 0; i < _assets.length; ++i) {
-            _assets[i].withdrawTokens(wallet, _amounts[i]);
-            balancesBefore[i] = _assets[i].getBalance(address(this));
-        }
+        uint256[] memory balancesBefore = _sendTokensToWalletAndSnapshot(_assets, _amounts, wallet);
 
         _executeRecipe(wallet, _getWalletType(wallet), currRecipe, _amounts[0] + _fees[0]);
 
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
             uint256 paybackAmount = _amounts[i] + _fees[i];
-            bool correctAmount =
-                _assets[i].getBalance(address(this)) == paybackAmount + balancesBefore[i];
-
-            if (_assets[i] == ST_ETH_ADDR && !correctAmount) {
-                flFeeFaucet.my2Wei(ST_ETH_ADDR);
-                correctAmount = true;
-            }
-            if (!correctAmount) {
-                revert WrongPaybackAmountError();
-            }
+            _verifyPaybackAmount(_assets[i], paybackAmount + balancesBefore[i]);
 
             _assets[i].approveToken(address(msg.sender), paybackAmount);
         }
@@ -309,10 +303,8 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
         for (uint256 i = 0; i < _userData.tokens.length; i++) {
             uint256 paybackAmount = _userData.amounts[i];
 
-            if (_userData.tokens[i].getBalance(address(this)) != paybackAmount + balancesBefore[i])
-            {
-                revert WrongPaybackAmountError();
-            }
+            _verifyPaybackAmount(_userData.tokens[i], paybackAmount + balancesBefore[i]);
+
             // Send tokens back to Balancer V3 Vault - repay the loan
             _userData.tokens[i].withdrawTokens(BALANCER_V3_VAULT_ADDR, paybackAmount);
             // Settle the repayment
@@ -333,20 +325,14 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
         }
         (Recipe memory currRecipe, address wallet) = abi.decode(_userData, (Recipe, address));
 
-        uint256[] memory balancesBefore = new uint256[](_tokens.length);
-        for (uint256 i = 0; i < _tokens.length; i++) {
-            _tokens[i].withdrawTokens(wallet, _amounts[i]);
-            balancesBefore[i] = _tokens[i].getBalance(address(this));
-        }
+        uint256[] memory balancesBefore = _sendTokensToWalletAndSnapshot(_tokens, _amounts, wallet);
 
         _executeRecipe(wallet, _getWalletType(wallet), currRecipe, _amounts[0] + _feeAmounts[0]);
 
         for (uint256 i = 0; i < _tokens.length; i++) {
             uint256 paybackAmount = _amounts[i] + (_feeAmounts[i]);
 
-            if (_tokens[i].getBalance(address(this)) != paybackAmount + balancesBefore[i]) {
-                revert WrongPaybackAmountError();
-            }
+            _verifyPaybackAmount(_tokens[i], paybackAmount + balancesBefore[i]);
 
             _tokens[i].withdrawTokens(address(VAULT_ADDR), paybackAmount);
         }
@@ -379,9 +365,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
 
         _executeRecipe(wallet, _getWalletType(wallet), currRecipe, paybackAmount);
 
-        if (_token.getBalance(address(this)) != paybackAmount + balanceBefore) {
-            revert WrongPaybackAmountError();
-        }
+        _verifyPaybackAmount(_token, paybackAmount + balanceBefore);
 
         if (msg.sender == CURVEUSD_FLASH_ADDR) {
             _token.withdrawTokens(msg.sender, paybackAmount);
@@ -415,25 +399,12 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
         uint256 expectedBalance0 = params.modes[0] + params.amounts[0] + _fee0;
         uint256 expectedBalance1 = params.modes[1] + params.amounts[1] + _fee1;
 
-        uint256 currBalance0 =
-            params.amounts[0] > 0 ? params.tokens[0].getBalance(address(this)) : 0;
-        uint256 currBalance1 =
-            params.amounts[1] > 0 ? params.tokens[1].getBalance(address(this)) : 0;
-
-        bool isCorrectAmount0 = currBalance0 == expectedBalance0;
-        bool isCorrectAmount1 = currBalance1 == expectedBalance1;
-
-        if (params.amounts[0] > 0 && params.tokens[0] == ST_ETH_ADDR && !isCorrectAmount0) {
-            flFeeFaucet.my2Wei(ST_ETH_ADDR);
-            isCorrectAmount0 = true;
+        if (params.amounts[0] > 0) {
+            _verifyPaybackAmount(params.tokens[0], expectedBalance0);
         }
-        if (params.amounts[1] > 0 && params.tokens[1] == ST_ETH_ADDR && !isCorrectAmount1) {
-            flFeeFaucet.my2Wei(ST_ETH_ADDR);
-            isCorrectAmount1 = true;
+        if (params.amounts[1] > 0) {
+            _verifyPaybackAmount(params.tokens[1], expectedBalance1);
         }
-
-        if (!isCorrectAmount0) revert WrongPaybackAmountError();
-        if (!isCorrectAmount1) revert WrongPaybackAmountError();
 
         params.tokens[0].withdrawTokens(msg.sender, params.amounts[0] + _fee0);
         params.tokens[1].withdrawTokens(msg.sender, params.amounts[1] + _fee1);
@@ -452,10 +423,58 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
 
         _executeRecipe(wallet, _getWalletType(wallet), currRecipe, assets);
 
-        if (token.getBalance(address(this)) != assets + balanceBefore) {
+        _verifyPaybackAmount(token, assets + balanceBefore);
+
+        token.approveToken(MORPHO_BLUE_ADDR, assets);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                                HELPERS
+    //////////////////////////////////////////////////////////////*/
+    function _sendTokensToWalletAndSnapshot(
+        address[] memory _tokens,
+        uint256[] memory _amounts,
+        address _wallet
+    ) internal returns (uint256[] memory balancesBefore) {
+        balancesBefore = new uint256[](_tokens.length);
+
+        for (uint256 i = 0; i < _tokens.length; ++i) {
+            _tokens[i].withdrawTokens(_wallet, _amounts[i]);
+            balancesBefore[i] = _tokens[i].getBalance(address(this));
+        }
+    }
+
+    function _verifyPaybackAmount(address _token, uint256 _expectedBalance) internal {
+        uint256 currBalance = _token.getBalance(address(this));
+        if (currBalance == _expectedBalance) return;
+
+        // At this point, we only tolerate stETH having less than the expected balance.
+        if (_token != ST_ETH_ADDR || currBalance > _expectedBalance) {
             revert WrongPaybackAmountError();
         }
 
-        token.approveToken(MORPHO_BLUE_ADDR, assets);
+        // Tolerate up to 2 wei of stETH deficit.
+        uint256 deficit = _expectedBalance - currBalance;
+        if (deficit > ST_ETH_PAYBACK_ROUNDING_TOLERANCE) {
+            revert WrongPaybackAmountError();
+        }
+
+        // Take 2 wei of stETH to cover the rounding deficit.
+        flFeeFaucet.my2Wei(ST_ETH_ADDR);
+
+        currBalance = ST_ETH_ADDR.getBalance(address(this));
+
+        // This means that there was not enough stETH on the faucet to cover the deficit.
+        if (currBalance < _expectedBalance) revert WrongPaybackAmountError();
+
+        // Return any excess stETH to the faucet (in practice, at most 1 wei).
+        // Keeping it would not cause issues, but returning it simplifies reasoning
+        // and preserves the invariant that the flash loan should not leave any dust.
+        if (currBalance > _expectedBalance) {
+            ST_ETH_ADDR.withdrawTokens(address(flFeeFaucet), currBalance - _expectedBalance);
+            currBalance = ST_ETH_ADDR.getBalance(address(this));
+        }
+
+        if (currBalance != _expectedBalance) revert WrongPaybackAmountError();
     }
 }
