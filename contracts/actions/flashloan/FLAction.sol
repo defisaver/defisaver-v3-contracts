@@ -452,22 +452,22 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
     /// @notice Morpho blue FL callback function that formats and calls back RecipeExecutor
     /// FLSource == MORPHO_BLUE
     /// Can have fees = NO
-    function onMorphoFlashLoan(uint256 assets, bytes calldata data) external nonReentrant {
+    function onMorphoFlashLoan(uint256 _assets, bytes calldata _data) external nonReentrant {
         if (msg.sender != MORPHO_BLUE_ADDR) {
             revert UntrustedLender();
         }
-        (bytes memory taskData, address token) = abi.decode(data, (bytes, address));
-        (Recipe memory currRecipe, address wallet) = abi.decode(taskData, (Recipe, address));
+        (bytes memory recipeData, address token) = abi.decode(_data, (bytes, address));
+        (Recipe memory currRecipe, address wallet) = abi.decode(recipeData, (Recipe, address));
 
-        token.withdrawTokens(wallet, assets);
+        token.withdrawTokens(wallet, _assets);
 
         uint256 balanceBefore = token.getBalance(address(this));
 
-        _executeRecipe(wallet, _getWalletType(wallet), currRecipe, assets);
+        _executeRecipe(wallet, _getWalletType(wallet), currRecipe, _assets);
 
-        _verifyPaybackAmount(token, assets + balanceBefore);
+        _verifyPaybackAmount(token, _assets + balanceBefore);
 
-        token.approveToken(MORPHO_BLUE_ADDR, assets);
+        token.approveToken(MORPHO_BLUE_ADDR, _assets);
     }
 
     /*//////////////////////////////////////////////////////////////
