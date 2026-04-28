@@ -30,6 +30,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
     // When FL source is not found
     error NonexistentFLSource();
 
+    // Used for stETH payback rounding tolerance. Only used for mainnet.
     uint256 internal constant ST_ETH_PAYBACK_ROUNDING_TOLERANCE = 2;
 
     enum FLSource {
