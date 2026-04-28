@@ -69,12 +69,18 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
 
         _handleFlashloan(params, flSource);
 
+        // In practice, this value is not used and is overwritten in RecipeExecutor:executeActionsFromFL,
+        // where the actual flash loan amount (including fees) is set as the first return value,
+        // which is then used by subsequent actions.
         return bytes32(params.amounts[0]);
     }
 
     /*//////////////////////////////////////////////////////////////
                          FLASHLOAN INITIATION
     //////////////////////////////////////////////////////////////*/
+    /// @notice Handles the flash loan initiation based on the source
+    /// @param _flParams All the amounts/tokens and related fl data
+    /// @param _source The source of the flash loan
     function _handleFlashloan(FlashLoanParams memory _flParams, FLSource _source) internal {
         if (_source == FLSource.AAVEV2) {
             _flAaveV2(_flParams);
@@ -146,6 +152,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
     }
 
     /// @notice Gets a FL from Balancer and returns back the execution to the action address
+    /// @param _flParams All the amounts/tokens and related balancer fl data
     function _flBalancer(FlashLoanParams memory _flParams) internal {
         IFlashLoans(VAULT_ADDR)
             .flashLoan(address(this), _flParams.tokens, _flParams.amounts, _flParams.recipeData);
@@ -154,6 +161,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
     }
 
     /// @notice Gets a FL from Balancer V3 and returns back the execution to the action address
+    /// @param _flParams All the amounts/tokens and related balancer v3 fl data
     function _flBalancerV3(FlashLoanParams memory _flParams) internal {
         IVaultMain(BALANCER_V3_VAULT_ADDR)
             .unlock(abi.encodeWithSelector(this.receiveFlashLoanBalancerV3.selector, _flParams));
@@ -162,6 +170,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
     }
 
     /// @notice Gets a GHO FL from Gho Flash Minter
+    /// @param _flParams All the amounts/tokens and related gho fl data
     function _flGho(FlashLoanParams memory _flParams) internal {
         IERC3156FlashLender(GHO_FLASH_MINTER_ADDR)
             .flashLoan(
@@ -175,7 +184,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
     }
 
     /// @notice Gets a DAI flash loan from Maker and returns back the execution to the action address
-    /// @param _flParams All the amounts/tokens and related aave fl data
+    /// @param _flParams All the amounts/tokens and related maker fl data
     function _flMaker(FlashLoanParams memory _flParams) internal {
         IERC3156FlashLender(DSS_FLASH_ADDR)
             .flashLoan(
@@ -188,6 +197,8 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
         emit ActionEvent("FLAction", abi.encode("MAKER", _flParams.amounts[0]));
     }
 
+    /// @notice Gets a FL from Uniswap V3 and returns back the execution to the action address
+    /// @param _flParams All the amounts/tokens and related univ3 fl data
     function _flUniV3(FlashLoanParams memory _flParams) internal {
         // modes aren't used so we set them to later know starting balances
         _flParams.modes = new uint256[](2);
@@ -204,6 +215,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
     }
 
     /// @notice Gets a Fl from Spark and returns back the execution to the action address
+    /// @param _flParams All the amounts/tokens and related spark fl data
     function _flSpark(FlashLoanParams memory _flParams) internal {
         ILendingPoolV2(SPARK_LENDING_POOL)
             .flashLoan(
@@ -220,27 +232,30 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
     }
 
     /// @notice Gets a FL from Morpho blue and returns back the execution to the action address
-    function _flMorphoBlue(FlashLoanParams memory _params) internal {
+    /// @param _flParams All the amounts/tokens and related morpho blue fl data
+    function _flMorphoBlue(FlashLoanParams memory _flParams) internal {
         IMorphoBlue(MORPHO_BLUE_ADDR)
             .flashLoan(
-                _params.tokens[0],
-                _params.amounts[0],
-                abi.encode(_params.recipeData, _params.tokens[0])
+                _flParams.tokens[0],
+                _flParams.amounts[0],
+                abi.encode(_flParams.recipeData, _flParams.tokens[0])
             );
 
-        emit ActionEvent("FLAction", abi.encode("MORPHOBLUE", _params.amounts[0]));
+        emit ActionEvent("FLAction", abi.encode("MORPHOBLUE", _flParams.amounts[0]));
     }
 
-    function _flCurveUSD(FlashLoanParams memory _params) internal {
+    /// @notice Gets a FL from Curve USD and returns back the execution to the action address
+    /// @param _flParams All the amounts/tokens and related curve usd fl data
+    function _flCurveUSD(FlashLoanParams memory _flParams) internal {
         IERC3156FlashLender(CURVEUSD_FLASH_ADDR)
             .flashLoan(
                 IERC3156FlashBorrower(address(this)),
                 CURVEUSD_ADDR,
-                _params.amounts[0],
-                _params.recipeData
+                _flParams.amounts[0],
+                _flParams.recipeData
             );
 
-        emit ActionEvent("FLAction", abi.encode("CURVEUSD", _params.amounts[0]));
+        emit ActionEvent("FLAction", abi.encode("CURVEUSD", _flParams.amounts[0]));
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -248,6 +263,8 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
     //////////////////////////////////////////////////////////////*/
     /// @notice Aave callback function that formats and calls back RecipeExecutor
     /// FLSource == AAVE | SPARK
+    /// Can have fees = YES
+    /// @dev Only first flash loan amount will be accessible to other recipe actions.
     function executeOperation(
         address[] memory _assets,
         uint256[] memory _amounts,
@@ -268,7 +285,10 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
         (Recipe memory currRecipe, address wallet) = abi.decode(_params, (Recipe, address));
         uint256[] memory balancesBefore = _sendTokensToWalletAndSnapshot(_assets, _amounts, wallet);
 
-        _executeRecipe(wallet, _getWalletType(wallet), currRecipe, _amounts[0] + _fees[0]);
+        // DFS actions can return only one value that can be used by other actions,
+        // so we limit the return value to the first flash loan amount, including any fees if present.
+        uint256 pipedReturnValue = _amounts[0] + _fees[0];
+        _executeRecipe(wallet, _getWalletType(wallet), currRecipe, pipedReturnValue);
 
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
@@ -283,6 +303,8 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
 
     /// @notice Balancer V3 FL callback function that formats and calls back RecipeExecutor
     /// FLSource == BALANCER_V3
+    /// Can have fees = NO
+    /// @dev Only first flash loan amount will be accessible to other recipe actions.
     function receiveFlashLoanBalancerV3(FlashLoanParams memory _userData) external nonReentrant {
         if (msg.sender != BALANCER_V3_VAULT_ADDR) {
             revert UntrustedLender();
@@ -299,6 +321,8 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
                 .sendTo(IERC20(_userData.tokens[i]), wallet, _userData.amounts[i]);
         }
 
+        // DFS actions can return only one value that can be used by other actions,
+        // so we limit the return value to the first flash loan amount
         _executeRecipe(wallet, _getWalletType(wallet), currRecipe, _userData.amounts[0]);
 
         for (uint256 i = 0; i < _userData.tokens.length; i++) {
@@ -315,6 +339,8 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
 
     /// @notice Balancer FL callback function that formats and calls back RecipeExecutor
     /// FLSource == BALANCER
+    /// Can have fees = YES
+    /// @dev Only first flash loan amount will be accessible to other recipe actions.
     function receiveFlashLoan(
         address[] memory _tokens,
         uint256[] memory _amounts,
@@ -328,10 +354,13 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
 
         uint256[] memory balancesBefore = _sendTokensToWalletAndSnapshot(_tokens, _amounts, wallet);
 
-        _executeRecipe(wallet, _getWalletType(wallet), currRecipe, _amounts[0] + _feeAmounts[0]);
+        // DFS actions can return only one value that can be used by other actions,
+        // so we limit the return value to the first flash loan amount, including any fees if present.
+        uint256 pipedReturnValue = _amounts[0] + _feeAmounts[0];
+        _executeRecipe(wallet, _getWalletType(wallet), currRecipe, pipedReturnValue);
 
         for (uint256 i = 0; i < _tokens.length; i++) {
-            uint256 paybackAmount = _amounts[i] + (_feeAmounts[i]);
+            uint256 paybackAmount = _amounts[i] + _feeAmounts[i];
 
             _verifyPaybackAmount(_tokens[i], paybackAmount + balancesBefore[i]);
 
@@ -341,6 +370,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
 
     /// @notice ERC3156 callback function that formats and calls back RecipeExecutor
     /// FLSource == MAKER | GHO | CURVEUSD
+    /// Can have fees = YES
     function onFlashLoan(
         address _initiator,
         address _token,
@@ -377,6 +407,10 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
         return keccak256("ERC3156FlashBorrower.onFlashLoan");
     }
 
+    /// @notice Uniswap V3 FL callback function that formats and calls back RecipeExecutor
+    /// FLSource == UNIV3
+    /// Can have fees = YES
+    /// @dev Only first flash loan amount will be accessible to other recipe actions.
     function uniswapV3FlashCallback(uint256 _fee0, uint256 _fee1, bytes memory _params)
         external
         nonReentrant
@@ -395,8 +429,12 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
         params.tokens[0].withdrawTokens(wallet, params.amounts[0]);
         params.tokens[1].withdrawTokens(wallet, params.amounts[1]);
 
-        _executeRecipe(wallet, _getWalletType(wallet), currRecipe, params.amounts[0]);
+        // DFS actions can return only one value that can be used by other actions,
+        // so we limit the return value to the first flash loan amount, including any fees if present.
+        uint256 pipedReturnValue = params.amounts[0];
+        _executeRecipe(wallet, _getWalletType(wallet), currRecipe, pipedReturnValue);
 
+        // params.modes were used for snapshotting the starting balances of the tokens inside _flUniV3
         uint256 expectedBalance0 = params.modes[0] + params.amounts[0] + _fee0;
         uint256 expectedBalance1 = params.modes[1] + params.amounts[1] + _fee1;
 
@@ -411,6 +449,9 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
         params.tokens[1].withdrawTokens(msg.sender, params.amounts[1] + _fee1);
     }
 
+    /// @notice Morpho blue FL callback function that formats and calls back RecipeExecutor
+    /// FLSource == MORPHO_BLUE
+    /// Can have fees = NO
     function onMorphoFlashLoan(uint256 assets, bytes calldata data) external nonReentrant {
         if (msg.sender != MORPHO_BLUE_ADDR) {
             revert UntrustedLender();
