@@ -431,7 +431,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
 
         // DFS actions can return only one value that can be used by other actions,
         // so we limit the return value to the first flash loan amount, including any fees if present.
-        uint256 pipedReturnValue = params.amounts[0];
+        uint256 pipedReturnValue = params.amounts[0] + _fee0;
         _executeRecipe(wallet, _getWalletType(wallet), currRecipe, pipedReturnValue);
 
         // params.modes were used for snapshotting the starting balances of the tokens inside _flUniV3
