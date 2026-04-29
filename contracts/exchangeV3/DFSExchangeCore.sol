@@ -87,6 +87,10 @@ contract DFSExchangeCore is DSMath, DFSExchangeData, ExchangeHelper {
         bool offChainSwapSuccess;
 
         // Try offchain aggregator first and then fallback to on-chain swap.
+        /// @dev We don't use try/catch here, which means an off-chain swap can revert in the wrapper contract
+        /// (for example, with `ZeroTokensSwapped`).
+        /// In that case, the on-chain fallback will not be executed because the call reverts here.
+        /// This is acceptable because we usually perform only off-chain swaps, and errors in the wrappers itself are highly unlikely.
         if (_exData.offchainData.price > 0) {
             (offChainSwapSuccess,) = _offChainSwap(_exData);
         }
