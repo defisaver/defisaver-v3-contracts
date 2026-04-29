@@ -74,9 +74,11 @@ contract LSVSell is ActionBase, UtilAddresses, DFSExchangeCore {
         internal
         returns (uint256, bytes memory)
     {
-        // If we set srcAmount to max, take the whole user's wallet balance.
+        // If we set srcAmount to max, take the whole balance of the source token.
+        // For ETH, use smart wallet balance as it will be send from EOA to wallet during the call.
         if (_exchangeData.srcAmount == type(uint256).max) {
-            _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
+            _exchangeData.srcAmount = _exchangeData.srcAddr
+                .getBalance(_exchangeData.srcAddr == TokenUtils.ETH_ADDR ? address(this) : _from);
         }
 
         // If source and destination address are same we want to skip exchanging and take no fees.
