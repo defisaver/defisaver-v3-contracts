@@ -87,9 +87,10 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
         uint256 _gasUsed,
         uint256 _l1GasUsed
     ) internal returns (uint256, bytes memory) {
-        // If we set srcAmount to max, take the whole user's wallet balance.
+        // If we set srcAmount to max, take the whole balance of the source token.
+        // Limit sell only works with ERC20 tokens, for ETH token, WETH is used as source token.
         if (_exchangeData.srcAmount == type(uint256).max) {
-            _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
+            _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(_from);
         }
 
         // Validate price that is set in the trigger.
