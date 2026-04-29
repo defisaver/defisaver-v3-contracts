@@ -6,6 +6,9 @@ import { TokenUtils } from "../utils/token/TokenUtils.sol";
 import { DSMath } from "../_vendor/DS/DSMath.sol";
 import { UtilAddresses } from "../utils/addresses/UtilAddresses.sol";
 
+/// @title TxSaverGasCostCalc
+/// @notice Helper contract for TxSaver, containing the logic for calculating the gas cost using the injected ETH price.
+/// @dev Different from `GasFeeHelper` where we get eth price from the price feed.
 contract TxSaverGasCostCalc is DSMath, UtilAddresses {
     using TokenUtils for address;
 
@@ -16,6 +19,12 @@ contract TxSaverGasCostCalc is DSMath, UtilAddresses {
     // when injecting price, price must be greater than 0
     error ZeroTokenPriceInEthError();
 
+    /// @notice Calculates the gas cost using the injected ETH price.
+    /// @param _gasUsed Gas used
+    /// @param _feeToken Fee token address
+    /// @param _tokenPriceInEth ETH price
+    /// @param _l1GasCostInEth Additional L1 gas cost
+    /// @return txCost Gas cost in the fee token
     function calcGasCostUsingInjectedPrice(
         uint256 _gasUsed,
         address _feeToken,

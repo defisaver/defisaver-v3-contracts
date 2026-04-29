@@ -7,6 +7,8 @@ import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { FeeRecipient } from "../../../utils/fee/FeeRecipient.sol";
 import { TokenPriceHelper } from "../../../utils/token/TokenPriceHelper.sol";
 
+/// @title GasFeeHelper
+/// @notice Helper contract for calculating the gas cost for strategies
 contract GasFeeHelper is DSMath, TokenPriceHelper {
     using TokenUtils for address;
 

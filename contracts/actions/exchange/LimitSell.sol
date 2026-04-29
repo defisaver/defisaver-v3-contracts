@@ -9,13 +9,26 @@ import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { GasFeeHelper } from "../fee/helpers/GasFeeHelper.sol";
 
 /// @title A special Limit Sell action used as a part of the limit order strategy
+/// @dev Adds additional gas fee calculation on top of regular sell.
 contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
     using TokenUtils for address;
 
+    /// @notice Used for validating the price that is set in the trigger
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 
+    /// @notice Error thrown when the price is not the expected price
+    /// @param expected Expected price
+    /// @param actual Actual price
     error WrongPriceFromTrigger(uint256 expected, uint256 actual);
 
+    /// @notice Error thrown when the price is not set
+    error PriceNotSetError();
+
+    /// @notice Parameters for the LimitSell action
+    /// @param exchangeData Exchange data
+    /// @param from Address from which we'll pull the srcTokens
+    /// @param to Address where we'll send the _to token
+    /// @param gasUsed Gas used for this strategy so we can take the fee
     struct Params {
         ExchangeData exchangeData;
         address from;
@@ -37,7 +50,6 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
         params.exchangeData.destAddr = _parseParamAddr(
             params.exchangeData.destAddr, _paramMapping[1], _subData, _returnValues
         );
-
         params.exchangeData.srcAmount = _parseParamUint(
             params.exchangeData.srcAmount, _paramMapping[2], _subData, _returnValues
         );
@@ -72,36 +84,41 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
         address _to,
         uint256 _gasUsed
     ) internal returns (uint256, bytes memory) {
-        // if we set srcAmount to max, take the whole user's wallet balance
+        // If we set srcAmount to max, take the whole user's wallet balance.
         if (_exchangeData.srcAmount == type(uint256).max) {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
         }
 
-        // Validate price that is set in the trigger
+        // Validate price that is set in the trigger.
         uint256 currPrice = uint256(tempStorage.getBytes32("CURR_PRICE"));
-        require(currPrice > 0, "LimitSell: Price not set");
+        if (currPrice == 0) revert PriceNotSetError();
 
-        // no fee for limit sell strategies
+        // No sell fee for limit sell strategies.
         _exchangeData.dfsFeeDivider = 0;
 
+        // If the price is not the expected price, revert.
         if (_exchangeData.minPrice != currPrice) {
             revert WrongPriceFromTrigger(currPrice, _exchangeData.minPrice);
         }
 
+        // Pull the source tokens for selling.
         _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
 
+        // Execute the sell.
         (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
 
         {
+            // Take the gas fee from the sold amount.
             uint256 amountAfterFee = _takeGasFee(_gasUsed, exchangedAmount, _exchangeData.destAddr);
 
-            address tokenAddr = _exchangeData.destAddr;
-            if (tokenAddr == WETH_ADDR) {
+            // If the destination token is WETH, withdraw it and convert to ETH.
+            if (_exchangeData.destAddr == TokenUtils.WETH_ADDR) {
                 TokenUtils.withdrawWeth(amountAfterFee);
-                tokenAddr = ETH_ADDR;
+                _exchangeData.destAddr = TokenUtils.ETH_ADDR;
             }
 
-            tokenAddr.withdrawTokens(_to, amountAfterFee);
+            // Send the tokens to the recipient. Also handles raw ETH sending.
+            _exchangeData.destAddr.withdrawTokens(_to, amountAfterFee);
         }
 
         bytes memory logData = abi.encode(
@@ -112,6 +129,7 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
             exchangedAmount,
             _exchangeData.dfsFeeDivider
         );
+
         return (exchangedAmount, logData);
     }
 
@@ -119,19 +137,24 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
         params = abi.decode(_callData, (Params));
     }
 
+    /// @notice Takes the gas fee from the sold amount
+    /// @param _gasUsed Gas used for this strategy so we can take the fee
+    /// @param _soldAmount Amount of tokens sold
+    /// @param _feeToken Token in which the gas fee is taken
+    /// @return amountAfterFee Amount of tokens after the fee is taken
     function _takeGasFee(uint256 _gasUsed, uint256 _soldAmount, address _feeToken)
         internal
         returns (uint256 amountAfterFee)
     {
-        uint256 txCost = calcGasCost(_gasUsed, _feeToken, 0);
+        uint256 gasFeeCost = calcGasCost(_gasUsed, _feeToken, 0);
 
-        // cap at 20% of the max amount
-        if (txCost >= (_soldAmount / 5)) {
-            txCost = _soldAmount / 5;
+        // Cap at 20% of the sold amount.
+        if (gasFeeCost >= (_soldAmount / 5)) {
+            gasFeeCost = _soldAmount / 5;
         }
 
-        _feeToken.withdrawTokens(feeRecipient.getFeeAddr(), txCost);
+        _feeToken.withdrawTokens(feeRecipient.getFeeAddr(), gasFeeCost);
 
-        return _soldAmount - txCost;
+        return _soldAmount - gasFeeCost;
     }
 }

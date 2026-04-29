@@ -2,18 +2,23 @@
 
 pragma solidity =0.8.24;
 
+import { ITokenGroupRegistry } from "../../interfaces/exchange/ITokenGroupRegistry.sol";
 import { DFSExchangeWithTxSaver } from "../../exchangeV3/DFSExchangeWithTxSaver.sol";
-import { TokenGroupRegistry } from "../../exchangeV3/registries/TokenGroupRegistry.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 
 /// @title A exchange sell action through the dfs exchange
-/// @dev The only action which has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
+/// @dev Action which has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
 contract DFSSell is ActionBase, DFSExchangeWithTxSaver {
     using TokenUtils for address;
 
-    uint256 internal constant RECIPE_FEE = 400;
+    // Standard default service fee is 25 bps (0.25%) on source token amount.
+    uint256 internal constant STANDARD_FEE_DIVIDER = 400;
 
+    /// @notice Parameters for the DFSSell action
+    /// @param exchangeData Exchange data
+    /// @param from Address from which we'll pull the srcTokens
+    /// @param to Address where we'll send the _to token
     struct Params {
         ExchangeData exchangeData;
         address from;
@@ -34,13 +39,13 @@ contract DFSSell is ActionBase, DFSExchangeWithTxSaver {
         params.exchangeData.destAddr = _parseParamAddr(
             params.exchangeData.destAddr, _paramMapping[1], _subData, _returnValues
         );
-
         params.exchangeData.srcAmount = _parseParamUint(
             params.exchangeData.srcAmount, _paramMapping[2], _subData, _returnValues
         );
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
+        // No fee is taken if recipe contains only one sell action.
         bool isDirect = _returnValues.length == 1 ? true : false;
 
         (uint256 exchangedAmount, bytes memory logData) =
@@ -75,12 +80,12 @@ contract DFSSell is ActionBase, DFSExchangeWithTxSaver {
         address _to,
         bool _isDirect
     ) internal returns (uint256, bytes memory) {
-        // if we set srcAmount to max, take the whole user's wallet balance
+        // If we set srcAmount to max, take the whole user's wallet balance.
         if (_exchangeData.srcAmount == type(uint256).max) {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
         }
 
-        // if source and destination address are same we want to skip exchanging and take no fees
+        // If source and destination address are same we want to skip exchanging and take no fees.
         if (_exchangeData.srcAddr == _exchangeData.destAddr) {
             bytes memory sameAssetLogData = abi.encode(
                 address(0),
@@ -93,7 +98,7 @@ contract DFSSell is ActionBase, DFSExchangeWithTxSaver {
             return (_exchangeData.srcAmount, sameAssetLogData);
         }
 
-        // Wrap eth if sent directly
+        // Wrap ETH if sent directly.
         if (_exchangeData.srcAddr == TokenUtils.ETH_ADDR) {
             TokenUtils.depositWeth(_exchangeData.srcAmount);
             _exchangeData.srcAddr = TokenUtils.WETH_ADDR;
@@ -101,37 +106,36 @@ contract DFSSell is ActionBase, DFSExchangeWithTxSaver {
             _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
         }
 
-        // We always swap with weth, convert token addr when eth sent for unwrapping later
+        // We always swap with WETH, convert token addr when ETH sent for unwrapping later.
         bool isEthDest;
         if (_exchangeData.destAddr == TokenUtils.ETH_ADDR) {
             _exchangeData.destAddr = TokenUtils.WETH_ADDR;
             isEthDest = true;
         }
 
-        /// @dev only check for custom fee if a non standard fee is sent
-        if (!_isDirect) {
-            if (_exchangeData.dfsFeeDivider != RECIPE_FEE) {
-                _exchangeData.dfsFeeDivider = TokenGroupRegistry(TOKEN_GROUP_REGISTRY)
+        // If recipe contains only one sell action, or if it's a direct sell execution, no fee is taken.
+        if (_isDirect) {
+            _exchangeData.dfsFeeDivider = 0;
+        } else {
+            // Only check for custom fee if a non standard fee is sent.
+            if (_exchangeData.dfsFeeDivider != STANDARD_FEE_DIVIDER) {
+                _exchangeData.dfsFeeDivider = ITokenGroupRegistry(TOKEN_GROUP_REGISTRY)
                     .getFeeForTokens(_exchangeData.srcAddr, _exchangeData.destAddr);
             }
-        } else {
-            _exchangeData.dfsFeeDivider = 0;
         }
 
-        address wrapper;
-        uint256 exchangedAmount;
-
-        (wrapper, exchangedAmount,,) =
+        // Execute the sell with TxSaver choice.
+        (address wrapper, uint256 exchangedAmount,,) =
             _sellWithTxSaverChoice(_exchangeData, address(this), registry);
 
+        // If the destination token is WETH, withdraw it and convert to ETH.
         if (isEthDest) {
             TokenUtils.withdrawWeth(exchangedAmount);
-
-            (bool success,) = _to.call{ value: exchangedAmount }("");
-            require(success, "Eth send failed");
-        } else {
-            _exchangeData.destAddr.withdrawTokens(_to, exchangedAmount);
+            _exchangeData.destAddr = TokenUtils.ETH_ADDR;
         }
+
+        // Send the tokens to the recipient. Also handles raw ETH sending.
+        _exchangeData.destAddr.withdrawTokens(_to, exchangedAmount);
 
         bytes memory logData = abi.encode(
             wrapper,
@@ -141,6 +145,7 @@ contract DFSSell is ActionBase, DFSExchangeWithTxSaver {
             exchangedAmount,
             _exchangeData.dfsFeeDivider
         );
+
         return (exchangedAmount, logData);
     }
 
