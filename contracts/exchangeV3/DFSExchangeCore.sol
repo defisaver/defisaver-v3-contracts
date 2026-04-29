@@ -1,150 +1,172 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
+import { IERC20 } from "../interfaces/token/IERC20.sol";
 import { IExchangeV3 } from "../interfaces/exchange/IExchangeV3.sol";
+import {
+    IExchangeAggregatorRegistry
+} from "../interfaces/exchange/IExchangeAggregatorRegistry.sol";
+import { IWrapperExchangeRegistry } from "../interfaces/exchange/IWrapperExchangeRegistry.sol";
+import { IOffchainWrapper } from "../interfaces/exchange/IOffchainWrapper.sol";
+
 import { DFSExchangeData } from "./DFSExchangeData.sol";
 import { Discount } from "../utils/Discount.sol";
 import { FeeRecipient } from "../utils/fee/FeeRecipient.sol";
-import { ExchangeAggregatorRegistry } from "./registries/ExchangeAggregatorRegistry.sol";
-import { WrapperExchangeRegistry } from "./registries/WrapperExchangeRegistry.sol";
-import { IOffchainWrapper } from "../interfaces/exchange/IOffchainWrapper.sol";
 import { ExchangeHelper } from "./helpers/ExchangeHelper.sol";
-import { StrategyModel } from "../core/strategy/StrategyModel.sol";
 import { SafeERC20 } from "../_vendor/openzeppelin/SafeERC20.sol";
-import { IERC20 } from "../interfaces/token/IERC20.sol";
 import { TokenUtils } from "../utils/token/TokenUtils.sol";
 import { DSMath } from "../_vendor/DS/DSMath.sol";
 
-contract DFSExchangeCore is DSMath, DFSExchangeData, ExchangeHelper, StrategyModel {
+/// @title DFSExchangeCore
+/// @notice Contract containing the core logic for performing swaps used by other DFS Sell actions.
+contract DFSExchangeCore is DSMath, DFSExchangeData, ExchangeHelper {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
     error SlippageHitError(uint256 amountBought, uint256 amountExpected);
-    error InvalidWrapperError(address wrapperAddr);
+    error InvalidWrapperError(address wrapperAddress);
 
-    ExchangeAggregatorRegistry internal constant exchangeAggRegistry =
-        ExchangeAggregatorRegistry(EXCHANGE_AGGREGATOR_REGISTRY_ADDR);
-    WrapperExchangeRegistry internal constant wrapperRegistry =
-        WrapperExchangeRegistry(WRAPPER_EXCHANGE_REGISTRY);
+    // Used for verifying exchange addresses used in offchain swaps.
+    IExchangeAggregatorRegistry internal constant exchangeAggRegistry =
+        IExchangeAggregatorRegistry(EXCHANGE_AGGREGATOR_REGISTRY_ADDR);
+
+    // Used for verifying wrapper addresses used in both offchain and onchain swaps.
+    IWrapperExchangeRegistry internal constant wrapperRegistry =
+        IWrapperExchangeRegistry(WRAPPER_EXCHANGE_REGISTRY_ADDR);
 
     /// @notice Internal method that performs a sell on offchain aggregator/on-chain
-    /// @dev Useful for other DFS contract to integrate for exchanging
-    /// @param exData Exchange data struct
-    function _sell(ExchangeData memory exData)
+    /// @param _exData Exchange data struct
+    /// @return wrapperAddress Address of the wrapper used
+    /// @return destAmount Amount of tokens bought
+    /// @dev Useful for other DFS contracts to integrate for exchanging
+    function _sell(ExchangeData memory _exData)
         internal
         returns (address wrapperAddress, uint256 destAmount)
     {
-        (wrapperAddress, destAmount,) = _sell(exData, address(this));
+        (wrapperAddress, destAmount,) = _sell(_exData, address(this));
     }
 
     /// @notice Internal method that performs a sell on offchain aggregator/on-chain
-    /// @dev Useful for other DFS contract to integrate for exchanging
-    /// @param exData Exchange data struct
-    /// @return (address, uint, bool) Address of the wrapper used and destAmount and if there was fee
-    function _sell(ExchangeData memory exData, address smartWallet)
+    /// @param _exData Exchange data struct
+    /// @param _smartWallet Smart wallet address used to check if service fees are disabled.
+    /// @return wrapperAddress Address of the wrapper used
+    /// @return destAmount Amount of tokens bought
+    /// @return hasFee Whether there was a fee taken
+    /// @dev Useful for other DFS contracts to integrate for exchanging
+    function _sell(ExchangeData memory _exData, address _smartWallet)
         internal
-        returns (address, uint256, bool)
+        returns (address wrapperAddress, uint256 destAmount, bool hasFee)
     {
-        uint256 amountWithoutFee = exData.srcAmount;
-        uint256 destBalanceBefore = exData.destAddr.getBalance(address(this));
+        uint256 amountWithoutFee = _exData.srcAmount;
+        uint256 destBalanceBefore = _exData.destAddr.getBalance(address(this));
 
-        _takeDfsExchangeFee(exData, smartWallet);
+        _takeDfsExchangeFee(_exData, _smartWallet);
 
-        address wrapperAddr = _executeSwap(exData);
+        wrapperAddress = _executeSwap(_exData);
 
-        uint256 destBalanceAfter = exData.destAddr.getBalance(address(this));
-        uint256 amountBought = destBalanceAfter - destBalanceBefore;
+        uint256 destBalanceAfter = _exData.destAddr.getBalance(address(this));
+        destAmount = destBalanceAfter - destBalanceBefore;
 
         // check slippage
-        if (amountBought < wmul(exData.minPrice, exData.srcAmount)) {
-            revert SlippageHitError(amountBought, wmul(exData.minPrice, exData.srcAmount));
+        uint256 minExpectedDestAmount = wmul(_exData.minPrice, _exData.srcAmount);
+        if (destAmount < minExpectedDestAmount) {
+            revert SlippageHitError(destAmount, minExpectedDestAmount);
         }
 
-        bool hasFee = exData.srcAmount != amountWithoutFee;
-        // revert back exData changes to keep it consistent
-        exData.srcAmount = amountWithoutFee;
+        hasFee = _exData.srcAmount != amountWithoutFee;
 
-        return (wrapperAddr, amountBought, hasFee);
+        // revert back exData changes to keep it consistent
+        _exData.srcAmount = amountWithoutFee;
+    }
+
+    /// @notice Executes the swap on the offchain aggregator with on-chain fallback.
+    /// @param _exData Exchange data struct
+    /// @return wrapperAddress Address of the wrapper used (offchain or onchain)
+    function _executeSwap(ExchangeData memory _exData) internal returns (address wrapperAddress) {
+        wrapperAddress = _exData.offchainData.wrapper;
+        bool offChainSwapSuccess;
+
+        // Try offchain aggregator first and then fallback to on-chain swap.
+        if (_exData.offchainData.price > 0) {
+            (offChainSwapSuccess,) = _offChainSwap(_exData);
+        }
+
+        // Fallback to on-chain swap if offchain aggregator failed.
+        if (!offChainSwapSuccess) {
+            wrapperAddress = _exData.wrapper;
+            _onChainSwap(_exData);
+        }
     }
 
     /// @notice Takes order from exchange aggregator and returns bool indicating if it is successful
     /// @param _exData Exchange data
-    function offChainSwap(ExchangeData memory _exData) internal returns (bool success, uint256) {
-        /// @dev Check if exchange address is in our registry to not call an untrusted contract
+    /// @return success Whether the swap was successful
+    /// @return destAmount Amount of tokens bought
+    function _offChainSwap(ExchangeData memory _exData)
+        internal
+        returns (bool success, uint256 destAmount)
+    {
+        /// @dev Only trust exchange addresses from exchange aggregator registry.
         if (!exchangeAggRegistry.isExchangeAggregatorAddr(_exData.offchainData.exchangeAddr)) {
             return (false, 0);
         }
 
-        /// @dev Check if we have the address is a registered wrapper
+        /// @dev Only trust wrapper addresses from wrapper registry.
         if (!wrapperRegistry.isWrapper(_exData.offchainData.wrapper)) {
             return (false, 0);
         }
 
-        // send src amount
+        // Send source amount to wrapper.
         IERC20(_exData.srcAddr).safeTransfer(_exData.offchainData.wrapper, _exData.srcAmount);
 
-        return IOffchainWrapper(_exData.offchainData.wrapper).takeOrder(_exData);
+        // Perform off-chain swap.
+        (success, destAmount) = IOffchainWrapper(_exData.offchainData.wrapper).takeOrder(_exData);
     }
 
     /// @notice Calls wrapper contract for exchange to preform an on-chain swap
     /// @param _exData Exchange data struct
-    /// @return swappedTokens Dest amount of tokens we get after sell
-    function onChainSwap(ExchangeData memory _exData) internal returns (uint256 swappedTokens) {
-        if (!(WrapperExchangeRegistry(WRAPPER_EXCHANGE_REGISTRY).isWrapper(_exData.wrapper))) {
+    /// @return destAmount Amount of tokens bought
+    function _onChainSwap(ExchangeData memory _exData) internal returns (uint256 destAmount) {
+        /// @dev Only trust wrapper addresses from wrapper registry.
+        if (!wrapperRegistry.isWrapper(_exData.wrapper)) {
             revert InvalidWrapperError(_exData.wrapper);
         }
 
+        // Send source amount to wrapper.
         IERC20(_exData.srcAddr).safeTransfer(_exData.wrapper, _exData.srcAmount);
 
-        swappedTokens = IExchangeV3(_exData.wrapper)
+        // Perform on-chain swap.
+        destAmount = IExchangeV3(_exData.wrapper)
             .sell(_exData.srcAddr, _exData.destAddr, _exData.srcAmount, _exData.wrapperData);
     }
 
-    function _takeDfsExchangeFee(ExchangeData memory exData, address smartWallet) internal {
-        if (exData.dfsFeeDivider != 0) {
-            exData.srcAmount = sub(
-                exData.srcAmount,
-                getFee(exData.srcAmount, smartWallet, exData.srcAddr, exData.dfsFeeDivider)
-            );
-        }
+    /// @notice Takes the DFS exchange fee from the source amount.
+    /// @param _exData Exchange data struct
+    /// @param _smartWallet Smart wallet address used to check if service fees are disabled.
+    function _takeDfsExchangeFee(ExchangeData memory _exData, address _smartWallet) internal {
+        _exData.srcAmount -= _getFee(
+            _exData.srcAmount, _smartWallet, _exData.srcAddr, _exData.dfsFeeDivider
+        );
     }
 
-    function _executeSwap(ExchangeData memory exData) internal returns (address wrapperAddr) {
-        wrapperAddr = exData.offchainData.wrapper;
-        bool offChainSwapSuccess;
-
-        // Try offchain aggregator first and then fallback on specific wrapper
-        if (exData.offchainData.price > 0) {
-            (offChainSwapSuccess,) = offChainSwap(exData);
-        }
-
-        // fallback to desired wrapper if offchain aggregator failed
-        if (!offChainSwapSuccess) {
-            onChainSwap(exData);
-            wrapperAddr = exData.wrapper;
-        }
-    }
-
-    /// @notice Takes a feePercentage and sends it to wallet
-    /// @param _amount Amount of the whole trade
-    /// @param _wallet Address of the users wallet
-    /// @param _token Address of the token
-    /// @param _dfsFeeDivider Dfs fee divider
-    /// @return feeAmount Amount owner earned on the fee
-    function getFee(uint256 _amount, address _wallet, address _token, uint256 _dfsFeeDivider)
+    /// @notice Calculates and transfers the DFS fee for a given amount.
+    /// @param _amount Total amount used to calculate the fee.
+    /// @param _wallet User wallet used to check whether service fees are disabled.
+    /// @param _token Token address for fee transfer
+    /// @param _dfsFeeDivider Fee divider used to calculate the fee. A value of 0 disables the fee.
+    /// @return feeAmount DFS fee amount transferred to fee recipient.
+    function _getFee(uint256 _amount, address _wallet, address _token, uint256 _dfsFeeDivider)
         internal
         returns (uint256 feeAmount)
     {
-        if (_dfsFeeDivider != 0 && Discount(DISCOUNT_ADDRESS).serviceFeesDisabled(_wallet)) {
-            _dfsFeeDivider = 0;
+        if (_dfsFeeDivider == 0) return 0;
+
+        if (Discount(DISCOUNT_ADDRESS).serviceFeesDisabled(_wallet)) {
+            return 0;
         }
 
-        if (_dfsFeeDivider == 0) {
-            feeAmount = 0;
-        } else {
-            feeAmount = _amount / _dfsFeeDivider;
-            address walletAddr = FeeRecipient(FEE_RECIPIENT_ADDRESS).getFeeAddr();
-            _token.withdrawTokens(walletAddr, feeAmount);
-        }
+        feeAmount = _amount / _dfsFeeDivider;
+        address feeRecipient = FeeRecipient(FEE_RECIPIENT_ADDRESS).getFeeAddr();
+        _token.withdrawTokens(feeRecipient, feeAmount);
     }
 }

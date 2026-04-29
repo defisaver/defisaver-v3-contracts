@@ -11,6 +11,10 @@ import { ActionBase } from "../ActionBase.sol";
 contract DFSSellNoFee is ActionBase, DFSExchangeCore {
     using TokenUtils for address;
 
+    /// @notice Parameters for the DFSSellNoFee action
+    /// @param exchangeData Exchange data
+    /// @param from Address from which we'll pull the srcTokens
+    /// @param to Address where we'll send the _to token
     struct Params {
         ExchangeData exchangeData;
         address from;
@@ -31,7 +35,6 @@ contract DFSSellNoFee is ActionBase, DFSExchangeCore {
         params.exchangeData.destAddr = _parseParamAddr(
             params.exchangeData.destAddr, _paramMapping[1], _subData, _returnValues
         );
-
         params.exchangeData.srcAmount = _parseParamUint(
             params.exchangeData.srcAmount, _paramMapping[2], _subData, _returnValues
         );
@@ -67,12 +70,12 @@ contract DFSSellNoFee is ActionBase, DFSExchangeCore {
         internal
         returns (uint256, bytes memory)
     {
-        // if we set srcAmount to max, take the whole user's wallet balance
+        // If we set srcAmount to max, take the whole user's wallet balance.
         if (_exchangeData.srcAmount == type(uint256).max) {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
         }
 
-        // if source and destination address are same we want to skip exchanging and take no fees
+        // If source and destination address are same we want to skip exchanging and take no fees.
         if (_exchangeData.srcAddr == _exchangeData.destAddr) {
             bytes memory sameAssetLogData = abi.encode(
                 address(0),
@@ -85,7 +88,7 @@ contract DFSSellNoFee is ActionBase, DFSExchangeCore {
             return (_exchangeData.srcAmount, sameAssetLogData);
         }
 
-        // Wrap eth if sent directly
+        // Wrap ETH if sent directly.
         if (_exchangeData.srcAddr == TokenUtils.ETH_ADDR) {
             TokenUtils.depositWeth(_exchangeData.srcAmount);
             _exchangeData.srcAddr = TokenUtils.WETH_ADDR;
@@ -93,26 +96,27 @@ contract DFSSellNoFee is ActionBase, DFSExchangeCore {
             _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
         }
 
-        // We always swap with weth, convert token addr when eth sent for unwrapping later
+        // We always swap with WETH, convert token addr when ETH sent for unwrapping later.
         bool isEthDest;
         if (_exchangeData.destAddr == TokenUtils.ETH_ADDR) {
             _exchangeData.destAddr = TokenUtils.WETH_ADDR;
             isEthDest = true;
         }
 
-        /// @dev Don't take any fee
+        // Don't take any fee.
         _exchangeData.dfsFeeDivider = 0;
 
+        // Execute the sell.
         (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
 
+        // If the destination token is WETH, withdraw it and convert to ETH.
         if (isEthDest) {
             TokenUtils.withdrawWeth(exchangedAmount);
-
-            (bool success,) = _to.call{ value: exchangedAmount }("");
-            require(success, "Eth send failed");
-        } else {
-            _exchangeData.destAddr.withdrawTokens(_to, exchangedAmount);
+            _exchangeData.destAddr = TokenUtils.ETH_ADDR;
         }
+
+        // Send the tokens to the recipient. Also handles raw ETH sending.
+        _exchangeData.destAddr.withdrawTokens(_to, exchangedAmount);
 
         bytes memory logData = abi.encode(
             wrapper,
@@ -122,6 +126,7 @@ contract DFSSellNoFee is ActionBase, DFSExchangeCore {
             exchangedAmount,
             _exchangeData.dfsFeeDivider
         );
+
         return (exchangedAmount, logData);
     }
 
