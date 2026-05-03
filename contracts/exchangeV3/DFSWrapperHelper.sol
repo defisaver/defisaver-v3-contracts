@@ -6,9 +6,9 @@ import { IERC20 } from "../interfaces/token/IERC20.sol";
 import { TokenUtils } from "../utils/token/TokenUtils.sol";
 import { SafeERC20 } from "../_vendor/openzeppelin/SafeERC20.sol";
 
-/// @title DFSExchangeHelper
+/// @title DFSWrapperHelper
 /// @notice Helper contract used by other Wrapper contracts
-contract DFSExchangeHelper {
+contract DFSWrapperHelper {
     using TokenUtils for address;
     using SafeERC20 for IERC20;
 
