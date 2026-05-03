@@ -6,6 +6,7 @@ import { IWStEth } from "../../interfaces/protocols/lido/IWStEth.sol";
 import { IWeEth } from "../../interfaces/protocols/etherFi/IWeEth.sol";
 import { ILiquidityPool } from "../../interfaces/protocols/etherFi/ILiquidityPool.sol";
 import { DFSExchangeCore } from "../../exchangeV3/DFSExchangeCore.sol";
+import { SellActionHelper } from "./helpers/SellActionHelper.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { UtilAddresses } from "../../utils/addresses/UtilAddresses.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
@@ -15,6 +16,7 @@ import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 /// @dev Action which has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
 contract LSVSell is ActionBase, UtilAddresses, DFSExchangeCore {
     using TokenUtils for address;
+    using SellActionHelper for ExchangeData;
 
     /// @notice Parameters for the LSVSell action
     /// @param exchangeData Exchange data
@@ -74,77 +76,15 @@ contract LSVSell is ActionBase, UtilAddresses, DFSExchangeCore {
         internal
         returns (uint256, bytes memory)
     {
-        // If we set srcAmount to max, take the whole balance of the source token.
-        // For ETH, use smart wallet balance as it will be send from EOA to wallet during the call.
-        if (_exchangeData.srcAmount == type(uint256).max) {
-            _exchangeData.srcAmount = _exchangeData.srcAddr
-                .getBalance(_exchangeData.srcAddr == TokenUtils.ETH_ADDR ? address(this) : _from);
+        _exchangeData.setMaxAmountIfNeeded(_from);
+
+        (bool handled, uint256 exchangedAmount, bytes memory logData) =
+            _exchangeData.tryHandleDirectTokenConversion(_from, _to);
+        if (handled) {
+            return (exchangedAmount, logData);
         }
 
-        // If source and destination address are same we want to skip exchanging and take no fees.
-        if (_exchangeData.srcAddr == _exchangeData.destAddr) {
-            bytes memory sameAssetLogData = abi.encode(
-                address(0),
-                _exchangeData.srcAddr,
-                _exchangeData.destAddr,
-                _exchangeData.srcAmount,
-                _exchangeData.srcAmount,
-                0
-            );
-            return (_exchangeData.srcAmount, sameAssetLogData);
-        }
-
-        if (
-            _exchangeData.srcAddr == TokenUtils.ETH_ADDR
-                && _exchangeData.destAddr == TokenUtils.WETH_ADDR
-        ) {
-            TokenUtils.depositWeth(_exchangeData.srcAmount);
-            _exchangeData.destAddr.withdrawTokens(_to, _exchangeData.srcAmount);
-
-            bytes memory wethWrapLogData = abi.encode(
-                address(0),
-                _exchangeData.srcAddr,
-                _exchangeData.destAddr,
-                _exchangeData.srcAmount,
-                _exchangeData.srcAmount,
-                0
-            );
-            return (_exchangeData.srcAmount, wethWrapLogData);
-        }
-
-        if (
-            _exchangeData.srcAddr == TokenUtils.WETH_ADDR
-                && _exchangeData.destAddr == TokenUtils.ETH_ADDR
-        ) {
-            _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
-            TokenUtils.withdrawWeth(_exchangeData.srcAmount);
-            _exchangeData.destAddr.withdrawTokens(_to, _exchangeData.srcAmount);
-
-            bytes memory wethUnwrapLogData = abi.encode(
-                address(0),
-                _exchangeData.srcAddr,
-                _exchangeData.destAddr,
-                _exchangeData.srcAmount,
-                _exchangeData.srcAmount,
-                0
-            );
-            return (_exchangeData.srcAmount, wethUnwrapLogData);
-        }
-
-        // Wrap ETH if sent directly.
-        if (_exchangeData.srcAddr == TokenUtils.ETH_ADDR) {
-            TokenUtils.depositWeth(_exchangeData.srcAmount);
-            _exchangeData.srcAddr = TokenUtils.WETH_ADDR;
-        } else {
-            _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
-        }
-
-        // We always swap with WETH, convert token addr when ETH sent for unwrapping later.
-        bool isEthDest;
-        if (_exchangeData.destAddr == TokenUtils.ETH_ADDR) {
-            _exchangeData.destAddr = TokenUtils.WETH_ADDR;
-            isEthDest = true;
-        }
+        bool isEthDest = _exchangeData.pullTokens(_from);
 
         // No sell fee for LSV sell.
         _exchangeData.dfsFeeDivider = 0;
@@ -153,7 +93,6 @@ contract LSVSell is ActionBase, UtilAddresses, DFSExchangeCore {
         bool shouldSell = true;
 
         address wrapper;
-        uint256 exchangedAmount;
 
         // Stake with Lido if the rate is better than the minPrice.
         if (_exchangeData.destAddr == WSTETH_ADDR) {
@@ -173,16 +112,9 @@ contract LSVSell is ActionBase, UtilAddresses, DFSExchangeCore {
             (wrapper, exchangedAmount) = _sell(_exchangeData);
         }
 
-        // If the destination token is WETH, withdraw it and convert to ETH.
-        if (isEthDest) {
-            TokenUtils.withdrawWeth(exchangedAmount);
-            _exchangeData.destAddr = TokenUtils.ETH_ADDR;
-        }
+        _exchangeData.sendTokensAfterSell(_to, exchangedAmount, isEthDest);
 
-        // Send the tokens to the recipient. Also handles raw ETH sending.
-        _exchangeData.destAddr.withdrawTokens(_to, exchangedAmount);
-
-        bytes memory logData = abi.encode(
+        logData = abi.encode(
             wrapper,
             _exchangeData.srcAddr,
             _exchangeData.destAddr,
