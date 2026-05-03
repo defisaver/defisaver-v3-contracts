@@ -10,7 +10,7 @@ import { DSMath } from "../../_vendor/DS/DSMath.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { WrapperHelper } from "./helpers/WrapperHelper.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
-import { DFSExchangeHelper } from "../DFSExchangeHelper.sol";
+import { DFSWrapperHelper } from "../DFSWrapperHelper.sol";
 import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 
 /// @title KyberWrapperV3
@@ -22,7 +22,7 @@ import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 ///    See DFSExchangeCore for more details.
 /// 2. Wrapper contracts are designed to be stateless, meaning they do not hold funds,
 ///    and any token balances can be cleared by anyone.
-contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper, DFSExchangeHelper {
+contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper, DFSWrapperHelper {
     error WrongDestAmountError(uint256, uint256);
 
     using SafeERC20 for IERC20;

@@ -7,7 +7,7 @@ import { IKyberScaleHelper } from "../../interfaces/exchange/IKyberScaleHelper.s
 import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 import { AdminAuth } from "../../auth/AdminAuth.sol";
-import { DFSExchangeHelper } from "../DFSExchangeHelper.sol";
+import { DFSWrapperHelper } from "../DFSWrapperHelper.sol";
 import { DFSExchangeData } from "../DFSExchangeData.sol";
 import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
@@ -25,7 +25,7 @@ import { DFSIds } from "../../utils/DFSIds.sol";
 ///    and any token balances can be cleared by anyone.
 contract KyberAggregatorWrapper is
     IOffchainWrapper,
-    DFSExchangeHelper,
+    DFSWrapperHelper,
     DFSExchangeData,
     AdminAuth,
     CoreHelper

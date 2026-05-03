@@ -6,7 +6,7 @@ import { IOffchainWrapper } from "../../interfaces/exchange/IOffchainWrapper.sol
 import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 import { AdminAuth } from "../../auth/AdminAuth.sol";
-import { DFSExchangeHelper } from "../DFSExchangeHelper.sol";
+import { DFSWrapperHelper } from "../DFSWrapperHelper.sol";
 import { DFSExchangeData } from "../DFSExchangeData.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
@@ -19,7 +19,7 @@ import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 ///    See DFSExchangeCore for more details.
 /// 2. Wrapper contracts are designed to be stateless, meaning they do not hold funds,
 ///    and any token balances can be cleared by anyone.
-contract ZeroxWrapper is IOffchainWrapper, DFSExchangeHelper, DFSExchangeData, AdminAuth {
+contract ZeroxWrapper is IOffchainWrapper, DFSWrapperHelper, DFSExchangeData, AdminAuth {
     using TokenUtils for address;
     using SafeERC20 for IERC20;
 

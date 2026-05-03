@@ -5,7 +5,7 @@ import { IExchangeV3 } from "../interfaces/exchange/IExchangeV3.sol";
 import { DFSExchangeData } from "./DFSExchangeData.sol";
 import { Discount } from "../utils/Discount.sol";
 import { FeeRecipient } from "../utils/fee/FeeRecipient.sol";
-import { DFSExchangeHelper } from "./DFSExchangeHelper.sol";
+import { DFSWrapperHelper } from "./DFSWrapperHelper.sol";
 import { ExchangeAggregatorRegistry } from "./registries/ExchangeAggregatorRegistry.sol";
 import { WrapperExchangeRegistry } from "./registries/WrapperExchangeRegistry.sol";
 import { IOffchainWrapper } from "../interfaces/exchange/IOffchainWrapper.sol";
@@ -18,7 +18,7 @@ import { DSMath } from "../_vendor/DS/DSMath.sol";
 
 contract DFSExchangeCore is
     DSMath,
-    DFSExchangeHelper,
+    DFSWrapperHelper,
     DFSExchangeData,
     ExchangeHelper,
     StrategyModel
