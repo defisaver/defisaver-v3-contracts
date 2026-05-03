@@ -56,10 +56,9 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
-        (uint256 exchangedAmount, bytes memory logData) =
-            _dfsSell(params.exchangeData, params.from, params.to, params.gasUsed);
+        (uint256 exchangedAmountAfterFee, bytes memory logData) = _dfsSell(params);
         emit ActionEvent("LimitSell", logData);
-        return bytes32(exchangedAmount);
+        return bytes32(exchangedAmountAfterFee);
     }
 
     /// @inheritdoc ActionBase
@@ -74,20 +73,19 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Sells a specified srcAmount for the dest token
-    /// @param _exchangeData DFS Exchange data struct
-    /// @param _from Address from which we'll pull the srcTokens
-    /// @param _to Address where we'll send the _to token
-    /// @param _gasUsed Gas used for this strategy so we can take the fee
-    function _dfsSell(
-        ExchangeData memory _exchangeData,
-        address _from,
-        address _to,
-        uint256 _gasUsed
-    ) internal returns (uint256, bytes memory) {
+    /// @param _params Parameters for the LimitSell action
+    /// @return exchangedAmountAfterFee Amount of tokens after the fee is taken
+    /// @return logData Log data for the LimitSell action
+    function _dfsSell(Params memory _params)
+        internal
+        returns (uint256 exchangedAmountAfterFee, bytes memory logData)
+    {
+        ExchangeData memory exchangeData = _params.exchangeData;
+
         // If we set srcAmount to max, take the whole balance of the source token.
         // Limit sell only works with ERC20 tokens, for ETH token, WETH is used as source token.
-        if (_exchangeData.srcAmount == type(uint256).max) {
-            _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(_from);
+        if (exchangeData.srcAmount == type(uint256).max) {
+            exchangeData.srcAmount = exchangeData.srcAddr.getBalance(_params.from);
         }
 
         // Validate price that is set in the trigger.
@@ -95,43 +93,40 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
         if (currPrice == 0) revert PriceNotSetError();
 
         // No sell fee for limit sell strategies.
-        _exchangeData.dfsFeeDivider = 0;
+        exchangeData.dfsFeeDivider = 0;
 
         // If the price is not the expected price, revert.
-        if (_exchangeData.minPrice != currPrice) {
-            revert WrongPriceFromTrigger(currPrice, _exchangeData.minPrice);
+        if (exchangeData.minPrice != currPrice) {
+            revert WrongPriceFromTrigger(currPrice, exchangeData.minPrice);
         }
 
         // Pull the source tokens for selling.
-        _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
+        exchangeData.srcAddr.pullTokensIfNeeded(_params.from, exchangeData.srcAmount);
 
         // Execute the sell.
-        (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
+        (address wrapper, uint256 exchangedAmount) = _sell(exchangeData);
 
-        {
-            // Take the gas fee from the sold amount.
-            uint256 amountAfterFee = _takeGasFee(_gasUsed, exchangedAmount, _exchangeData.destAddr);
+        // Take the gas fee from the sold amount.
+        exchangedAmountAfterFee =
+            _takeGasFee(_params.gasUsed, exchangedAmount, exchangeData.destAddr);
 
-            // If the destination token is WETH, withdraw it and convert to ETH.
-            if (_exchangeData.destAddr == TokenUtils.WETH_ADDR) {
-                TokenUtils.withdrawWeth(amountAfterFee);
-                _exchangeData.destAddr = TokenUtils.ETH_ADDR;
-            }
-
-            // Send the tokens to the recipient. Also handles raw ETH sending.
-            _exchangeData.destAddr.withdrawTokens(_to, amountAfterFee);
+        // If the destination token is WETH, withdraw it and convert to ETH.
+        if (exchangeData.destAddr == TokenUtils.WETH_ADDR) {
+            TokenUtils.withdrawWeth(exchangedAmountAfterFee);
+            exchangeData.destAddr = TokenUtils.ETH_ADDR;
         }
 
-        bytes memory logData = abi.encode(
-            wrapper,
-            _exchangeData.srcAddr,
-            _exchangeData.destAddr,
-            _exchangeData.srcAmount,
-            exchangedAmount,
-            _exchangeData.dfsFeeDivider
-        );
+        // Send the tokens to the recipient. Also handles raw ETH sending.
+        exchangeData.destAddr.withdrawTokens(_params.to, exchangedAmountAfterFee);
 
-        return (exchangedAmount, logData);
+        logData = abi.encode(
+            wrapper,
+            exchangeData.srcAddr,
+            exchangeData.destAddr,
+            exchangeData.srcAmount,
+            exchangedAmount,
+            exchangeData.dfsFeeDivider
+        );
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
