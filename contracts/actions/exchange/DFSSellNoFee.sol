@@ -90,6 +90,43 @@ contract DFSSellNoFee is ActionBase, DFSExchangeCore {
             return (_exchangeData.srcAmount, sameAssetLogData);
         }
 
+        if (
+            _exchangeData.srcAddr == TokenUtils.ETH_ADDR
+                && _exchangeData.destAddr == TokenUtils.WETH_ADDR
+        ) {
+            TokenUtils.depositWeth(_exchangeData.srcAmount);
+            _exchangeData.destAddr.withdrawTokens(_to, _exchangeData.srcAmount);
+
+            bytes memory wethWrapLogData = abi.encode(
+                address(0),
+                _exchangeData.srcAddr,
+                _exchangeData.destAddr,
+                _exchangeData.srcAmount,
+                _exchangeData.srcAmount,
+                0
+            );
+            return (_exchangeData.srcAmount, wethWrapLogData);
+        }
+
+        if (
+            _exchangeData.srcAddr == TokenUtils.WETH_ADDR
+                && _exchangeData.destAddr == TokenUtils.ETH_ADDR
+        ) {
+            _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
+            TokenUtils.withdrawWeth(_exchangeData.srcAmount);
+            _exchangeData.destAddr.withdrawTokens(_to, _exchangeData.srcAmount);
+
+            bytes memory wethUnwrapLogData = abi.encode(
+                address(0),
+                _exchangeData.srcAddr,
+                _exchangeData.destAddr,
+                _exchangeData.srcAmount,
+                _exchangeData.srcAmount,
+                0
+            );
+            return (_exchangeData.srcAmount, wethUnwrapLogData);
+        }
+
         // Wrap ETH if sent directly.
         if (_exchangeData.srcAddr == TokenUtils.ETH_ADDR) {
             TokenUtils.depositWeth(_exchangeData.srcAmount);

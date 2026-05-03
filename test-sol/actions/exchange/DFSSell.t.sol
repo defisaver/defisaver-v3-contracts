@@ -124,6 +124,38 @@ contract TestDFSSell is ActionsUtils, RegistryUtils, BaseTest {
         assertEq(IERC20(Addresses.DAI_ADDR).balanceOf(walletAddr), 0);
     }
 
+    function test_should_wrap_eth_to_weth_direct_without_swap() public {
+        uint256 senderEthBalance = 1 ether;
+        uint256 wrapAmount = senderEthBalance / 2;
+
+        vm.deal(sender, senderEthBalance);
+
+        _executeSellDirect(_ethToWethSell(wrapAmount, sender, sender), wrapAmount);
+
+        assertEq(sender.balance, senderEthBalance - wrapAmount);
+        assertEq(IERC20(Addresses.WETH_ADDR).balanceOf(sender), wrapAmount);
+
+        assertEq(walletAddr.balance, 0);
+        assertEq(IERC20(Addresses.WETH_ADDR).balanceOf(walletAddr), 0);
+    }
+
+    function test_should_unwrap_weth_to_eth_direct_without_swap() public {
+        uint256 senderBalance = amountInUSDPrice(Addresses.WETH_ADDR, 1000);
+        uint256 unwrapAmount = senderBalance / 2;
+
+        _giveWethAndApprove(senderBalance);
+
+        uint256 senderEthBalanceBefore = sender.balance;
+
+        _executeSellDirect(_wethToEthSell(unwrapAmount, sender, sender), 0);
+
+        assertEq(sender.balance, senderEthBalanceBefore + unwrapAmount);
+        assertEq(IERC20(Addresses.WETH_ADDR).balanceOf(sender), senderBalance - unwrapAmount);
+
+        assertEq(walletAddr.balance, 0);
+        assertEq(IERC20(Addresses.WETH_ADDR).balanceOf(walletAddr), 0);
+    }
+
     function test_should_sell_part_erc20_balance_recipe() public {
         uint256 senderBalance = amountInUSDPrice(Addresses.WETH_ADDR, 1000);
         uint256 sellAmount = senderBalance / 2;
@@ -297,6 +329,38 @@ contract TestDFSSell is ActionsUtils, RegistryUtils, BaseTest {
             Addresses.DAI_ADDR,
             Addresses.WETH_ADDR,
             Addresses.DAI_ADDR,
+            _amount,
+            _from,
+            _to
+        );
+    }
+
+    function _ethToWethSell(uint256 _amount, address _from, address _to)
+        internal
+        view
+        returns (bytes memory)
+    {
+        return _sellParams(
+            Addresses.ETH_ADDR,
+            Addresses.WETH_ADDR,
+            Addresses.WETH_ADDR,
+            Addresses.WETH_ADDR,
+            _amount,
+            _from,
+            _to
+        );
+    }
+
+    function _wethToEthSell(uint256 _amount, address _from, address _to)
+        internal
+        view
+        returns (bytes memory)
+    {
+        return _sellParams(
+            Addresses.WETH_ADDR,
+            Addresses.ETH_ADDR,
+            Addresses.WETH_ADDR,
+            Addresses.WETH_ADDR,
             _amount,
             _from,
             _to
