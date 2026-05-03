@@ -6,12 +6,14 @@ import { DFSExchangeCore } from "../../exchangeV3/DFSExchangeCore.sol";
 import { TransientStorageCancun } from "../../utils/transient/TransientStorageCancun.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { SellActionHelper } from "./helpers/SellActionHelper.sol";
 import { GasFeeHelper } from "../fee/helpers/GasFeeHelper.sol";
 
 /// @title A special Limit Sell action used as a part of the limit order strategy
 /// @dev Adds additional gas fee calculation on top of regular sell.
 contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
     using TokenUtils for address;
+    using SellActionHelper for ExchangeData;
 
     /// @notice Used for validating the price that is set in the trigger
     TransientStorageCancun public constant tempStorage =
@@ -111,23 +113,10 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
         exchangedAmountAfterFee =
             _takeGasFee(_params.gasUsed, exchangedAmount, exchangeData.destAddr);
 
-        // If the destination token is WETH, withdraw it and convert to ETH.
-        if (exchangeData.destAddr == TokenUtils.WETH_ADDR) {
-            TokenUtils.withdrawWeth(exchangedAmountAfterFee);
-            exchangeData.destAddr = TokenUtils.ETH_ADDR;
-        }
+        bool unwrapEth = exchangeData.destAddr == TokenUtils.WETH_ADDR;
+        exchangeData.sendTokensAfterSell(_params.to, exchangedAmountAfterFee, unwrapEth);
 
-        // Send the tokens to the recipient. Also handles raw ETH sending.
-        exchangeData.destAddr.withdrawTokens(_params.to, exchangedAmountAfterFee);
-
-        logData = abi.encode(
-            wrapper,
-            exchangeData.srcAddr,
-            exchangeData.destAddr,
-            exchangeData.srcAmount,
-            exchangedAmount,
-            exchangeData.dfsFeeDivider
-        );
+        logData = exchangeData.encodeSellLogData(wrapper, exchangedAmount);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
