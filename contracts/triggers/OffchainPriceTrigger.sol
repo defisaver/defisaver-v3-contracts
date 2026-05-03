@@ -2,9 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { AdminAuth } from "../auth/AdminAuth.sol";
 import { ITrigger } from "../interfaces/core/ITrigger.sol";
-import { TransientStorage } from "../utils/transient/TransientStorage.sol";
+
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { TransientStorageCancun } from "../utils/transient/TransientStorageCancun.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
 /// @title Trigger that triggers when the price of a token is over or under a limit price.
@@ -27,7 +28,8 @@ contract OffchainPriceTrigger is ITrigger, AdminAuth, TriggerHelper {
         uint256 currentPrice;
     }
 
-    TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
+    TransientStorageCancun public constant tempStorage =
+        TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
 
     function isTriggered(bytes memory _callData, bytes memory _subData)
         external
