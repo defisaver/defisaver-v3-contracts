@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { DFSExchangeCore } from "../../exchangeV3/DFSExchangeCore.sol";
-import { TransientStorage } from "../../utils/transient/TransientStorage.sol";
+import { TransientStorageCancun } from "../../utils/transient/TransientStorageCancun.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { GasFeeHelper } from "../fee/helpers/GasFeeHelper.sol";
@@ -14,7 +14,8 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
     using TokenUtils for address;
 
     /// @notice Used for validating the price that is set in the trigger
-    TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
+    TransientStorageCancun public constant tempStorage =
+        TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
 
     /// @notice Error thrown when the price is not the expected price
     /// @param expected Expected price

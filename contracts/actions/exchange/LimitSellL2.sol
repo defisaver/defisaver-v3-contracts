@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { DFSExchangeCore } from "../../exchangeV3/DFSExchangeCore.sol";
-import { TransientStorage } from "../../utils/transient/TransientStorage.sol";
+import { TransientStorageCancun } from "../../utils/transient/TransientStorageCancun.sol";
 import { GasFeeHelperL2 } from "../fee/helpers/GasFeeHelperL2.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
@@ -13,7 +13,8 @@ import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
     using TokenUtils for address;
 
-    TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
+    TransientStorageCancun public constant tempStorage =
+        TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
 
     /// @notice Error thrown when the price is not the expected price
     /// @param expected Expected price
@@ -92,9 +93,6 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
         // Validate price that is set in the trigger.
         uint256 currPrice = uint256(tempStorage.getBytes32("CURR_PRICE"));
         if (currPrice == 0) revert PriceNotSetError();
-
-        // Reset the current price for the next strategy.
-        tempStorage.setBytes32("CURR_PRICE", bytes32(0));
 
         // No sell fee for limit sell strategies.
         exchangeData.dfsFeeDivider = 0;
