@@ -10,13 +10,14 @@ import {
 import { DFSExchangeCore } from "./DFSExchangeCore.sol";
 import { SafeERC20 } from "../_vendor/openzeppelin/SafeERC20.sol";
 import { TokenUtils } from "../utils/token/TokenUtils.sol";
-import { TxSaverGasCostCalc } from "../tx-saver/TxSaverGasCostCalc.sol";
+import { UtilAddresses } from "../utils/addresses/UtilAddresses.sol";
 import { DFSIds } from "../utils/DFSIds.sol";
 import { StrategyModel } from "../core/strategy/StrategyModel.sol";
+import { GasCostLib } from "../actions/fee/helpers/GasCostLib.sol";
 
 /// @title DFSExchangeWithTxSaver
 /// @notice Contract containing the logic for performing swaps with optional TxSaver functionality.
-contract DFSExchangeWithTxSaver is DFSExchangeCore, TxSaverGasCostCalc, StrategyModel {
+contract DFSExchangeWithTxSaver is DFSExchangeCore, UtilAddresses, StrategyModel {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
@@ -174,8 +175,8 @@ contract DFSExchangeWithTxSaver is DFSExchangeCore, TxSaverGasCostCalc, Strategy
         if (_estimatedGas == 0) return;
 
         // Calculate the gas cost in the source token. Use injected ETH price to convert to source token amount.
-        uint256 txCostInSrcToken = calcGasCostUsingInjectedPrice(
-            _estimatedGas, _exData.srcAddr, _txSaverData.tokenPriceInEth, _l1GasCostInEth
+        uint256 txCostInSrcToken = GasCostLib.calcGasCost(
+            _estimatedGas, _exData.srcAddr, _txSaverData.tokenPriceInEth, _l1GasCostInEth, true
         );
 
         // Revert if the tx cost is higher than the max value set by the user.

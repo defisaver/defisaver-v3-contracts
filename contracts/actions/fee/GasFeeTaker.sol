@@ -4,6 +4,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { GasFeeHelper } from "./helpers/GasFeeHelper.sol";
+import { GasCostLib } from "./helpers/GasCostLib.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Helper action to take gas fee from the user's wallet and send it to the fee recipient.
@@ -50,12 +51,10 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
     }
 
     function _takeFee(GasFeeTakerParams memory _inputData) internal returns (uint256 amountLeft) {
-        uint256 txCost = calcGasCost(_inputData.gasUsed, _inputData.feeToken, 0);
+        uint256 txCost = calcGasCost(_inputData.gasUsed, _inputData.feeToken);
 
         // cap at 20% of the max amount
-        if (txCost >= (_inputData.availableAmount / 5)) {
-            txCost = _inputData.availableAmount / 5;
-        }
+        txCost = GasCostLib.capFeeAt20Percent(txCost, _inputData.availableAmount);
 
         if (_inputData.dfsFeeDivider != 0) {
             /// @notice If divider is lower the fee is greater, should be max 5 bps

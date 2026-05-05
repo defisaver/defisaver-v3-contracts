@@ -6,6 +6,7 @@ import { DFSExchangeCore } from "../../exchangeV3/DFSExchangeCore.sol";
 import { TransientStorageCancun } from "../../utils/transient/TransientStorageCancun.sol";
 import { SellActionHelper } from "./helpers/SellActionHelper.sol";
 import { GasFeeHelperL2 } from "../fee/helpers/GasFeeHelperL2.sol";
+import { GasCostLib } from "../fee/helpers/GasCostLib.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
@@ -31,13 +32,13 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
     /// @param from Address from which we'll pull the srcTokens
     /// @param to Address where we'll send the dest token
     /// @param gasUsed Gas used for this strategy so we can take the fee
-    /// @param l1GasUsed Gas spent on L1 to post data for L2 network
+    /// @param l1GasCostInEth Cost in ETH spent on L1 to post data for L2 network
     struct Params {
         ExchangeData exchangeData;
         address from;
         address to;
         uint256 gasUsed;
-        uint256 l1GasUsed;
+        uint256 l1GasCostInEth;
     }
 
     /// @inheritdoc ActionBase
@@ -111,8 +112,9 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
         (address wrapper, uint256 exchangedAmount) = _sell(exchangeData);
 
         // Take the gas fee from the sold amount.
-        exchangedAmountAfterFee =
-            _takeGasFee(_params.gasUsed, exchangedAmount, exchangeData.destAddr, _params.l1GasUsed);
+        exchangedAmountAfterFee = _takeGasFee(
+            _params.gasUsed, exchangedAmount, exchangeData.destAddr, _params.l1GasCostInEth
+        );
 
         bool unwrapEth = exchangeData.destAddr == TokenUtils.WETH_ADDR;
         exchangeData.sendTokensAfterSell(_params.to, exchangedAmountAfterFee, unwrapEth);
@@ -128,20 +130,18 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
     /// @param _gasUsed Gas used for this strategy so we can take the fee
     /// @param _soldAmount Amount of tokens sold
     /// @param _feeToken Token in which the gas fee is taken
-    /// @param _l1GasUsed Gas spent on L1 to post data for L2 network
+    /// @param _l1GasCostInEth Cost in ETH spent on L1 to post data for L2 network
     /// @return amountAfterFee Amount of tokens after the fee is taken
     function _takeGasFee(
         uint256 _gasUsed,
         uint256 _soldAmount,
         address _feeToken,
-        uint256 _l1GasUsed
+        uint256 _l1GasCostInEth
     ) internal returns (uint256 amountAfterFee) {
-        uint256 gasFeeCost = calcGasCost(_gasUsed, _feeToken, _l1GasUsed);
+        uint256 gasFeeCost = calcGasCost(_gasUsed, _feeToken, _l1GasCostInEth);
 
         // Cap at 20% of the sold amount.
-        if (gasFeeCost >= (_soldAmount / 5)) {
-            gasFeeCost = _soldAmount / 5;
-        }
+        gasFeeCost = GasCostLib.capFeeAt20Percent(gasFeeCost, _soldAmount);
 
         _feeToken.withdrawTokens(feeRecipient.getFeeAddr(), gasFeeCost);
 

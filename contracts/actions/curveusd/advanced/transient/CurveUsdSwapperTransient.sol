@@ -11,6 +11,7 @@ import { DFSExchangeData } from "../../../../exchangeV3/DFSExchangeData.sol";
 import { FeeRecipient } from "../../../../utils/fee/FeeRecipient.sol";
 import { ActionsUtilHelper } from "../../../utils/helpers/ActionsUtilHelper.sol";
 import { GasFeeHelper } from "../../../../actions/fee/helpers/GasFeeHelper.sol";
+import { GasCostLib } from "../../../../actions/fee/helpers/GasCostLib.sol";
 import {
     ReentrancyGuardTransient
 } from "../../../../_vendor/openzeppelin/ReentrancyGuardTransient.sol";
@@ -159,12 +160,10 @@ contract CurveUsdSwapperTransient is
         bool hasFee
     ) internal returns (uint256 feeAmount) {
         // we need to take the fee for tx cost as well, as it's in a strategy
-        feeAmount += calcGasCost(_gasUsed, _token, 0);
+        feeAmount += calcGasCost(_gasUsed, _token);
 
         // gas fee can't go over 20% of the whole amount
-        if (feeAmount > (_destTokenAmount / 5)) {
-            feeAmount = _destTokenAmount / 5;
-        }
+        feeAmount = GasCostLib.capFeeAt20Percent(feeAmount, _destTokenAmount);
         // if user has been whitelisted we don't take 0.05% fee
         if (hasFee) {
             feeAmount += _destTokenAmount / AUTOMATION_DFS_FEE;

@@ -2,63 +2,24 @@
 
 pragma solidity =0.8.24;
 
-import { DSMath } from "../../../_vendor/DS/DSMath.sol";
 import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { FeeRecipient } from "../../../utils/fee/FeeRecipient.sol";
 import { TokenPriceHelper } from "../../../utils/token/TokenPriceHelper.sol";
+import { GasCostLib } from "./GasCostLib.sol";
 
 /// @title GasFeeHelper
 /// @notice Helper contract for calculating the gas cost for strategies
-contract GasFeeHelper is DSMath, TokenPriceHelper {
+contract GasFeeHelper is TokenPriceHelper {
     using TokenUtils for address;
 
-    // only support token with decimals <= 18
-    error TokenDecimalsUnsupportedError(uint256 decimals);
-
     FeeRecipient public constant feeRecipient = FeeRecipient(FEE_RECIPIENT);
-
-    uint256 public constant SANITY_GAS_PRICE = 1000 gwei;
 
     /// @dev Divider for input amount, 5 bps
     uint256 public constant MAX_DFS_FEE = 2000;
 
-    function calcGasCost(uint256 _gasUsed, address _feeToken, uint256 _l1GasCostInEth)
-        public
-        view
-        returns (uint256 txCost)
-    {
-        uint256 gasPrice = tx.gasprice;
+    function calcGasCost(uint256 _gasUsed, address _feeToken) public view returns (uint256 txCost) {
+        uint256 price = _feeToken == TokenUtils.WETH_ADDR ? 0 : getPriceInETH(_feeToken);
 
-        // gas price must be in a reasonable range
-        if (tx.gasprice > SANITY_GAS_PRICE) {
-            gasPrice = SANITY_GAS_PRICE;
-        }
-
-        // can't use more gas than the block gas limit
-        if (_gasUsed > block.gaslimit) {
-            _gasUsed = block.gaslimit;
-        }
-
-        // additional l1 gas cost must stay 0 for mainnet
-        if (block.chainid == 1 && _l1GasCostInEth > 0) {
-            _l1GasCostInEth = 0;
-        }
-
-        // calc gas used
-        txCost = (_gasUsed * gasPrice) + _l1GasCostInEth;
-
-        // convert to token amount
-        if (_feeToken != TokenUtils.WETH_ADDR) {
-            uint256 price = getPriceInETH(_feeToken);
-            uint256 tokenDecimals = _feeToken.getTokenDecimals();
-
-            if (tokenDecimals > 18) revert TokenDecimalsUnsupportedError(tokenDecimals);
-
-            if (price > 0) {
-                txCost = wdiv(txCost, uint256(price)) / (10 ** (18 - tokenDecimals));
-            } else {
-                txCost = 0;
-            }
-        }
+        txCost = GasCostLib.calcGasCost(_gasUsed, _feeToken, price, 0, false);
     }
 }

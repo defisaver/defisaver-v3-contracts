@@ -24,7 +24,7 @@ contract GasFeeCalc is ActionBase, GasFeeHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        uint256 txCost = calcGasCost(inputData.gasUsed, inputData.feeToken, 0);
+        uint256 txCost = calcGasCost(inputData.gasUsed, inputData.feeToken);
 
         return bytes32(txCost);
     }

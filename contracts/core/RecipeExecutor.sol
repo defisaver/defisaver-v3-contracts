@@ -114,18 +114,19 @@ import { StrategyModel } from "../core/strategy/StrategyModel.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { CoreHelper } from "../core/helpers/CoreHelper.sol";
 import { TokenUtils } from "../utils/token/TokenUtils.sol";
-import { TxSaverGasCostCalc } from "../tx-saver/TxSaverGasCostCalc.sol";
+import { UtilAddresses } from "../utils/addresses/UtilAddresses.sol";
 import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
 import { DFSExchangeData } from "../exchangeV3/DFSExchangeData.sol";
 import { WalletType } from "../utils/DFSTypes.sol";
 import { DFSIds } from "../utils/DFSIds.sol";
+import { GasCostLib } from "../actions/fee/helpers/GasCostLib.sol";
 
 contract RecipeExecutor is
     StrategyModel,
     Permission,
     AdminAuth,
     CoreHelper,
-    TxSaverGasCostCalc,
+    UtilAddresses,
     SmartWalletUtils,
     IRecipeExecutor
 {
@@ -196,8 +197,12 @@ contract RecipeExecutor is
         }
 
         // calculate gas cost using gas estimation and signed token price
-        uint256 gasCost = calcGasCostUsingInjectedPrice(
-            estimatedGasUsed, _txSaverData.feeToken, _txSaverData.tokenPriceInEth, l1GasCostInEth
+        uint256 gasCost = GasCostLib.calcGasCost(
+            estimatedGasUsed,
+            _txSaverData.feeToken,
+            _txSaverData.tokenPriceInEth,
+            l1GasCostInEth,
+            true
         );
 
         // revert if gas cost is higher than max cost signed by user
