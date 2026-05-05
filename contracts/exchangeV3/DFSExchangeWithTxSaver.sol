@@ -13,7 +13,7 @@ import { TokenUtils } from "../utils/token/TokenUtils.sol";
 import { UtilAddresses } from "../utils/addresses/UtilAddresses.sol";
 import { DFSIds } from "../utils/DFSIds.sol";
 import { StrategyModel } from "../core/strategy/StrategyModel.sol";
-import { GasCostLib } from "../actions/fee/helpers/GasCostLib.sol";
+import { GasCostLib } from "../utils/fee/GasCostLib.sol";
 
 /// @title DFSExchangeWithTxSaver
 /// @notice Contract containing the logic for performing swaps with optional TxSaver functionality.

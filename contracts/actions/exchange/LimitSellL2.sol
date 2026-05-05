@@ -4,11 +4,10 @@ pragma solidity =0.8.24;
 
 import { DFSExchangeCore } from "../../exchangeV3/DFSExchangeCore.sol";
 import { TransientStorageCancun } from "../../utils/transient/TransientStorageCancun.sol";
-import { SellActionHelper } from "./helpers/SellActionHelper.sol";
-import { GasFeeHelperL2 } from "../fee/helpers/GasFeeHelperL2.sol";
-import { GasCostLib } from "../fee/helpers/GasCostLib.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { SellActionHelper } from "./helpers/SellActionHelper.sol";
+import { GasFeeHelperL2 } from "../../utils/fee/GasFeeHelperL2.sol";
 
 /// @title A special Limit Sell L2 action used as a part of the limit order strategy
 /// @dev Adds additional gas fee calculation on top of regular sell.
@@ -16,6 +15,7 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
     using TokenUtils for address;
     using SellActionHelper for ExchangeData;
 
+    /// @notice Used for validating the price that is set in the trigger
     TransientStorageCancun public constant tempStorage =
         TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
 
@@ -67,7 +67,7 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
     }
 
     /// @inheritdoc ActionBase
-    /// @dev No direct action as it"s a part of the limit order strategy
+    /// @dev No direct action as it's a part of the limit order strategy
     function executeActionDirect(bytes memory _callData) public payable virtual override { }
 
     /// @inheritdoc ActionBase
@@ -111,10 +111,10 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
         // Execute the sell.
         (address wrapper, uint256 exchangedAmount) = _sell(exchangeData);
 
-        // Take the gas fee from the sold amount.
-        exchangedAmountAfterFee = _takeGasFee(
-            _params.gasUsed, exchangedAmount, exchangeData.destAddr, _params.l1GasCostInEth
-        );
+        exchangedAmountAfterFee = exchangedAmount
+            - takeGasFee(
+                _params.gasUsed, exchangeData.destAddr, exchangedAmount, _params.l1GasCostInEth
+            );
 
         bool unwrapEth = exchangeData.destAddr == TokenUtils.WETH_ADDR;
         exchangeData.sendTokensAfterSell(_params.to, exchangedAmountAfterFee, unwrapEth);
@@ -124,27 +124,5 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
-    }
-
-    /// @notice Takes the gas fee from the sold amount
-    /// @param _gasUsed Gas used for this strategy so we can take the fee
-    /// @param _soldAmount Amount of tokens sold
-    /// @param _feeToken Token in which the gas fee is taken
-    /// @param _l1GasCostInEth Cost in ETH spent on L1 to post data for L2 network
-    /// @return amountAfterFee Amount of tokens after the fee is taken
-    function _takeGasFee(
-        uint256 _gasUsed,
-        uint256 _soldAmount,
-        address _feeToken,
-        uint256 _l1GasCostInEth
-    ) internal returns (uint256 amountAfterFee) {
-        uint256 gasFeeCost = calcGasCost(_gasUsed, _feeToken, _l1GasCostInEth);
-
-        // Cap at 20% of the sold amount.
-        gasFeeCost = GasCostLib.capFeeAt20Percent(gasFeeCost, _soldAmount);
-
-        _feeToken.withdrawTokens(feeRecipient.getFeeAddr(), gasFeeCost);
-
-        return _soldAmount - gasFeeCost;
     }
 }

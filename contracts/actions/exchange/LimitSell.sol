@@ -7,8 +7,7 @@ import { TransientStorageCancun } from "../../utils/transient/TransientStorageCa
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { SellActionHelper } from "./helpers/SellActionHelper.sol";
-import { GasFeeHelper } from "../fee/helpers/GasFeeHelper.sol";
-import { GasCostLib } from "../fee/helpers/GasCostLib.sol";
+import { GasFeeHelper } from "../../utils/fee/GasFeeHelper.sol";
 
 /// @title A special Limit Sell action used as a part of the limit order strategy
 /// @dev Adds additional gas fee calculation on top of regular sell.
@@ -31,7 +30,7 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
     /// @notice Parameters for the LimitSell action
     /// @param exchangeData Exchange data
     /// @param from Address from which we'll pull the srcTokens
-    /// @param to Address where we'll send the _to token
+    /// @param to Address where we'll send the dest token
     /// @param gasUsed Gas used for this strategy so we can take the fee
     struct Params {
         ExchangeData exchangeData;
@@ -110,9 +109,8 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
         // Execute the sell.
         (address wrapper, uint256 exchangedAmount) = _sell(exchangeData);
 
-        // Take the gas fee from the sold amount.
         exchangedAmountAfterFee =
-            _takeGasFee(_params.gasUsed, exchangedAmount, exchangeData.destAddr);
+            exchangedAmount - takeGasFee(_params.gasUsed, exchangeData.destAddr, exchangedAmount);
 
         bool unwrapEth = exchangeData.destAddr == TokenUtils.WETH_ADDR;
         exchangeData.sendTokensAfterSell(_params.to, exchangedAmountAfterFee, unwrapEth);
@@ -122,24 +120,5 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
-    }
-
-    /// @notice Takes the gas fee from the sold amount
-    /// @param _gasUsed Gas used for this strategy so we can take the fee
-    /// @param _soldAmount Amount of tokens sold
-    /// @param _feeToken Token in which the gas fee is taken
-    /// @return amountAfterFee Amount of tokens after the fee is taken
-    function _takeGasFee(uint256 _gasUsed, uint256 _soldAmount, address _feeToken)
-        internal
-        returns (uint256 amountAfterFee)
-    {
-        uint256 gasFeeCost = calcGasCost(_gasUsed, _feeToken);
-
-        // Cap at 20% of the sold amount.
-        gasFeeCost = GasCostLib.capFeeAt20Percent(gasFeeCost, _soldAmount);
-
-        _feeToken.withdrawTokens(feeRecipient.getFeeAddr(), gasFeeCost);
-
-        return _soldAmount - gasFeeCost;
     }
 }

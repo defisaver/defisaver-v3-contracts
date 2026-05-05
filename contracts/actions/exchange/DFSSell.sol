@@ -6,14 +6,12 @@ import { ITokenGroupRegistry } from "../../interfaces/exchange/ITokenGroupRegist
 import { DFSExchangeWithTxSaver } from "../../exchangeV3/DFSExchangeWithTxSaver.sol";
 import { SellActionHelper } from "./helpers/SellActionHelper.sol";
 import { ActionBase } from "../ActionBase.sol";
+import { DFSFeeLib } from "../../utils/fee/DFSFeeLib.sol";
 
 /// @title A exchange sell action through the dfs exchange
 /// @dev Action which has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
 contract DFSSell is ActionBase, DFSExchangeWithTxSaver {
     using SellActionHelper for ExchangeData;
-
-    // Standard default service fee is 25 bps (0.25%) on source token amount.
-    uint256 internal constant STANDARD_FEE_DIVIDER = 400;
 
     /// @notice Parameters for the DFSSell action
     /// @param exchangeData Exchange data
@@ -95,7 +93,7 @@ contract DFSSell is ActionBase, DFSExchangeWithTxSaver {
             _exchangeData.dfsFeeDivider = 0;
         } else {
             // Only check for custom fee if a non standard fee is sent.
-            if (_exchangeData.dfsFeeDivider != STANDARD_FEE_DIVIDER) {
+            if (_exchangeData.dfsFeeDivider != DFSFeeLib.SELL_STANDARD_FEE_DIVIDER) {
                 _exchangeData.dfsFeeDivider = ITokenGroupRegistry(TOKEN_GROUP_REGISTRY)
                     .getFeeForTokens(_exchangeData.srcAddr, _exchangeData.destAddr);
             }

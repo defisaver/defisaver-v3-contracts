@@ -119,7 +119,7 @@ import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
 import { DFSExchangeData } from "../exchangeV3/DFSExchangeData.sol";
 import { WalletType } from "../utils/DFSTypes.sol";
 import { DFSIds } from "../utils/DFSIds.sol";
-import { GasCostLib } from "../actions/fee/helpers/GasCostLib.sol";
+import { GasCostLib } from "../utils/fee/GasCostLib.sol";
 
 contract RecipeExecutor is
     StrategyModel,
