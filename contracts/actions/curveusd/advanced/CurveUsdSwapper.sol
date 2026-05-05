@@ -8,6 +8,7 @@ import { CurveUsdHelper } from "../helpers/CurveUsdHelper.sol";
 import { Discount } from "../../../utils/Discount.sol";
 import { FeeRecipient } from "../../../utils/fee/FeeRecipient.sol";
 import { GasFeeHelper } from "../../../actions/fee/helpers/GasFeeHelper.sol";
+import { GasCostLib } from "../../../actions/fee/helpers/GasCostLib.sol";
 import { ExchangeHelper } from "../../../exchangeV3/helpers/ExchangeHelper.sol";
 import { TokenGroupRegistry } from "../../../exchangeV3/registries/TokenGroupRegistry.sol";
 import { ICrvUsdController } from "../../../interfaces/protocols/curveusd/ICurveUsd.sol";
@@ -254,12 +255,10 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
     ) internal returns (uint256 feeAmount) {
         // we need to take the fee for tx cost as well, as it"s in a strategy
 
-        feeAmount += calcGasCost(_gasUsed, _token, 0);
+        feeAmount += calcGasCost(_gasUsed, _token);
 
         // gas fee can't go over 20% of the whole amount
-        if (feeAmount > (_destTokenAmount / 5)) {
-            feeAmount = _destTokenAmount / 5;
-        }
+        feeAmount = GasCostLib.capFeeAt20Percent(feeAmount, _destTokenAmount);
 
         if (_dfsFeeDivider != 0) {
             feeAmount += _destTokenAmount / AUTOMATION_DFS_FEE;

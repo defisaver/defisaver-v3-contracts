@@ -4,6 +4,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { GasFeeHelperL2 } from "./helpers/GasFeeHelperL2.sol";
+import { GasCostLib } from "./helpers/GasCostLib.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Helper action to take gas fee from the user's wallet on L2 and send it to the fee recipient.
@@ -49,9 +50,7 @@ contract GasFeeTakerL2 is ActionBase, GasFeeHelperL2 {
         }
 
         // cap at 20% of the max amount
-        if (txCost >= (inputData.availableAmount / 5)) {
-            txCost = inputData.availableAmount / 5;
-        }
+        txCost = GasCostLib.capFeeAt20Percent(txCost, inputData.availableAmount);
 
         if (inputData.dfsFeeDivider != 0) {
             /// @notice If divider is lower the fee is greater, should be max 5 bps.

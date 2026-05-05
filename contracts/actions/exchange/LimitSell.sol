@@ -8,6 +8,7 @@ import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { SellActionHelper } from "./helpers/SellActionHelper.sol";
 import { GasFeeHelper } from "../fee/helpers/GasFeeHelper.sol";
+import { GasCostLib } from "../fee/helpers/GasCostLib.sol";
 
 /// @title A special Limit Sell action used as a part of the limit order strategy
 /// @dev Adds additional gas fee calculation on top of regular sell.
@@ -132,12 +133,10 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
         internal
         returns (uint256 amountAfterFee)
     {
-        uint256 gasFeeCost = calcGasCost(_gasUsed, _feeToken, 0);
+        uint256 gasFeeCost = calcGasCost(_gasUsed, _feeToken);
 
         // Cap at 20% of the sold amount.
-        if (gasFeeCost >= (_soldAmount / 5)) {
-            gasFeeCost = _soldAmount / 5;
-        }
+        gasFeeCost = GasCostLib.capFeeAt20Percent(gasFeeCost, _soldAmount);
 
         _feeToken.withdrawTokens(feeRecipient.getFeeAddr(), gasFeeCost);
 
