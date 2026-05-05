@@ -2,8 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
+import { TokenUtils } from "../token/TokenUtils.sol";
 
+/// @title GasCostLib
+/// @notice Library for calculating the gas cost used
 library GasCostLib {
     using TokenUtils for address;
 
@@ -72,7 +74,7 @@ library GasCostLib {
         tokenAmount = _wdiv(_ethCost, _tokenPriceInEth) / (10 ** (18 - tokenDecimals));
     }
 
-    function capFeeAt20Percent(uint256 _feeAmount, uint256 _availableAmount)
+    function capGasFeeAt20Percent(uint256 _feeAmount, uint256 _availableAmount)
         internal
         pure
         returns (uint256)

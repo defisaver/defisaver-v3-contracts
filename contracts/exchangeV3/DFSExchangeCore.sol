@@ -8,14 +8,15 @@ import {
 } from "../interfaces/exchange/IExchangeAggregatorRegistry.sol";
 import { IWrapperExchangeRegistry } from "../interfaces/exchange/IWrapperExchangeRegistry.sol";
 import { IOffchainWrapper } from "../interfaces/exchange/IOffchainWrapper.sol";
+import { IDiscount } from "../interfaces/utils/IDiscount.sol";
 
 import { DFSExchangeData } from "./DFSExchangeData.sol";
-import { Discount } from "../utils/Discount.sol";
 import { FeeRecipient } from "../utils/fee/FeeRecipient.sol";
 import { ExchangeHelper } from "./helpers/ExchangeHelper.sol";
 import { SafeERC20 } from "../_vendor/openzeppelin/SafeERC20.sol";
 import { TokenUtils } from "../utils/token/TokenUtils.sol";
 import { DSMath } from "../_vendor/DS/DSMath.sol";
+import { DFSFeeLib } from "../utils/fee/DFSFeeLib.sol";
 
 /// @title DFSExchangeCore
 /// @notice Contract containing the core logic for performing swaps used by other DFS Sell actions.
@@ -148,29 +149,11 @@ contract DFSExchangeCore is DSMath, DFSExchangeData, ExchangeHelper {
     /// @param _exData Exchange data struct
     /// @param _smartWallet Smart wallet address used to check if service fees are disabled.
     function _takeDfsExchangeFee(ExchangeData memory _exData, address _smartWallet) internal {
-        _exData.srcAmount -= _getFee(
-            _exData.srcAmount, _smartWallet, _exData.srcAddr, _exData.dfsFeeDivider
+        uint256 feeAmount = DFSFeeLib.calculateSellFee(
+            _exData.dfsFeeDivider, _exData.srcAmount, IDiscount(DISCOUNT_ADDRESS), _smartWallet
         );
-    }
 
-    /// @notice Calculates and transfers the DFS fee for a given amount.
-    /// @param _amount Total amount used to calculate the fee.
-    /// @param _wallet User wallet used to check whether service fees are disabled.
-    /// @param _token Token address for fee transfer
-    /// @param _dfsFeeDivider Fee divider used to calculate the fee. A value of 0 disables the fee.
-    /// @return feeAmount DFS fee amount transferred to fee recipient.
-    function _getFee(uint256 _amount, address _wallet, address _token, uint256 _dfsFeeDivider)
-        internal
-        returns (uint256 feeAmount)
-    {
-        if (_dfsFeeDivider == 0) return 0;
-
-        if (Discount(DISCOUNT_ADDRESS).serviceFeesDisabled(_wallet)) {
-            return 0;
-        }
-
-        feeAmount = _amount / _dfsFeeDivider;
-        address feeRecipient = FeeRecipient(FEE_RECIPIENT_ADDRESS).getFeeAddr();
-        _token.withdrawTokens(feeRecipient, feeAmount);
+        _exData.srcAmount -= feeAmount;
+        _exData.srcAddr.withdrawTokens(FeeRecipient(FEE_RECIPIENT_ADDRESS).getFeeAddr(), feeAmount);
     }
 }
