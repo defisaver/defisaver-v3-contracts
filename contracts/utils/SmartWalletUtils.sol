@@ -15,6 +15,9 @@ import { WalletType } from "../utils/DFSTypes.sol";
 
 /// @title SmartWalletUtils - Helper contract with utility functions for smart wallets
 contract SmartWalletUtils is DSProxyFactoryHelper, DSAProxyFactoryHelper, SFProxyFactoryHelper {
+    /// @notice Error thrown when the owner of the smart wallet is not the provided owner
+    error InvalidSmartWalletOwner(address wallet, address providedOwner);
+
     /// @notice Determine the type of wallet an address represents
     function _getWalletType(address _wallet) internal view returns (WalletType) {
         if (_isDSProxy(_wallet)) {
@@ -59,5 +62,25 @@ contract SmartWalletUtils is DSProxyFactoryHelper, DSAProxyFactoryHelper, SFProx
         // Otherwise, we assume we are in context of Safe
         address[] memory owners = ISafe(_wallet).getOwners();
         return owners.length == 1 ? owners[0] : _wallet;
+    }
+
+    /// @notice Validate that the provided owner is the owner of the smart wallet
+    /// @dev Only supports Safe and DSProxy wallets because SFProxy and DSAProxy are not part of automation
+    /// @param _wallet Address of the smart wallet
+    /// @param _owner Address of the owner to validate
+    function _validateOwner(address _wallet, address _owner) internal view {
+        if (_isDSProxy(_wallet)) {
+            if (IDSProxy(_wallet).owner() != _owner) {
+                revert InvalidSmartWalletOwner(_wallet, _owner);
+            }
+        }
+
+        // Otherwise, we assume we are in context of Safe
+        address[] memory owners = ISafe(_wallet).getOwners();
+        for (uint256 i = 0; i < owners.length; i++) {
+            if (owners[i] == _owner) return;
+        }
+
+        revert InvalidSmartWalletOwner(_wallet, _owner);
     }
 }
