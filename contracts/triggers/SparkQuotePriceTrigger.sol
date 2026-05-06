@@ -9,6 +9,7 @@ import { DSMath } from "../_vendor/DS/DSMath.sol";
 import { SparkRatioHelper } from "../actions/spark/helpers/SparkRatioHelper.sol";
 
 /// @title Trigger contract that verifies if current token price ratio is over/under the price ratio specified during subscription
+/// @dev The trigger expects the price input to be scaled by 1e8.
 contract SparkQuotePriceTrigger is ITrigger, AdminAuth, DSMath, SparkRatioHelper {
     enum PriceState {
         OVER,
