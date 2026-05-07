@@ -36,7 +36,7 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
     /// @param _aggregator Chainlink aggregator
     /// @return priceInUSD Chainlink USD price answer after supported token adjustment
     /// @return updateTimestamp Timestamp of the price update
-    /// @dev For wstETH, the price is calculated from the price of stETH.
+    /// @dev For wstETH and WBTC, the price is calculated from the price of stETH and BTC respectively.
     function getRoundInfo(address _inputTokenAddr, uint80 _roundId, IAggregatorV3 _aggregator)
         public
         view
@@ -52,8 +52,9 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
         }
         signedPrice = _parseChainlinkPrice(signedPrice);
 
-        // No direct feed for wstETH, so we calculate price from stETH.
+        // Handle special cases for wstETH and WBTC.
         if (_inputTokenAddr == WSTETH_ADDR) signedPrice = getWStEthPrice(signedPrice);
+        if (_inputTokenAddr == WBTC_ADDR) signedPrice = getWBtcPrice(signedPrice);
 
         priceInUSD = uint256(signedPrice);
     }
