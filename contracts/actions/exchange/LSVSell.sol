@@ -110,6 +110,12 @@ contract LSVSell is ActionBase, UtilAddresses, DFSExchangeCore {
 
         if (shouldSell) {
             (wrapper, exchangedAmount) = _sell(_exchangeData);
+        } else {
+            // Direct staking paths bypass _sell, so enforce the same minPrice semantics here.
+            uint256 minExpectedDestAmount = wmul(_exchangeData.minPrice, _exchangeData.srcAmount);
+            if (exchangedAmount < minExpectedDestAmount) {
+                revert SlippageHitError(exchangedAmount, minExpectedDestAmount);
+            }
         }
 
         _exchangeData.sendTokensAfterSell(_to, exchangedAmount, isEthDest);
