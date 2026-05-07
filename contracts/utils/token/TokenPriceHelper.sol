@@ -50,6 +50,7 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
         } else {
             (, signedPrice,, updateTimestamp,) = _aggregator.getRoundData(_roundId);
         }
+        signedPrice = _parseChainlinkPrice(signedPrice);
 
         // No direct feed for wstETH, so we calculate price from stETH.
         if (_inputTokenAddr == WSTETH_ADDR) signedPrice = getWStEthPrice(signedPrice);
@@ -135,17 +136,19 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
             uint256(getChainlinkPriceInUSD(chainlinkTokenAddr, false));
         if (chainlinkTokenPriceInUSD != 0) {
             uint256 chainlinkETHPriceInUSD = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
-            priceInETH = wdiv(chainlinkTokenPriceInUSD, chainlinkETHPriceInUSD);
+            if (chainlinkETHPriceInUSD != 0) {
+                priceInETH = wdiv(chainlinkTokenPriceInUSD, chainlinkETHPriceInUSD);
 
-            // Handle special cases for wstETH and WBTC.
-            if (_inputTokenAddr == WSTETH_ADDR) {
-                priceInETH = uint256(getWStEthPrice(int256(priceInETH)));
-            }
-            if (_inputTokenAddr == WBTC_ADDR) {
-                priceInETH = uint256(getWBtcPrice(int256(priceInETH)));
-            }
+                // Handle special cases for wstETH and WBTC.
+                if (_inputTokenAddr == WSTETH_ADDR) {
+                    priceInETH = uint256(getWStEthPrice(int256(priceInETH)));
+                }
+                if (_inputTokenAddr == WBTC_ADDR) {
+                    priceInETH = uint256(getWBtcPrice(int256(priceInETH)));
+                }
 
-            return priceInETH;
+                return priceInETH;
+            }
         }
 
         // 2. -> Try with ETH price feed.
@@ -183,7 +186,7 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
         try feedRegistry.latestRoundData(_inputTokenAddr, Denominations.USD) returns (
             uint80, int256 answer, uint256, uint256, uint80
         ) {
-            chainlinkPriceInUSD = answer;
+            chainlinkPriceInUSD = _parseChainlinkPrice(answer);
         } catch {
             if (_useFallback) {
                 // Chainlink ETH-denominated feeds are expected to be scaled by 1e18.
@@ -208,7 +211,7 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
         try feedRegistry.latestRoundData(_inputTokenAddr, Denominations.ETH) returns (
             uint80, int256 answer, uint256, uint256, uint80
         ) {
-            chainlinkPriceInETH = answer;
+            chainlinkPriceInETH = _parseChainlinkPrice(answer);
         } catch {
             chainlinkPriceInETH = 0;
         }
@@ -240,6 +243,7 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
     /// @return wStEthPrice Price of wstETH (can be in USD or ETH)
     /// @dev Fetch price ratio from the WSTETH contract.
     function getWStEthPrice(int256 _stEthPrice) public view returns (int256 wStEthPrice) {
+        if (_stEthPrice <= 0) return 0;
         wStEthPrice = int256(wmul(uint256(_stEthPrice), IWStEth(WSTETH_ADDR).stEthPerToken()));
     }
 
@@ -249,9 +253,14 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
     /// @dev Fetch price ratio from the Chainlink feed.
     /// @dev Round to the nearest integer.
     function getWBtcPrice(int256 _btcPrice) public view returns (int256 wBtcPrice) {
+        if (_btcPrice <= 0) return 0;
         (, int256 wBtcPriceToPeg,,,) = feedRegistry.latestRoundData(WBTC_ADDR, CHAINLINK_WBTC_ADDR);
         // Round to the nearest integer.
         wBtcPrice = (_btcPrice * wBtcPriceToPeg + USD_PRICE_SCALE / 2) / USD_PRICE_SCALE;
+    }
+
+    function _parseChainlinkPrice(int256 _answer) internal pure returns (int256 price) {
+        price = _answer > 0 ? _answer : int256(0);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -315,6 +324,7 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
     function getAaveV3TokenPriceInETH(address _tokenAddr) public view returns (uint256) {
         uint256 tokenAavePriceInUSD = getAaveV3TokenPriceInUSD(_tokenAddr);
         uint256 ethPriceInUSD = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
+        if (tokenAavePriceInUSD == 0 || ethPriceInUSD == 0) return 0;
 
         return wdiv(tokenAavePriceInUSD, ethPriceInUSD);
     }
@@ -347,6 +357,7 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
     function getSparkTokenPriceInETH(address _tokenAddr) public view returns (uint256) {
         uint256 tokenSparkPriceInUSD = getSparkTokenPriceInUSD(_tokenAddr);
         uint256 ethPriceInUSD = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
+        if (tokenSparkPriceInUSD == 0 || ethPriceInUSD == 0) return 0;
 
         return wdiv(tokenSparkPriceInUSD, ethPriceInUSD);
     }

@@ -43,6 +43,7 @@ contract TokenPriceHelperL2 is DSMath, UtilAddresses {
         } else {
             (, signedPrice,, updateTimestamp,) = _aggregator.getRoundData(_roundId);
         }
+        signedPrice = _parseChainlinkPrice(signedPrice);
 
         priceInUSD = uint256(signedPrice);
     }
@@ -100,8 +101,10 @@ contract TokenPriceHelperL2 is DSMath, UtilAddresses {
 
         if (chainlinkTokenPriceInUSD != 0) {
             uint256 chainlinkETHPriceInUSD = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
-            priceInETH = wdiv(chainlinkTokenPriceInUSD, chainlinkETHPriceInUSD);
-            return priceInETH;
+            if (chainlinkETHPriceInUSD != 0) {
+                priceInETH = wdiv(chainlinkTokenPriceInUSD, chainlinkETHPriceInUSD);
+                return priceInETH;
+            }
         }
 
         // 3. -> Try with ETH price feed.
@@ -125,7 +128,7 @@ contract TokenPriceHelperL2 is DSMath, UtilAddresses {
         try feedRegistry.latestRoundData(_inputTokenAddr, Denominations.USD) returns (
             uint80, int256 answer, uint256, uint256, uint80
         ) {
-            chainlinkPriceInUSD = answer;
+            chainlinkPriceInUSD = _parseChainlinkPrice(answer);
         } catch {
             if (_useFallback) {
                 // Chainlink ETH-denominated feeds are expected to be scaled by 1e18.
@@ -150,7 +153,7 @@ contract TokenPriceHelperL2 is DSMath, UtilAddresses {
         try feedRegistry.latestRoundData(_inputTokenAddr, Denominations.ETH) returns (
             uint80, int256 answer, uint256, uint256, uint80
         ) {
-            chainlinkPriceInETH = answer;
+            chainlinkPriceInETH = _parseChainlinkPrice(answer);
         } catch {
             chainlinkPriceInETH = 0;
         }
@@ -164,6 +167,7 @@ contract TokenPriceHelperL2 is DSMath, UtilAddresses {
     function getAaveTokenPriceInETH(address _tokenAddr) public view returns (uint256 price) {
         uint256 tokenAavePriceInUSD = getAaveTokenPriceInUSD(_tokenAddr);
         uint256 ethPriceInUSD = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
+        if (tokenAavePriceInUSD == 0 || ethPriceInUSD == 0) return 0;
 
         price = wdiv(tokenAavePriceInUSD, ethPriceInUSD);
     }
@@ -183,5 +187,9 @@ contract TokenPriceHelperL2 is DSMath, UtilAddresses {
         } catch {
             price = 0;
         }
+    }
+
+    function _parseChainlinkPrice(int256 _answer) internal pure returns (int256 price) {
+        price = _answer > 0 ? _answer : int256(0);
     }
 }
