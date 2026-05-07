@@ -8,6 +8,7 @@ import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
 /// @dev We didn't use Safe's initializer for this since we want the Safe address to be easily recreatable on each chain
 contract DFSSafeFactory {
     error UnsupportedChain(uint256);
+    error SafeExecutionError();
 
     struct SafeCreationData {
         address singleton;
@@ -59,7 +60,7 @@ contract DFSSafeFactory {
                 _creationData.singleton, _creationData.initializer, _creationData.saltNonce
             )
         );
-        createdSafe.execTransaction{ value: msg.value }(
+        bool success = createdSafe.execTransaction{ value: msg.value }(
             _executionData.to,
             _executionData.value,
             _executionData.data,
@@ -71,5 +72,8 @@ contract DFSSafeFactory {
             _executionData.refundReceiver,
             _executionData.signatures
         );
+        if (!success) {
+            revert SafeExecutionError();
+        }
     }
 }
