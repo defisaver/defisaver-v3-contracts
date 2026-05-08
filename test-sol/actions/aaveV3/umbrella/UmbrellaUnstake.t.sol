@@ -10,8 +10,9 @@ import {
 import { UmbrellaStake } from "../../../../contracts/actions/aaveV3/umbrella/UmbrellaStake.sol";
 import { UmbrellaUnstake } from "../../../../contracts/actions/aaveV3/umbrella/UmbrellaUnstake.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
-import { Addresses } from "../../../utils/Addresses.sol";
+import { Addresses } from "../../../utils/helpers/MainnetAddresses.sol";
 import { TestUmbrellaCommon } from "./UmbrellaCommon.t.sol";
+import { AaveV3Encode } from "../../../utils/encode/AaveV3Encode.sol";
 
 contract TestUmbrellaUnstake is TestUmbrellaCommon {
     /*//////////////////////////////////////////////////////////////////////////
@@ -30,7 +31,7 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("UmbrellaUnstake");
+        forkFromEnv("UmbrellaUnstake");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -93,7 +94,7 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
             uint256 minAmountOut = _getMinAmountOut(stkTokens[i], unstakeAmount);
 
             bytes memory unstakeCallData = executeActionCalldata(
-                umbrellaUnstakeEncode(
+                AaveV3Encode.umbrellaUnstake(
                     stkTokens[i],
                     sender,
                     _isMaxAmount ? type(uint256).max : unstakeAmount,
@@ -122,8 +123,9 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
     }
 
     function _startCooldown(address _stkToken) internal {
-        bytes memory startCooldownCallData =
-            executeActionCalldata(umbrellaUnstakeEncode(_stkToken, sender, 0, false, 0), true);
+        bytes memory startCooldownCallData = executeActionCalldata(
+            AaveV3Encode.umbrellaUnstake(_stkToken, sender, 0, false, 0), true
+        );
         wallet.execute(address(cut), startCooldownCallData, 0);
     }
 
@@ -143,7 +145,7 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
         approveAsSender(sender, supplyToken, walletAddr, _amount);
 
         bytes memory stakeCallData = executeActionCalldata(
-            umbrellaStakeEncode(
+            AaveV3Encode.umbrellaStake(
                 _stkToken,
                 sender,
                 walletAddr, // keep stake on the wallet so we can call unstake later

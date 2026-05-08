@@ -17,7 +17,7 @@ contract TestCore_SubStorage is SubStorage, BaseTest {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
         cut = new SubStorage();
     }
 

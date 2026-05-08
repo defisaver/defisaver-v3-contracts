@@ -8,7 +8,7 @@ import { AdminAuth } from "../../contracts/auth/AdminAuth.sol";
 
 import { Strings } from "../utils/Strings.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
-import { Addresses } from "../utils/Addresses.sol";
+import { Addresses } from "../utils/helpers/MainnetAddresses.sol";
 
 contract TestCore_StrategyStorage is BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
@@ -25,7 +25,7 @@ contract TestCore_StrategyStorage is BaseTest {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
         cut = new StrategyStorage();
     }
 

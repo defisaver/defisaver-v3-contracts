@@ -3,7 +3,7 @@ pragma solidity =0.8.24;
 
 import { ChainLinkPriceTrigger } from "../../contracts/triggers/ChainLinkPriceTrigger.sol";
 import { TokenPriceHelper } from "../../contracts/utils/token/TokenPriceHelper.sol";
-import { Addresses } from "../utils/Addresses.sol";
+import { Addresses } from "../utils/helpers/MainnetAddresses.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
 import { console } from "forge-std/console.sol";
 
@@ -17,7 +17,10 @@ contract TestChainLinkPriceTrigger is BaseTest, TokenPriceHelper {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("ChainlinkPriceTrigger");
+        forkFromEnv("ChainlinkPriceTrigger");
+
+        if (isL2NetworkSelected()) vm.skip(true, "ChainLinkPriceTrigger not available on L2s");
+
         cut = new ChainLinkPriceTrigger();
     }
 

@@ -10,6 +10,7 @@ import { EulerV2TestHelper } from "./EulerV2TestHelper.t.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { console } from "forge-std/console.sol";
+import { EulerV2Encode } from "../../utils/encode/EulerV2Encode.sol";
 
 contract TestEulerV2Borrow is EulerV2TestHelper {
     /*//////////////////////////////////////////////////////////////////////////
@@ -37,7 +38,7 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("EulerV2Borrow");
+        forkFromEnv("EulerV2Borrow");
         initTestPairs("EulerV2");
 
         wallet = new SmartWallet(bob);
@@ -187,7 +188,7 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
         uint256 borrowAmount = amountInUSDPrice(assetToken, _config.borrowAmountInUsd);
 
         bytes memory callData = executeActionCalldata(
-            eulerV2BorrowEncode(_config.vault, _config.account, sender, borrowAmount),
+            EulerV2Encode.borrow(_config.vault, _config.account, sender, borrowAmount),
             _config.isDirect
         );
 

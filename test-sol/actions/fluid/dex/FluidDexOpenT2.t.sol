@@ -9,6 +9,7 @@ import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { TokenUtils } from "../../../../contracts/utils/token/TokenUtils.sol";
 import { Vm } from "forge-std/Vm.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
+import { FluidEncode } from "../../../utils/encode/FluidEncode.sol";
 
 contract TestFluidDexOpenT2 is FluidTestBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -70,7 +71,7 @@ contract TestFluidDexOpenT2 is FluidTestBase {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("FluidDexOpen");
+        forkFromEnv("FluidDexOpen");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -199,6 +200,10 @@ contract TestFluidDexOpenT2 is FluidTestBase {
 
     function _baseTest(TestConfig memory _config) internal {
         for (uint256 i = 0; i < vaults.length; ++i) {
+            if (isMissingVault(vaults[i])) {
+                logVaultNotFound(vaults[i]);
+                continue;
+            }
             FluidView.VaultData memory vaultData = fluidView.getVaultData(vaults[i]);
             LocalVars memory vars;
 
@@ -244,7 +249,7 @@ contract TestFluidDexOpenT2 is FluidTestBase {
             });
 
             vars.executeActionCallData = executeActionCalldata(
-                fluidDexOpenEncode(
+                FluidEncode.dexOpen(
                     vaults[i],
                     sender, /* from */
                     sender, /* to */

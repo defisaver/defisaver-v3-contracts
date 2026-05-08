@@ -16,6 +16,7 @@ import {
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
 import { LiquityV2Utils } from "../../utils/liquityV2/LiquityV2Utils.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
+import { LiquityV2Encode } from "../../utils/encode/LiquityV2Encode.sol";
 
 contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions, LiquityV2Utils {
     /*//////////////////////////////////////////////////////////////////////////
@@ -60,7 +61,7 @@ contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions, LiquityV2Utils {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("LiquityV2SPWithdraw");
+        forkFromEnv("LiquityV2SPWithdraw");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -128,7 +129,7 @@ contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions, LiquityV2Utils {
         bool shouldClaim = false;
 
         _vars.executeActionCallData = executeActionCalldata(
-            liquityV2SPDepositEncode(
+            LiquityV2Encode.spDeposit(
                 address(_market), sender, sender, sender, _vars.depositAmount, shouldClaim
             ),
             isDirect
@@ -150,7 +151,7 @@ contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions, LiquityV2Utils {
         approveAsSender(aliceWallet.owner(), BOLD, aliceWallet.walletAddr(), _vars.depositAmount);
 
         _vars.executeActionCallData = executeActionCalldata(
-            liquityV2SPDepositEncode(
+            LiquityV2Encode.spDeposit(
                 address(_market),
                 aliceWallet.owner(),
                 aliceWallet.owner(),
@@ -188,7 +189,7 @@ contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions, LiquityV2Utils {
             _isMaxUint256Withdraw ? _vars.compoundedBOLD : _vars.depositAmount / 2;
 
         _vars.executeActionCallData = executeActionCalldata(
-            liquityV2SPWithdrawEncode(
+            LiquityV2Encode.spWithdraw(
                 address(_market),
                 sender,
                 sender,

@@ -13,7 +13,7 @@ import { BaseTest } from "../utils/BaseTest.sol";
 import { RegistryUtils } from "../utils/RegistryUtils.sol";
 import { ActionsUtils } from "../utils/ActionsUtils.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
-import { Addresses } from "../utils/Addresses.sol";
+import { Addresses } from "../utils/helpers/MainnetAddresses.sol";
 
 contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
@@ -35,7 +35,7 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
 
         wallet = new SmartWallet(bob);
         safeWalletAddr = wallet.createSafe();

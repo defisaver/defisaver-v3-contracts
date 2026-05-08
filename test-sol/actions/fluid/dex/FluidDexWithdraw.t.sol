@@ -12,6 +12,7 @@ import { FluidDexModel } from "../../../../contracts/actions/fluid/helpers/Fluid
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { TokenUtils } from "../../../../contracts/utils/token/TokenUtils.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
+import { FluidEncode } from "../../../utils/encode/FluidEncode.sol";
 
 contract TestFluidDexWithdraw is FluidTestBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -76,7 +77,7 @@ contract TestFluidDexWithdraw is FluidTestBase {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("FluidDexWithdraw");
+        forkFromEnv("FluidDexWithdraw");
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
         walletAddr = wallet.walletAddr();
@@ -298,6 +299,10 @@ contract TestFluidDexWithdraw is FluidTestBase {
         address[] memory vaults = _t2VaultsSelected ? t2Vaults : t4Vaults;
 
         for (uint256 i = 0; i < vaults.length; ++i) {
+            if (isMissingVault(vaults[i])) {
+                logVaultNotFound(vaults[i]);
+                continue;
+            }
             uint256 nftId = _t2VaultsSelected
                 ? executeFluidVaultT2Open(
                     vaults[i],
@@ -392,7 +397,7 @@ contract TestFluidDexWithdraw is FluidTestBase {
             });
 
             vars.executeActionCallData = executeActionCalldata(
-                fluidDexWithdrawEncode(
+                FluidEncode.dexWithdraw(
                     vaults[i],
                     sender,
                     nftId,

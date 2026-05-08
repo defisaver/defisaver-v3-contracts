@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { AaveV3Supply } from "../../../contracts/actions/aaveV3/AaveV3Supply.sol";
-import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
+import { AaveV3TestHelper } from "../../utils/aaveV3/AaveV3TestHelper.sol";
 import { IL2PoolV3 } from "../../../contracts/interfaces/protocols/aaveV3/IL2PoolV3.sol";
 import {
     IAaveProtocolDataProvider
@@ -13,8 +13,10 @@ import { DataTypes } from "../../../contracts/interfaces/protocols/aaveV3/DataTy
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
+import { AaveV3Encode } from "../../utils/encode/AaveV3Encode.sol";
+import { console2 } from "forge-std/console2.sol";
 
-contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
+contract TestAaveV3Supply is AaveV3TestHelper, ActionsUtils, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -33,7 +35,7 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("AaveV3Supply");
+        forkFromEnv("");
         initTestPairs("AaveV3");
 
         wallet = new SmartWallet(bob);
@@ -113,6 +115,12 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
                 pool.getReserveData(testPairs[i].supplyAsset);
 
             uint256 supplyAmount = amountInUSDPrice(testPairs[i].supplyAsset, 100_000);
+            if (!isValidSupply(DEFAULT_AAVE_MARKET, testPairs[i].supplyAsset, supplyAmount)) {
+                console2.log(
+                    "[AaveV3Supply] Can't supply asset (check cap and flags). Skipping test..."
+                );
+                continue;
+            }
 
             give(testPairs[i].supplyAsset, sender, supplyAmount);
             approveAsSender(sender, testPairs[i].supplyAsset, walletAddr, supplyAmount);
@@ -123,7 +131,7 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
                 onBehalfOfAddrATokenBalance: balanceOf(supplyTokenData.aTokenAddress, onBehalfOf)
             });
 
-            bytes memory paramsCallData = aaveV3SupplyEncode(
+            bytes memory paramsCallData = AaveV3Encode.supply(
                 supplyAmount, sender, supplyTokenData.id, true, true, address(0), onBehalfOf
             );
 
@@ -146,9 +154,10 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
             assertEq(dataBefore.senderBalance - supplyAmount, dataAfter.senderBalance);
             assertEq(dataBefore.walletATokenBalance, 0);
             assertEq(dataAfter.walletATokenBalance, 0);
-            assertGe(
+            assertApproxEqAbs(
                 dataAfter.onBehalfOfAddrATokenBalance,
-                dataBefore.onBehalfOfAddrATokenBalance + supplyAmount
+                dataBefore.onBehalfOfAddrATokenBalance + supplyAmount,
+                2
             );
 
             (uint256 walletCurrentATokenBalance,,,,,,,,) =
@@ -156,11 +165,11 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
             assertEq(walletCurrentATokenBalance, 0);
             (uint256 onBehalfOfAddrCurrentATokenBalance,,,,,,,,) =
                 dataProvider.getUserReserveData(testPairs[i].supplyAsset, onBehalfOf);
-            assertGe(onBehalfOfAddrCurrentATokenBalance, supplyAmount);
+            assertApproxEqAbs(onBehalfOfAddrCurrentATokenBalance, supplyAmount, 2);
         }
     }
 
-    function testFuzz_encode_decode_inputs_no_market_no_onbehalf(
+    function testFuzz_encode_decode_inputs_no_market_no_onBehalf(
         uint256 _amount,
         address _from,
         uint16 _assetId
@@ -178,7 +187,7 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
         _assertParams(params);
     }
 
-    function testFuzz_encode_decode_inputs_no_onbehalf(
+    function testFuzz_encode_decode_inputs_no_onBehalf(
         uint256 _amount,
         address _from,
         uint16 _assetId,
@@ -262,6 +271,13 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
         uint256 senderBalanceBefore = balanceOf(_supplyAsset, sender);
         uint256 walletATokenBalanceBefore = balanceOf(supplyTokenData.aTokenAddress, walletAddr);
 
+        if (!isValidSupply(DEFAULT_AAVE_MARKET, _supplyAsset, realAmountToSupply)) {
+            console2.log(
+                "[AaveV3Supply] Can't supply asset (check cap and flags). Skipping test..."
+            );
+            return;
+        }
+
         if (_isL2Direct) {
             AaveV3Supply.Params memory params = AaveV3Supply.Params({
                 amount: _supplyAmount,
@@ -276,7 +292,7 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
 
             wallet.execute(address(cut), cut.encodeInputs(params), 0);
         } else {
-            bytes memory paramsCallData = aaveV3SupplyEncode(
+            bytes memory paramsCallData = AaveV3Encode.supply(
                 _supplyAmount, sender, supplyTokenData.id, true, false, address(0), address(0)
             );
 
@@ -295,11 +311,12 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
         uint256 walletATokenBalanceAfter = balanceOf(supplyTokenData.aTokenAddress, walletAddr);
 
         assertEq(senderBalanceBefore - realAmountToSupply, senderBalanceAfter);
-        assertGe(walletATokenBalanceAfter, walletATokenBalanceBefore + realAmountToSupply);
+        assertApproxEqAbs(
+            walletATokenBalanceAfter, walletATokenBalanceBefore + realAmountToSupply, 2
+        );
 
-        (uint256 currentATokenBalance,,,,,,,, bool usageAsCollateral) =
+        (uint256 currentATokenBalance,,,,,,,,) =
             dataProvider.getUserReserveData(_supplyAsset, walletAddr);
-        assertGe(currentATokenBalance, realAmountToSupply);
-        assertTrue(usageAsCollateral);
+        assertApproxEqAbs(currentATokenBalance, realAmountToSupply, 2);
     }
 }

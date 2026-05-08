@@ -8,6 +8,7 @@ import { EulerV2Payback } from "../../../contracts/actions/eulerV2/EulerV2Paybac
 import { EulerV2TestHelper } from "./EulerV2TestHelper.t.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
+import { EulerV2Encode } from "../../utils/encode/EulerV2Encode.sol";
 
 contract TestEulerV2Payback is EulerV2TestHelper {
     /*//////////////////////////////////////////////////////////////////////////
@@ -33,7 +34,7 @@ contract TestEulerV2Payback is EulerV2TestHelper {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("EulerV2Payback");
+        forkFromEnv("EulerV2Payback");
         initTestPairs("EulerV2");
 
         wallet = new SmartWallet(bob);
@@ -139,7 +140,7 @@ contract TestEulerV2Payback is EulerV2TestHelper {
         address assetToken = IEVault(_config.vault).asset();
 
         bytes memory callData = executeActionCalldata(
-            eulerV2PaybackEncode(
+            EulerV2Encode.payback(
                 _config.vault, _config.account, sender, _config.paybackAmountInUsd
             ),
             _config.isDirect

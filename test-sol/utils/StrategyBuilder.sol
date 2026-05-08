@@ -3,7 +3,7 @@ pragma solidity =0.8.24;
 
 import { StrategyStorage } from "../../contracts/core/strategy/StrategyStorage.sol";
 import { CheatCodes } from "./CheatCodes.sol";
-import { Addresses } from "./Addresses.sol";
+import { Addresses } from "./helpers/MainnetAddresses.sol";
 
 contract StrategyBuilder is CheatCodes {
     string name;

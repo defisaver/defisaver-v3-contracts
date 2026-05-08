@@ -89,24 +89,6 @@ interface IL2PoolV3 is IPoolV3 {
     function repayWithATokens(bytes32 args) external returns (uint256);
 
     /**
-     * @notice Calldata efficient wrapper of the swapBorrowRateMode function
-     * @param args Arguments for the swapBorrowRateMode function packed in one bytes32
-     *    232 bits            8 bits             16 bits
-     * | 0-padding | shortenedInterestRateMode | assetId |
-     * @dev assetId is the index of the asset in the reservesList.
-     */
-    function swapBorrowRateMode(bytes32 args) external;
-
-    /**
-     * @notice Calldata efficient wrapper of the rebalanceStableBorrowRate function
-     * @param args Arguments for the rebalanceStableBorrowRate function packed in one bytes32
-     *    80 bits      160 bits     16 bits
-     * | 0-padding | user address | assetId |
-     * @dev assetId is the index of the asset in the reservesList.
-     */
-    function rebalanceStableBorrowRate(bytes32 args) external;
-
-    /**
      * @notice Calldata efficient wrapper of the setUserUseReserveAsCollateral function
      * @param args Arguments for the setUserUseReserveAsCollateral function packed in one bytes32
      *    239 bits         1 bit       16 bits
@@ -114,17 +96,4 @@ interface IL2PoolV3 is IPoolV3 {
      * @dev assetId is the index of the asset in the reservesList.
      */
     function setUserUseReserveAsCollateral(bytes32 args) external;
-
-    /**
-     * @notice Calldata efficient wrapper of the liquidationCall function
-     * @param args1 part of the arguments for the liquidationCall function packed in one bytes32
-     *    64 bits      160 bits       16 bits         16 bits
-     * | 0-padding | user address | debtAssetId | collateralAssetId |
-     * @param args2 part of the arguments for the liquidationCall function packed in one bytes32
-     *    127 bits       1 bit             128 bits
-     * | 0-padding | receiveAToken | shortenedDebtToCover |
-     * @dev the shortenedDebtToCover is cast to 256 bits at decode time,
-     * if type(uint128).max the value will be expanded to type(uint256).max
-     */
-    function liquidationCall(bytes32 args1, bytes32 args2) external;
 }

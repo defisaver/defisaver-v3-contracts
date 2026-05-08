@@ -8,6 +8,7 @@ import { EulerV2Borrow } from "../../../contracts/actions/eulerV2/EulerV2Borrow.
 
 import { ExecuteActionsBase } from "./ExecuteActionsBase.sol";
 import { SmartWallet } from "../SmartWallet.sol";
+import { EulerV2Encode } from "../encode/EulerV2Encode.sol";
 
 contract EulerV2ExecuteActions is ExecuteActionsBase {
     function executeEulerV2Supply(
@@ -16,7 +17,7 @@ contract EulerV2ExecuteActions is ExecuteActionsBase {
         bool _useAddressFromDfsRegistry,
         address _contractAddress
     ) public {
-        bytes memory paramsCalldata = eulerV2SupplyEncode(
+        bytes memory paramsCalldata = EulerV2Encode.supply(
             _params.vault, _params.account, _params.from, _params.amount, _params.enableAsColl
         );
         bytes memory _calldata =
@@ -36,7 +37,7 @@ contract EulerV2ExecuteActions is ExecuteActionsBase {
         bool _useAddressFromDfsRegistry,
         address _contractAddress
     ) public {
-        bytes memory paramsCalldata = eulerV2BorrowEncode(
+        bytes memory paramsCalldata = EulerV2Encode.borrow(
             _params.vault, _params.account, _params.receiver, _params.amount
         );
         bytes memory _calldata =

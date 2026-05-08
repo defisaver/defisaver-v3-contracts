@@ -15,6 +15,7 @@ import {
 import { TokenUtils } from "../../../../contracts/utils/token/TokenUtils.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
+import { FluidEncode } from "../../../utils/encode/FluidEncode.sol";
 
 contract TestFluidLiquidityAdjust is FluidTestBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -50,7 +51,7 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("FluidLiquidityAdjust");
+        forkFromEnv("FluidLiquidityAdjust");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -435,6 +436,10 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
 
     function _baseTest(TestConfig memory _config) internal {
         for (uint256 i = 0; i < vaults.length; ++i) {
+            if (isMissingVault(vaults[i])) {
+                logVaultNotFound(vaults[i]);
+                continue;
+            }
             IFluidVaultT1.ConstantViews memory constants = IFluidVaultT1(vaults[i]).constantsView();
             TempLocalVars memory vars;
 
@@ -519,7 +524,7 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
 
             // .--------- EXECUTE ACTION ----------.
             bytes memory executeActionCallData = executeActionCalldata(
-                fluidVaultT1AdjustEncode(
+                FluidEncode.vaultT1Adjust(
                     vaults[i],
                     vars.nftId,
                     _config.isMaxSupplyAmount ? type(uint256).max : vars.supplyTokenAmount,
@@ -527,8 +532,8 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                     sender,
                     sender,
                     _config.sendWrappedEth,
-                    _config.supplyActionType,
-                    _config.borrowActionType
+                    uint8(_config.supplyActionType),
+                    uint8(_config.borrowActionType)
                 ),
                 _config.isDirect
             );

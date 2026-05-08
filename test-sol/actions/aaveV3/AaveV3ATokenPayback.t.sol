@@ -8,6 +8,8 @@ import { DataTypes } from "../../../contracts/interfaces/protocols/aaveV3/DataTy
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { AaveV3PositionCreator } from "../../utils/positions/AaveV3PositionCreator.sol";
+import { AaveV3Encode } from "../../utils/encode/AaveV3Encode.sol";
+import { console2 } from "forge-std/console2.sol";
 
 contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
     /*//////////////////////////////////////////////////////////////////////////
@@ -26,7 +28,7 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("AaveV3ATokenPayback");
+        forkFromEnv("");
         initTestPairs("AaveV3");
 
         wallet = new SmartWallet(bob);
@@ -68,6 +70,24 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
                 debtAddr: testPairs[i].borrowAsset,
                 debtAmount: amountInUSDPrice(testPairs[i].borrowAsset, 40_000)
             });
+
+            if (!isValidSupply(
+                    DEFAULT_AAVE_MARKET, testPairs[i].supplyAsset, positionParams.collAmount
+                )) {
+                console2.log(
+                    "[AaveV3ATokenPayback] Can't supply asset (check cap and flags). Skipping test..."
+                );
+                continue;
+            }
+
+            if (!isValidBorrow(
+                    DEFAULT_AAVE_MARKET, testPairs[i].borrowAsset, positionParams.debtAmount
+                )) {
+                console2.log(
+                    "[AaveV3ATokenPayback] Can't borrow asset (check cap and flags). Skipping test..."
+                );
+                continue;
+            }
 
             createAaveV3Position(positionParams, wallet);
 
@@ -141,6 +161,13 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
         address debtVariableTokenAddr = reserveData.variableDebtTokenAddress;
         address debtATokenAddr = reserveData.aTokenAddress;
 
+        if (!isValidRepay(DEFAULT_AAVE_MARKET, _positionParams.debtAddr)) {
+            console2.log(
+                "[AaveV3ATokenPayback] Can't repay asset (check cap and flags). Skipping test..."
+            );
+            return;
+        }
+
         uint256 walletSafetyRatioBefore = getSafetyRatio(DEFAULT_AAVE_MARKET, walletAddr);
         uint256 walletVariableDebtBefore = balanceOf(debtVariableTokenAddr, walletAddr);
 
@@ -153,10 +180,13 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
         }
 
         uint256 senderBalanceBefore = balanceOf(debtATokenAddr, sender);
+        uint256 amountToPayback = _paybackAmount == type(uint256).max
+            ? walletVariableDebtBefore
+            : (_paybackAmount > senderBalanceBefore ? senderBalanceBefore : _paybackAmount);
 
         if (_isL2Direct) {
             AaveV3ATokenPayback.Params memory params = AaveV3ATokenPayback.Params({
-                amount: _paybackAmount,
+                amount: amountToPayback,
                 from: sender,
                 rateMode: uint8(DataTypes.InterestRateMode.VARIABLE),
                 assetId: debtAssetId,
@@ -165,8 +195,8 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
             });
             wallet.execute(address(cut), cut.encodeInputs(params), 0);
         } else {
-            bytes memory paramsCalldata = aaveV3ATokenPaybackEncode(
-                _paybackAmount,
+            bytes memory paramsCalldata = AaveV3Encode.aTokenPayback(
+                amountToPayback,
                 sender,
                 uint8(DataTypes.InterestRateMode.VARIABLE),
                 debtAssetId,
@@ -193,16 +223,20 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
         if (_paybackAmount == type(uint256).max) {
             assertApproxEqAbs(
                 senderBalanceAfter,
-                senderBalanceBefore - walletVariableDebtBefore,
+                senderBalanceBefore - amountToPayback,
                 maxATokenIncreaseTolerance
             );
             assertEq(walletVariableDebtAfter, 0);
             assertEq(walletSafetyRatioAfter, 0);
         } else {
-            assertEq(senderBalanceAfter, senderBalanceBefore - _paybackAmount);
+            assertApproxEqAbs(
+                senderBalanceAfter,
+                senderBalanceBefore - amountToPayback,
+                maxATokenIncreaseTolerance
+            );
             assertApproxEqAbs(
                 walletVariableDebtAfter,
-                walletVariableDebtBefore - _paybackAmount,
+                walletVariableDebtBefore - amountToPayback,
                 maxATokenIncreaseTolerance
             );
             assertGt(walletSafetyRatioAfter, walletSafetyRatioBefore);

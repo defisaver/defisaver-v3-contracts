@@ -24,7 +24,10 @@ contract TestTrailingStopTrigger is BaseTest, DSMath, MainnetUtilAddresses {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("TrailingStopTrigger");
+        forkFromEnv("TrailingStopTrigger");
+
+        if (isL2NetworkSelected()) vm.skip(true, "TrailingStopTrigger not available on L2s");
+
         cut = new TrailingStopTrigger();
 
         // set mock price feed

@@ -15,6 +15,7 @@ import { FluidDexModel } from "../../../../contracts/actions/fluid/helpers/Fluid
 import { TokenUtils } from "../../../../contracts/utils/token/TokenUtils.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
+import { FluidEncode } from "../../../utils/encode/FluidEncode.sol";
 
 contract TestFluidLiquiditySupply is FluidTestBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -41,7 +42,7 @@ contract TestFluidLiquiditySupply is FluidTestBase {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("FluidLiquiditySupply");
+        forkFromEnv("FluidLiquiditySupply");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -98,6 +99,10 @@ contract TestFluidLiquiditySupply is FluidTestBase {
         address[] memory vaults = _t1VaultsSelected ? t1Vaults : t3Vaults;
 
         for (uint256 i = 0; i < vaults.length; ++i) {
+            if (isMissingVault(vaults[i])) {
+                logVaultNotFound(vaults[i]);
+                continue;
+            }
             uint256 nftId = _t1VaultsSelected
                 ? executeFluidVaultT1Open(
                     address(vaults[i]),
@@ -132,13 +137,13 @@ contract TestFluidLiquiditySupply is FluidTestBase {
 
             bytes memory executeActionCallData = executeActionCalldata(
                 _t1VaultsSelected
-                    ? fluidVaultT1SupplyEncode(
+                    ? FluidEncode.vaultT1Supply(
                         address(vaults[i]),
                         nftId,
                         _takeMaxUint256 ? type(uint256).max : supplyAmount,
                         sender
                     )
-                    : fluidDexSupplyEncode(
+                    : FluidEncode.dexSupply(
                         address(vaults[i]),
                         sender,
                         nftId,

@@ -25,15 +25,18 @@ import {
 } from "../../../contracts/interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
 import { IPoolV3 } from "../../../contracts/interfaces/protocols/aaveV3/IPoolV3.sol";
 import { AaveV3RatioTrigger } from "../../../contracts/triggers/AaveV3RatioTrigger.sol";
-import { Addresses } from "../../utils/Addresses.sol";
+import { Addresses } from "../../utils/helpers/MainnetAddresses.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 import { BundleBuilder } from "../../utils/BundleBuilder.sol";
 import { RegistryUtils } from "../../utils/RegistryUtils.sol";
 import { Strategies } from "../../utils/Strategies.sol";
 import { AaveV3User } from "../../utils/aaveV3/AaveV3User.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
+import { AaveV3Encode } from "../../utils/encode/AaveV3Encode.sol";
+import { AaveV3TestHelper } from "../../utils/aaveV3/AaveV3TestHelper.sol";
+import { console2 } from "forge-std/console2.sol";
 
-contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
+contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils, AaveV3TestHelper {
     /*//////////////////////////////////////////////////////////////////////////
                                      VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
@@ -70,7 +73,9 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
     IPoolV3 internal pool;
 
     DataTypes.ReserveData internal collateralAsset;
+    address internal collateralToken;
     DataTypes.ReserveData internal debtAsset;
+    address internal debtToken;
 
     FLAction internal flAction;
     StrategyExecutor internal executor;
@@ -88,7 +93,7 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
 
         REPAY_AMOUNT_WETH = amountInUSDPrice(Addresses.WETH_ADDR, 1000);
         INITIAL_COLLATERAL_WETH_AMOUNT = amountInUSDPrice(Addresses.WETH_ADDR, 15_000);
@@ -164,11 +169,27 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
         boostBundleId = uint64(bundleBuilder.init(boostIds));
     }
 
-    function _createAaveV3Position(bool _isSafe, address _wallet) internal {
+    function _createAaveV3Position(bool _isSafe, address _wallet) internal returns (bool) {
         gibTokens(_wallet, Addresses.WETH_ADDR, INITIAL_TOKEN_AMOUNT);
+
+        if (!isValidSupply(AAVE_MARKET, collateralToken, INITIAL_COLLATERAL_WETH_AMOUNT)) {
+            console2.log(
+                "[AaveV3Automation] Can't supply collateral asset (check cap and flags). Skipping test..."
+            );
+            return false;
+        }
+
+        if (!isValidBorrow(AAVE_MARKET, debtToken, INITIAL_DEBT_DAI_AMOUNT)) {
+            console2.log(
+                "[AaveV3Automation] Can't borrow debt asset (check cap and flags). Skipping test..."
+            );
+            return false;
+        }
 
         user.supply(INITIAL_COLLATERAL_WETH_AMOUNT, _isSafe, collateralAsset.id, AAVE_MARKET);
         user.borrow(_isSafe, AAVE_MARKET, INITIAL_DEBT_DAI_AMOUNT, 2, debtAsset.id);
+
+        return true;
     }
 
     function _subToAutomationBundles(bool _isSafe) internal {
@@ -185,10 +206,11 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
         boostSub = _formatBoostSub(params);
     }
 
-    function _walletSetUpBeforeEachTest(bool _isSafe) internal {
+    function _walletSetUpBeforeEachTest(bool _isSafe) internal returns (bool) {
         wallet = _isSafe ? user.safeAddr() : user.proxyAddr();
-        _createAaveV3Position(_isSafe, wallet);
+        if (!_createAaveV3Position(_isSafe, wallet)) return false;
         _subToAutomationBundles(_isSafe);
+        return true;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -215,7 +237,7 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
     }
 
     function _testAaveV3RepayStrategy(bool _isSafe) internal {
-        _walletSetUpBeforeEachTest(_isSafe);
+        if (!_walletSetUpBeforeEachTest(_isSafe)) return;
 
         uint256 beforeRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
 
@@ -227,14 +249,14 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
 
         bytes[] memory _actionsCallData = new bytes[](5);
         _actionsCallData[0] =
-            aaveV3WithdrawEncode(collateralAsset.id, true, REPAY_AMOUNT_WETH, wallet, address(0));
+            AaveV3Encode.withdraw(collateralAsset.id, true, REPAY_AMOUNT_WETH, wallet, address(0));
         _actionsCallData[1] = sellEncode(
             Addresses.WETH_ADDR, Addresses.DAI_ADDR, 0, wallet, wallet, Addresses.UNI_V2_WRAPPER
         );
         _actionsCallData[2] = gasFeeEncode(REPAY_GAS_COST, Addresses.DAI_ADDR);
         _actionsCallData[3] =
-            aaveV3PaybackEncode(0, wallet, 2, debtAsset.id, true, false, address(0), address(0));
-        _actionsCallData[4] = aaveV3RatioCheckEncode(0, 0, AAVE_MARKET, wallet);
+            AaveV3Encode.payback(0, wallet, 2, debtAsset.id, true, false, address(0), address(0));
+        _actionsCallData[4] = AaveV3Encode.ratioCheck(0, 0, AAVE_MARKET, wallet);
 
         executor.executeStrategy(
             repaySubId, INDEX_REPAY, _triggerCallData, _actionsCallData, repaySub
@@ -254,7 +276,7 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
     }
 
     function _testAaveV3FLRepayStrategy(bool _isSafe) internal {
-        _walletSetUpBeforeEachTest(_isSafe);
+        if (!_walletSetUpBeforeEachTest(_isSafe)) return;
 
         bytes[] memory _triggerCallData = new bytes[](1);
 
@@ -271,10 +293,10 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
         );
         _actionsCallData[2] = gasFeeEncode(REPAY_FL_GAS_COST, Addresses.DAI_ADDR);
         _actionsCallData[3] =
-            aaveV3PaybackEncode(0, wallet, 2, debtAsset.id, true, false, address(0), address(0));
+            AaveV3Encode.payback(0, wallet, 2, debtAsset.id, true, false, address(0), address(0));
         _actionsCallData[4] =
-            aaveV3WithdrawEncode(collateralAsset.id, true, 0, address(flAction), address(0));
-        _actionsCallData[5] = aaveV3RatioCheckEncode(0, 0, AAVE_MARKET, wallet);
+            AaveV3Encode.withdraw(collateralAsset.id, true, 0, address(flAction), address(0));
+        _actionsCallData[5] = AaveV3Encode.ratioCheck(0, 0, AAVE_MARKET, wallet);
 
         uint256 beforeRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
 
@@ -288,14 +310,14 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
     }
 
     function _testAaveV3BoostStrategy(bool _isSafe) internal {
-        _walletSetUpBeforeEachTest(_isSafe);
+        if (!_walletSetUpBeforeEachTest(_isSafe)) return;
 
         user.supply(INITIAL_COLLATERAL_WETH_AMOUNT, _isSafe, collateralAsset.id, AAVE_MARKET);
 
         bytes[] memory _triggerCallData = new bytes[](1);
 
         bytes[] memory _actionsCallData = new bytes[](5);
-        _actionsCallData[0] = aaveV3BorrowEncode(
+        _actionsCallData[0] = AaveV3Encode.borrow(
             BOOST_AMOUNT_DAI, address(0), 2, debtAsset.id, true, false, address(0), address(0)
         );
         _actionsCallData[1] = sellEncode(
@@ -303,8 +325,8 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
         );
         _actionsCallData[2] = gasFeeEncode(BOOST_GAS_COST, Addresses.WETH_ADDR);
         _actionsCallData[3] =
-            aaveV3SupplyEncode(0, wallet, collateralAsset.id, true, false, address(0), address(0));
-        _actionsCallData[4] = aaveV3RatioCheckEncode(0, 0, AAVE_MARKET, wallet);
+            AaveV3Encode.supply(0, wallet, collateralAsset.id, true, false, address(0), address(0));
+        _actionsCallData[4] = AaveV3Encode.ratioCheck(0, 0, AAVE_MARKET, wallet);
 
         uint256 beforeRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
 
@@ -317,7 +339,7 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
     }
 
     function _testAaveV3BoostFLStrategy(bool _isSafe) internal {
-        _walletSetUpBeforeEachTest(_isSafe);
+        if (!_walletSetUpBeforeEachTest(_isSafe)) return;
 
         user.supply(INITIAL_COLLATERAL_WETH_AMOUNT, _isSafe, collateralAsset.id, AAVE_MARKET);
 
@@ -336,11 +358,11 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
         );
         _actionsCallData[2] = gasFeeEncode(BOOST_FL_GAS_COST, Addresses.WETH_ADDR);
         _actionsCallData[3] =
-            aaveV3SupplyEncode(0, wallet, collateralAsset.id, true, false, address(0), address(0));
-        _actionsCallData[4] = aaveV3BorrowEncode(
+            AaveV3Encode.supply(0, wallet, collateralAsset.id, true, false, address(0), address(0));
+        _actionsCallData[4] = AaveV3Encode.borrow(
             0, address(flAction), 2, debtAsset.id, true, false, address(0), address(0)
         );
-        _actionsCallData[5] = aaveV3RatioCheckEncode(0, 0, AAVE_MARKET, wallet);
+        _actionsCallData[5] = AaveV3Encode.ratioCheck(0, 0, AAVE_MARKET, wallet);
 
         uint256 beforeRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
 

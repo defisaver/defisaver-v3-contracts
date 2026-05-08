@@ -29,7 +29,7 @@ contract SummerfiUnsubTest is BaseTest, ActionsUtils {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
 
         cut = new SummerfiUnsub();
 

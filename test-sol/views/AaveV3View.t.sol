@@ -11,14 +11,16 @@ import { SafeERC20 } from "../../contracts/_vendor/openzeppelin/SafeERC20.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
 import { ActionsUtils } from "../utils/ActionsUtils.sol";
-import { Addresses } from "../utils/Addresses.sol";
+import { Addresses } from "../utils/helpers/MainnetAddresses.sol";
 import { AaveV3Supply } from "../../contracts/actions/aaveV3/AaveV3Supply.sol";
 import { AaveV3Borrow } from "../../contracts/actions/aaveV3/AaveV3Borrow.sol";
 
 import { AaveV3View } from "../../contracts/views/AaveV3View.sol";
-import { AaveV3Helper } from "../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
+import { AaveV3TestHelper } from "../utils/aaveV3/AaveV3TestHelper.sol";
+import { AaveV3Encode } from "../utils/encode/AaveV3Encode.sol";
+import { console2 } from "forge-std/console2.sol";
 
-contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
+contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3TestHelper {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -48,7 +50,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("AaveV3View");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -67,7 +69,9 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function test_Approvals_WithoutPosition() public view {
+    function test_Approvals_WithoutPosition() public {
+        resetTokenBalanceToZero(sender, Addresses.WETH_ADDR);
+
         DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(Addresses.WETH_ADDR);
 
         AaveV3View.EOAApprovalData memory approvals = cut.getEOAApprovalsAndBalances(
@@ -94,6 +98,16 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
     }
 
     function _baseTestProxy(TestConfig memory config) internal {
+        if (!isValidSupply(DEFAULT_AAVE_MARKET, config.supplyToken, config.supplyAmount)) {
+            console2.log("[AaveV3View] Can't supply asset (check cap and flags). Skipping test...");
+            return;
+        }
+
+        if (!isValidBorrow(DEFAULT_AAVE_MARKET, config.borrowToken, config.borrowAmount)) {
+            console2.log("[AaveV3View] Can't borrow asset (check cap and flags). Skipping test...");
+            return;
+        }
+
         // Give initial balance for supply token
         give(config.supplyToken, sender, config.initialBalance);
 
@@ -107,13 +121,11 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
             config.supplyToken, sender, walletAddr, DEFAULT_AAVE_MARKET
         );
 
-        bool isWBTC = Addresses.WBTC_ADDR == config.supplyToken;
-
         DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(config.supplyToken);
         assertEq(approvals.asset, config.supplyToken);
         assertEq(approvals.aToken, reserveData.aTokenAddress);
         assertEq(approvals.variableDebtToken, reserveData.variableDebtTokenAddress);
-        assertEq(approvals.assetApproval, type(uint256).max - (isWBTC ? config.supplyAmount : 0)); // WBTC allowance is being decreased when used, even when it is UINT_MAX approval
+        assertGe(approvals.assetApproval, type(uint256).max - config.supplyAmount); // On mainnet WBTC allowance is being decreased when used, even when it is UINT_MAX approval. There are more tokens on L2s having same logic, so we use assertGe instead of assertEq.
 
         assertEq(approvals.aTokenApproval, 0);
         assertEq(approvals.variableDebtDelegation, 0);
@@ -125,12 +137,24 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
     function test_Approvals_AfterOpeningPosition_EOA() public {
         for (uint256 i = 0; i < testConfigs.length; i++) {
             uint256 snapshot = vm.snapshotState();
+            resetTokenBalanceToZero(sender, testConfigs[i].borrowToken);
+
             _baseTest(testConfigs[i]);
             vm.revertToState(snapshot);
         }
     }
 
     function _baseTest(TestConfig memory config) internal {
+        if (!isValidSupply(DEFAULT_AAVE_MARKET, config.supplyToken, config.supplyAmount)) {
+            console2.log("[AaveV3View] Can't supply asset (check cap and flags). Skipping test...");
+            return;
+        }
+
+        if (!isValidBorrow(DEFAULT_AAVE_MARKET, config.borrowToken, config.borrowAmount)) {
+            console2.log("[AaveV3View] Can't borrow asset (check cap and flags). Skipping test...");
+            return;
+        }
+
         // Give initial balance for supply token
         give(config.supplyToken, sender, config.initialBalance);
 
@@ -152,11 +176,10 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
             config.supplyToken, sender, walletAddr, DEFAULT_AAVE_MARKET
         );
 
-        bool isWBTC = Addresses.WBTC_ADDR == config.supplyToken;
         assertEq(approvals.asset, config.supplyToken);
         assertEq(approvals.aToken, reserveData.aTokenAddress);
         assertEq(approvals.variableDebtToken, reserveData.variableDebtTokenAddress);
-        assertEq(approvals.assetApproval, type(uint256).max - (isWBTC ? config.supplyAmount : 0)); // WBTC allowance is being decreased when used, even when it is UINT_MAX approval
+        assertGe(approvals.assetApproval, type(uint256).max - config.supplyAmount); // On mainnet WBTC allowance is being decreased when used, even when it is UINT_MAX approval. There are more tokens on L2s having same logic, so we use assertGe instead of assertEq.
         assertEq(approvals.aTokenApproval, type(uint256).max);
         assertEq(approvals.variableDebtDelegation, 0);
         assertEq(approvals.eoaBalance, config.initialBalance - config.supplyAmount);
@@ -189,9 +212,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         assertEq(approvalsAfter.asset, config.supplyToken);
         assertEq(approvalsAfter.aToken, reserveData.aTokenAddress);
         assertEq(approvalsAfter.variableDebtToken, reserveData.variableDebtTokenAddress);
-        assertEq(
-            approvalsAfter.assetApproval, type(uint256).max - (isWBTC ? config.supplyAmount : 0)
-        ); // WBTC allowance is being decreased when used, even when it is UINT_MAX approval
+        assertGe(approvalsAfter.assetApproval, type(uint256).max - config.supplyAmount); // On mainnet WBTC allowance is being decreased when used, even when it is UINT_MAX approval. There are more tokens on L2s having same logic, so we use assertGe instead of assertEq.
         assertEq(approvalsAfter.aTokenApproval, type(uint256).max);
         assertEq(approvalsAfter.variableDebtDelegation, 0);
         assertEq(approvalsAfter.eoaBalance, config.initialBalance - config.supplyAmount);
@@ -226,7 +247,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
             lendingPool.getReserveData(_config.borrowToken);
 
         // Execute Supply
-        bytes memory supplyParams = aaveV3SupplyEncode(
+        bytes memory supplyParams = AaveV3Encode.supply(
             _config.supplyAmount,
             sender,
             reserveDataColl.id,
@@ -241,7 +262,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         wallet.execute(address(supplyContract), supplyCalldata, 0);
 
         // Execute Borrow
-        bytes memory borrowParams = aaveV3BorrowEncode(
+        bytes memory borrowParams = AaveV3Encode.borrow(
             _config.borrowAmount,
             sender,
             2, // rateMode (variable)
@@ -261,7 +282,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         testConfigs.push(
             TestConfig({
                 supplyToken: Addresses.WETH_ADDR,
-                borrowToken: Addresses.USDT_ADDR,
+                borrowToken: isBaseSelected() ? Addresses.USDC_ADDR : Addresses.USDT_ADDR,
                 supplyAmount: 40e18, // 40 WETH
                 borrowAmount: 50_000e6, // 50k USDT
                 initialBalance: 100e18 // 100 WETH
@@ -283,7 +304,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         testConfigs.push(
             TestConfig({
                 supplyToken: Addresses.WBTC_ADDR,
-                borrowToken: Addresses.USDT_ADDR,
+                borrowToken: isBaseSelected() ? Addresses.USDC_ADDR : Addresses.USDT_ADDR,
                 supplyAmount: 4e8, // 4 WBTC
                 borrowAmount: 100_000e6, // 100k USDT
                 initialBalance: 10e8 // 10 WBTC
@@ -294,9 +315,11 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         testConfigs.push(
             TestConfig({
                 supplyToken: Addresses.WBTC_ADDR,
-                borrowToken: Addresses.GHO_TOKEN,
+                borrowToken: (isOptimismSelected() || isPlasmaSelected())
+                    ? Addresses.USDT_ADDR
+                    : Addresses.GHO_TOKEN,
                 supplyAmount: 4e8, // 4 WBTC
-                borrowAmount: 100_000e8, // 100k GHO
+                borrowAmount: (isOptimismSelected() || isPlasmaSelected()) ? 100_000e6 : 100_000e8, // 100k GHO
                 initialBalance: 10e8 // 10 WBTC
             })
         );
@@ -304,7 +327,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         // USDT/WETH
         testConfigs.push(
             TestConfig({
-                supplyToken: Addresses.USDT_ADDR,
+                supplyToken: isBaseSelected() ? Addresses.USDC_ADDR : Addresses.USDT_ADDR,
                 borrowToken: Addresses.WETH_ADDR,
                 supplyAmount: 75_000e6, // 75k USDT
                 borrowAmount: 5e18, // 5 WETH

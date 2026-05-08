@@ -11,6 +11,7 @@ import { FluidDexOpen } from "../../../../contracts/actions/fluid/dex/FluidDexOp
 import { FluidDexModel } from "../../../../contracts/actions/fluid/helpers/FluidDexModel.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
+import { FluidEncode } from "../../../utils/encode/FluidEncode.sol";
 
 contract TestFluidDexPayback is FluidTestBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -73,7 +74,7 @@ contract TestFluidDexPayback is FluidTestBase {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("FluidDexPayback");
+        forkFromEnv("FluidDexPayback");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -238,6 +239,10 @@ contract TestFluidDexPayback is FluidTestBase {
         address[] memory vaults = _t3VaultsSelected ? t3Vaults : t4Vaults;
 
         for (uint256 i = 0; i < vaults.length; ++i) {
+            if (isMissingVault(vaults[i])) {
+                logVaultNotFound(vaults[i]);
+                continue;
+            }
             uint256 nftId = _t3VaultsSelected
                 ? executeFluidVaultT3Open(
                     vaults[i],
@@ -292,7 +297,7 @@ contract TestFluidDexPayback is FluidTestBase {
             });
 
             vars.executeActionCallData = executeActionCalldata(
-                fluidDexPaybackEncode(
+                FluidEncode.dexPayback(
                     vaults[i],
                     sender,
                     nftId,

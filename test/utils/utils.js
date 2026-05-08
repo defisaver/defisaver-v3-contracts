@@ -12,21 +12,6 @@ const { deployAsOwner, deployContract } = require('../../scripts/utils/deployer'
 
 const { createSafe, executeSafeTx } = require('./safe');
 
-const strategyStorageBytecode =
-    require('../../artifacts/contracts/core/strategy/StrategyStorage.sol/StrategyStorage.json').deployedBytecode;
-const subStorageBytecode =
-    require('../../artifacts/contracts/core/strategy/SubStorage.sol/SubStorage.json').deployedBytecode;
-const subStorageBytecodeL2 =
-    require('../../artifacts/contracts/core/l2/SubStorageL2.sol/SubStorageL2.json').deployedBytecode;
-const bundleStorageBytecode =
-    require('../../artifacts/contracts/core/strategy/BundleStorage.sol/BundleStorage.json').deployedBytecode;
-const recipeExecutorBytecode =
-    require('../../artifacts/contracts/core/RecipeExecutor.sol/RecipeExecutor.json').deployedBytecode;
-const proxyAuthBytecode =
-    require('../../artifacts/contracts/core/strategy/ProxyAuth.sol/ProxyAuth.json').deployedBytecode;
-const mockChainlinkFeedRegistryBytecode =
-    require('../../artifacts/contracts/mocks/MockChainlinkFeedRegistry.sol/MockChainlinkFeedRegistry.json').deployedBytecode;
-
 const addrs = {
     mainnet: {
         PROXY_REGISTRY: '0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4',
@@ -71,10 +56,11 @@ const addrs = {
         STRATEGY_STORAGE_ADDR: '0xF52551F95ec4A2B4299DcC42fbbc576718Dbf933',
         BUNDLE_STORAGE_ADDR: '0x223c6aDE533851Df03219f6E3D8B763Bd47f84cf',
         ZEROX_WRAPPER: '0x11e048f19844B7bAa6D9eA4a20eD4fACF7b757b2',
-        STRATEGY_EXECUTOR_ADDR: '0xFaa763790b26E7ea354373072baB02e680Eeb07F',
+        STRATEGY_EXECUTOR_ADDR: '0x8278DA54b4A47c0f6F4a0a4b00B6f31678f30181',
         REFILL_CALLER: '0x33fDb79aFB4456B604f376A45A546e7ae700e880',
         MORPHO_BLUE_VIEW: '0x10B621823D4f3E85fBDF759e252598e4e097C1fd',
         FLUID_VAULT_T1_RESOLVER_ADDR: '0x814c8C7ceb1411B364c2940c4b9380e739e06686',
+        COMP_V3_SUB_PROXY_ADDR: '0x2f62a2ec44ed48dd5f2d56b308558ac065e8b794',
         BOLD_ADDR: '0x6440f144b7e50D6a8439336510312d2F54beB01D',
         INSTADAPP_INDEX: '0x2971AdFa57b20E5a416aE5a708A8655A9c74f723',
         INSTADAPP_CONNECTORS_V2: '0x97b0B3A8bDeFE8cB9563a3c610019Ad10DB8aD11',
@@ -551,7 +537,9 @@ const setStorageAt = async (address, index, value) => {
         prefix = 'tenderly';
     }
 
-    await hre.ethers.provider.send(`${prefix}_setStorageAt`, [address, index, value]);
+    const paddedIndex = hre.ethers.utils.hexZeroPad(index, 32);
+
+    await hre.ethers.provider.send(`${prefix}_setStorageAt`, [address, paddedIndex, value]);
     await hre.ethers.provider.send('evm_mine', []); // Just mines to the next block
 };
 
@@ -611,6 +599,16 @@ const getTokenHelperContract = async () => {
 };
 const fetchAmountInUSDPrice = async (tokenSymbol, amountUSD) => {
     const { decimals, address } = getAssetInfo(tokenSymbol, chainIds[network]);
+    const tokenHelper = await getTokenHelperContract();
+
+    const tokenPriceInUSD = await tokenHelper.getPriceInUSD(address);
+    const tokenPriceInUSDFormatted = tokenPriceInUSD / 10 ** 8;
+
+    const numOfTokens = (amountUSD / tokenPriceInUSDFormatted).toFixed(decimals);
+
+    return hre.ethers.utils.parseUnits(numOfTokens, decimals);
+};
+const fetchAmountInUSDPriceByAddress = async (address, decimals, amountUSD) => {
     const tokenHelper = await getTokenHelperContract();
 
     const tokenPriceInUSD = await tokenHelper.getPriceInUSD(address);
@@ -903,6 +901,19 @@ const setContractAt = async ({ name, address, args = [] }) => {
 };
 
 const redeployCore = async (isL2 = false) => {
+    const strategyStorageBytecode =
+        require('../../artifacts/contracts/core/strategy/StrategyStorage.sol/StrategyStorage.json').deployedBytecode;
+    const subStorageBytecode =
+        require('../../artifacts/contracts/core/strategy/SubStorage.sol/SubStorage.json').deployedBytecode;
+    const subStorageBytecodeL2 =
+        require('../../artifacts/contracts/core/l2/SubStorageL2.sol/SubStorageL2.json').deployedBytecode;
+    const bundleStorageBytecode =
+        require('../../artifacts/contracts/core/strategy/BundleStorage.sol/BundleStorage.json').deployedBytecode;
+    const recipeExecutorBytecode =
+        require('../../artifacts/contracts/core/RecipeExecutor.sol/RecipeExecutor.json').deployedBytecode;
+    const proxyAuthBytecode =
+        require('../../artifacts/contracts/core/strategy/ProxyAuth.sol/ProxyAuth.json').deployedBytecode;
+
     const strategyStorageAddr = await getAddrFromRegistry('StrategyStorage');
     await setCode(strategyStorageAddr, strategyStorageBytecode);
 
@@ -1043,6 +1054,52 @@ const formatMockExchangeObjUsdFeed = async (
 
     const srcTokenPriceInUsdBN = BigNumber.from(srcTokenPriceInUSD);
     const destTokenPriceInUsdBN = BigNumber.from(destTokenPriceInUSD);
+    const ten = BigNumber.from(10);
+    const destScale = ten.pow(destTokenInfo.decimals);
+    const srcScale = ten.pow(srcTokenInfo.decimals);
+
+    const srcAmountIsPiped = srcAmount.toString()[0] === '$';
+
+    const destTokenAmountBN = (srcAmountIsPiped ? amountUsedWhenSrcAmountIsPiped : srcAmount)
+        .mul(srcTokenPriceInUsdBN)
+        .mul(destScale)
+        .div(destTokenPriceInUsdBN)
+        .div(srcScale)
+        .mul(2);
+
+    await setBalance(
+        destTokenInfo.addresses[chainIds[network]],
+        wrapperContract.address,
+        destTokenAmountBN,
+    );
+
+    return [
+        srcTokenInfo.addresses[chainIds[network]],
+        destTokenInfo.addresses[chainIds[network]],
+        srcAmount,
+        0,
+        0,
+        0,
+        nullAddress,
+        wrapperContract.address,
+        hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [0]),
+        [nullAddress, nullAddress, nullAddress, 0, 0, hre.ethers.utils.toUtf8Bytes('')],
+    ];
+};
+
+/// @notice formats exchange object and sets mock wrapper balance.
+/// Rate is calculated based on existing prices.
+const formatMockExchangeObjUsingExistingPrices = async (
+    srcTokenInfo,
+    destTokenInfo,
+    srcAmount,
+    srcPrice,
+    destPrice,
+    wrapperContract,
+    amountUsedWhenSrcAmountIsPiped = 0,
+) => {
+    const srcTokenPriceInUsdBN = BigNumber.from(srcPrice);
+    const destTokenPriceInUsdBN = BigNumber.from(destPrice);
     const ten = BigNumber.from(10);
     const destScale = ten.pow(destTokenInfo.decimals);
     const srcScale = ten.pow(srcTokenInfo.decimals);
@@ -1542,8 +1599,9 @@ const resetForkToBlock = async (block) => {
 };
 
 const mockChainlinkPriceFeed = async () => {
+    const mockChainlinkFeedRegistryBytecode =
+        require('../../artifacts/contracts/mocks/MockChainlinkFeedRegistry.sol/MockChainlinkFeedRegistry.json').deployedBytecode;
     await setCode(addrs[network].FEED_REGISTRY, mockChainlinkFeedRegistryBytecode);
-
     const registryInstance = await hre.ethers.getContractFactory('MockChainlinkFeedRegistry');
     const registry = await registryInstance.attach(addrs[network].FEED_REGISTRY);
 
@@ -1885,6 +1943,8 @@ module.exports = {
     getCloseStrategyTypeName,
     getCloseStrategyConfigs,
     isCloseToDebtType,
+    fetchAmountInUSDPriceByAddress,
+    formatMockExchangeObjUsingExistingPrices,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,

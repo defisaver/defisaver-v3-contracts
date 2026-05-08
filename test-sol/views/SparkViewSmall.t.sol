@@ -10,13 +10,14 @@ import { SparkDataTypes } from "../../contracts/interfaces/protocols/spark/Spark
 import { BaseTest } from "../utils/BaseTest.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
 import { ActionsUtils } from "../utils/ActionsUtils.sol";
-import { Addresses } from "../utils/Addresses.sol";
+import { Addresses } from "../utils/helpers/MainnetAddresses.sol";
 
 import { SparkSupply } from "../../contracts/actions/spark/SparkSupply.sol";
 import { SparkBorrow } from "../../contracts/actions/spark/SparkBorrow.sol";
 import { SparkSetEMode } from "../../contracts/actions/spark/SparkSetEMode.sol";
 import { SparkViewSmall } from "../../contracts/views/SparkViewSmall.sol";
 import { SparkHelper } from "../../contracts/actions/spark/helpers/SparkHelper.sol";
+import { SparkEncode } from "../utils/encode/SparkEncode.sol";
 
 contract TestSparkViewSmall is BaseTest, ActionsUtils, SparkHelper {
     /*//////////////////////////////////////////////////////////////////////////
@@ -49,7 +50,7 @@ contract TestSparkViewSmall is BaseTest, ActionsUtils, SparkHelper {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("SparkViewSmall");
+        forkFromEnv("SparkViewSmall");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -92,7 +93,7 @@ contract TestSparkViewSmall is BaseTest, ActionsUtils, SparkHelper {
     }
 
     function test_WithEModeSelected() public {
-        TestConfig memory _config = testConfigs[2];
+        TestConfig memory _config = testConfigs[0];
         uint256 EMODE_ID = 2;
 
         // Give initial balance for supply token
@@ -187,7 +188,7 @@ contract TestSparkViewSmall is BaseTest, ActionsUtils, SparkHelper {
             lendingPool.getReserveData(_config.borrowToken);
 
         // Execute Supply
-        bytes memory supplyParams = sparkSupplyEncode(
+        bytes memory supplyParams = SparkEncode.supply(
             _config.supplyAmount,
             sender,
             reserveDataColl.id,
@@ -203,7 +204,7 @@ contract TestSparkViewSmall is BaseTest, ActionsUtils, SparkHelper {
         wallet.execute(address(supplyContract), supplyCalldata, 0);
 
         // Execute Borrow
-        bytes memory borrowParams = sparkBorrowEncode(
+        bytes memory borrowParams = SparkEncode.borrow(
             _config.borrowAmount,
             sender,
             2, // rateMode (variable)
@@ -220,7 +221,7 @@ contract TestSparkViewSmall is BaseTest, ActionsUtils, SparkHelper {
 
     function _setEMode(uint8 _categoryId, bool _useDefaultMarket, address _market) internal {
         // Execute SparkSetEMode
-        bytes memory setEModeParams = sparkSetEModeEncode(_categoryId, _useDefaultMarket, _market);
+        bytes memory setEModeParams = SparkEncode.setEMode(_categoryId, _useDefaultMarket, _market);
 
         bytes memory setEModeCalldata =
             abi.encodeWithSelector(bytes4(keccak256("executeActionDirect(bytes)")), setEModeParams);
@@ -247,17 +248,6 @@ contract TestSparkViewSmall is BaseTest, ActionsUtils, SparkHelper {
                 supplyAmount: 30e18, // 30 WETH
                 borrowAmount: 50_000e6, // 50k USDC
                 initialBalance: 100e18 // 100 WETH
-            })
-        );
-
-        // sDAI/USDC
-        testConfigs.push(
-            TestConfig({
-                supplyToken: Addresses.WETH_ADDR,
-                borrowToken: Addresses.USDT_ADDR,
-                supplyAmount: 80_000e18, // 30 sDAI
-                borrowAmount: 50_000e6, // 50k USDC
-                initialBalance: 100_000e18 // 100 sDAI
             })
         );
     }

@@ -9,9 +9,10 @@ import {
 } from "../../../../contracts/interfaces/protocols/aaveV3/IStaticATokenV2.sol";
 import { UmbrellaStake } from "../../../../contracts/actions/aaveV3/umbrella/UmbrellaStake.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
-import { Addresses } from "../../../utils/Addresses.sol";
+import { Addresses } from "../../../utils/helpers/MainnetAddresses.sol";
 
 import { TestUmbrellaCommon } from "./UmbrellaCommon.t.sol";
+import { AaveV3Encode } from "../../../utils/encode/AaveV3Encode.sol";
 
 contract TestUmbrellaStake is TestUmbrellaCommon {
     /*//////////////////////////////////////////////////////////////////////////
@@ -23,7 +24,7 @@ contract TestUmbrellaStake is TestUmbrellaCommon {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("UmbrellaStake");
+        forkFromEnv("UmbrellaStake");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -77,7 +78,7 @@ contract TestUmbrellaStake is TestUmbrellaCommon {
             uint256 minSharesOut = getMinSharesOut(stkTokens[i], waTokenOrGHO, amount);
 
             bytes memory executeActionCallData = executeActionCalldata(
-                umbrellaStakeEncode(
+                AaveV3Encode.umbrellaStake(
                     stkTokens[i], sender, sender, amount, _useATokens, minSharesOut
                 ),
                 _isDirect

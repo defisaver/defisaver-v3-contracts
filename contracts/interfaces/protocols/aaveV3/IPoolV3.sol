@@ -147,14 +147,6 @@ interface IPoolV3 {
         returns (uint256);
 
     /**
-     * @notice Allows a borrower to swap his debt between stable and variable mode, or vice versa
-     * @param asset The address of the underlying asset borrowed
-     * @param interestRateMode The current interest rate mode of the position being swapped: 1 for Stable, 2 for Variable
-     *
-     */
-    function swapBorrowRateMode(address asset, uint256 interestRateMode) external;
-
-    /**
      * @notice Allows suppliers to enable/disable a specific supplied asset as collateral
      * @param asset The address of the underlying asset supplied
      * @param useAsCollateral True if the user wants to use the supply as collateral, false otherwise
@@ -288,22 +280,6 @@ interface IPoolV3 {
     function FLASHLOAN_PREMIUM_TOTAL() external view returns (uint128);
 
     /**
-     * @notice Supplies an `amount` of underlying asset into the reserve, receiving in return overlying aTokens.
-     * - E.g. User supplies 100 USDC and gets in return 100 aUSDC
-     * @dev Deprecated: Use the `supply` function instead
-     * @param asset The address of the underlying asset to supply
-     * @param amount The amount to be supplied
-     * @param onBehalfOf The address that will receive the aTokens, same as msg.sender if the user
-     *   wants to receive them on his own wallet, or a different address if the beneficiary of aTokens
-     *   is a different wallet
-     * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
-     *   0 if the action is executed directly by the user, without any middle-man
-     *
-     */
-    function deposit(address asset, uint256 amount, address onBehalfOf, uint16 referralCode)
-        external;
-
-    /**
      * @notice Returns the address of the underlying asset of a reserve by the reserve id as stored in the DataTypes.ReserveData struct
      * @param id The id of the reserve as stored in the DataTypes.ReserveData struct
      * @return The address of the reserve associated with id
@@ -384,4 +360,11 @@ interface IPoolV3 {
      * @return The address of the ReserveInterestRateStrategy contract
      */
     function RESERVE_INTEREST_RATE_STRATEGY() external view returns (address);
+
+    /**
+     * @notice Returns the isolated flag of an eMode category
+     * @param id The id of the category
+     * @return True if the eMode category is isolated
+     */
+    function getIsEModeCategoryIsolated(uint8 id) external view returns (bool);
 }

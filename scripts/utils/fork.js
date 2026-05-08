@@ -63,7 +63,7 @@ const topUp = async (account, network = 'mainnet') => {
 
     try {
         await axios.post(
-            `https://virtual.${network}.rpc.tenderly.co/${process.env.FORK_ID}`,
+            `https://virtual.${network}.eu.rpc.tenderly.co/${process.env.FORK_ID}`,
             body,
             { headers },
         );

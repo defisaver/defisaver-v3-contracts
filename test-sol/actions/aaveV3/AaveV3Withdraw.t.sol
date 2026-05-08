@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { AaveV3Withdraw } from "../../../contracts/actions/aaveV3/AaveV3Withdraw.sol";
 import { AaveV3Supply } from "../../../contracts/actions/aaveV3/AaveV3Supply.sol";
-import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
+import { AaveV3TestHelper } from "../../utils/aaveV3/AaveV3TestHelper.sol";
 import { IL2PoolV3 } from "../../../contracts/interfaces/protocols/aaveV3/IL2PoolV3.sol";
 import {
     IAaveProtocolDataProvider
@@ -13,8 +13,10 @@ import { DataTypes } from "../../../contracts/interfaces/protocols/aaveV3/DataTy
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { AaveV3ExecuteActions } from "../../utils/executeActions/AaveV3ExecuteActions.sol";
+import { AaveV3Encode } from "../../utils/encode/AaveV3Encode.sol";
+import { console2 } from "forge-std/console2.sol";
 
-contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
+contract TestAaveV3Withdraw is AaveV3TestHelper, AaveV3ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -35,7 +37,7 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("AaveV3Withdraw");
+        forkFromEnv("AaveV3Withdraw");
         initTestPairs("AaveV3");
 
         wallet = new SmartWallet(bob);
@@ -55,7 +57,7 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
         for (uint256 i = 0; i < testPairs.length; ++i) {
             address tokenAddr = testPairs[i].supplyAsset;
             uint256 supplyAmount = amountInUSDPrice(tokenAddr, 100_000);
-            _supply(tokenAddr, supplyAmount);
+            if (!_validSupplyExecuted(tokenAddr, supplyAmount)) continue;
 
             uint256 withdrawAmount = amountInUSDPrice(tokenAddr, 50_000);
             bool isL2Direct = false;
@@ -67,7 +69,7 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
         for (uint256 i = 0; i < testPairs.length; ++i) {
             address tokenAddr = testPairs[i].supplyAsset;
             uint256 supplyAmount = amountInUSDPrice(tokenAddr, 100_000);
-            _supply(tokenAddr, supplyAmount);
+            if (!_validSupplyExecuted(tokenAddr, supplyAmount)) continue;
 
             uint256 withdrawAmount = type(uint256).max;
             bool isL2Direct = false;
@@ -79,7 +81,7 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
         for (uint256 i = 0; i < testPairs.length; ++i) {
             address tokenAddr = testPairs[i].supplyAsset;
             uint256 supplyAmount = amountInUSDPrice(tokenAddr, 100_000);
-            _supply(tokenAddr, supplyAmount);
+            if (!_validSupplyExecuted(tokenAddr, supplyAmount)) continue;
 
             uint256 withdrawAmount = amountInUSDPrice(tokenAddr, 50_000);
             bool isL2Direct = true;
@@ -132,6 +134,15 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
         (uint256 walletATokenBalanceBefore,,,,,,,,) =
             dataProvider.getUserReserveData(_token, walletAddr);
 
+        uint256 realAmountToWithdraw =
+            _amount == type(uint256).max ? walletATokenBalanceBefore : _amount;
+        if (!isValidWithdraw(DEFAULT_AAVE_MARKET, _token, realAmountToWithdraw)) {
+            console2.log(
+                "[AaveV3Withdraw] Can't withdraw asset (check cap/flags/liquidity). Skipping test..."
+            );
+            return;
+        }
+
         if (_isL2Direct) {
             AaveV3Withdraw.Params memory params = AaveV3Withdraw.Params({
                 assetId: tokenData.id,
@@ -143,7 +154,7 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
             wallet.execute(address(cut), cut.encodeInputs(params), 0);
         } else {
             bytes memory paramsCalldata =
-                aaveV3WithdrawEncode(tokenData.id, true, _amount, sender, address(0));
+                AaveV3Encode.withdraw(tokenData.id, true, _amount, sender, address(0));
 
             bytes memory _calldata = abi.encodeWithSelector(
                 AaveV3Withdraw.executeAction.selector,
@@ -180,7 +191,14 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
         }
     }
 
-    function _supply(address _token, uint256 _amount) internal {
+    function _validSupplyExecuted(address _token, uint256 _amount) internal returns (bool) {
+        if (!isValidSupply(DEFAULT_AAVE_MARKET, _token, _amount)) {
+            console2.log(
+                "[AaveV3Withdraw] Can't supply asset (check cap and flags). Skipping test..."
+            );
+            return false;
+        }
+
         DataTypes.ReserveData memory tokenData = pool.getReserveData(_token);
         AaveV3Supply.Params memory supplyParams = AaveV3Supply.Params({
             amount: _amount,
@@ -194,5 +212,6 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
         });
 
         executeAaveV3Supply(supplyParams, _token, wallet, false, aaveV3SupplyContractAddr);
+        return true;
     }
 }

@@ -11,6 +11,7 @@ import { FluidDexOpen } from "../../../../contracts/actions/fluid/dex/FluidDexOp
 import { FluidDexModel } from "../../../../contracts/actions/fluid/helpers/FluidDexModel.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
+import { FluidEncode } from "../../../utils/encode/FluidEncode.sol";
 
 contract TestFluidDexSupply is FluidTestBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -67,7 +68,7 @@ contract TestFluidDexSupply is FluidTestBase {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("FluidDexSupply");
+        forkFromEnv("FluidDexSupply");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -198,6 +199,10 @@ contract TestFluidDexSupply is FluidTestBase {
         address[] memory vaults = _t2VaultsSelected ? t2Vaults : t4Vaults;
 
         for (uint256 i = 0; i < vaults.length; ++i) {
+            if (isMissingVault(vaults[i])) {
+                logVaultNotFound(vaults[i]);
+                continue;
+            }
             uint256 nftId = _t2VaultsSelected
                 ? executeFluidVaultT2Open(
                     vaults[i],
@@ -254,7 +259,7 @@ contract TestFluidDexSupply is FluidTestBase {
             });
 
             vars.executeActionCallData = executeActionCalldata(
-                fluidDexSupplyEncode(
+                FluidEncode.dexSupply(
                     address(vaults[i]),
                     sender,
                     nftId,

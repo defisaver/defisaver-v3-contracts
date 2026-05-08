@@ -19,6 +19,7 @@ import { TokenUtils } from "../../../../contracts/utils/token/TokenUtils.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { Vm } from "forge-std/Vm.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
+import { FluidEncode } from "../../../utils/encode/FluidEncode.sol";
 
 contract TestFluidLiquidityPayback is FluidTestBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -47,7 +48,7 @@ contract TestFluidLiquidityPayback is FluidTestBase {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("FluidLiquidityPayback");
+        forkFromEnv("FluidLiquidityPayback");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -182,6 +183,10 @@ contract TestFluidLiquidityPayback is FluidTestBase {
         address[] memory vaults = _t1VaultsSelected ? t1Vaults : t2Vaults;
 
         for (uint256 i = 0; i < vaults.length; ++i) {
+            if (isMissingVault(vaults[i])) {
+                logVaultNotFound(vaults[i]);
+                continue;
+            }
             uint256 nftId = _t1VaultsSelected
                 ? executeFluidVaultT1Open(
                     address(vaults[i]),
@@ -221,8 +226,8 @@ contract TestFluidLiquidityPayback is FluidTestBase {
 
             bytes memory executeActionCallData = executeActionCalldata(
                 _t1VaultsSelected
-                    ? fluidVaultT1PaybackEncode(address(vaults[i]), nftId, paybackAmount, sender)
-                    : fluidDexPaybackEncode(
+                    ? FluidEncode.vaultT1Payback(address(vaults[i]), nftId, paybackAmount, sender)
+                    : FluidEncode.dexPayback(
                         address(vaults[i]),
                         sender,
                         nftId,

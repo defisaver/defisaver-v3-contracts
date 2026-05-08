@@ -10,6 +10,7 @@ import { SkyHelper } from "../../../contracts/actions/sky/helpers/SkyHelper.sol"
 import { ILockstakeEngine } from "../../../contracts/interfaces/protocols/sky/ILockstakeEngine.sol";
 
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
+import { SkyStakingEncode } from "../../utils/encode/SkyStakingEncode.sol";
 
 contract TestSkyStakingEngineOpen is ActionsUtils, BaseTest, SkyHelper {
     /*//////////////////////////////////////////////////////////////////////////
@@ -28,7 +29,7 @@ contract TestSkyStakingEngineOpen is ActionsUtils, BaseTest, SkyHelper {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkFromEnv("");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -54,7 +55,7 @@ contract TestSkyStakingEngineOpen is ActionsUtils, BaseTest, SkyHelper {
     //////////////////////////////////////////////////////////////////////////*/
     function _baseTest(bool _isDirect) internal {
         bytes memory executeActionCallData =
-            executeActionCalldata(skyStakingEngineOpenEncode(STAKING_ENGINE), _isDirect);
+            executeActionCalldata(SkyStakingEncode.open(STAKING_ENGINE), _isDirect);
         ILockstakeEngine stakingEngine = ILockstakeEngine(STAKING_ENGINE);
 
         vm.expectEmit(true, true, false, false, address(STAKING_ENGINE));

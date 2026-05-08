@@ -6,7 +6,7 @@ import { BotAuth } from "../../contracts/core/strategy/BotAuth.sol";
 import { AdminAuth } from "../../contracts/auth/AdminAuth.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
-import { Addresses } from "../utils/Addresses.sol";
+import { Addresses } from "../utils/helpers/MainnetAddresses.sol";
 
 contract TestCore_BotAuth is BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
@@ -18,7 +18,7 @@ contract TestCore_BotAuth is BaseTest {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("BotAuth");
+        forkFromEnv("BotAuth");
         cut = new BotAuth();
     }
 

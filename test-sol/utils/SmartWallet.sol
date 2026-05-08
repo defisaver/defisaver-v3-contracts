@@ -15,7 +15,7 @@ import { IInstaAccountV2 } from "../../contracts/interfaces/protocols/insta/IIns
 
 import { BaseTest } from "./BaseTest.sol";
 import { RegistryUtils } from "./RegistryUtils.sol";
-import { Addresses } from "../utils/Addresses.sol";
+import { Addresses } from "./helpers/MainnetAddresses.sol";
 import { console2 as console } from "forge-std/console2.sol";
 
 contract SmartWallet is BaseTest, RegistryUtils {

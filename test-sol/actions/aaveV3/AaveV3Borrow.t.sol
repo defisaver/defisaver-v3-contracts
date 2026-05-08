@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { AaveV3Borrow } from "../../../contracts/actions/aaveV3/AaveV3Borrow.sol";
 import { AaveV3Supply } from "../../../contracts/actions/aaveV3/AaveV3Supply.sol";
-import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
+import { AaveV3TestHelper } from "../../utils/aaveV3/AaveV3TestHelper.sol";
 import { AaveV3RatioHelper } from "../../../contracts/actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 import { IL2PoolV3 } from "../../../contracts/interfaces/protocols/aaveV3/IL2PoolV3.sol";
 import {
@@ -14,8 +14,10 @@ import { DataTypes } from "../../../contracts/interfaces/protocols/aaveV3/DataTy
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { AaveV3ExecuteActions } from "../../utils/executeActions/AaveV3ExecuteActions.sol";
+import { AaveV3Encode } from "../../utils/encode/AaveV3Encode.sol";
+import { console2 } from "forge-std/console2.sol";
 
-contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActions {
+contract TestAaveV3Borrow is AaveV3TestHelper, AaveV3RatioHelper, AaveV3ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -36,7 +38,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("AaveV3Borrow");
+        forkFromEnv("");
         initTestPairs("AaveV3");
 
         wallet = new SmartWallet(bob);
@@ -58,7 +60,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
 
             TestPair memory pair = testPairs[i];
             uint256 supplyAmount = amountInUSDPrice(pair.supplyAsset, 100_000);
-            _supply(pair.supplyAsset, supplyAmount);
+            if (!_validSupplyExecuted(pair.supplyAsset, supplyAmount)) continue;
 
             uint256 borrowAmount = amountInUSDPrice(pair.borrowAsset, 40_000);
             _borrow(borrowAmount, pair.borrowAsset, false);
@@ -73,7 +75,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
 
             TestPair memory pair = testPairs[i];
             uint256 supplyAmount = amountInUSDPrice(pair.supplyAsset, 100_000);
-            _supply(pair.supplyAsset, supplyAmount);
+            if (!_validSupplyExecuted(pair.supplyAsset, supplyAmount)) continue;
 
             uint256 borrowAmount = amountInUSDPrice(pair.borrowAsset, 40_000);
             _borrow(borrowAmount, pair.borrowAsset, true);
@@ -185,6 +187,13 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
         uint256 senderBalanceBefore = balanceOf(_borrowAsset, sender);
         uint256 walletSafetyRatioBefore = getSafetyRatio(DEFAULT_AAVE_MARKET, walletAddr);
 
+        if (!isValidBorrow(DEFAULT_AAVE_MARKET, _borrowAsset, _borrowAmount)) {
+            console2.log(
+                "[AaveV3Borrow] Can't borrow asset (check cap and flags). Skipping test..."
+            );
+            return;
+        }
+
         if (_isL2Direct) {
             AaveV3Borrow.Params memory params = AaveV3Borrow.Params({
                 amount: _borrowAmount,
@@ -198,7 +207,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
             });
             wallet.execute(address(cut), cut.encodeInputs(params), 0);
         } else {
-            bytes memory paramsCalldata = aaveV3BorrowEncode(
+            bytes memory paramsCalldata = AaveV3Encode.borrow(
                 _borrowAmount,
                 sender,
                 uint8(DataTypes.InterestRateMode.VARIABLE),
@@ -228,7 +237,13 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
         assertGe(walletSafetyRatioAfter, 0);
     }
 
-    function _supply(address _asset, uint256 _amount) internal {
+    function _validSupplyExecuted(address _asset, uint256 _amount) internal returns (bool) {
+        if (!isValidSupply(DEFAULT_AAVE_MARKET, _asset, _amount)) {
+            console2.log(
+                "[AaveV3Borrow] Can't supply asset (check cap and flags). Skipping test..."
+            );
+            return false;
+        }
         DataTypes.ReserveData memory assetData = pool.getReserveData(_asset);
         AaveV3Supply.Params memory supplyParams = AaveV3Supply.Params({
             amount: _amount,
@@ -242,5 +257,6 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
         });
 
         executeAaveV3Supply(supplyParams, _asset, wallet, false, aaveV3SupplyContractAddr);
+        return true;
     }
 }

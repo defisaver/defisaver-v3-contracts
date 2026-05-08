@@ -5,7 +5,7 @@ import { IDSProxyFactory } from "../../contracts/interfaces/DS/IDSProxyFactory.s
 import { IDSProxy } from "../../contracts/interfaces/DS/IDSProxy.sol";
 import { ISafeProxyFactory } from "../../contracts/interfaces/protocols/safe/ISafeProxyFactory.sol";
 import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
-import { Addresses } from "../utils/Addresses.sol";
+import { Addresses } from "./helpers/MainnetAddresses.sol";
 
 abstract contract UserWallet {
     IDSProxy public proxy;

@@ -6,7 +6,6 @@ import { Tokens } from "../utils/Tokens.sol";
 
 contract Config is Tokens {
     string internal constant IS_SMART_WALLET_SAFE = "$.isSmartWalletSafe";
-    string internal constant BLOCK_NUMBER = "$.blockNumber";
 
     using stdJson for string;
 
@@ -20,9 +19,10 @@ contract Config is Tokens {
     }
 
     /// @dev Fields have to be placed in alphabetical order for foundry parser to work
+    /// @dev Seems that the comment above is not true anymore, but leaving comments here in case we need to revert to it. Currently on version 1.6.1 of foundry.
     struct TestPairConfig {
-        string borrowAsset;
         string supplyAsset;
+        string borrowAsset;
     }
 
     struct ProtocolTestPairsConfig {
@@ -46,17 +46,22 @@ contract Config is Tokens {
         return configData.json.readBool(IS_SMART_WALLET_SAFE);
     }
 
-    function getBlockNumber() public view returns (uint256) {
-        return configData.json.readUint(BLOCK_NUMBER);
-    }
-
-    function getBlockNumberForTestIfExist(string memory _testName) public view returns (uint256) {
-        string memory testBlockNumberKey = string(abi.encodePacked(".", _testName, ".blockNumber"));
-
-        if (vm.keyExistsJson(configData.json, testBlockNumberKey)) {
-            return configData.json.readUint(testBlockNumberKey);
+    /// @notice Block for (chain, testName). 0 = fork latest. Lookup: .<testName>.<chain> then .defaultBlocks.<chain> (fallback for tests not in config).
+    function getBlockNumberForChainAndTest(string memory _chain, string memory _testName)
+        public
+        view
+        returns (uint256)
+    {
+        if (bytes(_testName).length == 0) return 0;
+        string memory path = string(abi.encodePacked(".", _testName, ".", _chain));
+        if (vm.keyExistsJson(configData.json, path)) {
+            return configData.json.readUint(string(abi.encodePacked("$", path)));
         }
-        return getBlockNumber();
+        string memory defaultPath = string(abi.encodePacked(".defaultBlocks.", _chain));
+        if (vm.keyExistsJson(configData.json, defaultPath)) {
+            return configData.json.readUint(string(abi.encodePacked("$", defaultPath)));
+        }
+        return 0;
     }
 
     function getTestPairsForProtocol(string memory _protocol) public returns (TestPair[] memory) {
