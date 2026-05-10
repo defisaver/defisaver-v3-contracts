@@ -5,6 +5,7 @@ pragma solidity =0.8.24;
 import { RecipeExecutor } from "../../../contracts/core/RecipeExecutor.sol";
 import { StrategyModel } from "../../../contracts/core/strategy/StrategyModel.sol";
 import { DFSSell } from "../../../contracts/actions/exchange/DFSSell.sol";
+import { SellActionHelper } from "../../../contracts/actions/exchange/helpers/SellActionHelper.sol";
 import { PullToken } from "../../../contracts/actions/utils/PullToken.sol";
 import { SendToken } from "../../../contracts/actions/utils/SendToken.sol";
 import { IERC20 } from "../../../contracts/interfaces/token/IERC20.sol";
@@ -229,6 +230,39 @@ contract TestDFSSell is ActionsUtils, RegistryUtils, BaseTest {
         assertEq(IERC20(Addresses.DAI_ADDR).balanceOf(walletAddr), 0);
     }
 
+    function test_should_handle_same_asset_sell_as_no_op_in_recipe() public {
+        uint256 senderBalance = amountInUSDPrice(Addresses.WETH_ADDR, 1000);
+        uint256 sellAmount = senderBalance / 2;
+
+        _giveWethAndApprove(senderBalance);
+
+        _executeSameAssetSellRecipe(sellAmount);
+
+        assertEq(IERC20(Addresses.WETH_ADDR).balanceOf(sender), senderBalance);
+        assertEq(IERC20(Addresses.WETH_ADDR).balanceOf(walletAddr), 0);
+    }
+
+    function test_should_revert_same_asset_sell_when_from_and_to_are_different() public {
+        uint256 senderBalance = amountInUSDPrice(Addresses.WETH_ADDR, 1000);
+        uint256 sellAmount = senderBalance / 2;
+
+        give(Addresses.WETH_ADDR, sender, senderBalance);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(SellActionHelper.SameAssetsSell_InvalidFromToAddress.selector)
+        );
+        cut.executeActionDirect(_wethToWethSell(sellAmount, sender, walletAddr));
+    }
+
+    function test_should_revert_same_asset_sell_when_from_has_insufficient_balance() public {
+        uint256 sellAmount = amountInUSDPrice(Addresses.WETH_ADDR, 1000);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(SellActionHelper.SameAssetsSell_InsufficientBalance.selector)
+        );
+        cut.executeActionDirect(_wethToWethSell(sellAmount, sender, sender));
+    }
+
     function _giveWethAndApprove(uint256 _amount) internal {
         give(Addresses.WETH_ADDR, sender, _amount);
         approveAsSender(sender, Addresses.WETH_ADDR, walletAddr, _amount);
@@ -267,6 +301,20 @@ contract TestDFSSell is ActionsUtils, RegistryUtils, BaseTest {
         actionIds[1] = bytes4(keccak256("SendToken"));
 
         _executeRecipe("DFSSellAndSend", actionsCalldata, actionIds, _value);
+    }
+
+    function _executeSameAssetSellRecipe(uint256 _sellAmount) internal {
+        bytes[] memory actionsCalldata = new bytes[](3);
+        actionsCalldata[0] = pullTokenEncode(Addresses.WETH_ADDR, sender, _sellAmount);
+        actionsCalldata[1] = _wethToWethSell(_sellAmount, walletAddr, walletAddr);
+        actionsCalldata[2] = sendTokenEncode(Addresses.WETH_ADDR, sender, type(uint256).max);
+
+        bytes4[] memory actionIds = new bytes4[](3);
+        actionIds[0] = bytes4(keccak256("PullToken"));
+        actionIds[1] = bytes4(keccak256("DFSSell"));
+        actionIds[2] = bytes4(keccak256("SendToken"));
+
+        _executeRecipe("DFSSellSameAssetNoOpAndSend", actionsCalldata, actionIds, 0);
     }
 
     function _executeRecipe(
@@ -329,6 +377,22 @@ contract TestDFSSell is ActionsUtils, RegistryUtils, BaseTest {
             Addresses.DAI_ADDR,
             Addresses.WETH_ADDR,
             Addresses.DAI_ADDR,
+            _amount,
+            _from,
+            _to
+        );
+    }
+
+    function _wethToWethSell(uint256 _amount, address _from, address _to)
+        internal
+        view
+        returns (bytes memory)
+    {
+        return _sellParams(
+            Addresses.WETH_ADDR,
+            Addresses.WETH_ADDR,
+            Addresses.WETH_ADDR,
+            Addresses.WETH_ADDR,
             _amount,
             _from,
             _to
