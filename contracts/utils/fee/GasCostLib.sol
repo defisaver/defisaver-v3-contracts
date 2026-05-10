@@ -25,7 +25,7 @@ library GasCostLib {
     ) internal view returns (uint256 txCost) {
         txCost = calcGasCostInEth(_gasUsed, _l1GasCostInEth);
 
-        if (_feeToken != TokenUtils.WETH_ADDR) {
+        if (_feeToken != TokenUtils.WETH_ADDR && _feeToken != TokenUtils.ETH_ADDR) {
             txCost = convertEthCostToTokenAmount(
                 txCost, _feeToken, _tokenPriceInEth, _revertOnZeroPrice
             );

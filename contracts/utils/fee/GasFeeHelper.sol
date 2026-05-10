@@ -18,7 +18,8 @@ contract GasFeeHelper is TokenPriceHelper {
     FeeRecipient public constant feeRecipient = FeeRecipient(FEE_RECIPIENT);
 
     function calcGasCost(uint256 _gasUsed, address _feeToken) public view returns (uint256 txCost) {
-        uint256 price = _feeToken == TokenUtils.WETH_ADDR ? 0 : getPriceInETH(_feeToken);
+        bool isNativeToken = _feeToken == TokenUtils.WETH_ADDR || _feeToken == TokenUtils.ETH_ADDR;
+        uint256 price = isNativeToken ? 0 : getPriceInETH(_feeToken);
         txCost = GasCostLib.calcGasCost(_gasUsed, _feeToken, price, 0, false);
     }
 
