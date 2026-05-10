@@ -10,6 +10,12 @@ import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 library SellActionHelper {
     using TokenUtils for address;
 
+    /// @notice '_from' and '_to' addresses must be the same for same tokens sell
+    error SameAssetsSell_InvalidFromToAddress();
+    /// @notice Source amount must be available for same tokens sell
+    error SameAssetsSell_InsufficientBalance();
+
+    /// @notice Handle max amount for sell
     function setMaxAmountIfNeeded(DFSExchangeData.ExchangeData memory _exchangeData, address _from)
         internal
         view
@@ -21,6 +27,10 @@ library SellActionHelper {
         }
     }
 
+    /// @notice Try to handle direct token conversions:
+    /// - Same assets sell (no fees, no pulling, no sending)
+    /// - ETH -> WETH conversion (wrap operation, no fees)
+    /// - WETH -> ETH conversion (unwrap operation, no fees)
     function tryHandleDirectTokenConversion(
         DFSExchangeData.ExchangeData memory _exchangeData,
         address _from,
@@ -28,13 +38,24 @@ library SellActionHelper {
     ) internal returns (bool handled, uint256 exchangedAmount, bytes memory logData) {
         // If source and destination address are same we want to skip exchanging and take no fees.
         if (_exchangeData.srcAddr == _exchangeData.destAddr) {
+            // Sanity check: sell action should not act as a plain token transfer here
+            if (_from != _to) {
+                revert SameAssetsSell_InvalidFromToAddress();
+            }
+
+            // Sanity check: the source amount must be available on the '_from' address,
+            // so later actions can trust that the `exchangedAmount` of tokens exists.
+            if (_exchangeData.srcAddr.getBalance(_from) < _exchangeData.srcAmount) {
+                revert SameAssetsSell_InsufficientBalance();
+            }
+
             exchangedAmount = _exchangeData.srcAmount;
             _exchangeData.dfsFeeDivider = 0;
             logData = encodeSellLogData(_exchangeData, address(0), exchangedAmount);
             return (true, exchangedAmount, logData);
         }
 
-        // For ETH -> WETH conversion, perform wrap operation.
+        // For ETH -> WETH conversion, perform wrap operation and take no fees.
         if (
             _exchangeData.srcAddr == TokenUtils.ETH_ADDR
                 && _exchangeData.destAddr == TokenUtils.WETH_ADDR
@@ -48,7 +69,7 @@ library SellActionHelper {
             return (true, exchangedAmount, logData);
         }
 
-        // For WETH -> ETH conversion, perform unwrap operation.
+        // For WETH -> ETH conversion, perform unwrap operation and take no fees.
         if (
             _exchangeData.srcAddr == TokenUtils.WETH_ADDR
                 && _exchangeData.destAddr == TokenUtils.ETH_ADDR
@@ -64,6 +85,8 @@ library SellActionHelper {
         }
     }
 
+    /// @notice Pull tokens for sell
+    /// @dev Handles ETH -> WETH conversion
     function pullTokens(DFSExchangeData.ExchangeData memory _exchangeData, address _from)
         internal
         returns (bool isEthDest)
@@ -83,6 +106,8 @@ library SellActionHelper {
         }
     }
 
+    /// @notice Send tokens after sell
+    /// @dev Handles WETH -> ETH conversion
     function sendTokensAfterSell(
         DFSExchangeData.ExchangeData memory _exchangeData,
         address _to,
@@ -99,6 +124,7 @@ library SellActionHelper {
         _exchangeData.destAddr.withdrawTokens(_to, _exchangedAmount);
     }
 
+    /// @notice Encode sell log data
     function encodeSellLogData(
         DFSExchangeData.ExchangeData memory _exchangeData,
         address _wrapper,
