@@ -197,6 +197,7 @@ contract RecipeExecutor is
         }
 
         // calculate gas cost using gas estimation and signed token price
+        // tokenPriceInEth is provided off-chain, so we explicitly revert on a zero price.
         uint256 gasCost = GasCostLib.calcGasCost(
             estimatedGasUsed,
             _txSaverData.feeToken,
