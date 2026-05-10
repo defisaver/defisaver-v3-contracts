@@ -155,12 +155,7 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, S
         repaySub.strategyOrBundleId = _subData.isEOA ? REPAY_BUNDLE_EOA_ID : REPAY_BUNDLE_ID;
         repaySub.isBundle = true;
 
-        address user = _wallet;
-
-        if (_subData.isEOA) {
-            _validateOwner(_wallet, _eoa);
-            user = _eoa;
-        }
+        address user = _subData.isEOA ? _eoa : _wallet;
 
         // format data for ratio trigger if currRatio < minRatio = true
         bytes memory triggerData =
@@ -184,12 +179,7 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, S
         boostSub.strategyOrBundleId = _subData.isEOA ? BOOST_BUNDLE_EOA_ID : BOOST_BUNDLE_ID;
         boostSub.isBundle = true;
 
-        address user = _wallet;
-
-        if (_subData.isEOA) {
-            _validateOwner(_wallet, _eoa);
-            user = _eoa;
-        }
+        address user = _subData.isEOA ? _eoa : _wallet;
 
         // format data for ratio trigger if currRatio > maxRatio = true
         bytes memory triggerData =
