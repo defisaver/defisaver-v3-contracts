@@ -10,6 +10,8 @@ import { DFSFeeLib } from "../../utils/fee/DFSFeeLib.sol";
 
 /// @title GasFeeHelper
 /// @notice Helper contract for calculating the gas cost for strategies
+/// @dev For non-WETH tokens, the price is fetched on-chain, so we do not revert on a zero price.
+/// @dev The worst-case outcome is that no fees are taken for that transaction.
 contract GasFeeHelper is TokenPriceHelper {
     using TokenUtils for address;
 
