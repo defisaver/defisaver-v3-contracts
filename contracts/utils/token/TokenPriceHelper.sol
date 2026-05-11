@@ -255,9 +255,17 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
     /// @dev Round to the nearest integer.
     function getWBtcPrice(int256 _btcPrice) public view returns (int256 wBtcPrice) {
         if (_btcPrice <= 0) return 0;
-        (, int256 wBtcPriceToPeg,,,) = feedRegistry.latestRoundData(WBTC_ADDR, CHAINLINK_WBTC_ADDR);
-        // Round to the nearest integer.
-        wBtcPrice = (_btcPrice * wBtcPriceToPeg + USD_PRICE_SCALE / 2) / USD_PRICE_SCALE;
+
+        try feedRegistry.latestRoundData(WBTC_ADDR, CHAINLINK_WBTC_ADDR) returns (
+            uint80, int256 wBtcPriceToPeg, uint256, uint256, uint80
+        ) {
+            // Round to the nearest integer.
+            wBtcPrice = (_btcPrice * wBtcPriceToPeg + USD_PRICE_SCALE / 2) / USD_PRICE_SCALE;
+        } catch {
+            // If the WBTC/BTC feed is unavailable, fall back to the unadjusted BTC price
+            // to preserve fail-open behavior and avoid reverting upstream callers.
+            wBtcPrice = _btcPrice;
+        }
     }
 
     function _parseChainlinkPrice(int256 _answer) internal pure returns (int256 price) {
