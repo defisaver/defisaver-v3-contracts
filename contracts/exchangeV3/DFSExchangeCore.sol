@@ -5,7 +5,6 @@ import { IExchangeV3 } from "../interfaces/exchange/IExchangeV3.sol";
 import { DFSExchangeData } from "./DFSExchangeData.sol";
 import { Discount } from "../utils/Discount.sol";
 import { FeeRecipient } from "../utils/fee/FeeRecipient.sol";
-import { DFSExchangeHelper } from "./DFSExchangeHelper.sol";
 import { ExchangeAggregatorRegistry } from "./registries/ExchangeAggregatorRegistry.sol";
 import { WrapperExchangeRegistry } from "./registries/WrapperExchangeRegistry.sol";
 import { IOffchainWrapper } from "../interfaces/exchange/IOffchainWrapper.sol";
@@ -16,13 +15,7 @@ import { IERC20 } from "../interfaces/token/IERC20.sol";
 import { TokenUtils } from "../utils/token/TokenUtils.sol";
 import { DSMath } from "../_vendor/DS/DSMath.sol";
 
-contract DFSExchangeCore is
-    DSMath,
-    DFSExchangeHelper,
-    DFSExchangeData,
-    ExchangeHelper,
-    StrategyModel
-{
+contract DFSExchangeCore is DSMath, DFSExchangeData, ExchangeHelper, StrategyModel {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
