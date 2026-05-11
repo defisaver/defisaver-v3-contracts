@@ -1,23 +1,24 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
+import { IERC20 } from "../../../interfaces/token/IERC20.sol";
+import { IDFSRegistry } from "../../../interfaces/core/IDFSRegistry.sol";
+import {
+    ILlamaLendController
+} from "../../../interfaces/protocols/llamalend/ILlamaLendController.sol";
+
 import { AdminAuth } from "../../../auth/AdminAuth.sol";
 import { LlamaLendHelper } from "../helpers/LlamaLendHelper.sol";
 import { DFSExchangeWithTxSaver } from "../../../exchangeV3/DFSExchangeWithTxSaver.sol";
 import { DFSExchangeData } from "../../../exchangeV3/DFSExchangeData.sol";
-import { FeeRecipient } from "../../../utils/fee/FeeRecipient.sol";
 import { SafeERC20 } from "../../../_vendor/openzeppelin/SafeERC20.sol";
-import { IERC20 } from "../../../interfaces/token/IERC20.sol";
 import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
-import {
-    ILlamaLendController
-} from "../../../interfaces/protocols/llamalend/ILlamaLendController.sol";
 import { ActionsUtilHelper } from "../../utils/helpers/ActionsUtilHelper.sol";
-import { IDFSRegistry } from "../../../interfaces/core/IDFSRegistry.sol";
-import { GasFeeHelper } from "../../fee/helpers/GasFeeHelper.sol";
+import { GasFeeHelper } from "../../../utils/fee/GasFeeHelper.sol";
 import {
     ReentrancyGuardTransient
 } from "../../../_vendor/openzeppelin/ReentrancyGuardTransient.sol";
+import { DFSFeeLib } from "../../../utils/fee/DFSFeeLib.sol";
 
 /// @title LlamaLendSwapper Callback contract for Llamalend extended actions
 contract LlamaLendSwapper is
@@ -30,9 +31,6 @@ contract LlamaLendSwapper is
 {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
-
-    /// @dev Divider for automation fee, 5 bps
-    uint256 internal constant AUTOMATION_DFS_FEE = 2000;
 
     struct CallbackData {
         uint256 stablecoins;
@@ -60,7 +58,12 @@ contract LlamaLendSwapper is
 
         // can't take both automation fee and TxSaver fee
         if (gasUsed > 0 && !txSaverFeeTaken) {
-            receivedAmount -= _takeAutomationFee(receivedAmount, debtToken, gasUsed, hasFee);
+            receivedAmount -= takeGasAndAutomationFee(
+                gasUsed,
+                debtToken,
+                receivedAmount,
+                hasFee ? DFSFeeLib.MAX_AUTOMATION_FEE_DIVIDER : 0
+            );
         }
 
         // if receivedAmount > current debt, leftover coll will be returned and receivedAmount-currentDebt will be returned
@@ -92,7 +95,12 @@ contract LlamaLendSwapper is
 
         // can't take both automation fee and TxSaver fee
         if (gasUsed > 0 && !txSaverFeeTaken) {
-            receivedAmount -= _takeAutomationFee(receivedAmount, collToken, gasUsed, hasFee);
+            receivedAmount -= takeGasAndAutomationFee(
+                gasUsed,
+                collToken,
+                receivedAmount,
+                hasFee ? DFSFeeLib.MAX_AUTOMATION_FEE_DIVIDER : 0
+            );
         }
 
         cb.collateral = receivedAmount;
@@ -126,7 +134,12 @@ contract LlamaLendSwapper is
 
         // can't take both automation fee and TxSaver fee
         if (gasUsed > 0 && !txSaverFeeTaken) {
-            receivedAmount -= _takeAutomationFee(receivedAmount, debtToken, gasUsed, hasFee);
+            receivedAmount -= takeGasAndAutomationFee(
+                gasUsed,
+                debtToken,
+                receivedAmount,
+                hasFee ? DFSFeeLib.MAX_AUTOMATION_FEE_DIVIDER : 0
+            );
         }
 
         cb.stablecoins = receivedAmount;
@@ -143,27 +156,5 @@ contract LlamaLendSwapper is
 
         debtToken.withdrawTokens(msg.sender, type(uint256).max);
         collToken.withdrawTokens(msg.sender, type(uint256).max);
-    }
-
-    function _takeAutomationFee(
-        uint256 _destTokenAmount,
-        address _token,
-        uint256 _gasUsed,
-        bool hasFee
-    ) internal returns (uint256 feeAmount) {
-        // we need to take the fee for tx cost as well, as it's in a strategy
-        feeAmount += calcGasCost(_gasUsed, _token, 0);
-
-        // gas fee can't go over 20% of the whole amount
-        if (feeAmount > (_destTokenAmount / 5)) {
-            feeAmount = _destTokenAmount / 5;
-        }
-        // if user has been whitelisted we don't take 0.05% fee
-        if (hasFee) {
-            feeAmount += _destTokenAmount / AUTOMATION_DFS_FEE;
-        }
-
-        address walletAddr = FeeRecipient(FEE_RECIPIENT_ADDRESS).getFeeAddr();
-        _token.withdrawTokens(walletAddr, feeAmount);
     }
 }

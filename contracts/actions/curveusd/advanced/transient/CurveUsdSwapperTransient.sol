@@ -1,22 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { SafeERC20 } from "../../../../_vendor/openzeppelin/SafeERC20.sol";
 import { IERC20 } from "../../../../interfaces/token/IERC20.sol";
 import { IDFSRegistry } from "../../../../interfaces/core/IDFSRegistry.sol";
+import { ICrvUsdController } from "../../../../interfaces/protocols/curveusd/ICurveUsd.sol";
+
+import { SafeERC20 } from "../../../../_vendor/openzeppelin/SafeERC20.sol";
 import { TokenUtils } from "../../../../utils/token/TokenUtils.sol";
 import { AdminAuth } from "../../../../auth/AdminAuth.sol";
 import { DFSExchangeWithTxSaver } from "../../../../exchangeV3/DFSExchangeWithTxSaver.sol";
 import { DFSExchangeData } from "../../../../exchangeV3/DFSExchangeData.sol";
-import { FeeRecipient } from "../../../../utils/fee/FeeRecipient.sol";
 import { ActionsUtilHelper } from "../../../utils/helpers/ActionsUtilHelper.sol";
-import { GasFeeHelper } from "../../../../actions/fee/helpers/GasFeeHelper.sol";
+import { GasFeeHelper } from "../../../../utils/fee/GasFeeHelper.sol";
 import {
     ReentrancyGuardTransient
 } from "../../../../_vendor/openzeppelin/ReentrancyGuardTransient.sol";
-
 import { CurveUsdHelper } from "../../helpers/CurveUsdHelper.sol";
-import { ICrvUsdController } from "../../../../interfaces/protocols/curveusd/ICurveUsd.sol";
+import { DFSFeeLib } from "../../../../utils/fee/DFSFeeLib.sol";
 
 /// @title CurveUsdSwapperTransient Callback contract for CurveUsd extended actions with transient storage
 contract CurveUsdSwapperTransient is
@@ -30,16 +30,13 @@ contract CurveUsdSwapperTransient is
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
-    /// @dev Divider for automation fee, 5 bps
-    uint256 internal constant AUTOMATION_DFS_FEE = 2000;
-
     struct CallbackData {
         uint256 stablecoins;
         uint256 collateral;
     }
 
     modifier onlyValidCrvUsdController(address _sender) {
-        if (!isControllerValid(msg.sender)) {
+        if (!isControllerValid(_sender)) {
             revert CurveUsdInvalidController();
         }
         _;
@@ -144,33 +141,14 @@ contract CurveUsdSwapperTransient is
 
         // can't take both automation fee and TxSaver fee
         if (_gasUsedForAutomation > 0 && !txSaverFeeTaken) {
-            receivedAmount -= _takeAutomationFee(
-                receivedAmount, _feeToken, _gasUsedForAutomation, hasFee
+            receivedAmount -= takeGasAndAutomationFee(
+                _gasUsedForAutomation,
+                _feeToken,
+                receivedAmount,
+                hasFee ? DFSFeeLib.MAX_AUTOMATION_FEE_DIVIDER : 0
             );
         }
 
         return receivedAmount;
-    }
-
-    function _takeAutomationFee(
-        uint256 _destTokenAmount,
-        address _token,
-        uint256 _gasUsed,
-        bool hasFee
-    ) internal returns (uint256 feeAmount) {
-        // we need to take the fee for tx cost as well, as it's in a strategy
-        feeAmount += calcGasCost(_gasUsed, _token, 0);
-
-        // gas fee can't go over 20% of the whole amount
-        if (feeAmount > (_destTokenAmount / 5)) {
-            feeAmount = _destTokenAmount / 5;
-        }
-        // if user has been whitelisted we don't take 0.05% fee
-        if (hasFee) {
-            feeAmount += _destTokenAmount / AUTOMATION_DFS_FEE;
-        }
-
-        address walletAddr = FeeRecipient(FEE_RECIPIENT_ADDRESS).getFeeAddr();
-        _token.withdrawTokens(walletAddr, feeAmount);
     }
 }
