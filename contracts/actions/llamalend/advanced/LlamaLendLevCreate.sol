@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
+import {
+    ILlamaLendController
+} from "../../../interfaces/protocols/llamalend/ILlamaLendController.sol";
+import { ILlamaLendSwapper } from "../../../interfaces/protocols/llamalend/ILlamaLendSwapper.sol";
 import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { LlamaLendHelper } from "../helpers/LlamaLendHelper.sol";
 import { DFSExchangeData } from "../../../exchangeV3/DFSExchangeData.sol";
-import {
-    ILlamaLendController
-} from "../../../interfaces/protocols/llamalend/ILlamaLendController.sol";
 import { DFSIds } from "../../../utils/DFSIds.sol";
 
 /// @title LlamaLendLevCreate
@@ -68,27 +69,47 @@ contract LlamaLendLevCreate is ActionBase, LlamaLendHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _create(Params memory _params) internal returns (uint256, bytes memory) {
-        if (_params.collAmount == 0 || _params.exData.srcAmount == 0) revert();
+        if (_params.collAmount == 0 || _params.exData.srcAmount == 0) {
+            revert LlamaLendZeroAmountError();
+        }
         if (!isControllerValid(_params.controllerAddress, _params.controllerId)) {
             revert InvalidLlamaLendController();
         }
 
         address collAddr = ILlamaLendController(_params.controllerAddress).collateral_token();
-        _params.collAmount = collAddr.pullTokensIfNeeded(_params.from, _params.collAmount);
+        address debtAddr = ILlamaLendController(_params.controllerAddress).borrowed_token();
+
+        // Validate exchange data (we are selling debt to buy more collateral)
+        if (_params.exData.srcAddr != debtAddr) revert LlamaLendInvalidExchangeSrcToken();
+        if (_params.exData.destAddr != collAddr) revert LlamaLendInvalidExchangeDestToken();
 
         address llamalendSwapper = registry.getAddr(DFSIds.LLAMALEND_SWAPPER);
-        uint256[] memory info = new uint256[](5);
-        info[0] = _params.gasUsed;
-        info[1] = _params.controllerId;
+        uint256[] memory callbackArgs = new uint256[](5);
+        callbackArgs[0] = _params.gasUsed;
+        callbackArgs[1] = _params.controllerId;
 
         transientStorage.setBytesTransiently(abi.encode(_params.exData));
 
+        _params.collAmount = collAddr.pullTokensIfNeeded(_params.from, _params.collAmount);
         collAddr.approveToken(_params.controllerAddress, _params.collAmount);
+
         // create loan
         ILlamaLendController(_params.controllerAddress)
             .create_loan_extended(
-                _params.collAmount, _params.exData.srcAmount, _params.nBands, llamalendSwapper, info
+                _params.collAmount,
+                _params.exData.srcAmount,
+                _params.nBands,
+                llamalendSwapper,
+                callbackArgs
             );
+
+        // Sanity check:
+        // This should never happen and there shouldn't be any funds left on swapper contract after sell,
+        // but withdrawing it just in case and forwarding funds back to the user.
+        (uint256 collBalance, uint256 debtBalance) =
+            ILlamaLendSwapper(llamalendSwapper).withdrawAll(_params.controllerAddress);
+        collAddr.withdrawTokens(_params.from, collBalance);
+        debtAddr.withdrawTokens(_params.from, debtBalance);
 
         return (_params.exData.srcAmount, abi.encode(_params));
     }
