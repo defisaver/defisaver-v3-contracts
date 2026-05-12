@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
+import { ICrvUsdController } from "../../../interfaces/protocols/curveusd/ICurveUsd.sol";
+import {
+    ICurveUsdSwapperTransient
+} from "../../../interfaces/protocols/curveusd/ICurveUsdSwapperTransient.sol";
+
 import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { DFSExchangeData } from "../../../exchangeV3/DFSExchangeData.sol";
-
 import { CurveUsdHelper } from "../helpers/CurveUsdHelper.sol";
-import { CurveUsdSwapperTransient } from "./CurveUsdSwapperTransient.sol";
-import { ICrvUsdController } from "../../../interfaces/protocols/curveusd/ICurveUsd.sol";
 import { DFSIds } from "../../../utils/DFSIds.sol";
 
 /// @title Liquidates a curveusd position with a given percentage of collateral
@@ -73,20 +75,30 @@ contract CurveUsdSelfLiquidateWithCollTransient is ActionBase, CurveUsdHelper {
         /// @dev Zero input will just return so we explicitly revert here (see ICrvUsdController natspec)
         if (_params.exData.srcAmount == 0) revert ZeroAmountError();
 
+        // Validate controller address
         if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
-
-        address curveUsdTransientSwapper = registry.getAddr(DFSIds.CURVE_TRANSIENT_SWAPPER);
-        uint256[] memory info = new uint256[](5);
-        info[0] = _params.gasUsed;
-        info[1] = _params.sellAllCollateral ? 1 : 0;
-
-        transientStorage.setBytesTransiently(abi.encode(_params.exData));
 
         address collToken = ICrvUsdController(_params.controllerAddress).collateral_token();
         address debtToken = CRVUSD_TOKEN_ADDR;
+
+        // Validate exchange data (we are selling collateral for debt)
+        if (_params.exData.srcAddr != collToken) revert CurveUsdInvalidExchangeSrcToken();
+        if (_params.exData.destAddr != debtToken) revert CurveUsdInvalidExchangeDestToken();
+
+        // Take snapshot of balances for any leftover funds refund later
         uint256 collStartingBalance = collToken.getBalance(address(this));
         uint256 debtStartingBalance = debtToken.getBalance(address(this));
 
+        // Setup callback args
+        address curveUsdTransientSwapper = registry.getAddr(DFSIds.CURVE_TRANSIENT_SWAPPER);
+        uint256[] memory callbackArgs = new uint256[](5);
+        callbackArgs[0] = _params.gasUsed;
+        callbackArgs[1] = _params.sellAllCollateral ? 1 : 0;
+
+        // Store exchange data for swapper contract to use
+        transientStorage.setBytesTransiently(abi.encode(_params.exData));
+
+        // This will call CurveUsdSwapperTransient.callback_liquidate to sell collateral for debt.
         ICrvUsdController(_params.controllerAddress)
             .liquidate_extended(
                 address(this),
@@ -94,13 +106,13 @@ contract CurveUsdSelfLiquidateWithCollTransient is ActionBase, CurveUsdHelper {
                 _params.percentage,
                 false,
                 curveUsdTransientSwapper,
-                info
+                callbackArgs
             );
 
-        // there shouldn't be any funds left on swapper contract after sell but withdrawing it just in case
-        CurveUsdSwapperTransient(curveUsdTransientSwapper).withdrawAll(_params.controllerAddress);
+        // There shouldn't be any funds left on swapper contract after sell but withdrawing it just in case.
+        ICurveUsdSwapperTransient(curveUsdTransientSwapper).withdrawAll(_params.controllerAddress);
 
-        // there will usually be both coll token and debt token, unless we're selling all collateral
+        // There will usually be both coll token and debt token, unless we're selling all collateral
         (, uint256 debtTokenReceived) = _sendLeftoverFundsWithSnapshot(
             collToken, debtToken, collStartingBalance, debtStartingBalance, _params.to
         );
