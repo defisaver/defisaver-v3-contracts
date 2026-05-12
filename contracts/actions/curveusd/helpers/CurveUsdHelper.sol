@@ -17,11 +17,14 @@ import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 contract CurveUsdHelper is MainnetCurveUsdAddresses, DSMath {
     using TokenUtils for address;
 
-    /// Reverts if the controller is invalid
+    /// @notice Reverts if the controller is invalid
     error CurveUsdInvalidController();
-
-    /// Amount to supply or borrow cannot be 0
+    /// @notice Amount to supply or borrow cannot be 0
     error ZeroAmountError();
+    /// @notice Invalid source token in exchange data
+    error CurveUsdInvalidExchangeSrcToken();
+    /// @notice Invalid destination token in exchange data
+    error CurveUsdInvalidExchangeDestToken();
 
     IBytesTransientStorage constant transientStorage =
         IBytesTransientStorage(BYTES_TRANSIENT_STORAGE);

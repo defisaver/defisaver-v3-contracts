@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
+import {
+    ICurveUsdSwapperTransient
+} from "../../../interfaces/protocols/curveusd/ICurveUsdSwapperTransient.sol";
 import { IERC20 } from "../../../interfaces/token/IERC20.sol";
 import { IDFSRegistry } from "../../../interfaces/core/IDFSRegistry.sol";
 import { ICrvUsdController } from "../../../interfaces/protocols/curveusd/ICurveUsd.sol";
@@ -25,15 +28,11 @@ contract CurveUsdSwapperTransient is
     AdminAuth,
     ActionsUtilHelper,
     GasFeeHelper,
-    ReentrancyGuardTransient
+    ReentrancyGuardTransient,
+    ICurveUsdSwapperTransient
 {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
-
-    struct CallbackData {
-        uint256 stablecoins;
-        uint256 collateral;
-    }
 
     modifier onlyValidCrvUsdController(address _sender) {
         if (!isControllerValid(_sender)) {
@@ -42,15 +41,20 @@ contract CurveUsdSwapperTransient is
         _;
     }
 
+    /*//////////////////////////////////////////////////////////////
+                            CALLBACKS
+    //////////////////////////////////////////////////////////////*/
     /// @dev Called by curveusd controller after 'repay_extended' method
     /// @dev sends all collateral the user has to this contract, we swap a part or all of it
     /// @dev After swapping, position will be recreated on curveusd or closed fully
-    function callback_repay(address _user, uint256, uint256, uint256, uint256[] memory info)
-        external
-        onlyValidCrvUsdController(msg.sender)
-        returns (CallbackData memory cb)
-    {
-        uint256 gasUsed = info[0];
+    function callback_repay(
+        address _user,
+        uint256,
+        uint256,
+        uint256,
+        uint256[] memory _callbackArgs
+    ) external onlyValidCrvUsdController(msg.sender) returns (CallbackData memory cb) {
+        uint256 gasUsed = _callbackArgs[0];
 
         ExchangeData memory exData =
             abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
@@ -74,12 +78,14 @@ contract CurveUsdSwapperTransient is
 
     /// @dev Called by curveusd controller after 'create_loan_extended' and 'borrow_more_extended' methods
     /// @dev sends exData.srcAmount of curveUsd token to this contract for us to sell then pulls received coll token
-    function callback_deposit(address _user, uint256, uint256, uint256, uint256[] memory info)
-        external
-        onlyValidCrvUsdController(msg.sender)
-        returns (CallbackData memory cb)
-    {
-        uint256 gasUsed = info[0];
+    function callback_deposit(
+        address _user,
+        uint256,
+        uint256,
+        uint256,
+        uint256[] memory _callbackArgs
+    ) external onlyValidCrvUsdController(msg.sender) returns (CallbackData memory cb) {
+        uint256 gasUsed = _callbackArgs[0];
 
         ExchangeData memory exData =
             abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
@@ -93,13 +99,17 @@ contract CurveUsdSwapperTransient is
         IERC20(collToken).safeApprove(msg.sender, cb.collateral);
     }
 
-    function callback_liquidate(address _user, uint256, uint256, uint256, uint256[] memory info)
-        external
-        onlyValidCrvUsdController(msg.sender)
-        returns (CallbackData memory cb)
-    {
-        uint256 gasUsed = info[0];
-        bool sellAllCollateral = info[1] == 1 ? true : false;
+    /// @dev Called by curveusd controller after 'liquidate_extended' method
+    /// @dev sends all collateral the user has to this contract, we swap a part or all depending on sellAllCollateral flag
+    function callback_liquidate(
+        address _user,
+        uint256,
+        uint256,
+        uint256,
+        uint256[] memory _callbackArgs
+    ) external onlyValidCrvUsdController(msg.sender) returns (CallbackData memory cb) {
+        uint256 gasUsed = _callbackArgs[0];
+        bool sellAllCollateral = _callbackArgs[1] == 1 ? true : false;
 
         ExchangeData memory exData =
             abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
@@ -113,20 +123,31 @@ contract CurveUsdSwapperTransient is
         uint256 receivedAmount = _performSell(exData, _user, debtToken, gasUsed);
 
         cb.stablecoins = receivedAmount;
+
+        // how much collateral we have left after sell
         cb.collateral = IERC20(collToken).balanceOf(address(this));
 
+        // approve controller to spend collateral and debt tokens
         IERC20(collToken).safeApprove(msg.sender, cb.collateral);
         IERC20(debtToken).safeApprove(msg.sender, cb.stablecoins);
     }
 
+    /*//////////////////////////////////////////////////////////////
+                            HELPERS
+    //////////////////////////////////////////////////////////////*/
     /// @dev No funds should be stored on this contract, but if anything is left send back to the user
     /// @dev This function is called during action execution, after performing sell through the swapper contract
-    function withdrawAll(address _controllerAddress) external nonReentrant {
+    /// @dev Intentionally permissionless, but it only makes sense if used in context of curveusd advanced actions
+    function withdrawAll(address _controllerAddress)
+        external
+        nonReentrant
+        returns (uint256 collBalance, uint256 debtBalance)
+    {
         address collToken = ICrvUsdController(_controllerAddress).collateral_token();
         address debtToken = CRVUSD_TOKEN_ADDR;
 
-        collToken.withdrawTokens(msg.sender, type(uint256).max);
-        debtToken.withdrawTokens(msg.sender, type(uint256).max);
+        collBalance = collToken.withdrawTokens(msg.sender, type(uint256).max);
+        debtBalance = debtToken.withdrawTokens(msg.sender, type(uint256).max);
     }
 
     function _performSell(
