@@ -59,10 +59,12 @@ const supplyToMarket = async (controllerAddr, chainId) => {
     await setBalance(loanToken.address, wallet.address, supplyAmountInWei);
     await approve(loanToken.address, vaultAddr, wallet);
     const vaultContract = await hre.ethers.getContractAt(
-        'contracts/interfaces/IERC4626.sol:IERC4626',
+        'contracts/interfaces/token/IERC4626.sol:IERC4626',
         vaultAddr,
     );
-    await vaultContract.deposit(supplyAmountInWei, wallet.address, { gasLimit: 3000000 });
+    await vaultContract['deposit(uint256,address)'](supplyAmountInWei, wallet.address, {
+        gasLimit: 3000000,
+    });
 };
 
 const getActiveBand = async (controllerAddress) => {
