@@ -235,7 +235,7 @@ contract LiquityV2View is LiquityV2Helper {
         compoundedBOLD = stabilityPool.getCompoundedBoldDeposit(_depositor);
         collGain =
             stabilityPool.getDepositorCollGain(_depositor) + stabilityPool.stashedColl(_depositor);
-        boldGain = stabilityPool.getDepositorYieldGain(_depositor);
+        boldGain = stabilityPool.getDepositorYieldGainWithPending(_depositor);
     }
 
     function getDebtInFront(address _market, uint256 _troveId, uint256 _acc, uint256 _iterations)
