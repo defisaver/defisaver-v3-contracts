@@ -12,6 +12,4 @@ interface IDFSRegistry {
     function approveContractChange(bytes4 _id) external;
 
     function cancelContractChange(bytes4 _id) external;
-
-    function changeWaitPeriod(bytes4 _id, uint256 _newWaitPeriod) external;
 }
