@@ -25,56 +25,10 @@ import { Denominations } from "../Denominations.sol";
 /// - AaveV2 oracle prices are ETH-denominated and WAD-scaled.
 /// - AaveV3 and Spark oracle prices are USD-denominated and scaled by 1e8.
 contract TokenPriceHelper is DSMath, UtilAddresses {
-    IFeedRegistry public constant feedRegistry = IFeedRegistry(CHAINLINK_FEED_REGISTRY);
+    IFeedRegistry public constant FEED_REGISTRY = IFeedRegistry(CHAINLINK_FEED_REGISTRY);
 
     int256 internal constant USD_PRICE_SCALE = 1e8;
     address internal constant BOLD_ADDR = 0x6440f144b7e50D6a8439336510312d2F54beB01D;
-
-    /// @notice Helper function that returns chainlink price data for a given round
-    /// @param _inputTokenAddr Token address we are looking the usd price for
-    /// @param _roundId Chainlink roundId, if 0 uses the latest
-    /// @param _aggregator Chainlink aggregator
-    /// @return priceInUSD Chainlink USD price answer after supported token adjustment
-    /// @return updateTimestamp Timestamp of the price update
-    /// @dev For wstETH and WBTC, the price is calculated from the price of stETH and BTC respectively.
-    function getRoundInfo(address _inputTokenAddr, uint80 _roundId, IAggregatorV3 _aggregator)
-        public
-        view
-        returns (uint256 priceInUSD, uint256 updateTimestamp)
-    {
-        int256 signedPrice;
-
-        // Price staleness not checked, the risk has been deemed acceptable.
-        if (_roundId == 0) {
-            (, signedPrice,, updateTimestamp,) = _aggregator.latestRoundData();
-        } else {
-            (, signedPrice,, updateTimestamp,) = _aggregator.getRoundData(_roundId);
-        }
-        signedPrice = _parseChainlinkPrice(signedPrice);
-
-        // Handle special cases for wstETH and WBTC.
-        if (_inputTokenAddr == WSTETH_ADDR) signedPrice = getWStEthPrice(signedPrice);
-        if (_inputTokenAddr == WBTC_ADDR) signedPrice = getWBtcPrice(signedPrice);
-
-        priceInUSD = uint256(signedPrice);
-    }
-
-    /// @notice Helper function that returns chainlink price data for a given round
-    /// @param _inputTokenAddr Token address we are looking the usd price for
-    /// @param _roundId Chainlink roundId, if 0 uses the latest
-    /// @return priceInUSD Chainlink USD price answer after supported token adjustment
-    /// @return updateTimestamp Timestamp of the price update
-    /// @dev For wstETH, the price is calculated from the price of stETH.
-    function getRoundInfo(address _inputTokenAddr, uint80 _roundId)
-        public
-        view
-        returns (uint256 priceInUSD, uint256 updateTimestamp)
-    {
-        address tokenAddr = getAddrForChainlinkOracle(_inputTokenAddr);
-        IAggregatorV3 aggregator = IAggregatorV3(feedRegistry.getFeed(tokenAddr, Denominations.USD));
-
-        (priceInUSD, updateTimestamp) = getRoundInfo(_inputTokenAddr, _roundId, aggregator);
-    }
 
     /// @notice Helper function that returns latest token price in USD
     /// @param _inputTokenAddr Token address we are looking the usd price for
@@ -172,6 +126,10 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
         priceInETH = 0;
     }
 
+    /*//////////////////////////////////////////////////////////////
+                              CHAINLINK
+    //////////////////////////////////////////////////////////////*/
+
     /// @notice Helper function that returns the latest chainlink price in USD
     /// @param _inputTokenAddr Token address we are looking the usd price for
     /// @param _useFallback Whether to use the fallback price feed
@@ -184,7 +142,7 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
     {
         if (_inputTokenAddr == BOLD_ADDR) return USD_PRICE_SCALE;
 
-        try feedRegistry.latestRoundData(_inputTokenAddr, Denominations.USD) returns (
+        try FEED_REGISTRY.latestRoundData(_inputTokenAddr, Denominations.USD) returns (
             uint80, int256 answer, uint256, uint256, uint80
         ) {
             chainlinkPriceInUSD = _parseChainlinkPrice(answer);
@@ -209,7 +167,7 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
         view
         returns (int256 chainlinkPriceInETH)
     {
-        try feedRegistry.latestRoundData(_inputTokenAddr, Denominations.ETH) returns (
+        try FEED_REGISTRY.latestRoundData(_inputTokenAddr, Denominations.ETH) returns (
             uint80, int256 answer, uint256, uint256, uint80
         ) {
             chainlinkPriceInETH = _parseChainlinkPrice(answer);
@@ -218,58 +176,51 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
         }
     }
 
-    /// @notice Helper function that adjusts the token address for chainlink usage
-    /// @param _inputTokenAddr Token address
-    /// @return tokenAddrForChainlinkUsage Token address for chainlink usage
-    /// @dev Chainlink uses different addresses for WBTC and ETH.
-    /// @dev There is only STETH price feed so we use that for WSTETH and handle later.
-    function getAddrForChainlinkOracle(address _inputTokenAddr)
+    /// @notice Helper function that returns chainlink price data for a given round
+    /// @param _inputTokenAddr Token address we are looking the usd price for
+    /// @param _roundId Chainlink roundId, if 0 uses the latest
+    /// @param _aggregator Chainlink aggregator
+    /// @return priceInUSD Chainlink USD price answer after supported token adjustment
+    /// @return updateTimestamp Timestamp of the price update
+    /// @dev For wstETH and WBTC, the price is calculated from the price of stETH and BTC respectively.
+    function getRoundInfo(address _inputTokenAddr, uint80 _roundId, IAggregatorV3 _aggregator)
         public
-        pure
-        returns (address tokenAddrForChainlinkUsage)
+        view
+        returns (uint256 priceInUSD, uint256 updateTimestamp)
     {
-        if (_inputTokenAddr == WETH_ADDR) {
-            tokenAddrForChainlinkUsage = ETH_ADDR;
-        } else if (_inputTokenAddr == WSTETH_ADDR) {
-            tokenAddrForChainlinkUsage = STETH_ADDR;
-        } else if (_inputTokenAddr == WBTC_ADDR) {
-            tokenAddrForChainlinkUsage = CHAINLINK_WBTC_ADDR;
+        int256 signedPrice;
+
+        // Price staleness not checked, the risk has been deemed acceptable.
+        if (_roundId == 0) {
+            (, signedPrice,, updateTimestamp,) = _aggregator.latestRoundData();
         } else {
-            tokenAddrForChainlinkUsage = _inputTokenAddr;
+            (, signedPrice,, updateTimestamp,) = _aggregator.getRoundData(_roundId);
         }
+        signedPrice = _parseChainlinkPrice(signedPrice);
+
+        // Handle special cases for wstETH and WBTC.
+        if (_inputTokenAddr == WSTETH_ADDR) signedPrice = getWStEthPrice(signedPrice);
+        if (_inputTokenAddr == WBTC_ADDR) signedPrice = getWBtcPrice(signedPrice);
+
+        priceInUSD = uint256(signedPrice);
     }
 
-    /// @notice Calculates the price of wstETH from the price of stETH
-    /// @param _stEthPrice Price of stETH (can be in USD or ETH)
-    /// @return wStEthPrice Price of wstETH (can be in USD or ETH)
-    /// @dev Fetch price ratio from the WSTETH contract.
-    function getWStEthPrice(int256 _stEthPrice) public view returns (int256 wStEthPrice) {
-        if (_stEthPrice <= 0) return 0;
-        wStEthPrice = int256(wmul(uint256(_stEthPrice), IWStEth(WSTETH_ADDR).stEthPerToken()));
-    }
+    /// @notice Helper function that returns chainlink price data for a given round
+    /// @param _inputTokenAddr Token address we are looking the usd price for
+    /// @param _roundId Chainlink roundId, if 0 uses the latest
+    /// @return priceInUSD Chainlink USD price answer after supported token adjustment
+    /// @return updateTimestamp Timestamp of the price update
+    /// @dev For wstETH, the price is calculated from the price of stETH.
+    function getRoundInfo(address _inputTokenAddr, uint80 _roundId)
+        public
+        view
+        returns (uint256 priceInUSD, uint256 updateTimestamp)
+    {
+        address tokenAddr = getAddrForChainlinkOracle(_inputTokenAddr);
+        IAggregatorV3 aggregator =
+            IAggregatorV3(FEED_REGISTRY.getFeed(tokenAddr, Denominations.USD));
 
-    /// @notice Helper function that returns the price of WBTC from the price of BTC
-    /// @param _btcPrice Price of BTC (can be in USD or ETH)
-    /// @return wBtcPrice Price of WBTC (can be in USD or ETH)
-    /// @dev Fetch price ratio from the Chainlink feed.
-    /// @dev Round to the nearest integer.
-    function getWBtcPrice(int256 _btcPrice) public view returns (int256 wBtcPrice) {
-        if (_btcPrice <= 0) return 0;
-
-        try feedRegistry.latestRoundData(WBTC_ADDR, CHAINLINK_WBTC_ADDR) returns (
-            uint80, int256 wBtcPriceToPeg, uint256, uint256, uint80
-        ) {
-            // Round to the nearest integer.
-            wBtcPrice = (_btcPrice * wBtcPriceToPeg + USD_PRICE_SCALE / 2) / USD_PRICE_SCALE;
-        } catch {
-            // If the WBTC/BTC feed is unavailable, fall back to the unadjusted BTC price
-            // to preserve fail-open behavior and avoid reverting upstream callers.
-            wBtcPrice = _btcPrice;
-        }
-    }
-
-    function _parseChainlinkPrice(int256 _answer) internal pure returns (int256 price) {
-        price = _answer > 0 ? _answer : int256(0);
+        (priceInUSD, updateTimestamp) = getRoundInfo(_inputTokenAddr, _roundId, aggregator);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -369,5 +320,63 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
         if (tokenSparkPriceInUSD == 0 || ethPriceInUSD == 0) return 0;
 
         return wdiv(tokenSparkPriceInUSD, ethPriceInUSD);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                              HELPERS
+    //////////////////////////////////////////////////////////////*/
+
+    /// @notice Calculates the price of wstETH from the price of stETH
+    /// @param _stEthPrice Price of stETH (can be in USD or ETH)
+    /// @return wStEthPrice Price of wstETH (can be in USD or ETH)
+    /// @dev Fetch price ratio from the WSTETH contract.
+    function getWStEthPrice(int256 _stEthPrice) public view returns (int256 wStEthPrice) {
+        if (_stEthPrice <= 0) return 0;
+        wStEthPrice = int256(wmul(uint256(_stEthPrice), IWStEth(WSTETH_ADDR).stEthPerToken()));
+    }
+
+    /// @notice Helper function that returns the price of WBTC from the price of BTC
+    /// @param _btcPrice Price of BTC (can be in USD or ETH)
+    /// @return wBtcPrice Price of WBTC (can be in USD or ETH)
+    /// @dev Fetch price ratio from the Chainlink feed.
+    /// @dev Round to the nearest integer.
+    function getWBtcPrice(int256 _btcPrice) public view returns (int256 wBtcPrice) {
+        if (_btcPrice <= 0) return 0;
+
+        try FEED_REGISTRY.latestRoundData(WBTC_ADDR, CHAINLINK_WBTC_ADDR) returns (
+            uint80, int256 wBtcPriceToPeg, uint256, uint256, uint80
+        ) {
+            // Round to the nearest integer.
+            wBtcPrice = (_btcPrice * wBtcPriceToPeg + USD_PRICE_SCALE / 2) / USD_PRICE_SCALE;
+        } catch {
+            // If the WBTC/BTC feed is unavailable, fall back to the unadjusted BTC price
+            // to preserve fail-open behavior and avoid reverting upstream callers.
+            wBtcPrice = _btcPrice;
+        }
+    }
+
+    /// @notice Helper function that adjusts the token address for chainlink usage
+    /// @param _inputTokenAddr Token address
+    /// @return tokenAddrForChainlinkUsage Token address for chainlink usage
+    /// @dev Chainlink uses different addresses for WBTC and ETH.
+    /// @dev There is only STETH price feed so we use that for WSTETH and handle later.
+    function getAddrForChainlinkOracle(address _inputTokenAddr)
+        public
+        pure
+        returns (address tokenAddrForChainlinkUsage)
+    {
+        if (_inputTokenAddr == WETH_ADDR) {
+            tokenAddrForChainlinkUsage = ETH_ADDR;
+        } else if (_inputTokenAddr == WSTETH_ADDR) {
+            tokenAddrForChainlinkUsage = STETH_ADDR;
+        } else if (_inputTokenAddr == WBTC_ADDR) {
+            tokenAddrForChainlinkUsage = CHAINLINK_WBTC_ADDR;
+        } else {
+            tokenAddrForChainlinkUsage = _inputTokenAddr;
+        }
+    }
+
+    function _parseChainlinkPrice(int256 _answer) internal pure returns (int256 price) {
+        price = _answer > 0 ? _answer : int256(0);
     }
 }
