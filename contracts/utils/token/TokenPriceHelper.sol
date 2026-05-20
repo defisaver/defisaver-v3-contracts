@@ -179,6 +179,24 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
     /// @notice Helper function that returns chainlink price data for a given round
     /// @param _inputTokenAddr Token address we are looking the usd price for
     /// @param _roundId Chainlink roundId, if 0 uses the latest
+    /// @return priceInUSD Chainlink USD price answer after supported token adjustment
+    /// @return updateTimestamp Timestamp of the price update
+    /// @dev For wstETH, the price is calculated from the price of stETH.
+    function getRoundInfo(address _inputTokenAddr, uint80 _roundId)
+        public
+        view
+        returns (uint256 priceInUSD, uint256 updateTimestamp)
+    {
+        address tokenAddr = getAddrForChainlinkOracle(_inputTokenAddr);
+        IAggregatorV3 aggregator =
+            IAggregatorV3(FEED_REGISTRY.getFeed(tokenAddr, Denominations.USD));
+
+        (priceInUSD, updateTimestamp) = getRoundInfo(_inputTokenAddr, _roundId, aggregator);
+    }
+
+    /// @notice Helper function that returns chainlink price data for a given round
+    /// @param _inputTokenAddr Token address we are looking the usd price for
+    /// @param _roundId Chainlink roundId, if 0 uses the latest
     /// @param _aggregator Chainlink aggregator
     /// @return priceInUSD Chainlink USD price answer after supported token adjustment
     /// @return updateTimestamp Timestamp of the price update
@@ -203,24 +221,6 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
         if (_inputTokenAddr == WBTC_ADDR) signedPrice = getWBtcPrice(signedPrice);
 
         priceInUSD = uint256(signedPrice);
-    }
-
-    /// @notice Helper function that returns chainlink price data for a given round
-    /// @param _inputTokenAddr Token address we are looking the usd price for
-    /// @param _roundId Chainlink roundId, if 0 uses the latest
-    /// @return priceInUSD Chainlink USD price answer after supported token adjustment
-    /// @return updateTimestamp Timestamp of the price update
-    /// @dev For wstETH, the price is calculated from the price of stETH.
-    function getRoundInfo(address _inputTokenAddr, uint80 _roundId)
-        public
-        view
-        returns (uint256 priceInUSD, uint256 updateTimestamp)
-    {
-        address tokenAddr = getAddrForChainlinkOracle(_inputTokenAddr);
-        IAggregatorV3 aggregator =
-            IAggregatorV3(FEED_REGISTRY.getFeed(tokenAddr, Denominations.USD));
-
-        (priceInUSD, updateTimestamp) = getRoundInfo(_inputTokenAddr, _roundId, aggregator);
     }
 
     /*//////////////////////////////////////////////////////////////
