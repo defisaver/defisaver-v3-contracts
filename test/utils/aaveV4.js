@@ -70,8 +70,11 @@ const {
 } = require('../../strategies-spec/mainnet');
 
 const CORE_RESERVE_ID_USDC = 7;
-const CORE_RESERVE_ID_WETH = 0;
 const CORE_RESERVE_ID_USDT = 8;
+const CORE_RESERVE_ID_WETH = 0;
+const CORE_RESERVE_ID_WSTETH = 1;
+const CORE_RESERVE_ID_WBTC = 3;
+const CORE_RESERVE_ID_FRXUSD = 12;
 
 const AAVE_V4_AUTOMATION_TEST_PAIRS = [
     {
@@ -79,6 +82,33 @@ const AAVE_V4_AUTOMATION_TEST_PAIRS = [
         debtSymbol: 'USDC',
         collReserveId: CORE_RESERVE_ID_WETH,
         debtReserveId: CORE_RESERVE_ID_USDC,
+        spoke: MAIN_SPOKE,
+        spokeName: 'CORE',
+    },
+];
+
+const AAVE_V4_TEST_PAIRS = [
+    {
+        collSymbol: 'WETH',
+        debtSymbol: 'USDC',
+        collReserveId: CORE_RESERVE_ID_WETH,
+        debtReserveId: CORE_RESERVE_ID_USDC,
+        spoke: MAIN_SPOKE,
+        spokeName: 'CORE',
+    },
+    {
+        collSymbol: 'wstETH',
+        debtSymbol: 'USDT',
+        collReserveId: CORE_RESERVE_ID_WSTETH,
+        debtReserveId: CORE_RESERVE_ID_USDT,
+        spoke: MAIN_SPOKE,
+        spokeName: 'CORE',
+    },
+    {
+        collSymbol: 'WBTC',
+        debtSymbol: 'frxUSD',
+        collReserveId: CORE_RESERVE_ID_WBTC,
+        debtReserveId: CORE_RESERVE_ID_FRXUSD,
         spoke: MAIN_SPOKE,
         spokeName: 'CORE',
     },
@@ -535,6 +565,7 @@ const signWithdrawPermit = (signer, spoke, reserveId, spender, amount) =>
 module.exports = {
     EOA_ACC_INDEX,
     AAVE_V4_AUTOMATION_TEST_PAIRS,
+    AAVE_V4_TEST_PAIRS,
     GIVER_POSITION_MANAGER,
     TAKER_POSITION_MANAGER,
     CONFIG_POSITION_MANAGER,
