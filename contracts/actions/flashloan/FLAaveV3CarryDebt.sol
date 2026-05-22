@@ -12,19 +12,38 @@ import { ReentrancyGuard } from "../../_vendor/openzeppelin/ReentrancyGuard.sol"
 import { FLHelper } from "./helpers/FLHelper.sol";
 
 /// @title FLAaveV3CarryDebt
-/// @notice Action that gets and receives a FL from Aave V3 and does not return funds but generates debt on Aave V3
-/// @notice This action doesn't have any flashloan fees
-/// @dev In order to generate debt, this contract must have credit delegation allowance from onBehalfOf address
+/// @notice Aave V3 flashloan action that generates debt for the borrowed amount instead of repaying it in the same transaction.
+/// @notice This action doesn't have any flashloan fees.
+/// @dev In order to generate debt, this contract must have credit delegation allowance from the user's wallet address.
+///      Allowance should be granted inside the recipe by using the AaveV3DelegateCredit action.
+/// @dev This action is not meant to be used as part of strategies, as debt is carried AFTER the recipe is executed.
+///      This means that regular checker actions can't be used without moving the calls after recipe is already executed, which we want to avoid.
 contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanBase {
     using TokenUtils for address;
 
+    uint256 private constant VARIABLE_RATE_MODE = 2;
+
+    /*//////////////////////////////////////////////////////////////
+                              ERRORS
+    //////////////////////////////////////////////////////////////*/
+    /// @notice Thrown when the parameters length is invalid.
+    error InvalidParamsLength();
+    /// @notice Thrown when the rate mode is invalid.
+    error InvalidRateMode();
+    /// @notice Thrown when the flash loan amount is zero.
+    error ZeroFlashLoanAmount();
     /// @dev FL Initiator must be this contract
     error UntrustedInitiator();
-    /// @dev Caller in these functions must be relevant FL source address
+    /// @dev Caller must be the relevant FL source address
     error UntrustedLender();
+    /// @dev Caller must be the user's wallet address
+    error UntrustedSender(address sender, address wallet);
     /// @dev Credit delegation allowance must be 0 after FL
     error CreditDelegationAllowanceLeftError(uint256 amountLeft);
 
+    /*//////////////////////////////////////////////////////////////
+                              PUBLIC
+    //////////////////////////////////////////////////////////////*/
     /// @inheritdoc ActionBase
     function actionType() public pure override returns (uint8) {
         return uint8(ActionType.FL_ACTION);
@@ -42,11 +61,19 @@ contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanB
     ) public payable override returns (bytes32) {
         FlashLoanParams memory params = parseInputs(_callData);
 
-        // If we want to get on chain info about FL params.
         if (params.flParamGetterAddr != address(0)) {
             (params.tokens, params.amounts, params.modes) = IFLParamGetter(params.flParamGetterAddr)
                 .getFlashLoanParams(params.flParamGetterData);
         }
+
+        _validateParams(params);
+
+        // We want to borrow onBehalf of user's wallet address which we can get from the current context.
+        (, address wallet) = abi.decode(params.recipeData, (Recipe, address));
+
+        // Only the wallet encoded by RecipeExecutor may initiate the carry-debt flash loan.
+        // This binds Aave's onBehalfOf address to the wallet that receives and executes the recipe.
+        if (msg.sender != wallet) revert UntrustedSender(msg.sender, wallet);
 
         // Trigger flashloan. This will move execution to 'executeOperation' function.
         IPoolV3(AAVE_V3_LENDING_POOL)
@@ -55,7 +82,7 @@ contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanB
                 params.tokens,
                 params.amounts,
                 params.modes,
-                params.onBehalfOf,
+                wallet,
                 params.recipeData,
                 AAVE_REFERRAL_CODE
             );
@@ -65,14 +92,13 @@ contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanB
         for (uint256 i = 0; i < params.tokens.length; ++i) {
             address token =
                 IPoolV3(AAVE_V3_LENDING_POOL).getReserveVariableDebtToken(params.tokens[i]);
-            uint256 allowance = IDebtToken(token).borrowAllowance(params.onBehalfOf, address(this));
+            uint256 allowance = IDebtToken(token).borrowAllowance(wallet, address(this));
             if (allowance > 0) revert CreditDelegationAllowanceLeftError(allowance);
         }
 
         // Emit event.
         emit ActionEvent(
-            "FLAaveV3CarryDebt",
-            abi.encode(params.tokens, params.amounts, params.modes, params.onBehalfOf)
+            "FLAaveV3CarryDebt", abi.encode(params.tokens, params.amounts, params.modes, wallet)
         );
 
         // In practice, this value is not used and is overwritten in RecipeExecutor:executeActionsFromFL,
@@ -124,5 +150,16 @@ contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanB
         returns (FlashLoanParams memory params)
     {
         params = abi.decode(_callData, (FlashLoanParams));
+    }
+
+    function _validateParams(FlashLoanParams memory _params) internal pure {
+        uint256 length = _params.tokens.length;
+        if (length == 0 || length != _params.amounts.length || length != _params.modes.length) {
+            revert InvalidParamsLength();
+        }
+        for (uint256 i = 0; i < length; ++i) {
+            if (_params.modes[i] != VARIABLE_RATE_MODE) revert InvalidRateMode();
+            if (_params.amounts[i] == 0) revert ZeroFlashLoanAmount();
+        }
     }
 }
