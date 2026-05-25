@@ -2,7 +2,6 @@
 
 pragma solidity =0.8.24;
 
-import { console } from "hardhat/console.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 import { ITrigger } from "../interfaces/core/ITrigger.sol";
