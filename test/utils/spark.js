@@ -20,6 +20,7 @@ const {
     createSparkFLRepayOnPriceStrategy,
     createSparkBoostOnPriceStrategy,
     createSparkFLBoostOnPriceStrategy,
+    createSparkFLCollateralSwitchStrategy,
 } = require('../../strategies-spec/mainnet');
 const { createStrategy, createBundle } = require('../strategies/utils/utils-strategies');
 const { getAssetInfo } = require('@defisaver/tokens');
@@ -383,6 +384,31 @@ const SPARK_AUTOMATION_TEST_PAIRS_REPAY = [
     },
 ];
 
+const deploySparkFLCollateralSwitchStrategy = async () => {
+    const isFork = isNetworkFork();
+    await openStrategyAndBundleStorage(isFork);
+    const flCollateralSwitchStrategy = createSparkFLCollateralSwitchStrategy();
+    const continuous = false;
+    const flCollateralSwitchStrategyId = await createStrategy(
+        ...flCollateralSwitchStrategy,
+        continuous,
+    );
+    return flCollateralSwitchStrategyId;
+};
+
+const SPARK_COLL_SWITCH_TEST_PAIRS = [
+    {
+        fromAsset: 'WETH',
+        toAsset: 'cbBTC',
+        marketAddr: addrs[network].SPARK_MARKET,
+        collAmountInUSD: 50_000,
+        debtAmountInUSD: 25_000,
+        amountToSwitchInUSD: 40_000,
+        priceState: 1, // UNDER
+        price: 1, // Trigger when 1 WETH < 1 cbBTC
+    },
+];
+
 module.exports = {
     getSparkPositionInfo,
     expectTwoSparkPositionsToBeEqual,
@@ -396,4 +422,6 @@ module.exports = {
     SPARK_AUTOMATION_TEST_PAIRS,
     SPARK_AUTOMATION_TEST_PAIRS_BOOST,
     SPARK_AUTOMATION_TEST_PAIRS_REPAY,
+    deploySparkFLCollateralSwitchStrategy,
+    SPARK_COLL_SWITCH_TEST_PAIRS,
 };
