@@ -15,11 +15,6 @@ contract AaveV3RatioCheck is ActionBase, AaveV3RatioHelper {
 
     error BadAfterRatio(uint256 startRatio, uint256 currRatio);
 
-    enum RatioState {
-        IN_BOOST,
-        IN_REPAY
-    }
-
     /// @param ratioState State of the ratio (IN_BOOST or IN_REPAY)
     /// @param targetRatio Target ratio.
     /// @param market Aave V3 Market parameter that was added later in order to add support for different markets in strategies
@@ -63,20 +58,26 @@ contract AaveV3RatioCheck is ActionBase, AaveV3RatioHelper {
         uint256 startRatio = uint256(tempStorage.getBytes32("AAVE_RATIO"));
 
         // if we are doing repay
-        if (RatioState(ratioState) == RatioState.IN_REPAY) {
-            // if repay ratio should be better off
-            if (currRatio <= startRatio) {
-                revert BadAfterRatio(startRatio, currRatio);
-            }
+        if (isRepay(ratioState)) {
+            if (isZero(targetRatio)) {
+                if (!isZero(currRatio)) {
+                    revert BadAfterRatio(startRatio, currRatio);
+                }
+            } else {
+                // if repay ratio should be better off
+                if (currRatio <= startRatio) {
+                    revert BadAfterRatio(startRatio, currRatio);
+                }
 
-            // can't repay too much over targetRatio so we don't trigger boost after
-            if (currRatio > (targetRatio + RATIO_OFFSET)) {
-                revert BadAfterRatio(startRatio, currRatio);
+                // can't repay too much over targetRatio so we don't trigger boost after
+                if (currRatio > (targetRatio + RATIO_OFFSET)) {
+                    revert BadAfterRatio(startRatio, currRatio);
+                }
             }
         }
 
         // if we are doing boost
-        if (RatioState(ratioState) == RatioState.IN_BOOST) {
+        if (isBoost(ratioState)) {
             // if boost ratio should be less
             if (currRatio >= startRatio) {
                 revert BadAfterRatio(startRatio, currRatio);

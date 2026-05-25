@@ -2,6 +2,7 @@
 
 pragma solidity =0.8.24;
 
+import { console } from "hardhat/console.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 import { ITrigger } from "../interfaces/core/ITrigger.sol";
@@ -11,11 +12,6 @@ import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 /// @title Trigger that triggers when the ratio of a user's position in aaveV3 market is over or under a certain ratio
 contract AaveV3RatioTrigger is ITrigger, AdminAuth, AaveV3RatioHelper, TriggerHelper {
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
-
-    enum RatioState {
-        OVER,
-        UNDER
-    }
 
     /// @param user address of the user whose position we check
     /// @param market aaveV3 market address
@@ -37,11 +33,11 @@ contract AaveV3RatioTrigger is ITrigger, AdminAuth, AaveV3RatioHelper, TriggerHe
 
         tempStorage.setBytes32("AAVE_RATIO", bytes32(currRatio));
 
-        if (RatioState(triggerSubData.state) == RatioState.OVER) {
+        if (isBoost(triggerSubData.state)) {
             if (currRatio > triggerSubData.ratio) return true;
         }
 
-        if (RatioState(triggerSubData.state) == RatioState.UNDER) {
+        if (isRepay(triggerSubData.state)) {
             if (currRatio < triggerSubData.ratio) return true;
         }
 

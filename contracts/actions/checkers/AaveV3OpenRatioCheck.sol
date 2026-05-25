@@ -50,10 +50,17 @@ contract AaveV3OpenRatioCheck is ActionBase, AaveV3RatioHelper {
 
         /// @notice If `targetRatio` is 999% or more then skip `RATIO_OFFSET` check because it is very hard to be precise under 5%.
         if (targetRatio < RATIO_LIMIT) {
-            if (
-                currRatio > (targetRatio + RATIO_OFFSET) || currRatio < (targetRatio - RATIO_OFFSET)
-            ) {
-                revert BadAfterRatio(currRatio, targetRatio);
+            if (isZero(targetRatio)) {
+                if (!isZero(currRatio)) {
+                    revert BadAfterRatio(currRatio, targetRatio);
+                }
+            } else {
+                if (
+                    currRatio > (targetRatio + RATIO_OFFSET)
+                        || currRatio < (targetRatio - RATIO_OFFSET)
+                ) {
+                    revert BadAfterRatio(currRatio, targetRatio);
+                }
             }
         }
 

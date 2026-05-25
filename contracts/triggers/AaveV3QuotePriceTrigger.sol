@@ -28,7 +28,7 @@ contract AaveV3QuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelp
 
     IAaveV3Oracle public constant aaveOracleV3 = IAaveV3Oracle(AAVE_ORACLE_V3);
 
-    /// @notice Checks chainlink oracle for current prices and triggers if it's in a correct state
+    /// @notice Checks Aave V3 oracle for current prices and triggers if it's in a correct state
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 

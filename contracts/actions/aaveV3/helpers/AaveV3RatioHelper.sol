@@ -9,6 +9,11 @@ import {
 } from "../../../interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
 
 contract AaveV3RatioHelper is DSMath, MainnetAaveV3Addresses {
+    enum RatioState {
+        IN_BOOST,
+        IN_REPAY
+    }
+
     function getSafetyRatio(address _market, address _user) public view returns (uint256) {
         IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(_market).getPool());
         (, uint256 totalDebtETH, uint256 availableBorrowsETH,,,) =
@@ -24,4 +29,17 @@ contract AaveV3RatioHelper is DSMath, MainnetAaveV3Addresses {
         // For each asset the account is in
         return getSafetyRatio(_market, _user);
     }
+
+    function isRepay(uint256 _ratioState) internal pure returns (bool) {
+        return RatioState(_ratioState) == RatioState.IN_REPAY;
+    }
+
+    function isBoost(uint256 _ratioState) internal pure returns (bool) {
+        return RatioState(_ratioState) == RatioState.IN_BOOST;
+    }
+
+    function isZero(uint256 _num) internal pure returns (bool) {
+        return _num == 0;
+    }
 }
+

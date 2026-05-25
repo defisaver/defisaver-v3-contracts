@@ -13,6 +13,7 @@ import { AaveV3ClaimRewards } from "../../../contracts/actions/aaveV3/AaveV3Clai
 import { AaveV3Payback } from "../../../contracts/actions/aaveV3/AaveV3Payback.sol";
 import { AaveV3ATokenPayback } from "../../../contracts/actions/aaveV3/AaveV3ATokenPayback.sol";
 import { AaveV3RatioCheck } from "../../../contracts/actions/checkers/AaveV3RatioCheck.sol";
+import { AaveV3RatioHelper } from "../../../contracts/actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 import { GhoStake } from "../../../contracts/actions/aaveV3/GhoStake.sol";
 import { UmbrellaStake } from "../../../contracts/actions/aaveV3/umbrella/UmbrellaStake.sol";
 import { UmbrellaUnstake } from "../../../contracts/actions/aaveV3/umbrella/UmbrellaUnstake.sol";
@@ -199,7 +200,7 @@ library AaveV3Encode {
         returns (bytes memory)
     {
         AaveV3RatioCheck.Params memory params = AaveV3RatioCheck.Params({
-            ratioState: AaveV3RatioCheck.RatioState(_state),
+            ratioState: AaveV3RatioHelper.RatioState(_state),
             targetRatio: _targetRatio,
             market: _market,
             user: _user
