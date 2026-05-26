@@ -1,68 +1,87 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-/// @title Used to store exchange data in a transaction
+/// @title BytesTransientStorage
+/// @notice Used to store data in a transaction.
 /// @dev Always set and read data in the same tx, and keep in mind it can be accessed by anyone
 contract BytesTransientStorage {
-    // Example:
-    // 0x1cff79cd000004e4b26a5e2e6dad30c5d95f5ce78a8310f04c200000000009d4e4b26a5e2e6dad30c5d95f5ce78a8310f04c200000000002e6dad30c5d95f5ce78a8310f04c23030
-    // This data has length of 72
-    // Slot 0 will be 0x0000000000000000000000000000000000000000000000000000000000000048
-    // Slot 1 will be 0x1cff79cd000004e4b26a5e2e6dad30c5d95f5ce78a8310f04c200000000009d4 _data[0:32]
-    // Slot 2 will be 0xe4b26a5e2e6dad30c5d95f5ce78a8310f04c200000000002e6dad30c5d95f5ce _data[32:64]
-    // lastPart will be 0xc5d95f5ce78a8310f04c200000000002e6dad30c5d95f5ce78a8310f04c23030 _data[40:72] will be shifted to the left 24*8 times
-    // Slot 3 will be 0x78a8310f04c23030000000000000000000000000000000000000000000000000
+    uint256 private constant CHUNK_SIZE = 32;
 
+    error InvalidDataLength();
+
+    /// @notice Sets the data to be stored in the transient storage.
+    /// @param _data The data to be stored.
+    /// @dev Data.length must be at least CHUNK_SIZE bytes.
+    ///
+    /// Example:
+    /// 0x1cff79cd000004e4b26a5e2e6dad30c5d95f5ce78a8310f04c200000000009d4e4b26a5e2e6dad30c5d95f5ce78a8310f04c200000000002e6dad30c5d95f5ce78a8310f04c23030
+    /// This data has length of 72
+    /// Slot 0 will be 0x0000000000000000000000000000000000000000000000000000000000000048
+    /// Slot 1 will be 0x1cff79cd000004e4b26a5e2e6dad30c5d95f5ce78a8310f04c200000000009d4 _data[0:32]
+    /// Slot 2 will be 0xe4b26a5e2e6dad30c5d95f5ce78a8310f04c200000000002e6dad30c5d95f5ce _data[32:64]
+    /// lastPart will be 0xc5d95f5ce78a8310f04c200000000002e6dad30c5d95f5ce78a8310f04c23030 _data[40:72] will be shifted to the left 24*8 times
+    /// Slot 3 will be 0x78a8310f04c23030000000000000000000000000000000000000000000000000
+    ///
     function setBytesTransiently(bytes calldata _data) public {
-        require(_data.length >= 32);
+        if (_data.length < CHUNK_SIZE) revert InvalidDataLength();
+
         // write length of _data to first slot
         assembly {
             tstore(0, _data.length)
         }
+
         // calculate how many slots at full size are we going to use
-        uint256 chunks = _data.length / 32;
-        uint256 i = 1;
+        uint256 chunks = _data.length / CHUNK_SIZE;
+
         // write _data split into bytes32 from slot 1 to slot 1+chunks
+        uint256 i = 1;
         for (i; i <= chunks; ++i) {
-            bytes32 chunk = bytes32(_data[32 * (i - 1):32 * i]); // chunks are bytes32: _data[0:32] -> _data[32:64] -> etc
+            // chunks are bytes32: _data[0:32] -> _data[32:64] -> etc
+            bytes32 chunk = bytes32(_data[CHUNK_SIZE * (i - 1):CHUNK_SIZE * i]);
             assembly {
                 tstore(i, chunk)
             }
         }
+
         // if there's any leftover write it in the next slot by writing last 32 bytes and then shifting left to delete what's already stored
-        uint256 leftover = _data.length % 32;
+        uint256 leftover = _data.length % CHUNK_SIZE;
         if (leftover > 0) {
-            bytes32 lastPart = bytes32(_data[_data.length - 32:_data.length]);
-            lastPart = lastPart << ((32 - leftover) * 8);
+            bytes32 lastPart = bytes32(_data[_data.length - CHUNK_SIZE:_data.length]);
+            lastPart = lastPart << ((CHUNK_SIZE - leftover) * 8);
             assembly {
                 tstore(i, lastPart)
             }
         }
     }
 
+    /// @notice Gets the data from the transient storage.
+    /// @return result The data retrieved from the transient storage.
     function getBytesTransiently() public view returns (bytes memory result) {
         uint256 dataLength;
         // fetch data length from first slot
         assembly {
             dataLength := tload(0)
         }
+
         // find out how many full size chunks there are
-        uint256 chunks = dataLength / 32;
+        uint256 chunks = dataLength / CHUNK_SIZE;
+
         // pre-allocate result and write chunks directly to memory
         result = new bytes(dataLength);
         for (uint256 i = 0; i < chunks; ++i) {
-            bytes32 chunk;
             uint256 slot = i + 1;
+            bytes32 chunk;
             assembly {
                 chunk := tload(slot)
                 mstore(add(add(result, 0x20), mul(i, 0x20)), chunk)
             }
         }
-        uint256 leftover = dataLength % 32;
+
         // write the padded leftover chunk; result.length trims the padding
+        uint256 leftover = dataLength % CHUNK_SIZE;
         if (leftover > 0) {
-            bytes32 lastChunk;
             uint256 slot = chunks + 1;
+            bytes32 lastChunk;
             assembly {
                 lastChunk := tload(slot)
                 mstore(add(add(result, 0x20), mul(chunks, 0x20)), lastChunk)
