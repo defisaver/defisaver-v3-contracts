@@ -34,6 +34,7 @@ contract TestTxSaverBytesTransientStorage is BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     uint256 constant POSITION_FEE_FLAG = 1;
     uint256 constant EOA_OR_WALLET_FEE_FLAG = 2;
+    uint256 constant CHUNK_SIZE = 32;
 
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
@@ -46,23 +47,24 @@ contract TestTxSaverBytesTransientStorage is BaseTest {
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_roundTripsEdgeCaseAlignedByteLengths() public {
-        _assertRoundTrip(32, true, keccak256("single chunk position fee"));
-        _assertRoundTrip(32, false, keccak256("single chunk eoa fee"));
-        _assertRoundTrip(64, true, keccak256("two chunks position fee"));
-        _assertRoundTrip(96, false, keccak256("three chunks eoa fee"));
-        _assertRoundTrip(128, true, keccak256("four chunks position fee"));
+        _assertRoundTrip(CHUNK_SIZE, true, keccak256("single chunk position fee"));
+        _assertRoundTrip(CHUNK_SIZE, false, keccak256("single chunk eoa fee"));
+        _assertRoundTrip(CHUNK_SIZE * 2, true, keccak256("two chunks position fee"));
+        _assertRoundTrip(CHUNK_SIZE * 3, false, keccak256("three chunks eoa fee"));
+        _assertRoundTrip(CHUNK_SIZE * 4, true, keccak256("four chunks position fee"));
     }
 
     function test_roundTripsLargerAlignedPayloads() public {
-        _assertRoundTrip(608, true, keccak256("payload 1 rounded size"));
-        _assertRoundTrip(3488, false, keccak256("payload 2 rounded size"));
-        _assertRoundTrip(8192, true, keccak256("large aligned payload"));
-        _assertRoundTrip(12_288, false, keccak256("larger aligned payload"));
+        _assertRoundTrip(CHUNK_SIZE * 19, true, keccak256("payload 1 rounded size"));
+        _assertRoundTrip(CHUNK_SIZE * 109, false, keccak256("payload 2 rounded size"));
+        _assertRoundTrip(CHUNK_SIZE * 256, true, keccak256("large aligned payload"));
+        _assertRoundTrip(CHUNK_SIZE * 384, false, keccak256("larger aligned payload"));
     }
 
     function test_overwritesLongerPayloadWithShorterPayload() public {
-        bytes memory longPayload = _buildPseudoRandomBytes(4096, keccak256("long payload"));
-        bytes memory shortPayload = _buildPseudoRandomBytes(32, keccak256("short payload"));
+        bytes memory longPayload =
+            _buildPseudoRandomBytes(CHUNK_SIZE * 128, keccak256("long payload"));
+        bytes memory shortPayload = _buildPseudoRandomBytes(CHUNK_SIZE, keccak256("short payload"));
 
         cut.exposedSetBytesTransiently(longPayload, true);
 
@@ -79,7 +81,7 @@ contract TestTxSaverBytesTransientStorage is BaseTest {
         bytes32 _seed
     ) public {
         uint256 chunks = bound(uint256(_chunksSeed), 1, 256);
-        bytes memory payload = _buildPseudoRandomBytes(chunks * 32, _seed);
+        bytes memory payload = _buildPseudoRandomBytes(chunks * CHUNK_SIZE, _seed);
 
         (bytes memory result, uint256 feeType) = cut.setAndGet(payload, _takeFeeFromPosition);
 
