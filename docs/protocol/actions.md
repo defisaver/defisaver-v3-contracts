@@ -28,7 +28,7 @@ Actions can be bundled into Recipes, which can then be executed manually or as p
 
 If the value is 0, this means the inputs are used and not modified. Values in the range of `[1-127]` are used for `returnValues` mapping, meaning that 1 means the return value of the first action, 2 represents the second action return values, etc... going up to 127.&#x20;
 
-If values are in the `[127-255]` range that means that the `Subscriptions` subData is used to replace inputs, following the same logic as return values in how they are mapped.
+If values are in the `[128-255]` range that means that the `Subscriptions` subData is used to replace inputs, following the same logic as return values in how they are mapped.
 
 {% hint style="info" %}
 The last values in the subData range, 254 and 255 are 'reserved'. That means that the ActionBase contract and the related parseParam methods will inject:
