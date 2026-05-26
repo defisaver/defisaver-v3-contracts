@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
+import { ICrvUsdController } from "../../../interfaces/protocols/curveusd/ICurveUsd.sol";
+import {
+    ICurveUsdSwapperTransient
+} from "../../../interfaces/protocols/curveusd/ICurveUsdSwapperTransient.sol";
 import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { DFSExchangeData } from "../../../exchangeV3/DFSExchangeData.sol";
-
 import { CurveUsdHelper } from "../helpers/CurveUsdHelper.sol";
-import { ICrvUsdController } from "../../../interfaces/protocols/curveusd/ICurveUsd.sol";
 import { DFSIds } from "../../../utils/DFSIds.sol";
 
 /// @title Creates a new curveusd leveraged position with a given amount of collateral and debt
@@ -69,27 +71,46 @@ contract CurveUsdLevCreateTransient is ActionBase, CurveUsdHelper {
         /// @dev Zero input will just return so we explicitly revert here (see ICrvUsdController natspec)
         if (_params.collAmount == 0 || _params.exData.srcAmount == 0) revert ZeroAmountError();
 
+        // Validate controller address
         if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
 
         address collAddr = ICrvUsdController(_params.controllerAddress).collateral_token();
-        _params.collAmount = collAddr.pullTokensIfNeeded(_params.from, _params.collAmount);
+        address debtAddr = CRVUSD_TOKEN_ADDR;
 
+        // Validate exchange data (we are selling debt to buy more collateral)
+        if (_params.exData.srcAddr != debtAddr) revert CurveUsdInvalidExchangeSrcToken();
+        if (_params.exData.destAddr != collAddr) revert CurveUsdInvalidExchangeDestToken();
+
+        // Setup callback args
         address curveUsdTransientSwapper = registry.getAddr(DFSIds.CURVE_TRANSIENT_SWAPPER);
-        uint256[] memory info = new uint256[](5);
-        info[0] = _params.gasUsed;
+        uint256[] memory callbackArgs = new uint256[](5);
+        callbackArgs[0] = _params.gasUsed;
 
+        // Store exchange data for swapper contract to use
         transientStorage.setBytesTransiently(abi.encode(_params.exData));
 
+        // Pull collateral from user and approve controller to spend it
+        _params.collAmount = collAddr.pullTokensIfNeeded(_params.from, _params.collAmount);
         collAddr.approveToken(_params.controllerAddress, _params.collAmount);
 
+        // This will call CurveUsdSwapperTransient.callback_deposit to sell crvUSD for more collateral.
         ICrvUsdController(_params.controllerAddress)
             .create_loan_extended(
                 _params.collAmount,
                 _params.exData.srcAmount,
                 _params.nBands,
                 curveUsdTransientSwapper,
-                info
+                callbackArgs
             );
+
+        // Sanity check:
+        // This should never happen and there shouldn't be any funds left on swapper contract after sell,
+        // but withdrawing it just in case and forwarding funds back to the user.
+        (uint256 collBalance, uint256 debtBalance) = ICurveUsdSwapperTransient(
+                curveUsdTransientSwapper
+            ).withdrawAll(_params.controllerAddress);
+        collAddr.withdrawTokens(_params.from, collBalance);
+        debtAddr.withdrawTokens(_params.from, debtBalance);
 
         return (_params.exData.srcAmount, abi.encode(_params));
     }
