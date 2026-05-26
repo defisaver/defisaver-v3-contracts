@@ -2,9 +2,9 @@
 
 pragma solidity =0.8.24;
 
+import { IERC20 } from "../../../contracts/interfaces/token/IERC20.sol";
 import { FLActionTestBase } from "./FLActionTestBase.t.sol";
 import { StrategyModel } from "../../../contracts/core/strategy/StrategyModel.sol";
-import { IERC20 } from "../../../contracts/interfaces/token/IERC20.sol";
 import { Addresses } from "../../utils/helpers/MainnetAddresses.sol";
 
 contract TestFLActionAaveV3 is FLActionTestBase {

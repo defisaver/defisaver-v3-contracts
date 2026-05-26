@@ -40,23 +40,25 @@ contract TestFLActionStEthPayback is BaseTest {
 
     address internal stEth;
     address internal faucet;
+    uint256 internal expectedBalance;
+    uint256 internal faucetBalance;
 
     function setUp() public override {
         forkFromEnv("");
 
+        if (isL2NetworkSelected()) vm.skip(true);
+
         harness = new FLActionPaybackHarness();
         stEth = harness.stEthAddr();
         faucet = harness.faucetAddr();
+        expectedBalance = 100 ether;
+        faucetBalance = 10;
 
         MockFLToken mockStEth = new MockFLToken();
         vm.etch(stEth, address(mockStEth).code);
     }
 
     function test_should_accept_exact_payback_amount() public {
-        if (isL2NetworkSelected()) vm.skip(true);
-
-        uint256 expectedBalance = 100 ether;
-
         _setMockBalance(address(harness), expectedBalance);
 
         harness.verifyPaybackAmount(stEth, expectedBalance);
@@ -65,11 +67,6 @@ contract TestFLActionStEthPayback is BaseTest {
     }
 
     function test_should_cover_steth_two_wei_deficit_from_faucet() public {
-        if (isL2NetworkSelected()) vm.skip(true);
-
-        uint256 expectedBalance = 100 ether;
-        uint256 faucetBalance = 10;
-
         _setMockBalance(address(harness), expectedBalance - 2);
         _setMockBalance(faucet, faucetBalance);
 
@@ -80,11 +77,6 @@ contract TestFLActionStEthPayback is BaseTest {
     }
 
     function test_should_cover_steth_one_wei_deficit_and_return_faucet_surplus() public {
-        if (isL2NetworkSelected()) vm.skip(true);
-
-        uint256 expectedBalance = 100 ether;
-        uint256 faucetBalance = 10;
-
         _setMockBalance(address(harness), expectedBalance - 1);
         _setMockBalance(faucet, faucetBalance);
 
@@ -95,22 +87,14 @@ contract TestFLActionStEthPayback is BaseTest {
     }
 
     function test_should_revert_steth_deficit_greater_than_two_wei() public {
-        if (isL2NetworkSelected()) vm.skip(true);
-
-        uint256 expectedBalance = 100 ether;
-
         _setMockBalance(address(harness), expectedBalance - 3);
-        _setMockBalance(faucet, 10);
+        _setMockBalance(faucet, faucetBalance);
 
         vm.expectRevert(FLAction.WrongPaybackAmountError.selector);
         harness.verifyPaybackAmount(stEth, expectedBalance);
     }
 
     function test_should_revert_steth_surplus() public {
-        if (isL2NetworkSelected()) vm.skip(true);
-
-        uint256 expectedBalance = 100 ether;
-
         _setMockBalance(address(harness), expectedBalance + 1);
 
         vm.expectRevert(FLAction.WrongPaybackAmountError.selector);
@@ -118,10 +102,6 @@ contract TestFLActionStEthPayback is BaseTest {
     }
 
     function test_should_revert_non_steth_deficit() public {
-        if (isL2NetworkSelected()) vm.skip(true);
-
-        uint256 expectedBalance = 100 ether;
-
         MockFLToken dai = new MockFLToken();
         dai.mint(address(harness), expectedBalance - 1);
 
@@ -130,10 +110,6 @@ contract TestFLActionStEthPayback is BaseTest {
     }
 
     function test_should_revert_non_steth_surplus() public {
-        if (isL2NetworkSelected()) vm.skip(true);
-
-        uint256 expectedBalance = 100 ether;
-
         MockFLToken dai = new MockFLToken();
         dai.mint(address(harness), expectedBalance + 1);
 
