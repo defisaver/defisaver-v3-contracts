@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
-import { ActionBase } from "../../ActionBase.sol";
-import { LlamaLendHelper } from "../helpers/LlamaLendHelper.sol";
-import { LlamaLendSwapper } from "./LlamaLendSwapper.sol";
-import { DFSExchangeData } from "../../../exchangeV3/DFSExchangeData.sol";
 import {
     ILlamaLendController
 } from "../../../interfaces/protocols/llamalend/ILlamaLendController.sol";
+import { ILlamaLendSwapper } from "../../../interfaces/protocols/llamalend/ILlamaLendSwapper.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
+import { ActionBase } from "../../ActionBase.sol";
+import { LlamaLendHelper } from "../helpers/LlamaLendHelper.sol";
+import { DFSExchangeData } from "../../../exchangeV3/DFSExchangeData.sol";
 import { DFSIds } from "../../../utils/DFSIds.sol";
 
 /// @title LlamaLendRepay
@@ -62,31 +62,36 @@ contract LlamaLendRepay is ActionBase, LlamaLendHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _repay(Params memory _params) internal returns (uint256, bytes memory) {
-        if (_params.exData.srcAmount == 0) revert();
+        if (_params.exData.srcAmount == 0) revert LlamaLendZeroAmountError();
         if (!isControllerValid(_params.controllerAddress, _params.controllerId)) {
             revert InvalidLlamaLendController();
         }
 
-        address llamalendSwapper = registry.getAddr(DFSIds.LLAMALEND_SWAPPER);
-
-        uint256[] memory info = new uint256[](5);
-        info[0] = _params.gasUsed;
-        info[1] = _params.controllerId;
-
-        transientStorage.setBytesTransiently(abi.encode(_params.exData));
-
         address collToken = ILlamaLendController(_params.controllerAddress).collateral_token();
         address debtToken = ILlamaLendController(_params.controllerAddress).borrowed_token();
+
+        // Validate exchange data (we are selling collateral for debt)
+        if (_params.exData.srcAddr != collToken) revert LlamaLendInvalidExchangeSrcToken();
+        if (_params.exData.destAddr != debtToken) revert LlamaLendInvalidExchangeDestToken();
+
         uint256 collStartingBalance = collToken.getBalance(address(this));
         uint256 debtStartingBalance = debtToken.getBalance(address(this));
 
-        ILlamaLendController(_params.controllerAddress).repay_extended(llamalendSwapper, info);
+        address llamalendSwapper = registry.getAddr(DFSIds.LLAMALEND_SWAPPER);
+        uint256[] memory callbackArgs = new uint256[](5);
+        callbackArgs[0] = _params.gasUsed;
+        callbackArgs[1] = _params.controllerId;
 
-        // there shouldn't be any funds left on swapper contract but withdrawing it just in case
-        LlamaLendSwapper(llamalendSwapper).withdrawAll(_params.controllerAddress);
+        transientStorage.setBytesTransiently(abi.encode(_params.exData));
 
-        // if the amount received from swap is higher than debt there will be leftover debtToken
-        // if we haven't sold 100% of coll from the position there will be leftover collToken
+        ILlamaLendController(_params.controllerAddress)
+            .repay_extended(llamalendSwapper, callbackArgs);
+
+        // There shouldn't be any funds left on swapper contract after sell but withdrawing it just in case.
+        ILlamaLendSwapper(llamalendSwapper).withdrawAll(_params.controllerAddress);
+
+        // If the amount received from swap is higher than debt there will be leftover debtToken.
+        // If we haven't sold 100% of coll from the position there will be leftover collToken.
         (, uint256 debtTokenReceived) = _sendLeftoverFunds(
             collToken, debtToken, collStartingBalance, debtStartingBalance, _params.to
         );
