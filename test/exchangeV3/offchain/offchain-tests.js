@@ -10,7 +10,6 @@ const {
     balanceOf,
     setNewExchangeWrapper,
     setBalance,
-    addrs,
     approve,
     formatExchangeObjForOffchain,
     addToExchangeAggregatorRegistry,
@@ -18,7 +17,6 @@ const {
     takeSnapshot,
     revertToSnapshot,
     network,
-    addToRegistry,
     DAI_ADDR,
 } = require('../../utils/utils');
 
@@ -54,6 +52,8 @@ const getKyberApiUrlByChainId = (chainId) => {
     }
     return 'https://aggregator-api.kyberswap.com/ethereum/api/v1/';
 };
+
+const getKyberDeadline = () => Math.floor(Date.now() / 1000) + 60 * 60;
 
 const bebopTestData = [
     { sellToken: 'WETH', buyToken: 'USDC', rawAmount: '1' },
@@ -234,16 +234,12 @@ const kyberTest = async () => {
         let snapshot;
 
         before(async () => {
-            await addToRegistry(
-                'KyberInputScalingHelper',
-                '0x2f577A41BeC1BE1152AeEA12e73b7391d15f655D',
-            );
+            senderAcc = (await hre.ethers.getSigners())[0];
             await redeploy('DFSSell');
             await redeploy('RecipeExecutor');
             await redeploy('PullToken');
             kyberAggregatorWrapper = await redeploy('KyberAggregatorWrapper');
 
-            senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             await setNewExchangeWrapper(senderAcc, kyberAggregatorWrapper.address);
         });
@@ -278,7 +274,7 @@ const kyberTest = async () => {
                     baseURL: baseUrl,
                     url: `routes?tokenIn=${sellAssetInfo.address}&tokenOut=${
                         buyAssetInfo.address
-                    }&amountIn=${amount.toString()}&saveGas=false&gasInclude=true&x-client-id=${clientId}`,
+                    }&amountIn=${amount.toString()}&gasInclude=true`,
                     headers,
                 };
                 const priceObject = await axios(options).then((response) => response.data.data);
@@ -291,8 +287,8 @@ const kyberTest = async () => {
                         routeSummary: priceObject.routeSummary,
                         sender: kyberAggregatorWrapper.address,
                         recipient: kyberAggregatorWrapper.address,
-                        slippageTolerance: 1000,
-                        deadline: 1776079017,
+                        slippageTolerance: 3000,
+                        deadline: getKyberDeadline(),
                         source: clientId,
                     },
                 };
@@ -349,7 +345,7 @@ const kyberTest = async () => {
                     baseURL: baseUrl,
                     url: `routes?tokenIn=${sellAssetInfo.address}&tokenOut=${
                         buyAssetInfo.address
-                    }&amountIn=${amount.toString()}&saveGas=false&gasInclude=true&x-client-id=${clientId}`,
+                    }&amountIn=${amount.toString()}&gasInclude=true`,
                     headers,
                 };
                 const priceObject = await axios(options).then((response) => response.data.data);
@@ -362,8 +358,8 @@ const kyberTest = async () => {
                         routeSummary: priceObject.routeSummary,
                         sender: kyberAggregatorWrapper.address,
                         recipient: kyberAggregatorWrapper.address,
-                        slippageTolerance: 1000,
-                        deadline: 1776079017,
+                        slippageTolerance: 3000,
+                        deadline: getKyberDeadline(),
                         source: clientId,
                     },
                 };
@@ -450,7 +446,6 @@ const paraswapTest = async () => {
                 url: `/prices?srcToken=${sellAssetInfo.address}&srcDecimals=${sellAssetInfo.decimals}&destToken=${buyAssetInfo.address}&destDecimals=${buyAssetInfo.decimals}&amount=${amount}&side=SELL&network=${networkId}&version=6.2`,
             };
             const priceObject = await axios(options).then((response) => response.data.priceRoute);
-            console.log(priceObject);
 
             const secondOptions = {
                 method: 'POST',
@@ -464,7 +459,7 @@ const paraswapTest = async () => {
                     partner: 'paraswap.io',
                     srcDecimals: priceObject.srcDecimals,
                     destDecimals: priceObject.destDecimals,
-                    slippage: 1000,
+                    slippage: 3000,
                     txOrigin: senderAcc.address,
                 },
             };
@@ -693,10 +688,16 @@ const zeroxTest = async () => {
         let senderAcc;
         let proxy;
         let snapshot;
+        let zeroxWrapper;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
+
+            await redeploy('DFSSell');
+            const zeroxWrapperContract = await redeploy('ZeroxWrapper');
+            zeroxWrapper = zeroxWrapperContract.address;
+            await setNewExchangeWrapper(senderAcc, zeroxWrapper);
         });
 
         beforeEach(async () => {
@@ -715,8 +716,6 @@ const zeroxTest = async () => {
             await setBalance(sellAssetInfo.address, senderAcc.address, sellAmount);
             await approve(sellAssetInfo.address, proxy.address);
 
-            const zeroxWrapper = addrs[network].ZEROX_WRAPPER;
-
             const options = {
                 method: 'GET',
                 baseURL: 'https://api.0x.org',
@@ -724,7 +723,9 @@ const zeroxTest = async () => {
                     sellAssetInfo.address
                 }&buyToken=${
                     buyAssetInfo.address
-                }&sellAmount=${sellAmount.toString()}&taker=${zeroxWrapper}`,
+                }&sellAmount=${sellAmount.toString()}&taker=${zeroxWrapper}&txOrigin=${
+                    senderAcc.address
+                }&recipient=${zeroxWrapper}&slippageBps=3000`,
                 headers: {
                     '0x-api-key': `${process.env.ZEROX_API_KEY}`,
                     '0x-version': 'v2',
