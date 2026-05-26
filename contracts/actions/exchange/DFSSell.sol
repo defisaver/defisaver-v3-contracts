@@ -43,7 +43,7 @@ contract DFSSell is ActionBase, DFSExchangeWithTxSaver {
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
-        // No fee is taken if recipe contains only one sell action.
+        // No fee is taken if recipe contains only one action, and that action is sell action.
         bool isDirect = _returnValues.length == 1 ? true : false;
 
         (uint256 exchangedAmount, bytes memory logData) =
@@ -88,7 +88,7 @@ contract DFSSell is ActionBase, DFSExchangeWithTxSaver {
 
         bool isEthDest = _exchangeData.pullTokens(_from);
 
-        // If recipe contains only one sell action, or if it's a direct sell execution, no fee is taken.
+        // If recipe contains only one action, and that action is sell action, or if it's a direct sell execution, no fee is taken.
         if (_isDirect) {
             _exchangeData.dfsFeeDivider = 0;
         } else {
