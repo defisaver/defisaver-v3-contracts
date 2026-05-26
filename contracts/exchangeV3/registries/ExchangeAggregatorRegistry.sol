@@ -2,14 +2,17 @@
 
 pragma solidity =0.8.24;
 
+import {
+    IExchangeAggregatorRegistry
+} from "../../interfaces/exchange/IExchangeAggregatorRegistry.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 
-contract ExchangeAggregatorRegistry is AdminAuth {
-    mapping(address => bool) public exchangeTargetAddresses;
-
+contract ExchangeAggregatorRegistry is AdminAuth, IExchangeAggregatorRegistry {
     error EmptyAddrError();
 
-    function setExchangeTargetAddr(address _exchangeAddr, bool _state) public onlyOwner {
+    mapping(address => bool) public exchangeTargetAddresses;
+
+    function setExchangeTargetAddr(address _exchangeAddr, bool _state) external onlyOwner {
         if (_exchangeAddr == address(0)) {
             revert EmptyAddrError();
         }
@@ -17,7 +20,7 @@ contract ExchangeAggregatorRegistry is AdminAuth {
         exchangeTargetAddresses[_exchangeAddr] = _state;
     }
 
-    function isExchangeAggregatorAddr(address _exchangeAddr) public view returns (bool) {
+    function isExchangeAggregatorAddr(address _exchangeAddr) external view returns (bool) {
         return exchangeTargetAddresses[_exchangeAddr];
     }
 }

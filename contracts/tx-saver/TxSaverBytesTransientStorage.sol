@@ -6,8 +6,10 @@ import {
     ITxSaverBytesTransientStorage
 } from "../interfaces/core/ITxSaverBytesTransientStorage.sol";
 
-/// @title Used to store TxSaver data in a transaction
-/// @dev Only TxSaverExecutor can store data, and anyone can read it
+/// @title Used to store TxSaver data in a transaction.
+/// @dev Only TxSaverExecutor can store data, and anyone can read it.
+/// @dev When taking a fee from a position, the fee flag is not cleared afterward, which means that every sell action will trigger the fee-taking logic.
+/// This is not a problem, as all recipes executed through TxSaver are expected to have exactly one sell action.
 contract TxSaverBytesTransientStorage is ITxSaverBytesTransientStorage {
     uint256 constant POSITION_FEE_FLAG = 1;
     uint256 constant EOA_OR_WALLET_FEE_FLAG = 2;
@@ -59,15 +61,15 @@ contract TxSaverBytesTransientStorage is ITxSaverBytesTransientStorage {
         }
         // find out how many full size chunks there are
         uint256 chunks = dataLength / 32;
-        uint256 i = 1;
-        // concat each full size chunk to the result
-        for (i; i <= chunks; ++i) {
+        // pre-allocate result and write chunks directly to memory
+        result = new bytes(dataLength);
+        for (uint256 i = 0; i < chunks; ++i) {
             bytes32 chunk;
-            uint256 slot = i + 1;
+            uint256 slot = i + 2;
             assembly {
                 chunk := tload(slot)
+                mstore(add(add(result, 0x20), mul(i, 0x20)), chunk)
             }
-            result = bytes.concat(result, chunk);
         }
     }
 }
