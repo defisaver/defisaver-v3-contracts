@@ -14,6 +14,7 @@ import { FLHelper } from "./helpers/FLHelper.sol";
 /// @title FLAaveV3CarryDebt
 /// @notice Aave V3 flashloan action that generates debt for the borrowed amount instead of repaying it in the same transaction.
 /// @notice This action doesn't have any flashloan fees.
+/// @notice This action is only meant to be used for smart wallet positions.
 /// @dev In order to generate debt, this contract must have credit delegation allowance from the user's wallet address.
 ///      Allowance should be granted inside the recipe by using the AaveV3DelegateCredit action.
 /// @dev This action is not meant to be used as part of strategies, as debt is carried AFTER the recipe is executed.
@@ -112,7 +113,7 @@ contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanB
     //////////////////////////////////////////////////////////////*/
     /// @notice Aave callback function that formats and calls back RecipeExecutor
     /// FLSource == AAVE_V3
-    /// Can have fees = YES
+    /// Can have fees = NO
     /// @dev FL amount is not returned, instead debt is carried into the position.
     function executeOperation(
         address[] memory _assets,
