@@ -4,26 +4,34 @@ pragma solidity =0.8.24;
 
 import { IWStEth } from "../../interfaces/protocols/lido/IWStEth.sol";
 import { IFeedRegistry } from "../../interfaces/protocols/chainlink/IFeedRegistry.sol";
+import { IAggregatorV3 } from "../../interfaces/protocols/chainlink/IAggregatorV3.sol";
+import {
+    IPoolAddressesProvider
+} from "../../interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
+import { IAaveV3Oracle } from "../../interfaces/protocols/aaveV3/IAaveV3Oracle.sol";
+import {
+    ISparkPoolAddressesProvider
+} from "../../interfaces/protocols/spark/ISparkPoolAddressesProvider.sol";
+import { ISparkV3Oracle } from "../../interfaces/protocols/spark/ISparkV3Oracle.sol";
 import {
     ILendingPoolAddressesProviderV2
 } from "../../interfaces/protocols/aaveV2/ILendingPoolAddressesProviderV2.sol";
 import {
     IPriceOracleGetterAave
 } from "../../interfaces/protocols/aaveV2/IPriceOracleGetterAave.sol";
-import { IAggregatorV3 } from "../../interfaces/protocols/chainlink/IAggregatorV3.sol";
-
 import { DSMath } from "../../_vendor/DS/DSMath.sol";
 import { UtilAddresses } from "../addresses/UtilAddresses.sol";
 import { Denominations } from "../Denominations.sol";
 
 /// @title TokenPriceHelper
-/// @notice Helper contract for fetching and formatting token prices from chainlink/aave
+/// @notice Helper contract for fetching and formatting token prices from chainlink/aaveV3/spark/aaveV2
 /// @dev Chainlink price staleness not checked, the risk has been deemed acceptable.
+/// @dev BOLD token price is hardcoded to 1 USD; any depeg risk has been deemed acceptable.
 /// @dev Assumptions:
 /// - Chainlink ETH-denominated feeds return WAD-scaled prices (1e18).
 /// - Chainlink USD-denominated feeds return prices scaled by 1e8.
-/// - AaveV2 oracle prices are ETH-denominated and WAD-scaled.
 /// - AaveV3 and Spark oracle prices are USD-denominated and scaled by 1e8.
+/// - AaveV2 oracle prices are ETH-denominated and WAD-scaled.
 contract TokenPriceHelper is DSMath, UtilAddresses {
     IFeedRegistry public constant FEED_REGISTRY = IFeedRegistry(CHAINLINK_FEED_REGISTRY);
 
@@ -33,108 +41,71 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
     /// @notice Helper function that returns latest token price in USD
     /// @param _inputTokenAddr Token address we are looking the usd price for
     /// @return priceInUSD Price of the token in USD, scaled by 1e8
-    /// @dev For wstETH and WBTC, the price is calculated from the price of stETH and BTC respectively.
-    /// @dev The price is calculated from the following sources:
-    /// @dev 1. Chainlink USD feed
-    /// @dev 2. Chainlink ETH feed
-    /// @dev 3. Aave feed
-    /// @dev 4. AaveV3 feed
-    /// @dev 5. Spark feed
-    /// @dev If no price is found, return 0.
+    /// @dev For wstETH and WBTC chainlink feeds, the price is calculated from the price of stETH and BTC respectively.
+    /// The price is calculated from the following sources:
+    /// 1. Chainlink USD feed
+    /// 2. Chainlink ETH feed
+    /// 3. AaveV3 feed
+    /// 4. Spark feed
+    /// 5. AaveV2 feed
+    /// If no price is found, return 0.
     function getPriceInUSD(address _inputTokenAddr) public view returns (uint256 priceInUSD) {
-        address chainlinkTokenAddr = getAddrForChainlinkOracle(_inputTokenAddr);
+        bool ethFeedAsFallback = true;
+        int256 price = _getAdjustedChainlinkPriceInUSD(_inputTokenAddr, ethFeedAsFallback);
+        if (price != 0) return uint256(price);
 
-        int256 signedPrice;
-        // 1. and 2. -> Try to get price from chainlink USD feed with fallback to ETH feed
-        signedPrice = getChainlinkPriceInUSD(chainlinkTokenAddr, true);
-        if (signedPrice == 0) {
-            // 3. -> Try to get price from Aave feed
-            signedPrice = int256(getAaveTokenPriceInUSD(_inputTokenAddr));
-        }
-        if (signedPrice == 0) {
-            // 4. -> Try to get price from AaveV3 feed
-            signedPrice = int256(getAaveV3TokenPriceInUSD(_inputTokenAddr));
-        }
-        if (signedPrice == 0) {
-            // 5. -> Try to get price from Spark feed
-            signedPrice = int256(getSparkTokenPriceInUSD(_inputTokenAddr));
-        }
-        if (signedPrice == 0) {
-            // If no price is found, return 0.
-            return 0;
-        }
+        priceInUSD = getAaveV3TokenPriceInUSD(_inputTokenAddr);
+        if (priceInUSD != 0) return priceInUSD;
 
-        // Handle special cases for wstETH and WBTC.
-        if (_inputTokenAddr == WSTETH_ADDR) signedPrice = getWStEthPrice(signedPrice);
-        if (_inputTokenAddr == WBTC_ADDR) signedPrice = getWBtcPrice(signedPrice);
+        priceInUSD = getSparkTokenPriceInUSD(_inputTokenAddr);
+        if (priceInUSD != 0) return priceInUSD;
 
-        priceInUSD = uint256(signedPrice);
+        priceInUSD = getAaveTokenPriceInUSD(_inputTokenAddr);
+        if (priceInUSD != 0) return priceInUSD;
     }
 
     /// @notice Helper function that returns latest token price in ETH
     /// @param _inputTokenAddr Token address we are looking the eth price for
     /// @return priceInETH Price of the token in ETH, scaled by 1e18
-    /// @dev For wstETH and WBTC, the price is calculated from the price of stETH and BTC respectively.
-    /// @dev The price is calculated from the following sources:
-    /// @dev 1. Chainlink USD feed
-    /// @dev 2. Chainlink ETH feed
-    /// @dev 3. Aave feed
-    /// @dev 4. AaveV3 feed
-    /// @dev 5. Spark feed
-    /// @dev If no price is found, return 0.
-    /// @dev Expect WBTC (BTC) and WSTETH (stETH) to have chainlink USD price.
+    /// @dev For wstETH and WBTC chainlink feeds, the price is calculated from the price of stETH and BTC respectively.
+    /// The price is calculated from the following sources:
+    /// 1. Chainlink USD feed
+    /// 2. Chainlink ETH feed
+    /// 3. AaveV3 feed
+    /// 4. Spark feed
+    /// 5. AaveV2 feed
+    /// If no price is found, return 0.
     function getPriceInETH(address _inputTokenAddr) public view returns (uint256 priceInETH) {
-        address chainlinkTokenAddr = getAddrForChainlinkOracle(_inputTokenAddr);
-
-        // 1. -> Try with USD price feed, if there is one, we can convert to ETH using the ETH price feed.
-        uint256 chainlinkTokenPriceInUSD =
-            uint256(getChainlinkPriceInUSD(chainlinkTokenAddr, false));
-        if (chainlinkTokenPriceInUSD != 0) {
-            uint256 chainlinkETHPriceInUSD = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
-            if (chainlinkETHPriceInUSD != 0) {
-                priceInETH = wdiv(chainlinkTokenPriceInUSD, chainlinkETHPriceInUSD);
-
-                // Handle special cases for wstETH and WBTC.
-                if (_inputTokenAddr == WSTETH_ADDR) {
-                    priceInETH = uint256(getWStEthPrice(int256(priceInETH)));
-                }
-                if (_inputTokenAddr == WBTC_ADDR) {
-                    priceInETH = uint256(getWBtcPrice(int256(priceInETH)));
-                }
-
+        uint256 tokenPriceInUSD = uint256(_getAdjustedChainlinkPriceInUSD(_inputTokenAddr, false));
+        if (tokenPriceInUSD != 0) {
+            uint256 ethPriceInUSD = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
+            if (ethPriceInUSD != 0) {
+                priceInETH = wdiv(tokenPriceInUSD, ethPriceInUSD);
                 return priceInETH;
             }
         }
-
-        // 2. -> Try with ETH price feed.
-        priceInETH = uint256(getChainlinkPriceInETH(chainlinkTokenAddr));
+        priceInETH = uint256(_getAdjustedChainlinkPriceInETH(_inputTokenAddr));
         if (priceInETH != 0) return priceInETH;
 
-        // 3. -> Try with Aave price feed.
-        priceInETH = getAaveTokenPriceInETH(_inputTokenAddr);
-        if (priceInETH != 0) return priceInETH;
-
-        // 4. -> Try with AaveV3 price feed.
         priceInETH = getAaveV3TokenPriceInETH(_inputTokenAddr);
         if (priceInETH != 0) return priceInETH;
 
-        // 5. -> Try with Spark price feed.
         priceInETH = getSparkTokenPriceInETH(_inputTokenAddr);
         if (priceInETH != 0) return priceInETH;
 
-        // If no price is found, return 0.
-        priceInETH = 0;
+        priceInETH = getAaveTokenPriceInETH(_inputTokenAddr);
+        if (priceInETH != 0) return priceInETH;
     }
 
     /*//////////////////////////////////////////////////////////////
                               CHAINLINK
     //////////////////////////////////////////////////////////////*/
-
     /// @notice Helper function that returns the latest chainlink price in USD
     /// @param _inputTokenAddr Token address we are looking the usd price for
-    /// @param _useFallback Whether to use the fallback price feed
+    /// @param _useFallback Whether to use the ETH price feed as fallback
     /// @return chainlinkPriceInUSD Chainlink price in USD, scaled by 1e8
     /// @dev If there's no USD price feed, we can fallback to ETH price feed, if there's no USD or ETH price feed return 0
+    /// @dev BOLD token price is hardcoded to 1 USD; any depeg risk has been deemed acceptable.
     function getChainlinkPriceInUSD(address _inputTokenAddr, bool _useFallback)
         public
         view
@@ -147,14 +118,10 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
         ) {
             chainlinkPriceInUSD = _parseChainlinkPrice(answer);
         } catch {
-            if (_useFallback) {
-                // Chainlink ETH-denominated feeds are expected to be scaled by 1e18.
-                uint256 chainlinkPriceInETH = uint256(getChainlinkPriceInETH(_inputTokenAddr));
-                uint256 chainlinkETHPriceInUSD = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
-                chainlinkPriceInUSD = int256(wmul(chainlinkPriceInETH, chainlinkETHPriceInUSD));
-            } else {
-                chainlinkPriceInUSD = 0;
-            }
+            if (!_useFallback) return 0;
+            uint256 tokenPriceInETH = uint256(getChainlinkPriceInETH(_inputTokenAddr));
+            uint256 ethPriceInUSD = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
+            chainlinkPriceInUSD = int256(wmul(tokenPriceInETH, ethPriceInUSD));
         }
     }
 
@@ -181,7 +148,7 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
     /// @param _roundId Chainlink roundId, if 0 uses the latest
     /// @return priceInUSD Chainlink USD price answer after supported token adjustment
     /// @return updateTimestamp Timestamp of the price update
-    /// @dev For wstETH, the price is calculated from the price of stETH.
+    /// @dev For wstETH and WBTC, the price is calculated from the price of stETH and BTC respectively.
     function getRoundInfo(address _inputTokenAddr, uint80 _roundId)
         public
         view
@@ -200,59 +167,19 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
     /// @param _aggregator Chainlink aggregator
     /// @return priceInUSD Chainlink USD price answer after supported token adjustment
     /// @return updateTimestamp Timestamp of the price update
-    /// @dev For wstETH and WBTC, the price is calculated from the price of stETH and BTC respectively.
+    /// @dev For wstETH and WBTC, the price is calculated from the price of stETH and BTC respectively. So:
+    /// - For WBTC, caller must pass the BTC/USD feed as the aggregator.
+    /// - For wstETH, caller must pass the stETH/USD feed as the aggregator.
     function getRoundInfo(address _inputTokenAddr, uint80 _roundId, IAggregatorV3 _aggregator)
         public
         view
         returns (uint256 priceInUSD, uint256 updateTimestamp)
     {
         int256 signedPrice;
-
-        // Price staleness not checked, the risk has been deemed acceptable.
-        if (_roundId == 0) {
-            (, signedPrice,, updateTimestamp,) = _aggregator.latestRoundData();
-        } else {
-            (, signedPrice,, updateTimestamp,) = _aggregator.getRoundData(_roundId);
-        }
-        signedPrice = _parseChainlinkPrice(signedPrice);
-
-        // Handle special cases for wstETH and WBTC.
-        if (_inputTokenAddr == WSTETH_ADDR) signedPrice = getWStEthPrice(signedPrice);
-        if (_inputTokenAddr == WBTC_ADDR) signedPrice = getWBtcPrice(signedPrice);
+        (signedPrice, updateTimestamp) = _readChainlinkRound(_roundId, _aggregator);
+        signedPrice = _applyChainlinkTokenAdjustment(_inputTokenAddr, signedPrice);
 
         priceInUSD = uint256(signedPrice);
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                              AAVE V2
-    //////////////////////////////////////////////////////////////*/
-    /// @notice Helper function that returns the Aave token price in ETH
-    /// @param _tokenAddr Token address we are looking the eth price for
-    /// @return price Price of the token in ETH
-    /// @dev If there is no price found, return 0.
-    /// @dev By default, Aave oracle stores prices in ETH.
-    function getAaveTokenPriceInETH(address _tokenAddr) public view returns (uint256 price) {
-        address priceOracleAddress = ILendingPoolAddressesProviderV2(AAVE_MARKET).getPriceOracle();
-
-        try IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr) returns (
-            uint256 tokenPrice
-        ) {
-            price = tokenPrice;
-        } catch {
-            price = 0;
-        }
-    }
-
-    /// @notice Helper function that returns the Aave token price in USD
-    /// @param _tokenAddr Token address we are looking the usd price for
-    /// @return price Price of the token in USD
-    /// @dev If there is no price found, return 0.
-    /// @dev By default, Aave oracle stores prices in ETH, so we need to convert to USD using the ETH price feed.
-    function getAaveTokenPriceInUSD(address _tokenAddr) public view returns (uint256 price) {
-        uint256 tokenAavePriceInETH = getAaveTokenPriceInETH(_tokenAddr);
-        uint256 ethPriceInUSD = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
-
-        price = wmul(tokenAavePriceInETH, ethPriceInUSD);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -264,10 +191,9 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
     /// @dev If there is no price found, return 0.
     /// @dev By default, AaveV3 oracle stores prices in USD.
     function getAaveV3TokenPriceInUSD(address _tokenAddr) public view returns (uint256 price) {
-        address priceOracleAddress =
-            ILendingPoolAddressesProviderV2(AAVE_V3_MARKET).getPriceOracle();
+        address priceOracleAddress = IPoolAddressesProvider(AAVE_V3_MARKET).getPriceOracle();
 
-        try IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr) returns (
+        try IAaveV3Oracle(priceOracleAddress).getAssetPrice(_tokenAddr) returns (
             uint256 tokenPrice
         ) {
             price = tokenPrice;
@@ -282,11 +208,11 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
     /// @dev If there is no price found, return 0.
     /// @dev By default, AaveV3 oracle stores prices in USD, so we need to convert to ETH using the ETH price feed.
     function getAaveV3TokenPriceInETH(address _tokenAddr) public view returns (uint256) {
-        uint256 tokenAavePriceInUSD = getAaveV3TokenPriceInUSD(_tokenAddr);
+        uint256 tokenPriceInUSD = getAaveV3TokenPriceInUSD(_tokenAddr);
         uint256 ethPriceInUSD = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
-        if (tokenAavePriceInUSD == 0 || ethPriceInUSD == 0) return 0;
+        if (tokenPriceInUSD == 0 || ethPriceInUSD == 0) return 0;
 
-        return wdiv(tokenAavePriceInUSD, ethPriceInUSD);
+        return wdiv(tokenPriceInUSD, ethPriceInUSD);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -298,9 +224,9 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
     /// @dev If there is no price found, return 0.
     /// @dev By default, Spark oracle stores prices in USD.
     function getSparkTokenPriceInUSD(address _tokenAddr) public view returns (uint256 price) {
-        address priceOracleAddress = ILendingPoolAddressesProviderV2(SPARK_MARKET).getPriceOracle();
+        address priceOracleAddress = ISparkPoolAddressesProvider(SPARK_MARKET).getPriceOracle();
 
-        try IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr) returns (
+        try ISparkV3Oracle(priceOracleAddress).getAssetPrice(_tokenAddr) returns (
             uint256 tokenPrice
         ) {
             price = tokenPrice;
@@ -315,11 +241,43 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
     /// @dev If there is no price found, return 0.
     /// @dev By default, Spark oracle stores prices in USD, so we need to convert to ETH using the ETH price feed.
     function getSparkTokenPriceInETH(address _tokenAddr) public view returns (uint256) {
-        uint256 tokenSparkPriceInUSD = getSparkTokenPriceInUSD(_tokenAddr);
+        uint256 tokenPriceInUSD = getSparkTokenPriceInUSD(_tokenAddr);
         uint256 ethPriceInUSD = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
-        if (tokenSparkPriceInUSD == 0 || ethPriceInUSD == 0) return 0;
+        if (tokenPriceInUSD == 0 || ethPriceInUSD == 0) return 0;
 
-        return wdiv(tokenSparkPriceInUSD, ethPriceInUSD);
+        return wdiv(tokenPriceInUSD, ethPriceInUSD);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                              AAVE V2
+    //////////////////////////////////////////////////////////////*/
+    /// @notice Helper function that returns the AaveV2 token price in ETH
+    /// @param _tokenAddr Token address we are looking the eth price for
+    /// @return price Price of the token in ETH
+    /// @dev If there is no price found, return 0.
+    /// @dev By default, AaveV2 oracle stores prices in ETH.
+    function getAaveTokenPriceInETH(address _tokenAddr) public view returns (uint256 price) {
+        address priceOracleAddress = ILendingPoolAddressesProviderV2(AAVE_MARKET).getPriceOracle();
+
+        try IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr) returns (
+            uint256 tokenPrice
+        ) {
+            price = tokenPrice;
+        } catch {
+            price = 0;
+        }
+    }
+
+    /// @notice Helper function that returns the AaveV2 token price in USD
+    /// @param _tokenAddr Token address we are looking the usd price for
+    /// @return price Price of the token in USD
+    /// @dev If there is no price found, return 0.
+    /// @dev By default, AaveV2 oracle stores prices in ETH, so we need to convert to USD using the ETH price feed.
+    function getAaveTokenPriceInUSD(address _tokenAddr) public view returns (uint256 price) {
+        uint256 tokenPriceInETH = getAaveTokenPriceInETH(_tokenAddr);
+        uint256 ethPriceInUSD = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
+
+        price = wmul(tokenPriceInETH, ethPriceInUSD);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -346,6 +304,8 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
         try FEED_REGISTRY.latestRoundData(WBTC_ADDR, CHAINLINK_WBTC_ADDR) returns (
             uint80, int256 wBtcPriceToPeg, uint256, uint256, uint80
         ) {
+            if (wBtcPriceToPeg <= 0) return _btcPrice;
+
             // Round to the nearest integer.
             wBtcPrice = (_btcPrice * wBtcPriceToPeg + USD_PRICE_SCALE / 2) / USD_PRICE_SCALE;
         } catch {
@@ -353,6 +313,52 @@ contract TokenPriceHelper is DSMath, UtilAddresses {
             // to preserve fail-open behavior and avoid reverting upstream callers.
             wBtcPrice = _btcPrice;
         }
+    }
+
+    function _getAdjustedChainlinkPriceInUSD(address _inputTokenAddr, bool _useFallback)
+        internal
+        view
+        returns (int256 price)
+    {
+        address chainlinkTokenAddr = getAddrForChainlinkOracle(_inputTokenAddr);
+        price = getChainlinkPriceInUSD(chainlinkTokenAddr, _useFallback);
+        price = _applyChainlinkTokenAdjustment(_inputTokenAddr, price);
+    }
+
+    function _getAdjustedChainlinkPriceInETH(address _inputTokenAddr)
+        internal
+        view
+        returns (int256 price)
+    {
+        address chainlinkTokenAddr = getAddrForChainlinkOracle(_inputTokenAddr);
+        price = getChainlinkPriceInETH(chainlinkTokenAddr);
+        price = _applyChainlinkTokenAdjustment(_inputTokenAddr, price);
+    }
+
+    function _applyChainlinkTokenAdjustment(address _inputTokenAddr, int256 _price)
+        internal
+        view
+        returns (int256 adjustedPrice)
+    {
+        if (_price <= 0) return 0;
+        if (_inputTokenAddr == WSTETH_ADDR) return getWStEthPrice(_price);
+        if (_inputTokenAddr == WBTC_ADDR) return getWBtcPrice(_price);
+        return _price;
+    }
+
+    function _readChainlinkRound(uint80 _roundId, IAggregatorV3 _aggregator)
+        internal
+        view
+        returns (int256 price, uint256 updateTimestamp)
+    {
+        // Price staleness not checked, the risk has been deemed acceptable.
+        if (_roundId == 0) {
+            (, price,, updateTimestamp,) = _aggregator.latestRoundData();
+        } else {
+            (, price,, updateTimestamp,) = _aggregator.getRoundData(_roundId);
+        }
+
+        price = _parseChainlinkPrice(price);
     }
 
     /// @notice Helper function that adjusts the token address for chainlink usage
