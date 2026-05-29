@@ -1612,5 +1612,16 @@
         "changeTime": 0,
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "FLAaveV3CarryDebt",
+        "address": "0x760e97862DD8652e5BB8b4D8ad9C99a74BBe7E7A",
+        "id": "0x66258f8a",
+        "path": "contracts/actions/flashloan/FLAaveV3CarryDebt.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     }
 ]
