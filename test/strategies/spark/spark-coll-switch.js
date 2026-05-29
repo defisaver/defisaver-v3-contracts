@@ -140,6 +140,20 @@ const runSparkCollSwitchTests = () => {
                 expect(dataBefore[0].enabledAsCollateral).to.be.true;
                 expect(dataBefore[1].enabledAsCollateral).to.be.false;
 
+                // -------------------- DEBUG: check supply cap
+                // const dataProvider = await hre.ethers.getContractAt(
+                //     ['function getReserveCaps(address asset) view returns (uint256 borrowCap, uint256 supplyCap)',
+                //      'function getReserveData(address asset) view returns (uint256 unbacked, uint256 accruedToTreasuryScaled, uint256 totalAToken, uint256 totalStableDebt, uint256 totalVariableDebt, uint256 liquidityRate, uint256 variableBorrowRate, uint256 stableBorrowRate, uint256 averageStableBorrowRate, uint256 liquidityIndex, uint256 variableBorrowIndex, uint40 lastUpdateTimestamp)'],
+                //     '0xFc21d6d146E6086B8359705C8b28512a983db0cb',
+                // );
+                // const caps = await dataProvider.getReserveCaps(toAsset.address);
+                // const reserveData = await dataProvider.getReserveData(toAsset.address);
+                // console.log(`${toAsset.symbol} supplyCap: ${caps.supplyCap.toString()}`);
+                // console.log(`${toAsset.symbol} totalAToken: ${reserveData.totalAToken.toString()}`);
+                // const capInWei = caps.supplyCap.mul(hre.ethers.BigNumber.from(10).pow(toAsset.decimals));
+                // console.log(`Cap full: ${reserveData.totalAToken.gte(capInWei)}`);
+                // ---------------------
+
                 await callSparkFLCollateralSwitchStrategy(
                     strategyExecutor,
                     0,

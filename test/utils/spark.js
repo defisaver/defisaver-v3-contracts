@@ -397,15 +397,35 @@ const deploySparkFLCollateralSwitchStrategy = async () => {
 };
 
 const SPARK_COLL_SWITCH_TEST_PAIRS = [
+    // {
+    //     fromAsset: 'WETH',
+    //     toAsset: 'cbBTC',
+    //     marketAddr: addrs[network].SPARK_MARKET,
+    //     collAmountInUSD: 50_000,
+    //     debtAmountInUSD: 25_000,
+    //     amountToSwitchInUSD: 40_000,
+    //     priceState: 1, // UNDER
+    //     price: 1, // Trigger when 1 WETH < 1 cbBTC
+    // },
     {
-        fromAsset: 'WETH',
-        toAsset: 'cbBTC',
+        fromAsset: 'WBTC',
+        toAsset: 'WETH',
         marketAddr: addrs[network].SPARK_MARKET,
         collAmountInUSD: 50_000,
         debtAmountInUSD: 25_000,
         amountToSwitchInUSD: 40_000,
         priceState: 1, // UNDER
-        price: 1, // Trigger when 1 WETH < 1 cbBTC
+        price: 100, // 1 WBTC < 100 wstETH
+    },
+    {
+        fromAsset: 'WBTC',
+        toAsset: 'WETH',
+        marketAddr: addrs[network].SPARK_MARKET,
+        collAmountInUSD: 50_000,
+        debtAmountInUSD: 25_000,
+        amountToSwitchInUSD: hre.ethers.constants.MaxUint256,
+        priceState: 0, // OVER
+        price: 1, // Trigger when 1 WBTC > 1 WETH
     },
 ];
 
