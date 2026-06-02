@@ -107,6 +107,10 @@ import {
 import { IStrategyStorage } from "../interfaces/core/IStrategyStorage.sol";
 import { IBundleStorage } from "../interfaces/core/IBundleStorage.sol";
 import { ISubStorage } from "../interfaces/core/ISubStorage.sol";
+import {
+    IStrategyPartialExecutionStorage
+} from "../interfaces/core/IStrategyPartialExecutionStorage.sol";
+
 import { Permission } from "../auth/Permission.sol";
 import { SmartWalletUtils } from "../utils/SmartWalletUtils.sol";
 import { ActionBase } from "../actions/ActionBase.sol";
@@ -148,6 +152,11 @@ contract RecipeExecutor is
 
     /// When calling TxSaver functions, caller has to be TxSaverExecutor
     error TxSaverAuthorizationError(address caller);
+
+    error StrategyPartialExecution_InvalidDataLength();
+    error StrategyPartialExecution_InvalidMagicIdentifier();
+    error StrategyPartialExecution_AllowOnlyNonContinuous(uint256 strategyId);
+    error StrategyPartialExecution_NotSupportedForStrategy(uint256 strategyId);
 
     /*//////////////////////////////////////////////////////////////
                                 EXTERNAL
@@ -229,20 +238,11 @@ contract RecipeExecutor is
         uint256 _strategyIndex,
         StrategySub memory _sub
     ) external payable override {
-        Strategy memory strategy;
+        uint256 strategyId = _getStrategyId(_sub, _strategyIndex);
+        Strategy memory strategy = IStrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
 
-        {
-            // to handle stack too deep
-            uint256 strategyId = _sub.strategyOrBundleId;
-
-            // fetch strategy if inside of bundle
-            if (_sub.isBundle) {
-                strategyId =
-                    IBundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(strategyId, _strategyIndex);
-            }
-
-            strategy = IStrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
-        }
+        (StrategyPartialExecutionData memory partialExecutionData, bool partialExecutionEnabled) =
+            _parseStrategyPartialExecutionData(strategy, strategyId, _triggerCallData);
 
         // check if all the triggers are true
         (bool triggered, uint256 errIndex) =
@@ -252,8 +252,8 @@ contract RecipeExecutor is
             revert TriggerNotActiveError(errIndex);
         }
 
-        // if this is a one time strategy
-        if (!strategy.continuous) {
+        // if this is a one time strategy without partial execution, deactivate before execution
+        if (!strategy.continuous && !partialExecutionEnabled) {
             ISubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId);
         }
 
@@ -267,6 +267,10 @@ contract RecipeExecutor is
         });
 
         _executeActions(currRecipe);
+
+        if (partialExecutionEnabled) {
+            _processPartialExecution(_subId, strategyId, partialExecutionData);
+        }
     }
 
     /// @notice This is the callback function that FL actions call
@@ -290,6 +294,105 @@ contract RecipeExecutor is
     /*//////////////////////////////////////////////////////////////
                                 INTERNAL
     //////////////////////////////////////////////////////////////*/
+
+    /// @notice Resolves strategy id from direct strategy subscriptions and bundle subscriptions.
+    function _getStrategyId(StrategySub memory _sub, uint256 _strategyIndex)
+        internal
+        view
+        returns (uint256 strategyId)
+    {
+        strategyId = _sub.strategyOrBundleId;
+
+        if (_sub.isBundle) {
+            strategyId =
+                IBundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(strategyId, _strategyIndex);
+        }
+    }
+
+    /// @notice Parses optional partial execution metadata appended after regular trigger calldata.
+    /// @dev No extra calldata means legacy behaviour. One extra item with correct magic opts in.
+    function _parseStrategyPartialExecutionData(
+        Strategy memory _strategy,
+        uint256 _strategyId,
+        bytes[] calldata _triggerCallData
+    )
+        internal
+        view
+        returns (StrategyPartialExecutionData memory partialExecutionData, bool isEnabled)
+    {
+        uint256 triggerCount = _strategy.triggerIds.length;
+
+        // No extra trigger calldata means standard behaviour
+        if (_triggerCallData.length == triggerCount) return (partialExecutionData, false);
+
+        // Allow up to one extra trigger calldata item for partial execution
+        if (_triggerCallData.length != triggerCount + 1) {
+            revert StrategyPartialExecution_InvalidDataLength();
+        }
+
+        // Only non-continuous strategies can be executed in partial mode
+        if (_strategy.continuous) {
+            revert StrategyPartialExecution_AllowOnlyNonContinuous(_strategyId);
+        }
+
+        partialExecutionData =
+            abi.decode(_triggerCallData[triggerCount], (StrategyPartialExecutionData));
+
+        // Sanity check to make sure this is intentional strategy partial execution call
+        if (partialExecutionData.magicIdentifier != DFSIds.STRATEGY_PARTIAL_EXECUTION_ID) {
+            revert StrategyPartialExecution_InvalidMagicIdentifier();
+        }
+
+        uint8 strategyMaxExecutions =
+            _getStrategyPartialExecutionStorage().getStrategyMaxExecutions(_strategyId);
+
+        // If max executions is 0, partial execution is not supported for this strategy
+        if (strategyMaxExecutions == 0) {
+            revert StrategyPartialExecution_NotSupportedForStrategy(_strategyId);
+        }
+
+        return (partialExecutionData, true);
+    }
+
+    /// @notice Handles post execution lifecycle for non-continuous strategies in partial mode.
+    function _processPartialExecution(
+        uint256 _subId,
+        uint256 _strategyId,
+        StrategyPartialExecutionData memory _partialExecutionData
+    ) internal {
+        IStrategyPartialExecutionStorage partialExecutionStorage =
+            _getStrategyPartialExecutionStorage();
+
+        StoredSubData memory storedSubData = ISubStorage(SUB_STORAGE_ADDR).getSub(_subId);
+        bytes32 subHash = storedSubData.strategySubHash;
+
+        if (_partialExecutionData.shouldDeactivateSub) {
+            partialExecutionStorage.clearExecutionCount(_subId, address(this), subHash);
+            ISubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId);
+            return;
+        }
+
+        uint256 executionCount =
+            partialExecutionStorage.incrementExecutionCount(_subId, address(this), subHash);
+
+        uint8 strategyMaxExecutions = partialExecutionStorage.getStrategyMaxExecutions(_strategyId);
+
+        if (executionCount >= strategyMaxExecutions) {
+            partialExecutionStorage.clearExecutionCount(_subId, address(this), subHash);
+            ISubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId);
+        }
+    }
+
+    /// @notice Reads StrategyPartialExecutionStorage from DFSRegistry.
+    function _getStrategyPartialExecutionStorage()
+        internal
+        view
+        returns (IStrategyPartialExecutionStorage)
+    {
+        return IStrategyPartialExecutionStorage(
+            registry.getAddr(DFSIds.STRATEGY_PARTIAL_EXECUTION_STORAGE)
+        );
+    }
 
     /// @notice Checks if all the triggers are true
     function _checkTriggers(

@@ -78,4 +78,9 @@ contract StrategyModel {
         uint256 deadline;
         bool shouldTakeFeeFromPosition;
     }
+
+    struct StrategyPartialExecutionData {
+        bytes4 magicIdentifier;
+        bool shouldDeactivateSub;
+    }
 }
