@@ -422,13 +422,13 @@ const tokenPriceHelperL2Test = async () => {
                 const assetInfo = getAssetInfo(assets[i].symbol, chainId);
                 const address = assetInfo.address;
                 const priceInUSD = await tokenPriceHelper.getPriceInUSD(address);
-                const aaveInUSD = await tokenPriceHelper.getAaveTokenPriceInUSD(address);
+                const aaveInUSD = await tokenPriceHelper.getAaveV3TokenPriceInUSD(address);
                 const chainlinkInUSD = await tokenPriceHelper.getChainlinkPriceInUSD(
                     address,
                     false,
                 );
                 const priceInETH = await tokenPriceHelper.getPriceInETH(address);
-                const aaveInETH = await tokenPriceHelper.getAaveTokenPriceInETH(address);
+                const aaveInETH = await tokenPriceHelper.getAaveV3TokenPriceInETH(address);
                 const chainlinkInETH = await tokenPriceHelper.getChainlinkPriceInETH(address);
 
                 console.log(`-----------------${assets[i].symbol}`);
