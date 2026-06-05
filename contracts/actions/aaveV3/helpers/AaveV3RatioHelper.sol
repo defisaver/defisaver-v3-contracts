@@ -159,16 +159,17 @@ contract AaveV3RatioHelper is DSMath, MainnetAaveV3Addresses {
         uint8 _emodeId
     ) internal view returns (uint256 ltv, uint256 lltv) {
         if (_emodeId != 0) {
-            DataTypes.CollateralConfig memory config = _lendingPool.getEModeCategoryCollateralConfig(
-                _emodeId
-            );
+            DataTypes.CollateralConfig memory
+                emodeConfig = _lendingPool.getEModeCategoryCollateralConfig(_emodeId);
             uint128 collateralBitmap = _lendingPool.getEModeCategoryCollateralBitmap(_emodeId);
             if (_isReserveEnabledOnBitmap(collateralBitmap, _reserve.id)) {
                 uint128 ltvZeroBitmap = _lendingPool.getEModeCategoryLtvzeroBitmap(_emodeId);
-                ltv = _isReserveEnabledOnBitmap(ltvZeroBitmap, _reserve.id) ? 0 : config.ltv;
-                lltv = config.liquidationThreshold;
+                ltv = _isReserveEnabledOnBitmap(ltvZeroBitmap, _reserve.id) ? 0 : emodeConfig.ltv;
+                lltv = emodeConfig.liquidationThreshold;
             } else {
-                ltv = _lendingPool.getIsEModeCategoryIsolated(_emodeId) ? 0 : config.ltv;
+                ltv = _lendingPool.getIsEModeCategoryIsolated(_emodeId)
+                    ? 0
+                    : _reserve.configuration.getLtv();
                 lltv = _reserve.configuration.getLiquidationThreshold();
             }
         } else {
