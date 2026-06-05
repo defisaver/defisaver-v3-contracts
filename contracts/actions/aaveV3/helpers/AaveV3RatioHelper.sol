@@ -58,8 +58,8 @@ contract AaveV3RatioHelper is DSMath, MainnetAaveV3Addresses {
     }
 
     /// @notice Returns the safety ratio of the user with ltv zero fallback support
-    /// the current overall health of position, inversely proportional to borrow power used.
-    /// @notice This function is equivalent to getSafetyRatio, but when asset has ltv zero, we fallback to lltv - LTV_ZERO_OFFSET
+    ///         the current overall health of position, inversely proportional to borrow power used.
+    ///         This function is equivalent to getSafetyRatio, but when asset has ltv zero, we fallback to lltv - LTV_ZERO_OFFSET.
     /// @param _market Address of LendingPoolAddressesProvider for specific market
     /// @param _user Address of the user
     /// @return The safety ratio of the user with ltv zero fallback support
