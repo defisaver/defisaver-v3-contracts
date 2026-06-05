@@ -10,6 +10,7 @@ import { DataTypes } from "../../../interfaces/protocols/aaveV3/DataTypes.sol";
 import { UserConfiguration } from "../../../_vendor/aave/v3/UserConfiguration.sol";
 import { ReserveConfiguration } from "../../../_vendor/aave/v3/ReserveConfiguration.sol";
 import { PercentageMath } from "../../../_vendor/aave/v3/PercentageMath.sol";
+import { MathUtils } from "../../../_vendor/aave/MathUtils.sol";
 import { DSMath } from "../../../_vendor/DS/DSMath.sol";
 import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { MainnetAaveV3Addresses } from "./MainnetAaveV3Addresses.sol";
@@ -142,8 +143,9 @@ contract AaveV3RatioHelper is DSMath, MainnetAaveV3Addresses {
                     if (vars.isBorrowed) {
                         vars.variableDebtBalance =
                             vars.reserve.variableDebtTokenAddress.getBalance(_user);
-                        totalDebtValue += (vars.variableDebtBalance * vars.assetPrice)
-                        / vars.assetUnit;
+                        totalDebtValue += MathUtils.mulDivCeil(
+                            vars.variableDebtBalance, vars.assetPrice, vars.assetUnit
+                        );
                     }
                 }
             }
