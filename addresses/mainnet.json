@@ -451,14 +451,15 @@
     },
     {
         "name": "StrategyTriggerViewNoRevert",
-        "address": "0xD00644919f1F6a816Fb88454065f0f6586C928Ae",
+        "address": "0xb93DA6F76c303536589E4d7A8f173A3442522A28",
         "id": "0x37a21cb5",
         "path": "contracts/views/strategy/StrategyTriggerViewNoRevert.sol",
-        "version": "1.0.6",
+        "version": "1.0.7",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xD00644919f1F6a816Fb88454065f0f6586C928Ae",
             "0x6f4bD4F45cA40EB95f070A9A4AeC9e47cEF05a3E",
             "0xEEfc5edc8dEDeeD92834469F2da3e2D415731137",
             "0x395079428c66C1AB0144057366c7493C92326860",
@@ -2105,14 +2106,14 @@
     },
     {
         "name": "AaveV3RatioTrigger",
-        "address": "0xC1b97aB9eF18EeE338a381c6f74470AA5C567283",
+        "address": "0x84e467281C5F8d10F9EE4A9017b9E129395F3ee5",
         "id": "0x21a42a26",
         "path": "contracts/triggers/AaveV3RatioTrigger.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xC1b97aB9eF18EeE338a381c6f74470AA5C567283"]
     },
     {
         "name": "SparkRatioTrigger",
@@ -2127,14 +2128,17 @@
     },
     {
         "name": "AaveV3RatioCheck",
-        "address": "0x6BF59F87046820eFce460a8AdCDeD8fc0ca90898",
+        "address": "0xB421FA1C7f79C726c8AE1178f828cd52c418F4cc",
         "id": "0x71ef3d4e",
         "path": "contracts/actions/checkers/AaveV3RatioCheck.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x8a975A9fB0d77b8d9e7E1694CC868e704D0Ef0fD"]
+        "history": [
+            "0x6BF59F87046820eFce460a8AdCDeD8fc0ca90898",
+            "0x8a975A9fB0d77b8d9e7E1694CC868e704D0Ef0fD"
+        ]
     },
     {
         "name": "SparkRatioCheck",
