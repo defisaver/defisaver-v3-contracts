@@ -106,6 +106,12 @@ const feeReceiverTest = async () => {
         let senderAcc;
 
         const MULTISIG_ADDR = '0x5B694B1107eebA70ADf88C51CC858EbE8e98Ef5b';
+        const getErrorData = (err) => {
+            if (err.data) return err.data;
+            if (err.error?.data) return err.error.data;
+
+            return err.toString().match(/0x[0-9a-fA-F]{8,}/)?.[0];
+        };
 
         before(async () => {
             /// @dev don't run dfs-registry-controller before this
@@ -228,8 +234,11 @@ const feeReceiverTest = async () => {
                 feeReceiver = feeReceiver.connect(senderAcc);
 
                 await feeReceiver.withdrawToken(WETH_ADDRESS, senderAcc.address, 0);
+                expect.fail('Expected withdrawToken to revert');
             } catch (err) {
-                expect(err.toString()).to.have.string('OnlyAdminError');
+                expect(getErrorData(err).slice(0, 10)).to.be.eq(
+                    feeReceiver.interface.getSighash('OnlyAdminError'),
+                );
             }
         });
 
@@ -240,8 +249,11 @@ const feeReceiverTest = async () => {
                 await feeReceiver.withdrawEth(senderAcc.address, 0);
 
                 await stopImpersonatingAccount(MULTISIG_ADDR);
+                expect.fail('Expected withdrawEth to revert');
             } catch (err) {
-                expect(err.toString()).to.have.string('OnlyAdminError');
+                expect(getErrorData(err).slice(0, 10)).to.be.eq(
+                    feeReceiver.interface.getSighash('OnlyAdminError'),
+                );
             }
         });
     });
