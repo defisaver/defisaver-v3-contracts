@@ -2,7 +2,9 @@
 
 pragma solidity =0.8.24;
 
-/// @title Used as a temp/tx only storage, should not trust value if not set in same tx
+/// @title TransientStorage
+/// @notice Used as temp/tx only storage, should not trust value if not set in same tx
+/// @dev Uses regular storage, not EIP-1153 transient storage
 contract TransientStorage {
     mapping(string => bytes32) public tempStore;
 
