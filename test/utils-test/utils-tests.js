@@ -116,7 +116,7 @@ const feeReceiverTest = async () => {
 
             await impersonateAccount(MULTISIG_ADDR);
 
-            await sendEther(senderAcc, MULTISIG_ADDR, '0.5');
+            await sendEther(senderAcc, MULTISIG_ADDR, '100');
 
             const signer = await hre.ethers.provider.getSigner(MULTISIG_ADDR);
             feeReceiver = feeReceiver.connect(signer);
@@ -229,7 +229,7 @@ const feeReceiverTest = async () => {
 
                 await feeReceiver.withdrawToken(WETH_ADDRESS, senderAcc.address, 0);
             } catch (err) {
-                expect(err.toString()).to.have.string('Only Admin');
+                expect(err.toString()).to.have.string('OnlyAdminError');
             }
         });
 
@@ -241,7 +241,7 @@ const feeReceiverTest = async () => {
 
                 await stopImpersonatingAccount(MULTISIG_ADDR);
             } catch (err) {
-                expect(err.toString()).to.have.string('Only Admin');
+                expect(err.toString()).to.have.string('OnlyAdminError');
             }
         });
     });
