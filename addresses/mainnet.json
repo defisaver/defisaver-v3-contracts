@@ -4862,14 +4862,14 @@
     },
     {
         "name": "AaveV4View",
-        "address": "0x274C0f0164A82B8771145651A8331A909c939e42",
+        "address": "0xeCa884900ccC0481F1b65707a80eb294d1245F68",
         "id": "0x29a71d39",
         "path": "contracts/views/AaveV4View.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x274C0f0164A82B8771145651A8331A909c939e42"]
     },
     {
         "name": "AaveV4Supply",
