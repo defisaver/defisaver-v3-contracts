@@ -2,17 +2,23 @@
 
 pragma solidity =0.8.24;
 
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
 import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 import { UtilAddresses } from "../addresses/UtilAddresses.sol";
-import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
-/// DO NOT DEPLOY ON L2s WITHOUT FEE_RECEIVER_ADMIN_ADDR SET
-/// @title Contract that receivers fees and can be withdrawn from with the admin
+/// @title FeeReceiver
+/// @notice Contract that receives fees withdrawable by the admin
+/// @dev DO NOT DEPLOY ON L2s WITHOUT FEE_RECEIVER_ADMIN_ADDR SET
 contract FeeReceiver is UtilAddresses {
     using SafeERC20 for IERC20;
 
+    error OnlyAdminError(address sender);
+    error EthSendFailedError();
+
     modifier onlyAdmin() {
-        require(msg.sender == FEE_RECEIVER_ADMIN_ADDR, "Only Admin");
+        if (msg.sender != FEE_RECEIVER_ADMIN_ADDR) {
+            revert OnlyAdminError(msg.sender);
+        }
 
         _;
     }
@@ -38,11 +44,11 @@ contract FeeReceiver is UtilAddresses {
         }
 
         (bool success,) = _to.call{ value: _amount }("");
-        require(success, "Eth send failed");
+        if (!success) revert EthSendFailedError();
     }
 
     /// @notice Gives ERC20 token approval from this contract to an address
-    /// @dev This is needed if we change the BotRefill contract which needs to pull funds
+    /// @dev This is needed for BotRefills contract which pulls funds from FeeReceiver
     /// @param _tokenAddr ERC20 token address
     /// @param _to Address of the address to approve
     /// @param _amount Amount to approve
