@@ -2095,14 +2095,14 @@
     },
     {
         "name": "FLAaveV3CarryDebt",
-        "address": "0x7BdD8ACE8a48B7032Df68B7f53E0D6D9Ea9411A7",
+        "address": "0x8225D3833D88BD1420E7d25e69A00F1A27aB9143",
         "id": "0x66258f8a",
         "path": "contracts/actions/flashloan/FLAaveV3CarryDebt.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x7BdD8ACE8a48B7032Df68B7f53E0D6D9Ea9411A7"]
     },
     {
         "name": "AaveV3RatioTrigger",
