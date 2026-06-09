@@ -9,6 +9,8 @@ const {
     encryptPrivateKey,
 } = require('./hardhat-tasks-functions');
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 task('fladepver', 'Deploys and verifies contract(s) on etherscan')
     .addPositionalParam('gas', 'The price (in gwei) per unit of gas')
     .addVariadicPositionalParam(
@@ -42,8 +44,9 @@ task('fladepver', 'Deploys and verifies contract(s) on etherscan')
         // Ver - Verify
         console.log('\nStarting contract verification...');
         const verificationPromises = Object.entries(deployedAddresses).map(
-            async ([contractName, contractAddress]) => {
+            async ([contractName, contractAddress], index) => {
                 try {
+                    await sleep(index * 1000);
                     await verifyContract(contractAddress, contractName);
                     console.log(`✓ ${contractName} verified successfully`);
                 } catch (error) {
