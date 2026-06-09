@@ -27,7 +27,7 @@ contract MainnetUtilAddresses {
 
     address internal constant ETHER_FI_LIQUIDITY_POOL = 0x308861A430be4cce5502d0A12724771Fc6DaF216;
 
-    address internal constant FEE_RECEIVER_ADMIN_ADDR = 0xA74e9791D7D66c6a14B2C571BdA0F2A1f6D64E06;
+    address internal constant FEE_RECEIVER_ADMIN_ADDR = 0x5B694B1107eebA70ADf88C51CC858EbE8e98Ef5b;
 
     address internal constant UNI_V3_ROUTER = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
     address internal constant UNI_V3_QUOTER = 0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6;

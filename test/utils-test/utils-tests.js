@@ -105,7 +105,7 @@ const feeReceiverTest = async () => {
         let feeReceiver;
         let senderAcc;
 
-        const MULTISIG_ADDR = '0xA74e9791D7D66c6a14B2C571BdA0F2A1f6D64E06';
+        const MULTISIG_ADDR = '0x5B694B1107eebA70ADf88C51CC858EbE8e98Ef5b';
 
         before(async () => {
             /// @dev don't run dfs-registry-controller before this
