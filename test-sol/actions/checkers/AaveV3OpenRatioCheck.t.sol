@@ -8,6 +8,7 @@ import { AaveV3RatioHelper } from "../../../contracts/actions/aaveV3/helpers/Aav
 import { ActionBase } from "../../../contracts/actions/ActionBase.sol";
 import { DataTypes } from "../../../contracts/interfaces/protocols/aaveV3/DataTypes.sol";
 
+import { BaseTest } from "../../utils/BaseTest.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { AaveV3PositionCreator } from "../../utils/positions/AaveV3PositionCreator.sol";
 import { AaveV3Encode } from "../../utils/encode/AaveV3Encode.sol";
@@ -254,5 +255,69 @@ contract TestAaveV3OpenRatioCheck is AaveV3RatioHelper, AaveV3PositionCreator {
         return abi.encodeWithSelector(
             ActionBase.executeAction.selector, paramsCalldata, subData, pm, returnValues
         );
+    }
+}
+
+/// @title Read-only checks for AaveV3OpenRatioCheck against real LTV-zero positions.
+/// @notice Pinned to mainnet block 24_929_244 (see test-sol/config/config.json). These positions
+///         hold LTV-zero collateral. We verify getRatio does NOT report 0 for them, so the full
+///         repay path (targetRatio == 0) never mistakes an indebted position for a fully repaid one.
+contract TestAaveV3OpenRatioCheckLtvZero is BaseTest, AaveV3RatioHelper {
+    /*//////////////////////////////////////////////////////////////////////////
+                               CONTRACT UNDER TEST
+    //////////////////////////////////////////////////////////////////////////*/
+    AaveV3OpenRatioCheck cut;
+
+    function setUp() public override {
+        forkFromEnv("ETH-ltv0");
+
+        if (!isMainnetSelected()) {
+            vm.skip(true, "Test only supported on Mainnet");
+        }
+
+        cut = new AaveV3OpenRatioCheck();
+    }
+
+    /// @dev Real LTV-zero positions present at the pinned block.
+    function _positions() internal pure returns (address[4] memory) {
+        return [
+            0x34780C209D5C575cc1C1cEB57aF95D4d2a69ddCF,
+            0x5dc2da72254FC303680A7d644198EDFdbdF07883,
+            0x28a55C4b4f9615FDE3CDAdDf6cc01FcF2E38A6b0,
+            0xe40d278afD00E6187Db21ff8C96D572359Ef03bf
+        ];
+    }
+
+    /// @notice None of these LTV-zero positions should report a zero ratio.
+    function test_ltv_zero_positions_have_nonzero_ratio() public view {
+        address[4] memory positions = _positions();
+        for (uint256 i = 0; i < positions.length; ++i) {
+            uint256 currRatio = cut.getRatio(DEFAULT_AAVE_MARKET, positions[i]);
+            assertGt(currRatio, 0, "LTV-zero position reported zero ratio");
+        }
+    }
+
+    /// @notice With targetRatio == 0 the check must revert for these still-indebted positions,
+    ///         proving the full repay check does not wrongly accept them as fully repaid.
+    function test_full_repay_check_reverts_for_ltv_zero_positions() public {
+        address[4] memory positions = _positions();
+        for (uint256 i = 0; i < positions.length; ++i) {
+            uint256 currRatio = cut.getRatio(DEFAULT_AAVE_MARKET, positions[i]);
+
+            bytes memory paramsCalldata = abi.encode(
+                AaveV3OpenRatioCheck.Params({
+                    targetRatio: 0, market: DEFAULT_AAVE_MARKET, user: positions[i]
+                })
+            );
+            // length 3 so the `user` param is honored by the action
+            uint8[] memory pm = new uint8[](3);
+
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    AaveV3OpenRatioCheck.BadAfterRatio.selector, currRatio, uint256(0)
+                )
+            );
+            cut.executeAction(paramsCalldata, new bytes32[](0), pm, new bytes32[](0));
+        }
     }
 }

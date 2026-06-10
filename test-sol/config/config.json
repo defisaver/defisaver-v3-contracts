@@ -33,6 +33,7 @@
     "CompV3EOAAutomation": { "mainnet": 24741489 },
     "AaveV3View": { "mainnet": 24741489 },
     "AaveV3RatioHelper": { "mainnet": 25250678 },
+    "ETH-ltv0": { "mainnet": 24929244 },
     "AaveV3": {
         "lightTesting": false,
         "lightPairs": [{ "supplyAsset": "WETH", "borrowAsset": "DAI" }],
