@@ -56,7 +56,7 @@ contract AaveV3OpenRatioCheck is ActionBase, AaveV3RatioHelper {
                     revert BadAfterRatio(currRatio, targetRatio);
                 }
             } else {
-                /// @notice Normal repay with target ratio, we accept 5% offset
+                /// @notice Normal repay/boost on price with target ratio, we accept 5% offset
                 if (
                     currRatio > (targetRatio + RATIO_OFFSET)
                         || currRatio < (targetRatio - RATIO_OFFSET)

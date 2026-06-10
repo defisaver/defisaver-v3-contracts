@@ -54,9 +54,16 @@ contract AaveV4RatioCheck is ActionBase, AaveV4RatioHelper {
         uint256 start = uint256(tempStorage.getBytes32(AAVE_V4_RATIO_KEY));
 
         if (params.ratioState == RatioState.IN_REPAY) {
-            // Repay: Ratio must increase but not overshoot 'target + offset' to avoid boost after.
-            if (current <= start || current > params.targetRatio + RATIO_OFFSET) {
-                revert BadAfterRatio(start, current);
+            /// @notice If user is subscribed on full repay, target ratio will be 0 for compatibility with other protocols. But in aave v4 protocol real ratio when user has no debt will be max uint256, hence check that current is max uint256 in that case.
+            if (_isRatioZero(params.targetRatio)) {
+                if (!_isRatioUintMax(current)) {
+                    revert BadAfterRatio(start, current);
+                }
+            } else {
+                if (current <= start || current > params.targetRatio + RATIO_OFFSET) {
+                    // Repay: Ratio must increase but not overshoot 'target + offset' to avoid boost after.
+                    revert BadAfterRatio(start, current);
+                }
             }
         } else {
             // Boost: Ratio must decrease but not undershoot 'target - offset' to avoid repay after.
