@@ -1,0 +1,11 @@
+{
+  "lib/ds-test": {
+    "rev": "2c7dbcc8586b33f358e3307a443e524490c17666"
+  },
+  "lib/forge-std": {
+    "tag": {
+      "name": "v1.16.1",
+      "rev": "620536fa5277db4e3fd46772d5cbc1ea0696fb43"
+    }
+  }
+}
