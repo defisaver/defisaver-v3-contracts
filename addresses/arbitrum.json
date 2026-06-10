@@ -1344,14 +1344,15 @@
     },
     {
         "name": "AaveV3OpenRatioCheck",
-        "address": "0x2583Ce06479C26AB60AE554BE5dC57F7D4B3D9a1",
+        "address": "0x2aA8e70E1778e8DFBe9C74F300Ae719DB8d4aB4f",
         "id": "0x72b17abf",
         "path": "contracts/actions/checkers/AaveV3OpenRatioCheck.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x2583Ce06479C26AB60AE554BE5dC57F7D4B3D9a1",
             "0x99A36d26A2e1E6776057835C7B5E72A20c8cF5cb",
             "0x770e015485d4720398B08Ff226DB4ef29896b5B8"
         ]
