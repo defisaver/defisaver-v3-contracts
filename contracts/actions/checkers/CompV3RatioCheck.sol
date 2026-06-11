@@ -77,17 +77,9 @@ contract CompV3RatioCheck is ActionBase, CompV3RatioHelper {
                     revert BadAfterRatio(startRatio, currRatio);
                 }
             }
-        }
-
-        // if we are doing boost
-        if (RatioState(ratioState) == RatioState.IN_BOOST) {
-            // if boost ratio should be less
-            if (currRatio >= startRatio) {
-                revert BadAfterRatio(startRatio, currRatio);
-            }
-
-            // can't boost too much under targetRatio so we don't trigger repay after
-            if (currRatio < (targetRatio - RATIO_OFFSET)) {
+        } else {
+            // Boost: Ratio must decrease but not undershoot 'target - offset' to avoid repay after.
+            if (currRatio >= startRatio || currRatio < targetRatio - RATIO_OFFSET) {
                 revert BadAfterRatio(startRatio, currRatio);
             }
         }
