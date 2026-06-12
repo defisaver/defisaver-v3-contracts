@@ -430,7 +430,7 @@ async function verifyContract(contractAddress, contractName) {
     const demoUrl = `https://${hre.network.config.blockExplorer}/sourcecode-demo.html`;
 
     console.log(
-        `Check how verification is going at ${demoUrl} with API key ${apiKey} and receipt GUID ${tx.data.result}`,
+        `Check how verification is going at ${demoUrl} using your API key and receipt GUID ${tx.data.result}`,
     );
 }
 
