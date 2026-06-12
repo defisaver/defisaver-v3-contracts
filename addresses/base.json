@@ -1072,14 +1072,17 @@
     },
     {
         "name": "CompV3RatioCheck",
-        "address": "0x243022bBE8A6E52AFCbD4f21362a7B4124B9013C",
+        "address": "0xCa6e079A94e60f8a594492f2ceEa68930b5Bf6FE",
         "id": "0x2ce67bb9",
         "path": "contracts/actions/checkers/CompV3RatioCheck.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0xC1ff2500790150c4a1c77B9e702e9984A252b60c"]
+        "history": [
+            "0x243022bBE8A6E52AFCbD4f21362a7B4124B9013C",
+            "0xC1ff2500790150c4a1c77B9e702e9984A252b60c"
+        ]
     },
     {
         "name": "MorphoBlueRatioTrigger",
@@ -1321,14 +1324,14 @@
     },
     {
         "name": "MorphoBlueTargetRatioCheck",
-        "address": "0x394fA7AeFe3ceCB3a79E0226c792134B0904dc4b",
+        "address": "0xbCe102593730e2b055D1C5E72be83Ffa2Eb17D3B",
         "id": "0x49f12f40",
         "path": "contracts/actions/checker/MorphoBlueTargetRatioCheck",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x394fA7AeFe3ceCB3a79E0226c792134B0904dc4b"]
     },
     {
         "name": "FluidVaultT1Open",

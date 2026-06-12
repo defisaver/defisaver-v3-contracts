@@ -3591,14 +3591,15 @@
     },
     {
         "name": "CompV3RatioCheck",
-        "address": "0xC98d94791216E6c5cf24FD3D2BBFdc577113331B",
+        "address": "0x314Bd8fFe51f6Ea7bAf978c61762F7eAaA1B5D34",
         "id": "0x2ce67bb9",
         "path": "contracts/actions/checkers/CompV3RatioCheck.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xC98d94791216E6c5cf24FD3D2BBFdc577113331B",
             "0x008E50774B26E92179fe25233E6ee7399c5A11F5",
             "0xEeb7e195d69479910d071Ac1dBC923A17d042960"
         ]
@@ -4015,14 +4016,14 @@
     },
     {
         "name": "MorphoBlueTargetRatioCheck",
-        "address": "0xC7D545749732dD4ce799ABd7Fc8e0900eEB2E564",
+        "address": "0x0b3C75c1D5EFA23d142B9177f81D61aC04AC79C5",
         "id": "0x49f12f40",
         "path": "contracts/actions/checker/MorphoBlueTargetRatioCheck",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xC7D545749732dD4ce799ABd7Fc8e0900eEB2E564"]
     },
     {
         "name": "LiquityV2CloseLegacy",
@@ -4820,14 +4821,14 @@
     },
     {
         "name": "SparkTargetRatioCheck",
-        "address": "0x4E5044F622C0FcAb587106847F4889d3AB065c79",
+        "address": "0xb43405A165b6827c665dAE8Da5b81773D9c09F94",
         "id": "0x66d60c1e",
         "path": "contracts/actions/checkers/SparkTargetRatioCheck.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x4E5044F622C0FcAb587106847F4889d3AB065c79"]
     },
     {
         "name": "SFProxyEntryPoint",
@@ -4941,14 +4942,14 @@
     },
     {
         "name": "AaveV4RatioCheck",
-        "address": "0x63711684b09cD80b4E696E5D5Af397d38a511Deb",
+        "address": "0xC45f793838FD019507b6e6b0651b1CcefDC09d8a",
         "id": "0x707ad6fd",
         "path": "contracts/actions/checkers/AaveV4RatioCheck.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x63711684b09cD80b4E696E5D5Af397d38a511Deb"]
     },
     {
         "name": "AaveV4RatioTrigger",
