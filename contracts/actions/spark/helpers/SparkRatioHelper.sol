@@ -24,4 +24,8 @@ contract SparkRatioHelper is DSMath, MainnetSparkAddresses {
         // For each asset the account is in
         return getSafetyRatio(_market, _user);
     }
+
+    function _isRatioZero(uint256 _ratio) internal pure returns (bool) {
+        return _ratio == 0;
+    }
 }

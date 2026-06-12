@@ -189,4 +189,9 @@ contract AaveV3RatioHelper is DSMath, MainnetAaveV3Addresses {
             return (_bitmap >> _reserveIndex) & 1 != 0;
         }
     }
+
+    /// @dev Helper function to check if ratio is 0, used for better readability.
+    function isRatioZero(uint256 _ratio) internal pure returns (bool) {
+        return _ratio == 0;
+    }
 }

@@ -18,4 +18,12 @@ contract AaveV4RatioHelper {
     function getRatio(address _spoke, address _user) public view returns (uint256) {
         return ISpoke(_spoke).getUserAccountData(_user).healthFactor;
     }
+
+    function _isRatioZero(uint256 _ratio) internal pure returns (bool) {
+        return _ratio == 0;
+    }
+
+    function _isRatioUintMax(uint256 _ratio) internal pure returns (bool) {
+        return _ratio == type(uint256).max;
+    }
 }

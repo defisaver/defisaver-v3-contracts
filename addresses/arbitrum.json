@@ -1081,14 +1081,17 @@
     },
     {
         "name": "CompV3RatioCheck",
-        "address": "0xDB0b878b3A496E18F8a77dA47Ac76b07153f0899",
+        "address": "0x854E7099E98693Cb7c10870E0aB6EDCb9281E98C",
         "id": "0x2ce67bb9",
         "path": "contracts/actions/checkers/CompV3RatioCheck.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x9A481a33d27dE100de7Eb12d7c35028c1aCedDEa"]
+        "history": [
+            "0xDB0b878b3A496E18F8a77dA47Ac76b07153f0899",
+            "0x9A481a33d27dE100de7Eb12d7c35028c1aCedDEa"
+        ]
     },
     {
         "name": "CompV3SubProxyL2",
@@ -1344,14 +1347,15 @@
     },
     {
         "name": "AaveV3OpenRatioCheck",
-        "address": "0x2583Ce06479C26AB60AE554BE5dC57F7D4B3D9a1",
+        "address": "0x2aA8e70E1778e8DFBe9C74F300Ae719DB8d4aB4f",
         "id": "0x72b17abf",
         "path": "contracts/actions/checkers/AaveV3OpenRatioCheck.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x2583Ce06479C26AB60AE554BE5dC57F7D4B3D9a1",
             "0x99A36d26A2e1E6776057835C7B5E72A20c8cF5cb",
             "0x770e015485d4720398B08Ff226DB4ef29896b5B8"
         ]
@@ -1746,14 +1750,14 @@
     },
     {
         "name": "MorphoBlueTargetRatioCheck",
-        "address": "0x83cc27951551188be7969e730A8e3AbB529Cc6c9",
+        "address": "0x68322C5844B97486a5c5479d7A702bEAb2e75857",
         "id": "0x49f12f40",
         "path": "contracts/actions/checkers/MorphoBlueTargetRatioCheck.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x83cc27951551188be7969e730A8e3AbB529Cc6c9"]
     },
     {
         "name": "MorphoBluePriceTrigger",
