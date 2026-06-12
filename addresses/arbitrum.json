@@ -337,14 +337,15 @@
     },
     {
         "name": "StrategyTriggerViewNoRevert",
-        "address": "0x5BFA73979F9432e767930CFfE8E904dB80a67C66",
+        "address": "0xfBc1BB09A2e0C4a676754befC2Bd79927A5EB85B",
         "id": "0x37a21cb5",
         "path": "contracts/views/strategy/StrategyTriggerViewNoRevert.sol",
-        "version": "1.0.6",
+        "version": "1.0.7",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x5BFA73979F9432e767930CFfE8E904dB80a67C66",
             "0x67ED79B0116071F805A6A0d642DC0757E6029492",
             "0x6520e22b6e147297D9a891678860931353FFeafB",
             "0x966e357706C31B8b56E89Da68A487646fD16cF10",
@@ -355,14 +356,15 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x5cd9613a16f474F60c7352c67f64F5CCA95842A1",
+        "address": "0x552e7f9f2D7348e2F4467F0cD04949c267050232",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.14",
+        "version": "1.0.15",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x5cd9613a16f474F60c7352c67f64F5CCA95842A1",
             "0x8B2Fc51EdeF42D5053683a1EE736C7038d424a2f",
             "0xf9d70D3280794ffA1E1ffbFC8FAA600a2DFc1f52",
             "0xe73217aa2b278981ae91ecc03ea5684ca89a2f87",
@@ -842,14 +844,14 @@
     },
     {
         "name": "AaveV3RatioTrigger",
-        "address": "0x07b5E4382b2a8fBC4bF31b09fdee89A918E33856",
+        "address": "0x867B60dc74930572B259Bde053BE948C43a57D88",
         "id": "0x21a42a26",
         "path": "contracts/triggers/AaveV3RatioTrigger.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x07b5E4382b2a8fBC4bF31b09fdee89A918E33856"]
     },
     {
         "name": "GasFeeTakerL2",
@@ -879,14 +881,17 @@
     },
     {
         "name": "AaveV3RatioCheck",
-        "address": "0x82AF88864E1A9dC1d6d2931C60A1CA25E4951487",
+        "address": "0xDb1B86F3C4F9B129836D5CdEe11CCCE506c25DB2",
         "id": "0x71ef3d4e",
         "path": "contracts/actions/checkers/AaveV3RatioCheck.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x0Cf69Cc3A9f9d1848C78e745c504d5AA320a8153"]
+        "history": [
+            "0x82AF88864E1A9dC1d6d2931C60A1CA25E4951487",
+            "0x0Cf69Cc3A9f9d1848C78e745c504d5AA320a8153"
+        ]
     },
     {
         "name": "FLActionL2",

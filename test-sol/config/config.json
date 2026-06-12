@@ -32,6 +32,7 @@
     "CompV3Automation": { "mainnet": 24741489 },
     "CompV3EOAAutomation": { "mainnet": 24741489 },
     "AaveV3View": { "mainnet": 24741489 },
+    "AaveV3RatioHelper": { "mainnet": 25250678 },
     "AaveV3": {
         "lightTesting": false,
         "lightPairs": [{ "supplyAsset": "WETH", "borrowAsset": "DAI" }],
