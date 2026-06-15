@@ -100,11 +100,15 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, SmartWalletUt
     /// @dev This function uses high level `isTriggered` call with try-catch to avoid revert.
     /// @param _sub - The subscription to check.
     /// @param _triggerCallData - The calldata to pass to the triggers.
+    /// @param _additionalTriggerIds - The additional trigger IDs to check
+    /// @param _additionalTriggerCallData - The calldata to pass to the additional triggers.
     /// @param smartWallet - The smart wallet of the subscription.
     /// @return TriggerStatus - The status of the trigger (FALSE, TRUE, REVERT).
     function checkTriggers(
         StrategySub memory _sub,
         bytes[] calldata _triggerCallData,
+        bytes4[] calldata _additionalTriggerIds,
+        bytes[] calldata _additionalTriggerCallData,
         address smartWallet
     ) public returns (TriggerStatus) {
         Strategy memory strategy;
@@ -136,24 +140,21 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, SmartWalletUt
             }
         }
 
-        // check DCA & LO for all chains
-        if (strategyId.isDCAStrategy() || strategyId.isLimitOrderStrategy()) {
-            return _tryToVerifyRequiredAmountAndAllowance(smartWallet, _sub.subData);
-        }
+        bytes memory bytesPlaceholder = "0x";
 
-        // check min debt and ltv0 for AaveV3 leverage management strategies
-        if (strategyId.isAaveV3LeverageManagementStrategy()) {
-            return _tryToVerifyAaveV3Conditions(smartWallet);
-        }
-
-        // check min debt for AaveV3 close strategies
-        if (strategyId.isAaveV3CloseStrategy()) {
-            return _verifyAaveV3MinDebtPosition(smartWallet);
-        }
-
-        // check Spark leverage management for only mainnet deployment
-        if (block.chainid == 1 && strategyId.isSparkLeverageManagementStrategy()) {
-            return _verifySparkMinDebtPosition(smartWallet);
+        // ! Additional triggers
+        for (uint256 i = 0; i < _additionalTriggerIds.length; i++) {
+            triggerAddr = registry.getAddr(_additionalTriggerIds[i]);
+            try ITrigger(triggerAddr)
+                .isTriggered(_additionalTriggerCallData[i], bytesPlaceholder) returns (
+                bool isTriggered
+            ) {
+                if (!isTriggered) {
+                    return TriggerStatus.FALSE;
+                }
+            } catch {
+                return TriggerStatus.REVERT;
+            }
         }
 
         return TriggerStatus.TRUE;
@@ -162,10 +163,11 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, SmartWalletUt
     /*//////////////////////////////////////////////////////////////
                               VERIFY LOGIC
     //////////////////////////////////////////////////////////////*/
-    function _tryToVerifyRequiredAmountAndAllowance(
-        address _smartWallet,
-        bytes32[] memory _subData
-    ) internal view returns (TriggerStatus) {
+    function _tryToVerifyRequiredAmountAndAllowance(address _smartWallet, bytes32[] memory _subData)
+        internal
+        view
+        returns (TriggerStatus)
+    {
         try this.verifyRequiredAmountAndAllowance(_smartWallet, _subData) returns (
             TriggerStatus status
         ) {
