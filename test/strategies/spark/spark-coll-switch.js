@@ -44,6 +44,8 @@ const runSparkCollSwitchTests = () => {
 
         before(async () => {
             const isFork = isNetworkFork();
+            await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', ['0x0']);
+
             senderAcc = (await hre.ethers.getSigners())[0];
             await sendEther(senderAcc, addrs[network].OWNER_ACC, '10');
             botAcc = (await hre.ethers.getSigners())[1];
