@@ -66,26 +66,20 @@ contract CompV3RatioCheck is ActionBase, CompV3RatioHelper {
 
         // if we are doing repay
         if (RatioState(ratioState) == RatioState.IN_REPAY) {
-            // if repay ratio should be better off
-            if (currRatio <= startRatio) {
-                revert BadAfterRatio(startRatio, currRatio);
+            /// @notice If user is subscribed on full repay, currRatio must be exactly 0
+            if (_isRatioZero(targetRatio)) {
+                if (!_isRatioZero(currRatio)) {
+                    revert BadAfterRatio(startRatio, currRatio);
+                }
+            } else {
+                if (currRatio <= startRatio || currRatio > targetRatio + RATIO_OFFSET) {
+                    // Repay: Ratio must increase but not overshoot 'target + offset' to avoid boost after.
+                    revert BadAfterRatio(startRatio, currRatio);
+                }
             }
-
-            // can't repay too much over targetRatio so we don't trigger boost after
-            if (currRatio > (targetRatio + RATIO_OFFSET)) {
-                revert BadAfterRatio(startRatio, currRatio);
-            }
-        }
-
-        // if we are doing boost
-        if (RatioState(ratioState) == RatioState.IN_BOOST) {
-            // if boost ratio should be less
-            if (currRatio >= startRatio) {
-                revert BadAfterRatio(startRatio, currRatio);
-            }
-
-            // can't boost too much under targetRatio so we don't trigger repay after
-            if (currRatio < (targetRatio - RATIO_OFFSET)) {
+        } else {
+            // Boost: Ratio must decrease but not undershoot 'target - offset' to avoid repay after.
+            if (currRatio >= startRatio || currRatio < targetRatio - RATIO_OFFSET) {
                 revert BadAfterRatio(startRatio, currRatio);
             }
         }
