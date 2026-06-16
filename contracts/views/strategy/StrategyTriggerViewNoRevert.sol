@@ -102,51 +102,40 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, SmartWalletUt
     /// @param _triggerCallData - The calldata to pass to the triggers.
     /// @param _additionalTriggerIds - The additional trigger IDs to check
     /// @param _additionalTriggerCallData - The calldata to pass to the additional triggers.
-    /// @param smartWallet - The smart wallet of the subscription.
     /// @return TriggerStatus - The status of the trigger (FALSE, TRUE, REVERT).
     function checkTriggers(
         StrategySub memory _sub,
         bytes[] calldata _triggerCallData,
         bytes4[] calldata _additionalTriggerIds,
-        bytes[] calldata _additionalTriggerCallData,
-        address smartWallet
+        bytes[] calldata _additionalTriggerCallData
     ) public returns (TriggerStatus) {
         Strategy memory strategy;
 
         uint256 strategyId = _sub.strategyOrBundleId;
-
         if (_sub.isBundle) {
             strategyId =
                 BundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(_sub.strategyOrBundleId, 0);
         }
-
         strategy = StrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
 
         bytes4[] memory triggerIds = strategy.triggerIds;
+        TriggerStatus subTriggers = _checkTriggers(triggerIds, _triggerCallData, _sub.triggerData);
+        if (subTriggers != TriggerStatus.TRUE) return subTriggers;
 
+        // We check for additional triggers only if sub TriggerStatus is TRUE
+        bytes[] memory bytesPlaceholder = new bytes[](_additionalTriggerIds.length);
+        return _checkTriggers(_additionalTriggerIds, _additionalTriggerCallData, bytesPlaceholder);
+    }
+
+    function _checkTriggers(
+        bytes4[] memory _triggerIds,
+        bytes[] memory _triggerCallData,
+        bytes[] memory _subTriggerData
+    ) internal returns (TriggerStatus) {
         address triggerAddr;
-
-        for (uint256 i = 0; i < triggerIds.length; i++) {
-            triggerAddr = registry.getAddr(triggerIds[i]);
-            try ITrigger(triggerAddr)
-                .isTriggered(_triggerCallData[i], _sub.triggerData[i]) returns (
-                bool isTriggered
-            ) {
-                if (!isTriggered) {
-                    return TriggerStatus.FALSE;
-                }
-            } catch {
-                return TriggerStatus.REVERT;
-            }
-        }
-
-        bytes memory bytesPlaceholder = "0x";
-
-        // ! Additional triggers
-        for (uint256 i = 0; i < _additionalTriggerIds.length; i++) {
-            triggerAddr = registry.getAddr(_additionalTriggerIds[i]);
-            try ITrigger(triggerAddr)
-                .isTriggered(_additionalTriggerCallData[i], bytesPlaceholder) returns (
+        for (uint256 i = 0; i < _triggerIds.length; i++) {
+            triggerAddr = registry.getAddr(_triggerIds[i]);
+            try ITrigger(triggerAddr).isTriggered(_triggerCallData[i], _subTriggerData[i]) returns (
                 bool isTriggered
             ) {
                 if (!isTriggered) {
