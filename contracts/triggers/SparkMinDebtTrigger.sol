@@ -14,7 +14,7 @@ import { MainnetSparkAddresses } from "../actions/spark/helpers/MainnetSparkAddr
 
 contract SparkMinDebtTrigger is ITrigger, AdminAuth, MainnetSparkAddresses {
     /// @param user address of the user whose position we check
-    /// @param minDebt minimum debt in USD that the user must have for the trigger to return true
+    /// @param minDebt minimum debt in USD (8 decimals) that the user must have for the trigger to return true
     struct CalldataParams {
         address user;
         uint256 minDebt;

@@ -10,7 +10,7 @@ import { IPoolAddressesProvider } from "../interfaces/protocols/aaveV3/IPoolAddr
 contract AaveV3MinDebtTrigger is ITrigger, AdminAuth {
     /// @param user address of the user whose position we check
     /// @param market aaveV3 market address
-    /// @param minDebt minimum debt in USD that the user must have for the trigger to return true
+    /// @param minDebt minimum debt in USD (8 decimals) that the user must have for the trigger to return true
     struct CalldataParams {
         address user;
         address market;
