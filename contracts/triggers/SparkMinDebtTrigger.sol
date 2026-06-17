@@ -15,18 +15,18 @@ import { MainnetSparkAddresses } from "../actions/spark/helpers/MainnetSparkAddr
 contract SparkMinDebtTrigger is ITrigger, AdminAuth, MainnetSparkAddresses {
     /// @param user address of the user whose position we check
     /// @param minDebt minimum debt in USD that the user must have for the trigger to return true
-    struct SubParams {
+    struct CalldataParams {
         address user;
         uint256 minDebt;
     }
 
-    function isTriggered(bytes memory, bytes memory _subData)
+    function isTriggered(bytes memory _calldata, bytes memory)
         external
         view
         override
         returns (bool)
     {
-        SubParams memory params = parseSubInputs(_subData);
+        CalldataParams memory params = parseCallInputs(_calldata);
 
         ISparkPool lendingPool =
             ISparkPool(ISparkPoolAddressesProvider(DEFAULT_SPARK_MARKET).getPool());
@@ -35,13 +35,17 @@ contract SparkMinDebtTrigger is ITrigger, AdminAuth, MainnetSparkAddresses {
         return totalDebtUSD >= params.minDebt;
     }
 
-    function parseSubInputs(bytes memory _subData) public pure returns (SubParams memory params) {
-        params = abi.decode(_subData, (SubParams));
-    }
-
     function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
 
     function isChangeable() public pure override returns (bool) {
         return false;
+    }
+
+    function parseCallInputs(bytes memory _callData)
+        public
+        pure
+        returns (CalldataParams memory params)
+    {
+        params = abi.decode(_callData, (CalldataParams));
     }
 }

@@ -10,22 +10,22 @@ import { ChainlinkPriceLib } from "../utils/ChainlinkPriceLib.sol";
 contract CompV3MinDebtTrigger is ITrigger, AdminAuth {
     using ChainlinkPriceLib for address;
 
+    /// @param user address of the user whose position we check
     /// @param market address of the compoundV3 market
-    /// @param user address of the user that will be used to store the current ratio for.
     /// @param minDebt minimum debt in USD (8 decimals) that the user must have for the trigger to return true
-    struct SubParams {
-        address market;
+    struct CalldataParams {
         address user;
+        address market;
         uint256 minDebt;
     }
 
-    function isTriggered(bytes memory, bytes memory _subData)
+    function isTriggered(bytes memory _calldata, bytes memory)
         external
         view
         override
         returns (bool)
     {
-        SubParams memory triggerData = parseSubInputs(_subData);
+        CalldataParams memory triggerData = parseCallInputs(_calldata);
 
         IComet comet = IComet(triggerData.market);
         address baseToken = comet.baseToken();
@@ -47,7 +47,11 @@ contract CompV3MinDebtTrigger is ITrigger, AdminAuth {
         return false;
     }
 
-    function parseSubInputs(bytes memory _callData) public pure returns (SubParams memory params) {
-        params = abi.decode(_callData, (SubParams));
+    function parseCallInputs(bytes memory _callData)
+        public
+        pure
+        returns (CalldataParams memory params)
+    {
+        params = abi.decode(_callData, (CalldataParams));
     }
 }
