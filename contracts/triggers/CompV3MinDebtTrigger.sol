@@ -12,12 +12,15 @@ contract CompV3MinDebtTrigger is ITrigger, AdminAuth {
 
     /// @param user address of the user whose position we check
     /// @param market address of the compoundV3 market
-    /// @param minDebt minimum debt in USD (8 decimals) that the user must have for the trigger to return true
+    /// @param minDebt minimum debt in whole USD (no decimals, e.g. 5000 for 5000 USD) that the user must have for the trigger to return true
     struct CalldataParams {
         address user;
         address market;
         uint256 minDebt;
     }
+
+    /// @dev getPriceInUSD returns prices with 8 decimals (1e8 == 1 USD).
+    uint256 constant ORACLE_PRECISION = 1e8;
 
     function isTriggered(bytes memory _calldata, bytes memory)
         external
@@ -33,11 +36,9 @@ contract CompV3MinDebtTrigger is ITrigger, AdminAuth {
         uint256 baseTokenPrice = baseToken.getPriceInUSD();
         if (baseTokenPrice == 0) return true;
 
-        // baseToken price has 8 decimals, baseScale == 10 ** baseToken.decimals(),
-        // so totalDebtUSD is denominated in USD with 8 decimals.
-        uint256 totalDebtUSD = totalDebt * baseTokenPrice / comet.baseScale();
-
-        return totalDebtUSD >= triggerData.minDebt;
+        /// @dev totalDebt is denominated in baseToken with baseScale decimals, and baseTokenPrice is denominated in USD with 8 decimals.
+        return
+            totalDebt * baseTokenPrice >= triggerData.minDebt * ORACLE_PRECISION * comet.baseScale();
     }
 
     //solhint-disable-next-line no-empty-blocks

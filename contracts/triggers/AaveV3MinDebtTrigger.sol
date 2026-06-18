@@ -10,12 +10,15 @@ import { IPoolAddressesProvider } from "../interfaces/protocols/aaveV3/IPoolAddr
 contract AaveV3MinDebtTrigger is ITrigger, AdminAuth {
     /// @param user address of the user whose position we check
     /// @param market aaveV3 market address
-    /// @param minDebt minimum debt in USD (8 decimals) that the user must have for the trigger to return true
+    /// @param minDebt minimum debt in whole USD (no decimals, e.g. 5000 for 5000 USD) that the user must have for the trigger to return true
     struct CalldataParams {
         address user;
         address market;
         uint256 minDebt;
     }
+
+    /// @dev totalDebtUSD is denominated in USD with 8 decimals, so 1e8 == 1 USD.
+    uint256 constant PRECISION = 1e8;
 
     function isTriggered(bytes memory _calldata, bytes memory)
         external
@@ -28,7 +31,7 @@ contract AaveV3MinDebtTrigger is ITrigger, AdminAuth {
         IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(params.market).getPool());
         (, uint256 totalDebtUSD,,,,) = lendingPool.getUserAccountData(params.user);
 
-        return totalDebtUSD >= params.minDebt;
+        return totalDebtUSD >= params.minDebt * PRECISION;
     }
 
     function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }

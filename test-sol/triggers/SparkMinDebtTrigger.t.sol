@@ -22,8 +22,11 @@ contract TestSparkMinDebtTrigger is BaseTest {
     /// @dev Mainnet Spark market (PoolAddressesProvider), hardcoded inside the trigger.
     address internal constant MARKET = 0x02C3eA4e34C0cBd694D2adFa2c690EECbC1793eE;
 
-    /// @dev totalDebtBase is denominated in USD with 8 decimals, so 5000 USD == 5000e8.
-    uint256 internal constant MIN_DEBT = 5000e8;
+    /// @dev minDebt is denominated in whole USD (no decimals), so 5000 USD == 5000.
+    uint256 internal constant MIN_DEBT = 5000;
+
+    /// @dev totalDebtBase is reported in USD with 8 decimals; divide by 1e8 to get whole USD (the minDebt unit).
+    uint256 internal constant PRECISION = 1e8;
 
     /// @dev Positions whose debt sits just below MIN_DEBT at the forked block.
     address[5] internal closelyBelowUsers = [
@@ -106,13 +109,13 @@ contract TestSparkMinDebtTrigger is BaseTest {
         }
     }
 
-    /// @dev "No debt" positions; one carries dust (a few base units), so allow negligible (< $1) debt.
+    /// @dev "No debt" positions; one carries dust (< $1), which floors to 0 whole USD.
     function test_should_not_trigger_when_user_has_no_debt() public view {
         for (uint256 i = 0; i < noDebtUsers.length; ++i) {
             address user = noDebtUsers[i];
             uint256 debt = getUserDebt(user);
 
-            assertLt(debt, 1e8, "noDebt user should have no debt at all or negligible debt");
+            assertLt(debt, 1, "noDebt user should have no debt at all or negligible debt");
             assertFalse(isTriggered(user, MIN_DEBT), "should not trigger when user has no debt");
         }
     }
@@ -153,8 +156,10 @@ contract TestSparkMinDebtTrigger is BaseTest {
         return cut.isTriggered(abi.encode(params), bytes(""));
     }
 
+    /// @dev Returns the user's total debt converted to the minDebt unit (whole USD).
     function getUserDebt(address _user) internal view returns (uint256 totalDebtUSD) {
         ISparkPool lendingPool = ISparkPool(ISparkPoolAddressesProvider(MARKET).getPool());
-        (, totalDebtUSD,,,,) = lendingPool.getUserAccountData(_user);
+        (, uint256 totalDebtBase,,,,) = lendingPool.getUserAccountData(_user);
+        totalDebtUSD = totalDebtBase / PRECISION;
     }
 }

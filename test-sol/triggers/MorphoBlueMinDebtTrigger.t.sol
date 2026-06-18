@@ -31,8 +31,11 @@ contract TestMorphoBlueMinDebtTrigger is BaseTest {
     IMorphoBlue internal constant morphoBlue =
         IMorphoBlue(0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb);
 
-    /// @dev minDebt is denominated in USD with 8 decimals, so 5000 USD == 5000e8.
-    uint256 internal constant MIN_DEBT = 5000e8;
+    /// @dev minDebt is denominated in whole USD (no decimals), so 5000 USD == 5000.
+    uint256 internal constant MIN_DEBT = 5000;
+
+    /// @dev totalDebtUSD is reported in USD with 8 decimals; scale MIN_DEBT by this to compare.
+    uint256 internal constant PRECISION = 1e8;
 
     /// @dev EOA that owns the MorphoBlue position we run the trigger against.
     address internal constant USER = address(0xdeAD);
@@ -122,21 +125,22 @@ contract TestMorphoBlueMinDebtTrigger is BaseTest {
         }
 
         uint256 actualDebtUsd = _getDebtUsd(_market, USER);
-        bool expectTriggered = _targetDebtUsd * 1e8 >= MIN_DEBT;
+        uint256 minDebtScaled = MIN_DEBT * PRECISION;
+        bool expectTriggered = _targetDebtUsd >= MIN_DEBT;
         console.log("loan token:", _market.loanToken);
         console.log("target debt USD:", _targetDebtUsd);
         console.log("actual debt USD (8 dec):", actualDebtUsd);
 
         // Sanity: the created position landed on the intended side of the threshold.
         assertEq(
-            actualDebtUsd >= MIN_DEBT,
+            actualDebtUsd >= minDebtScaled,
             expectTriggered,
             "position not created on the intended side of min debt"
         );
 
         assertEq(
             _isTriggered(_market, USER, MIN_DEBT),
-            actualDebtUsd >= MIN_DEBT,
+            actualDebtUsd >= minDebtScaled,
             "trigger must fire iff debt >= minDebt"
         );
     }

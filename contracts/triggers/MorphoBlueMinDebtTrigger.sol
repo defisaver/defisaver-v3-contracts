@@ -19,12 +19,15 @@ contract MorphoBlueMinDebtTrigger is ITrigger, AdminAuth, MainnetMorphoBlueAddre
 
     /// @param user address of the user whose position we check
     /// @param marketId bytes32 representing a MorphoBlue market
-    /// @param minDebt minimum debt in USD (8 decimals) that the user must have for the trigger to return true
+    /// @param minDebt minimum debt in whole USD (no decimals, e.g. 5000 for 5000 USD) that the user must have for the trigger to return true
     struct CalldataParams {
         address user;
         Id marketId; // this is bytes32
         uint256 minDebt;
     }
+
+    /// @dev getPriceInUSD returns prices with 8 decimals (1e8 == 1 USD).
+    uint256 constant ORACLE_PRECISION = 1e8;
 
     function isTriggered(bytes memory _calldata, bytes memory)
         external
@@ -42,10 +45,10 @@ contract MorphoBlueMinDebtTrigger is ITrigger, AdminAuth, MainnetMorphoBlueAddre
         uint256 loanTokenPrice = marketParams.loanToken.getPriceInUSD();
         if (loanTokenPrice == 0) return true;
 
-        uint256 totalDebtUSD =
-            totalDebt * loanTokenPrice / (10 ** IERC20(marketParams.loanToken).decimals());
+        uint256 loanTokenScale = 10 ** IERC20(marketParams.loanToken).decimals();
 
-        return totalDebtUSD >= params.minDebt;
+        /// @dev totalDebt is denominated in loanToken with loanTokenScale decimals, and loanTokenPrice is denominated in USD with 8 decimals.
+        return totalDebt * loanTokenPrice >= params.minDebt * ORACLE_PRECISION * loanTokenScale;
     }
 
     //solhint-disable-next-line no-empty-blocks

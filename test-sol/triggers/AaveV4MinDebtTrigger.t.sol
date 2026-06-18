@@ -22,9 +22,8 @@ contract TestAaveV4MinDebtTrigger is BaseTest {
     /// @dev minDebt is denominated in whole USD (no decimals), so 5000 USD == 5000.
     uint256 internal constant MIN_DEBT = 5000;
 
-    /// @dev Aave V4 expresses the position value with 26 decimals (1e26 == 1 USD), scaled by RAY (1e27).
-    ///      Dividing totalDebtValueRay by 1e53 yields the debt in whole USD (the minDebt unit).
-    uint256 internal constant DEBT_RAY_TO_MIN_DEBT = 1e53;
+    /// @dev totalDebtValueRay is a USD value (1e26 == 1 USD) scaled by RAY (1e27); divide by 1e53 to get whole USD (the minDebt unit).
+    uint256 internal constant PRECISION = 1e53;
 
     /// @dev Positions whose debt is clearly above MIN_DEBT at the forked block.
     address[5] internal clearlyAboveUsers = [
@@ -162,6 +161,6 @@ contract TestAaveV4MinDebtTrigger is BaseTest {
     /// @dev Returns the user's total debt converted to the minDebt unit (whole USD).
     function getUserDebt(address _user) internal view returns (uint256 totalDebtUSD) {
         uint256 totalDebtValueRay = ISpoke(MARKET).getUserAccountData(_user).totalDebtValueRay;
-        totalDebtUSD = totalDebtValueRay / DEBT_RAY_TO_MIN_DEBT;
+        totalDebtUSD = totalDebtValueRay / PRECISION;
     }
 }

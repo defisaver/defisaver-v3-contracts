@@ -22,8 +22,11 @@ contract TestAaveV3MinDebtTrigger is BaseTest {
     /// @dev Mainnet AaveV3 main market (PoolAddressesProvider).
     address internal constant MARKET = 0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e;
 
-    /// @dev totalDebtBase is denominated in USD with 8 decimals, so 5000 USD == 5000e8.
-    uint256 internal constant MIN_DEBT = 5000e8;
+    /// @dev minDebt is denominated in whole USD (no decimals), so 5000 USD == 5000.
+    uint256 internal constant MIN_DEBT = 5000;
+
+    /// @dev totalDebtBase is reported in USD with 8 decimals; divide by 1e8 to get whole USD (the minDebt unit).
+    uint256 internal constant PRECISION = 1e8;
 
     /// @dev Positions whose debt sits just below MIN_DEBT at the forked block.
     address[7] internal closelyBelowUsers = [
@@ -156,8 +159,10 @@ contract TestAaveV3MinDebtTrigger is BaseTest {
         return cut.isTriggered(abi.encode(params), bytes(""));
     }
 
+    /// @dev Returns the user's total debt converted to the minDebt unit (whole USD).
     function getUserDebt(address _user) internal view returns (uint256 totalDebtUSD) {
         IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(MARKET).getPool());
-        (, totalDebtUSD,,,,) = lendingPool.getUserAccountData(_user);
+        (, uint256 totalDebtBase,,,,) = lendingPool.getUserAccountData(_user);
+        totalDebtUSD = totalDebtBase / PRECISION;
     }
 }
