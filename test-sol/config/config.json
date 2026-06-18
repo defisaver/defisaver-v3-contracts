@@ -34,6 +34,7 @@
     "AaveV3View": { "mainnet": 24741489 },
     "AaveV3RatioHelper": { "mainnet": 25250678 },
     "AaveV3MinDebtTrigger": { "mainnet": 25337347 },
+    "AaveV4MinDebtTrigger": { "mainnet": 25344002 },
     "SparkMinDebtTrigger": { "mainnet": 25337347 },
     "AaveV3": {
         "lightTesting": false,
