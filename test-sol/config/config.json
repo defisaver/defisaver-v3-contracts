@@ -36,6 +36,7 @@
     "AaveV3MinDebtTrigger": { "mainnet": 25337347 },
     "AaveV4MinDebtTrigger": { "mainnet": 25344002 },
     "SparkMinDebtTrigger": { "mainnet": 25337347 },
+    "McdMinDebtTrigger": { "mainnet": 25351112 },
     "AaveV3": {
         "lightTesting": false,
         "lightPairs": [{ "supplyAsset": "WETH", "borrowAsset": "DAI" }],
