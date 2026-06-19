@@ -12,6 +12,7 @@ import {
 } from "../../contracts/actions/morpho-blue/helpers/MorphoBlueLib.sol";
 import { ChainlinkPriceLib } from "../../contracts/utils/ChainlinkPriceLib.sol";
 import { IERC20 } from "../../contracts/interfaces/token/IERC20.sol";
+import { IFeedRegistry } from "../../contracts/interfaces/protocols/chainlink/IFeedRegistry.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
 import { console } from "forge-std/console.sol";
@@ -36,6 +37,9 @@ contract TestMorphoBlueMinDebtTrigger is BaseTest {
 
     /// @dev totalDebtUSD is reported in USD with 8 decimals; scale MIN_DEBT by this to compare.
     uint256 internal constant PRECISION = 1e8;
+
+    /// @dev Chainlink Feed Registry on mainnet, used by ChainlinkPriceLib for USD prices.
+    address internal constant CHAINLINK_FEED_REGISTRY = 0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf;
 
     /// @dev EOA that owns the MorphoBlue position we run the trigger against.
     address internal constant USER = address(0xdeAD);
@@ -102,6 +106,29 @@ contract TestMorphoBlueMinDebtTrigger is BaseTest {
 
     function test_should_not_trigger_when_user_has_no_debt() public {
         _baseTestAllMarkets(0);
+    }
+
+    /// @notice When the loan token has no usable price (Chainlink returns 0), the trigger
+    ///         should always return true, even if the user has no debt.
+    function test_should_trigger_when_price_is_zero_even_with_no_debt() public {
+        MarketParams memory market = markets[0];
+        address user = address(0xBEEF); // fresh address, no position -> 0 debt
+
+        // Baseline: with a real price and no debt, the trigger must not fire.
+        assertFalse(
+            _isTriggered(market, user, MIN_DEBT), "no debt should not trigger with real price"
+        );
+
+        // Force the loan token's USD price to 0 for all Chainlink registry lookups.
+        vm.mockCall(
+            CHAINLINK_FEED_REGISTRY,
+            abi.encodeWithSelector(IFeedRegistry.latestRoundData.selector),
+            abi.encode(uint80(0), int256(0), uint256(0), uint256(0), uint80(0))
+        );
+
+        assertTrue(_isTriggered(market, user, MIN_DEBT), "zero price must return true");
+
+        vm.clearMockedCalls();
     }
 
     function _baseTestAllMarkets(uint256 _targetDebtUsd) internal {

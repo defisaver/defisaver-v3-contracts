@@ -4,6 +4,7 @@ pragma solidity =0.8.24;
 import { CompV3MinDebtTrigger } from "../../contracts/triggers/CompV3MinDebtTrigger.sol";
 import { IComet } from "../../contracts/interfaces/protocols/compoundV3/IComet.sol";
 import { ChainlinkPriceLib } from "../../contracts/utils/ChainlinkPriceLib.sol";
+import { IFeedRegistry } from "../../contracts/interfaces/protocols/chainlink/IFeedRegistry.sol";
 
 import { CompUser } from "../utils/compV3/CompUser.sol";
 import { Addresses } from "../utils/helpers/MainnetAddresses.sol";
@@ -26,6 +27,9 @@ contract TestCompV3MinDebtTrigger is BaseTest {
 
     /// @dev totalDebtUSD is reported in USD with 8 decimals; scale MIN_DEBT by this to compare.
     uint256 internal constant PRECISION = 1e8;
+
+    /// @dev Chainlink Feed Registry on mainnet, used by ChainlinkPriceLib for USD prices.
+    address internal constant CHAINLINK_FEED_REGISTRY = 0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf;
 
     /// @dev CompV3 markets (Comets) to run every case against.
     address[6] internal markets = [
@@ -65,6 +69,29 @@ contract TestCompV3MinDebtTrigger is BaseTest {
 
     function test_should_not_trigger_when_user_has_no_debt() public {
         _baseTestAllMarkets(0);
+    }
+
+    /// @notice When the base token has no usable price (Chainlink returns 0), the trigger
+    ///         should always return true, even if the user has no debt.
+    function test_should_trigger_when_price_is_zero_even_with_no_debt() public {
+        address market = Addresses.COMET_USDC;
+        address user = address(0xBEEF); // fresh address, no position -> 0 debt
+
+        // Baseline: with a real price and no debt, the trigger must not fire.
+        assertFalse(
+            _isTriggered(market, user, MIN_DEBT), "no debt should not trigger with real price"
+        );
+
+        // Force the base token's USD price to 0 for all Chainlink registry lookups.
+        vm.mockCall(
+            CHAINLINK_FEED_REGISTRY,
+            abi.encodeWithSelector(IFeedRegistry.latestRoundData.selector),
+            abi.encode(uint80(0), int256(0), uint256(0), uint256(0), uint80(0))
+        );
+
+        assertTrue(_isTriggered(market, user, MIN_DEBT), "zero price must return true");
+
+        vm.clearMockedCalls();
     }
 
     function _baseTestAllMarkets(uint256 _targetDebtUsd) internal {

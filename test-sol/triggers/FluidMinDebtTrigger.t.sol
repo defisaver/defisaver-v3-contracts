@@ -8,6 +8,7 @@ import {
 } from "../../contracts/interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
 import { ChainlinkPriceLib } from "../../contracts/utils/ChainlinkPriceLib.sol";
 import { IERC20 } from "../../contracts/interfaces/token/IERC20.sol";
+import { IFeedRegistry } from "../../contracts/interfaces/protocols/chainlink/IFeedRegistry.sol";
 
 import { FluidTestBase } from "../actions/fluid/FluidTestBase.t.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
@@ -36,6 +37,9 @@ contract TestFluidMinDebtTrigger is FluidTestBase {
 
     /// @dev getPriceInUSD returns prices with 8 decimals; scale MIN_DEBT by this to compare.
     uint256 internal constant PRECISION = 1e8;
+
+    /// @dev Chainlink Feed Registry on mainnet, used by ChainlinkPriceLib for USD prices.
+    address internal constant CHAINLINK_FEED_REGISTRY = 0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf;
 
     /*//////////////////////////////////////////////////////////////////////////
                                    SETUP FUNCTION
@@ -69,6 +73,36 @@ contract TestFluidMinDebtTrigger is FluidTestBase {
 
     function test_should_not_trigger_when_user_has_no_debt() public {
         _baseTestAllVaults(0);
+    }
+
+    /// @notice When the debt token has no usable price (Chainlink returns 0), the trigger
+    ///         should always return true, even if the user has no debt.
+    function test_should_trigger_when_price_is_zero_even_with_no_debt() public {
+        // Open a supply-only (zero debt) position on the first available vault.
+        address vault = _firstAvailableVault();
+        uint256 nftId = executeFluidVaultT1Open(vault, 30_000, 0, wallet, address(openAction));
+        assertFalse(nftId == 0, "failed to open fluid position");
+
+        // Baseline: with a real price and no debt, the trigger must not fire.
+        assertFalse(_isTriggered(nftId, MIN_DEBT), "no debt should not trigger with real price");
+
+        // Force the debt token's USD price to 0 for all Chainlink registry lookups.
+        vm.mockCall(
+            CHAINLINK_FEED_REGISTRY,
+            abi.encodeWithSelector(IFeedRegistry.latestRoundData.selector),
+            abi.encode(uint80(0), int256(0), uint256(0), uint256(0), uint80(0))
+        );
+
+        assertTrue(_isTriggered(nftId, MIN_DEBT), "zero price must return true");
+
+        vm.clearMockedCalls();
+    }
+
+    function _firstAvailableVault() internal view returns (address) {
+        for (uint256 i = 0; i < vaults.length; ++i) {
+            if (!isMissingVault(vaults[i])) return vaults[i];
+        }
+        revert("no fluid vault available");
     }
 
     /*//////////////////////////////////////////////////////////////////////////
