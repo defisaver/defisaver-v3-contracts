@@ -8050,6 +8050,89 @@ const createSparkGenericRepayStrategy = () => {
     return sparkGenericRepayStrategy.encodeForDsProxyCall();
 };
 
+const createSparkGenericFLRepayStrategy = () => {
+    const sparkGenericFLRepayStrategy = new dfs.Strategy('SparkGenericFLRepayStrategy');
+
+    sparkGenericFLRepayStrategy.addSubSlot('&targetRatio', 'uint256');
+    sparkGenericFLRepayStrategy.addSubSlot('&checkRepayState', 'uint8');
+    sparkGenericFLRepayStrategy.addSubSlot('&marketAddr', 'address');
+    sparkGenericFLRepayStrategy.addSubSlot('&user', 'address');
+
+    const sparkTrigger = new dfs.triggers.SparkRatioTrigger(nullAddress, nullAddress, '0', '0');
+    sparkGenericFLRepayStrategy.addTrigger(sparkTrigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.SparkFlashLoanAction(
+            ['%collAsset'], // sent by backend
+            ['%flAmount'], // sent by backend
+            nullAddress,
+            [],
+        ),
+    );
+
+    sparkGenericFLRepayStrategy.addAction(flAction);
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collAddr', // must stay variable
+            '%debtAddr', // must stay variable
+            '%amount', // can't hard code because of potential FL fee
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // must stay variable backend sets gasCost
+        '%debtAddr', // must stay variable as debt can differ
+        '$2', // hardcoded output from sell action
+        '%dfsFeeDivider', // defaults at 0.05%
+    );
+
+    const paybackAction = new dfs.actions.spark.SparkPaybackAction(
+        '%useDefaultMarket', // hardcoded to false
+        '&marketAddr', // from subData
+        '$3', // amount hardcoded - output of feeTakingAction
+        '&proxy', // proxy hardcoded
+        '%rateMode', // variable type of debt
+        '%debtAddr', // used just for sdk not actually sent
+        '%assetId', // must be variable
+        '%useOnBehalf', // hardcoded true
+        '&user', // EOA/SW addr from subData
+    );
+
+    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+        '%spCollTokenAddr', // spToken address for collateral
+        '&user', // EOA/SW addr from subData
+        '$1', // output of FL action
+    );
+
+    const withdrawAction = new dfs.actions.spark.SparkWithdrawAction(
+        '%useDefaultMarket', // hardcoded to false
+        '&marketAddr', // from subData
+        '$5', // repay fl amount
+        '%flAddr', // flAddr not hardcoded (tx will fail if not returned to correct addr)
+        '%assetId', // must stay variable can choose diff. asset
+    );
+
+    const checkerAction = new dfs.actions.checkers.SparkRatioCheckAction(
+        '&checkRepayState',
+        '&targetRatio',
+        '&marketAddr',
+        '&user',
+    );
+
+    sparkGenericFLRepayStrategy.addAction(sellAction);
+    sparkGenericFLRepayStrategy.addAction(feeTakingAction);
+    sparkGenericFLRepayStrategy.addAction(paybackAction);
+    sparkGenericFLRepayStrategy.addAction(pullTokenAction);
+    sparkGenericFLRepayStrategy.addAction(withdrawAction);
+    sparkGenericFLRepayStrategy.addAction(checkerAction);
+
+    return sparkGenericFLRepayStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createRepayStrategy,
     createFLRepayStrategy,
@@ -8181,4 +8264,5 @@ module.exports = {
     createAaveV4FLCollateralSwitchStrategy,
     createSparkFLCollateralSwitchStrategy,
     createSparkGenericRepayStrategy,
+    createSparkGenericFLRepayStrategy,
 };
