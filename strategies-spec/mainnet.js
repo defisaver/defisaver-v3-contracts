@@ -2706,7 +2706,7 @@ const createSparkRepayStrategy = () => {
         formatExchangeObj(
             '%collAddr', // must stay variable
             '%debtAddr', // must stay variable
-            '$1', //  hardcoded piped from fee taking
+            '$1', //  hardcoded piped from withdraw action
             '%exchangeWrapper', // can pick exchange wrapper
         ),
         '&proxy', // hardcoded
@@ -2716,7 +2716,7 @@ const createSparkRepayStrategy = () => {
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '0', // must stay variable backend sets gasCost
         '%debtAddr', // must stay variable as debt can differ
-        '$2', // hardcoded output from withdraw action
+        '$2', // hardcoded output from sell action
         '%dfsFeeDivider', // defaults at 0.05%
     );
 
