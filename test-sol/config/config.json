@@ -37,6 +37,16 @@
     "AaveV4MinDebtTrigger": { "mainnet": 25344002 },
     "SparkMinDebtTrigger": { "mainnet": 25337347 },
     "McdMinDebtTrigger": { "mainnet": 25351112 },
+    "ETH-ltv0": { "mainnet": 24929244 },
+    "Spark": {
+        "lightTesting": false,
+        "lightPairs": [{ "supplyAsset": "WETH", "borrowAsset": "USDC" }],
+        "fullPairs": [
+            { "supplyAsset": "WETH", "borrowAsset": "USDC" },
+            { "supplyAsset": "WETH", "borrowAsset": "USDT" },
+            { "supplyAsset": "WBTC", "borrowAsset": "USDT" }
+        ]
+    },
     "AaveV3": {
         "lightTesting": false,
         "lightPairs": [{ "supplyAsset": "WETH", "borrowAsset": "DAI" }],

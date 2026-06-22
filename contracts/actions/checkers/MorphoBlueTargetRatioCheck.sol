@@ -11,6 +11,8 @@ import { ActionBase } from "../ActionBase.sol";
 contract MorphoBlueTargetRatioCheck is ActionBase, MorphoBlueHelper {
     /// @notice 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 5e16;
+    /// @notice We are checking for 5% RATIO_OFFSET only when the target ratio is < 999%
+    uint256 internal constant RATIO_LIMIT = 999e16;
 
     error BadAfterRatio(uint256 currentRatio, uint256 targetRatio);
 
@@ -51,11 +53,22 @@ contract MorphoBlueTargetRatioCheck is ActionBase, MorphoBlueHelper {
 
         uint256 currRatio = getRatioUsingParams(inputData.marketParams, inputData.user);
 
-        if (
-            currRatio > (inputData.targetRatio + RATIO_OFFSET)
-                || currRatio < (inputData.targetRatio - RATIO_OFFSET)
-        ) {
-            revert BadAfterRatio(currRatio, inputData.targetRatio);
+        /// @notice If `targetRatio` is 999% or more then skip `RATIO_OFFSET` check because it is very hard to be precise under 5%.
+        if (inputData.targetRatio < RATIO_LIMIT) {
+            /// @notice If user is subscribed on full repay, currRatio must be exactly 0
+            if (_isRatioZero(inputData.targetRatio)) {
+                if (!_isRatioZero(currRatio)) {
+                    revert BadAfterRatio(currRatio, inputData.targetRatio);
+                }
+            } else {
+                /// @notice Normal repay/boost on price with target ratio, we accept 5% offset
+                if (
+                    currRatio > (inputData.targetRatio + RATIO_OFFSET)
+                        || currRatio < (inputData.targetRatio - RATIO_OFFSET)
+                ) {
+                    revert BadAfterRatio(currRatio, inputData.targetRatio);
+                }
+            }
         }
 
         emit ActionEvent("MorphoBlueTargetRatioCheck", abi.encode(currRatio));

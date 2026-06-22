@@ -7899,6 +7899,85 @@ const createAaveV4FLCollateralSwitchStrategy = () => {
     return s.encodeForDsProxyCall();
 };
 
+const createSparkFLCollateralSwitchStrategy = () => {
+    const sparkFLCollateralSwitchStrategy = new dfs.Strategy('SparkFLCollateralSwitchStrategy');
+
+    sparkFLCollateralSwitchStrategy.addSubSlot('&fromAsset', 'address');
+    sparkFLCollateralSwitchStrategy.addSubSlot('&fromAssetId', 'uint16');
+    sparkFLCollateralSwitchStrategy.addSubSlot('&toAsset', 'address');
+    sparkFLCollateralSwitchStrategy.addSubSlot('&toAssetId', 'uint16');
+    sparkFLCollateralSwitchStrategy.addSubSlot('&marketAddr', 'address');
+    sparkFLCollateralSwitchStrategy.addSubSlot('&amountToSwitch', 'uint256');
+    sparkFLCollateralSwitchStrategy.addSubSlot('&useOnBehalf', 'bool');
+
+    const trigger = new dfs.triggers.SparkQuotePriceTrigger(nullAddress, nullAddress, '0', '0');
+    sparkFLCollateralSwitchStrategy.addTrigger(trigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%fromAsset'], // Sent by backend.
+            ['%flAmount'], // Sent by backend.
+            // For maxUint256 amount use current fromAsset balance instead of '&amountToSwitch'.
+            // The maximum we can withdraw later is '&amountToSwitch', so this fl amount should be lowered for any fl fees so that:
+            // flAmount + flAmount * flFee = '&amountToSwitch'
+            // flAmount = '&amountToSwitch' / (1 + flFee)
+        ),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&fromAsset',
+            '&toAsset',
+            '%flAmount', // Sent by backend.
+            '%exchangeWrapper', // Sent by backend.
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // Sent by backend.
+        '&toAsset',
+        '$2',
+    );
+    const supplyAction = new dfs.actions.spark.SparkSupplyAction(
+        '%false', // useDefaultMarket - Sent by backend.
+        '&marketAddr',
+        '$3',
+        '&proxy',
+        '&toAsset',
+        '&toAssetId',
+        '%true', // enableAsColl - Sent by backend.
+        '&useOnBehalf',
+        '%address(0)', // onBehalf - Sent by backend.
+    );
+    const withdrawAction = new dfs.actions.spark.SparkWithdrawAction(
+        '%false', // useDefaultMarket - Sent by backend.
+        '&marketAddr',
+        '&amountToSwitch',
+        '&proxy',
+        '&fromAssetId',
+    );
+    const returnFLAction = new dfs.actions.basic.SendTokenAction(
+        '&fromAsset',
+        '%flAddress', // Sent by backend.
+        '$1',
+    );
+    const returnAnyDust = new dfs.actions.basic.SendTokenAndUnwrapAction(
+        '&fromAsset',
+        '&eoa',
+        '%max(uint)', // Sent by backend.
+    );
+
+    sparkFLCollateralSwitchStrategy.addAction(flAction);
+    sparkFLCollateralSwitchStrategy.addAction(sellAction);
+    sparkFLCollateralSwitchStrategy.addAction(feeTakingAction);
+    sparkFLCollateralSwitchStrategy.addAction(supplyAction);
+    sparkFLCollateralSwitchStrategy.addAction(withdrawAction);
+    sparkFLCollateralSwitchStrategy.addAction(returnFLAction);
+    sparkFLCollateralSwitchStrategy.addAction(returnAnyDust);
+
+    return sparkFLCollateralSwitchStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createRepayStrategy,
     createFLRepayStrategy,
@@ -8028,4 +8107,5 @@ module.exports = {
     createAaveV4FLCloseToDebtStrategy,
     createAaveV4FLCloseToCollStrategy,
     createAaveV4FLCollateralSwitchStrategy,
+    createSparkFLCollateralSwitchStrategy,
 };
