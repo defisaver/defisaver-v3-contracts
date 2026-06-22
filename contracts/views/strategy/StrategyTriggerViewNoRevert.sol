@@ -15,22 +15,11 @@ import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { StrategyStorage } from "../../core/strategy/StrategyStorage.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
-import { StrategyIDs } from "./StrategyIDs.sol";
-import { AaveV3Helper } from "../../actions/aaveV3/helpers/AaveV3Helper.sol";
 
 /// @title StrategyTriggerViewNoRevert - Helper contract to check whether a trigger is triggered or not for a given sub.
 /// @dev This contract is designed to avoid reverts from checking triggers.
-contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, SmartWalletUtils, AaveV3Helper {
+contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, SmartWalletUtils {
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
-
-    address internal constant DEFAULT_SPARK_MARKET_MAINNET =
-        0x02C3eA4e34C0cBd694D2adFa2c690EECbC1793eE;
-
-    uint256 public constant MIN_DEBT_IN_USD_MAINNET = 5000 * 1e8;
-    uint256 public constant MIN_DEBT_IN_USD_L2 = 50 * 1e8;
-
-    using StrategyIDs for uint256;
-    using TokenUtils for address;
 
     enum TriggerStatus {
         FALSE,
@@ -135,6 +124,8 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, SmartWalletUt
         address triggerAddr;
         for (uint256 i = 0; i < _triggerIds.length; i++) {
             triggerAddr = registry.getAddr(_triggerIds[i]);
+            if (triggerAddr == address(0)) return TriggerStatus.REVERT;
+
             try ITrigger(triggerAddr).isTriggered(_triggerCallData[i], _subTriggerData[i]) returns (
                 bool isTriggered
             ) {
@@ -146,99 +137,6 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, SmartWalletUt
             }
         }
 
-        return TriggerStatus.TRUE;
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                              VERIFY LOGIC
-    //////////////////////////////////////////////////////////////*/
-    function _tryToVerifyRequiredAmountAndAllowance(address _smartWallet, bytes32[] memory _subData)
-        internal
-        view
-        returns (TriggerStatus)
-    {
-        try this.verifyRequiredAmountAndAllowance(_smartWallet, _subData) returns (
-            TriggerStatus status
-        ) {
-            return status;
-        } catch {
-            return TriggerStatus.REVERT;
-        }
-    }
-
-    function verifyRequiredAmountAndAllowance(address _smartWallet, bytes32[] memory _subData)
-        external
-        view
-        returns (TriggerStatus)
-    {
-        address sellTokenAddr = address(uint160(uint256(_subData[0])));
-        uint256 desiredAmount = uint256(_subData[2]);
-
-        address tokenHolder = _fetchOwnerOrWallet(_smartWallet);
-        bool hasEnoughBalance = sellTokenAddr.getBalance(tokenHolder) >= desiredAmount;
-
-        if (tokenHolder != _smartWallet) {
-            uint256 currentAllowance = IERC20(sellTokenAddr).allowance(tokenHolder, _smartWallet);
-            bool hasEnoughAllowance = currentAllowance >= desiredAmount;
-            return
-                (hasEnoughBalance && hasEnoughAllowance) ? TriggerStatus.TRUE : TriggerStatus.FALSE;
-        }
-
-        return hasEnoughBalance ? TriggerStatus.TRUE : TriggerStatus.FALSE;
-    }
-
-    function _verifyAaveV3MinDebtPosition(address _smartWallet)
-        internal
-        view
-        returns (TriggerStatus)
-    {
-        /// @dev AaveV3 automation only supports Core market at the moment (Default market)
-        IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(DEFAULT_AAVE_MARKET).getPool());
-        (, uint256 totalDebtUSD,,,,) = lendingPool.getUserAccountData(_smartWallet);
-        return _hasEnoughMinDebtInUSD(totalDebtUSD) ? TriggerStatus.TRUE : TriggerStatus.FALSE;
-    }
-
-    function _verifySparkMinDebtPosition(address _smartWallet)
-        internal
-        view
-        returns (TriggerStatus)
-    {
-        /// @dev Spark automation is only deployed on Mainnet, so we can hardcode the market address
-        IPoolV3 lendingPool =
-            IPoolV3(IPoolAddressesProvider(DEFAULT_SPARK_MARKET_MAINNET).getPool());
-        (, uint256 totalDebtUSD,,,,) = lendingPool.getUserAccountData(_smartWallet);
-        return _hasEnoughMinDebtInUSD(totalDebtUSD) ? TriggerStatus.TRUE : TriggerStatus.FALSE;
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                                HELPERS
-    //////////////////////////////////////////////////////////////*/
-    function _hasEnoughMinDebtInUSD(uint256 _userDebtInUSD) internal view returns (bool) {
-        if (block.chainid == 1) {
-            return _userDebtInUSD >= MIN_DEBT_IN_USD_MAINNET;
-        }
-
-        return _userDebtInUSD >= MIN_DEBT_IN_USD_L2;
-    }
-
-    function _tryToVerifyAaveV3Conditions(address _smartWallet)
-        internal
-        view
-        returns (TriggerStatus)
-    {
-        try this.verifyAaveV3Conditions(_smartWallet) returns (TriggerStatus status) {
-            return status;
-        } catch {
-            return TriggerStatus.REVERT;
-        }
-    }
-
-    function verifyAaveV3Conditions(address _smartWallet) external view returns (TriggerStatus) {
-        // If not enough debt, return FALSE
-        if (_verifyAaveV3MinDebtPosition(_smartWallet) == TriggerStatus.FALSE) {
-            return TriggerStatus.FALSE;
-        }
-        // Otherwise, return TRUE
         return TriggerStatus.TRUE;
     }
 }

@@ -3,39 +3,46 @@
 pragma solidity =0.8.24;
 
 import { BaseTest } from "../utils/BaseTest.sol";
-import { Addresses } from "../utils/helpers/MainnetAddresses.sol";
-import { SmartWallet } from "../utils/SmartWallet.sol";
+import { RegistryUtils } from "../utils/RegistryUtils.sol";
 import {
     StrategyTriggerViewNoRevert
 } from "../../contracts/views/strategy/StrategyTriggerViewNoRevert.sol";
-import { AaveV3CollateralSwitch } from "../../contracts/actions/aaveV3/AaveV3CollateralSwitch.sol";
-import { IPoolV3 } from "../../contracts/interfaces/protocols/aaveV3/IPoolV3.sol";
-import {
-    IPoolAddressesProvider
-} from "../../contracts/interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
-import { IDSProxy } from "../../contracts/interfaces/DS/IDSProxy.sol";
+import { BundleStorage } from "../../contracts/core/strategy/BundleStorage.sol";
+import { StrategyStorage } from "../../contracts/core/strategy/StrategyStorage.sol";
+import { AaveV3MinDebtTrigger } from "../../contracts/triggers/AaveV3MinDebtTrigger.sol";
+import { AaveV3RatioTrigger } from "../../contracts/triggers/AaveV3RatioTrigger.sol";
+import { ITrigger } from "../../contracts/interfaces/core/ITrigger.sol";
 
-import { AaveV3Supply } from "../../contracts/actions/aaveV3/AaveV3Supply.sol";
-import { AaveV3Borrow } from "../../contracts/actions/aaveV3/AaveV3Borrow.sol";
-import { SparkSupply } from "../../contracts/actions/spark/SparkSupply.sol";
-import { SparkBorrow } from "../../contracts/actions/spark/SparkBorrow.sol";
+contract TestStrategyTriggerViewNoRevert is BaseTest, RegistryUtils, StrategyTriggerViewNoRevert {
+    /*//////////////////////////////////////////////////////////////////////////
+                                    CONSTANTS
+    //////////////////////////////////////////////////////////////////////////*/
+    /// @dev Smart wallet that owns the AaveV3 position behind the real repay sub (subId 2154).
+    address internal constant AAVE_V3_POSITION_OWNER = 0x2D407e8245664BA6485a16CFDDdC62CA24218070;
 
-import { IPoolV3 } from "../../contracts/interfaces/protocols/aaveV3/IPoolV3.sol";
-import { ISparkPool } from "../../contracts/interfaces/protocols/spark/ISparkPool.sol";
-import {
-    IPoolAddressesProvider
-} from "../../contracts/interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
-import {
-    ISparkPoolAddressesProvider
-} from "../../contracts/interfaces/protocols/spark/ISparkPoolAddressesProvider.sol";
+    /// @dev AaveV3 repay bundle the sub is subscribed to on mainnet.
+    uint64 internal constant AAVE_V3_REPAY_BUNDLE_ID = 8;
 
-contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRevert {
+    /// @dev Mainnet AaveV3 main market (PoolAddressesProvider), the market the sub points at.
+    address internal constant AAVE_V3_MARKET = 0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e;
+
+    /// @dev Registry id the additional AaveV3MinDebtTrigger is registered under in setUp.
+    bytes4 internal constant AAVE_V3_MIN_DEBT_TRIGGER_ID =
+        bytes4(keccak256("AaveV3MinDebtTrigger"));
+
+    /// @dev minDebt is expressed in whole USD (no decimals). 5000 == 5000 USD, the production floor.
+    uint256 internal constant MIN_DEBT = 5000;
+
     /*//////////////////////////////////////////////////////////////////////////
                                     VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
-    SmartWallet wallet;
-    address sender;
-    address walletAddr;
+    AaveV3MinDebtTrigger internal aaveV3MinDebtTrigger;
+
+    /// @dev Sub trigger (AaveV3RatioTrigger) address resolved from the repay bundle - mock target.
+    address internal ratioTriggerAddr;
+
+    /// @dev Additional trigger (AaveV3MinDebtTrigger) address registered in setUp - mock target.
+    address internal minDebtTriggerAddr;
 
     /*//////////////////////////////////////////////////////////////////////////
                                    SETUP FUNCTION
@@ -43,236 +50,179 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRever
     function setUp() public override {
         forkFromEnv("StrategyTriggerViewNoRevert");
 
-        wallet = new SmartWallet(bob);
-        sender = wallet.owner();
-        walletAddr = wallet.walletAddr();
-    }
-
-    function test_verifyRequiredAmountAndAllowance() public {
-        address token = Addresses.USDC_ADDR;
-        uint256 amount = uint256(5000);
-
-        bytes32[] memory _subData = new bytes32[](4);
-        _subData[0] = bytes32(uint256(uint160(token)));
-        _subData[2] = bytes32(amount);
-
-        // No balance, no allowance, trigger should be false
-        assertEq(
-            uint256(_tryToVerifyRequiredAmountAndAllowance(walletAddr, _subData)),
-            uint256(TriggerStatus.FALSE),
-            "trigger status should be false"
-        );
-
-        // Give balance
-        gibTokens(bob, token, amount);
-
-        // Has balance, no allowance, trigger should be false
-        assertEq(
-            uint256(_tryToVerifyRequiredAmountAndAllowance(walletAddr, _subData)),
-            uint256(TriggerStatus.FALSE),
-            "trigger status should be false"
-        );
-
-        // Give allowance
-        approveAsSender(sender, token, walletAddr, amount);
-
-        // Has balance, has allowance, trigger should be true
-        assertEq(
-            uint256(_tryToVerifyRequiredAmountAndAllowance(walletAddr, _subData)),
-            uint256(TriggerStatus.TRUE),
-            "trigger status should be true"
-        );
-    }
-
-    function test_verifyRequiredAmountAndAllowance_with_revert() public view {
-        bytes32[] memory _subData = new bytes32[](0);
-
-        // Empty subData should revert
-        assertEq(
-            uint256(_tryToVerifyRequiredAmountAndAllowance(walletAddr, _subData)),
-            uint256(TriggerStatus.REVERT),
-            "trigger status should be revert"
-        );
-
-        bytes32[] memory _subData2 = new bytes32[](1);
-        _subData2[0] = bytes32(uint256(uint160(address(0))));
-
-        // Invalid token address should revert
-        assertEq(
-            uint256(_tryToVerifyRequiredAmountAndAllowance(walletAddr, _subData2)),
-            uint256(TriggerStatus.REVERT),
-            "trigger status should be revert"
-        );
-    }
-
-    function test_verifyAaveV3LeverageManagementConditions() public {
-        SmartWallet walletWithEnoughDebt = new SmartWallet(jane);
-        _createAaveV3Position(
-            DEFAULT_AAVE_MARKET,
-            Addresses.WETH_ADDR,
-            10e18,
-            Addresses.USDC_ADDR,
-            6000e6,
-            walletWithEnoughDebt
-        );
-        assertEq(
-            uint256(_verifyAaveV3MinDebtPosition(walletWithEnoughDebt.walletAddr())),
-            uint256(TriggerStatus.TRUE),
-            "trigger status should be true"
-        );
-
-        SmartWallet walletWithNotEnoughDebt = new SmartWallet(alice);
-        _createAaveV3Position(
-            DEFAULT_AAVE_MARKET,
-            Addresses.WETH_ADDR,
-            10e18,
-            Addresses.USDC_ADDR,
-            10e6,
-            walletWithNotEnoughDebt
-        );
-        assertEq(
-            uint256(_verifyAaveV3MinDebtPosition(walletWithNotEnoughDebt.walletAddr())),
-            uint256(TriggerStatus.FALSE),
-            "trigger status should be false"
-        );
-    }
-
-    function test_verifySparkLeverageManagementConditions() public {
         if (!isMainnetSelected()) {
-            vm.skip(true, "Spark is only supported on Mainnet");
+            vm.skip(true, "StrategyTriggerViewNoRevert test is mainnet only");
         }
 
-        SmartWallet walletWithEnoughDebt = new SmartWallet(jane);
-        _createSparkPosition(
-            DEFAULT_SPARK_MARKET_MAINNET,
-            Addresses.WETH_ADDR,
-            10e18,
-            Addresses.USDC_ADDR,
-            6000e6,
-            walletWithEnoughDebt
-        );
-        assertEq(
-            uint256(_verifySparkMinDebtPosition(walletWithEnoughDebt.walletAddr())),
-            uint256(TriggerStatus.TRUE),
-            "trigger status should be true"
+        aaveV3MinDebtTrigger = new AaveV3MinDebtTrigger();
+        redeploy("AaveV3MinDebtTrigger", address(aaveV3MinDebtTrigger));
+        minDebtTriggerAddr = address(aaveV3MinDebtTrigger);
+
+        ratioTriggerAddr = _resolveSubTriggerAddr(AAVE_V3_REPAY_BUNDLE_ID);
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                       TESTS - checkTriggers (ratio x min debt)
+    //////////////////////////////////////////////////////////////////////////*/
+    // ratio TRUE -> the additional (min debt) trigger decides the outcome.
+    function test_checkTriggers_ratioTrue_minDebtTrue_returnsTrue() public {
+        _assertCombination(TriggerStatus.TRUE, TriggerStatus.TRUE, TriggerStatus.TRUE);
+    }
+
+    function test_checkTriggers_ratioTrue_minDebtFalse_returnsFalse() public {
+        _assertCombination(TriggerStatus.TRUE, TriggerStatus.FALSE, TriggerStatus.FALSE);
+    }
+
+    function test_checkTriggers_ratioTrue_minDebtRevert_returnsRevert() public {
+        _assertCombination(TriggerStatus.TRUE, TriggerStatus.REVERT, TriggerStatus.REVERT);
+    }
+
+    // ratio FALSE -> short-circuits to FALSE, additional trigger is never evaluated.
+    function test_checkTriggers_ratioFalse_minDebtTrue_returnsFalse() public {
+        _assertCombination(TriggerStatus.FALSE, TriggerStatus.TRUE, TriggerStatus.FALSE);
+    }
+
+    function test_checkTriggers_ratioFalse_minDebtFalse_returnsFalse() public {
+        _assertCombination(TriggerStatus.FALSE, TriggerStatus.FALSE, TriggerStatus.FALSE);
+    }
+
+    function test_checkTriggers_ratioFalse_minDebtRevert_returnsFalse() public {
+        _assertCombination(TriggerStatus.FALSE, TriggerStatus.REVERT, TriggerStatus.FALSE);
+    }
+
+    // ratio REVERT -> short-circuits to REVERT, additional trigger is never evaluated.
+    function test_checkTriggers_ratioRevert_minDebtTrue_returnsRevert() public {
+        _assertCombination(TriggerStatus.REVERT, TriggerStatus.TRUE, TriggerStatus.REVERT);
+    }
+
+    function test_checkTriggers_ratioRevert_minDebtFalse_returnsRevert() public {
+        _assertCombination(TriggerStatus.REVERT, TriggerStatus.FALSE, TriggerStatus.REVERT);
+    }
+
+    function test_checkTriggers_ratioRevert_minDebtRevert_returnsRevert() public {
+        _assertCombination(TriggerStatus.REVERT, TriggerStatus.REVERT, TriggerStatus.REVERT);
+    }
+
+    /// @dev No additional triggers (empty arrays); the result is driven purely by the sub trigger.
+    function test_checkTriggers_noAdditionalTriggers_returnsSubTriggerOutcome() public {
+        _mockTriggerOutcome(ratioTriggerAddr, TriggerStatus.TRUE);
+
+        TriggerStatus status = this.checkTriggers(
+            _aaveV3RepaySub(), _emptySubTriggerCallData(), new bytes4[](0), new bytes[](0)
         );
 
-        SmartWallet walletWithNotEnoughDebt = new SmartWallet(alice);
-        _createSparkPosition(
-            DEFAULT_SPARK_MARKET_MAINNET,
-            Addresses.WETH_ADDR,
-            10e18,
-            Addresses.USDC_ADDR,
-            100e6,
-            walletWithNotEnoughDebt
-        );
         assertEq(
-            uint256(_verifySparkMinDebtPosition(walletWithNotEnoughDebt.walletAddr())),
-            uint256(TriggerStatus.FALSE),
-            "trigger status should be false"
+            uint256(status), uint256(TriggerStatus.TRUE), "no additional triggers -> sub outcome"
         );
     }
+
+    /// @dev Additional trigger id is unregistered (resolves to address(0)); the guard maps it to
+    ///      REVERT instead of letting the high-level call revert the whole tx.
+    function test_checkTriggers_unregisteredAdditionalTrigger_returnsRevert() public {
+        _mockTriggerOutcome(ratioTriggerAddr, TriggerStatus.TRUE);
+
+        bytes4[] memory additionalIds = new bytes4[](1);
+        additionalIds[0] = bytes4(keccak256("NonExistentTrigger"));
+
+        bytes[] memory additionalCallData = new bytes[](1);
+        additionalCallData[0] = bytes("");
+
+        TriggerStatus status = this.checkTriggers(
+            _aaveV3RepaySub(), _emptySubTriggerCallData(), additionalIds, additionalCallData
+        );
+
+        assertEq(
+            uint256(status), uint256(TriggerStatus.REVERT), "unregistered id should map to REVERT"
+        );
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-
-    function _createAaveV3Position(
-        address _market,
-        address _supplyToken,
-        uint256 _supplyAmount,
-        address _borrowToken,
-        uint256 _borrowAmount,
-        SmartWallet _wallet
+    /// @dev Mocks the ratio + min debt trigger outcomes, runs checkTriggers and asserts the result.
+    function _assertCombination(
+        TriggerStatus _ratioOutcome,
+        TriggerStatus _minDebtOutcome,
+        TriggerStatus _expected
     ) internal {
-        IPoolV3 pool = IPoolV3(IPoolAddressesProvider(_market).getPool());
-        uint16 supplyAssetId = pool.getReserveData(_supplyToken).id;
-        uint16 borrowAssetId = pool.getReserveData(_borrowToken).id;
+        _mockTriggerOutcome(ratioTriggerAddr, _ratioOutcome);
+        _mockTriggerOutcome(minDebtTriggerAddr, _minDebtOutcome);
 
-        give(_supplyToken, _wallet.owner(), _supplyAmount);
-        _wallet.ownerApprove(_supplyToken, _supplyAmount);
+        (bytes4[] memory additionalIds, bytes[] memory additionalCallData) =
+            _minDebtAdditionalTrigger(MIN_DEBT);
 
-        bytes memory supplyCalldata = abi.encodeWithSelector(
-            bytes4(keccak256("executeActionDirect(bytes)")),
-            abi.encode(
-                AaveV3Supply.Params({
-                    amount: _supplyAmount,
-                    from: _wallet.owner(),
-                    assetId: supplyAssetId,
-                    enableAsColl: true,
-                    useDefaultMarket: false,
-                    useOnBehalf: false,
-                    market: _market,
-                    onBehalf: address(0)
-                })
-            )
+        TriggerStatus status = this.checkTriggers(
+            _aaveV3RepaySub(), _emptySubTriggerCallData(), additionalIds, additionalCallData
         );
-        _wallet.execute(address(new AaveV3Supply()), supplyCalldata, 0);
 
-        bytes memory borrowCalldata = abi.encodeWithSelector(
-            bytes4(keccak256("executeActionDirect(bytes)")),
-            abi.encode(
-                AaveV3Borrow.Params({
-                    amount: _borrowAmount,
-                    to: _wallet.owner(),
-                    rateMode: 2,
-                    assetId: borrowAssetId,
-                    useDefaultMarket: false,
-                    useOnBehalf: false,
-                    market: _market,
-                    onBehalf: address(0)
-                })
-            )
-        );
-        _wallet.execute(address(new AaveV3Borrow()), borrowCalldata, 0);
+        assertEq(uint256(status), uint256(_expected), "unexpected checkTriggers outcome");
     }
 
-    function _createSparkPosition(
-        address _market,
-        address _supplyToken,
-        uint256 _supplyAmount,
-        address _borrowToken,
-        uint256 _borrowAmount,
-        SmartWallet _wallet
-    ) internal {
-        ISparkPool pool = ISparkPool(ISparkPoolAddressesProvider(_market).getPool());
-        uint16 supplyAssetId = pool.getReserveData(_supplyToken).id;
-        uint16 borrowAssetId = pool.getReserveData(_borrowToken).id;
+    /// @dev Mocks ITrigger.isTriggered on a trigger address to return a bool, or to revert.
+    function _mockTriggerOutcome(address _trigger, TriggerStatus _outcome) internal {
+        bytes memory isTriggeredCall = abi.encodeWithSelector(ITrigger.isTriggered.selector);
 
-        give(_supplyToken, _wallet.owner(), _supplyAmount);
-        _wallet.ownerApprove(_supplyToken, _supplyAmount);
+        if (_outcome == TriggerStatus.REVERT) {
+            vm.mockCallRevert(_trigger, isTriggeredCall, bytes("MOCK_TRIGGER_REVERT"));
+        } else {
+            vm.mockCall(_trigger, isTriggeredCall, abi.encode(_outcome == TriggerStatus.TRUE));
+        }
+    }
 
-        bytes memory supplyCalldata = abi.encodeWithSelector(
-            bytes4(keccak256("executeActionDirect(bytes)")),
-            abi.encode(
-                SparkSupply.Params({
-                    amount: _supplyAmount,
-                    from: _wallet.owner(),
-                    assetId: supplyAssetId,
-                    enableAsColl: true,
-                    useDefaultMarket: false,
-                    useOnBehalf: false,
-                    market: _market,
-                    onBehalf: address(0)
-                })
-            )
+    /// @dev Resolves the (single) sub trigger address for a bundle's first strategy.
+    function _resolveSubTriggerAddr(uint64 _bundleId) internal view returns (address) {
+        uint256 strategyId = BundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(_bundleId, 0);
+        Strategy memory strategy = StrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
+        require(strategy.triggerIds.length == 1, "expected single ratio sub trigger");
+        return registry.getAddr(strategy.triggerIds[0]);
+    }
+
+    /// @dev Reconstructs the real subId 2154 StrategySub. Trigger calls are mocked, so the encoded
+    ///      values just document the real repay sub; checkTriggers only relies on triggerData length.
+    function _aaveV3RepaySub() internal pure returns (StrategySub memory sub) {
+        sub.strategyOrBundleId = AAVE_V3_REPAY_BUNDLE_ID;
+        sub.isBundle = true;
+
+        sub.triggerData = new bytes[](1);
+        sub.triggerData[0] = abi.encode(
+            AaveV3RatioTrigger.SubParams({
+                user: AAVE_V3_POSITION_OWNER,
+                market: AAVE_V3_MARKET,
+                ratio: 1.05e18, // trigger repay when safety ratio drops under 105%
+                state: uint8(AaveV3RatioTrigger.RatioState.UNDER)
+            })
         );
-        _wallet.execute(address(new SparkSupply()), supplyCalldata, 0);
 
-        bytes memory borrowCalldata = abi.encodeWithSelector(
-            bytes4(keccak256("executeActionDirect(bytes)")),
-            abi.encode(
-                SparkBorrow.Params({
-                    amount: _borrowAmount,
-                    to: _wallet.owner(),
-                    rateMode: 2,
-                    assetId: borrowAssetId,
-                    useDefaultMarket: false,
-                    useOnBehalf: false,
-                    market: _market,
-                    onBehalf: address(0)
-                })
-            )
+        sub.subData = new bytes32[](4);
+        sub.subData[0] = bytes32(uint256(1.2e18)); // target ratio 120%
+        sub.subData[1] = bytes32(uint256(1));
+        sub.subData[2] = bytes32(uint256(1));
+        sub.subData[3] = bytes32(uint256(0));
+    }
+
+    /// @dev AaveV3RatioTrigger reads only the sub data, so the per-trigger calldata is empty.
+    function _emptySubTriggerCallData() internal pure returns (bytes[] memory callData) {
+        callData = new bytes[](1);
+        callData[0] = bytes("");
+    }
+
+    function _minDebtCalldata(uint256 _minDebt) internal pure returns (bytes memory) {
+        return abi.encode(
+            AaveV3MinDebtTrigger.CalldataParams({
+                user: AAVE_V3_POSITION_OWNER, market: AAVE_V3_MARKET, minDebt: _minDebt
+            })
         );
-        _wallet.execute(address(new SparkBorrow()), borrowCalldata, 0);
+    }
+
+    function _minDebtAdditionalTrigger(uint256 _minDebt)
+        internal
+        pure
+        returns (bytes4[] memory ids, bytes[] memory callData)
+    {
+        ids = new bytes4[](1);
+        ids[0] = AAVE_V3_MIN_DEBT_TRIGGER_ID;
+
+        callData = new bytes[](1);
+        callData[0] = _minDebtCalldata(_minDebt);
     }
 }
