@@ -55,7 +55,7 @@ contract SparkRatioHelper is DSMath, MainnetSparkAddresses {
         (, uint256 totalDebtValue, uint256 availableBorrows,,,) =
             lendingPool.getUserAccountData(_user);
         if (totalDebtValue == 0) return uint256(0);
-        return wdiv(totalDebtValue + availableBorrows, totalDebtValue);
+        return wdiv(add(totalDebtValue, availableBorrows), totalDebtValue);
     }
 
     /// @notice Returns the safety ratio of the user with ltv zero fallback support
@@ -103,7 +103,7 @@ contract SparkRatioHelper is DSMath, MainnetSparkAddresses {
         return totalAvailableBorrowValue - _totalDebtValue;
     }
 
-    /// @dev See: https://github.com/aave/aave-v3-core/blob/master/contracts/protocol/libraries/logic/GenericLogic.sol#L64
+    /// @dev See: https://github.com/sparkdotfi/sparklend-v1-core/blob/master/contracts/protocol/libraries/logic/GenericLogic.sol#L64
     function _getUserAccountDataWithLtvZeroFallback(address _market, address _user)
         internal
         view
@@ -163,9 +163,13 @@ contract SparkRatioHelper is DSMath, MainnetSparkAddresses {
                 if (vars.ltv != 0) {
                     avgLtv += vars.userBalanceInBaseCurrency
                     * (vars.isInEModeCategory ? vars.eModeLtv : vars.ltv);
-                } else if (vars.liquidationThreshold > LTV_ZERO_OFFSET) {
-                    vars.ltv = vars.liquidationThreshold - LTV_ZERO_OFFSET;
-                    avgLtv += vars.userBalanceInBaseCurrency * vars.ltv;
+                } else {
+                    uint256 lltv = (vars.isInEModeCategory
+                            ? vars.eModeLiqThreshold
+                            : vars.liquidationThreshold);
+                    if (lltv > LTV_ZERO_OFFSET) {
+                        avgLtv += (vars.userBalanceInBaseCurrency * (lltv - LTV_ZERO_OFFSET));
+                    }
                 }
             }
 

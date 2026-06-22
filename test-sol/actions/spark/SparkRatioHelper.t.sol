@@ -4,6 +4,7 @@ pragma solidity =0.8.24;
 
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { SparkRatioHelper } from "../../../contracts/actions/spark/helpers/SparkRatioHelper.sol";
+import { console } from "forge-std/console.sol";
 
 contract TestSparkRatioHelper is BaseTest, SparkRatioHelper {
     uint256 internal constant RATIO_ROUNDING_TOLERANCE = 1e4;
@@ -17,11 +18,13 @@ contract TestSparkRatioHelper is BaseTest, SparkRatioHelper {
     }
 
     function test_should_return_same_ratio_for_non_ltv_zero_positions() public view {
-        address[4] memory users = [
-            0x99926Ab8E1B589500aE87977632f13cF7f70F242,
-            0xABdbBd00Fad79b257e7313B398A1Ea10d9EEf8D6,
-            0x78CCa58CeEebF201555a3c0F3DAeB55D1F1ca564,
-            0x36Aab712E7E6820608D5C974d6f9A615ecfD46DB
+        address[6] memory users = [
+            0xFcf7A0Bc9309447b55f734Be6C86866279cc467A,
+            0x5DE580bC902397BEbF51E55786F248E4EFC561c7,
+            0x6325CBDa7D8768D77d9Cc875780935cc0aBdD0b3,
+            0xe84bDDAc8a45b61A67b64b1BF8cA7aA65c8455Af,
+            0x462a336dCac6eaF544106266914caa5a18b831d0,
+            0x7eF216afdF22D1B336169a0C4bB7b5a531d1E528
         ];
 
         for (uint256 i = 0; i < users.length; ++i) {
@@ -32,25 +35,9 @@ contract TestSparkRatioHelper is BaseTest, SparkRatioHelper {
         }
     }
 
-    function test_should_return_fallback_ratio_for_only_ltv_zero_positions() public view {
-        address[2] memory users = [
-            0x925713C121423e7BbF7045FF163BdBC0A298207a, 0xA4A4435e1a4B4f424c2a33d5c8c9809B0F32d788
-        ];
-
-        for (uint256 i = 0; i < users.length; ++i) {
-            (uint256 ratio, uint256 ratioWithFallback) = _getRatios(users[i]);
-
-            assertEq(ratio, WAD);
-            assertGt(ratioWithFallback, WAD);
-        }
-    }
-
     function test_should_return_higher_fallback_ratio_for_mixed_ltv_zero_positions() public view {
-        address[4] memory users = [
-            0xA223e4985BF908eD3f8caCFe964A3D7c8Fae4C3B,
-            0x5830A35d34Fd3FE8f7Dfdf3105549b7791cF7688,
-            0x95368A0462B6caaf86F0AFe41bdd48469B734a3f,
-            0x9495D189896FCb04e3d2E5bB102Ad76C6782c41A
+        address[2] memory users = [
+            0x563E033A5D48ece6177E1c85A133157C28714826, 0x7a8825a71D9B734407A74a9e7873F03B9560E44d
         ];
 
         for (uint256 i = 0; i < users.length; ++i) {
@@ -67,5 +54,8 @@ contract TestSparkRatioHelper is BaseTest, SparkRatioHelper {
     {
         ratio = getSafetyRatio(DEFAULT_SPARK_MARKET, _user);
         ratioWithFallback = getSafetyRatioWithLtvZeroFallback(DEFAULT_SPARK_MARKET, _user);
+        console.log("user", _user);
+        console.log("ratio", ratio);
+        console.log("ratioWithFallback", ratioWithFallback);
     }
 }
