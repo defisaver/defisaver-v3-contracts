@@ -327,14 +327,15 @@
     },
     {
         "name": "StrategyTriggerViewNoRevert",
-        "address": "0xa63bbC3322778246f216430BE61771f9566f89D0",
+        "address": "0x4289ebe738FEde5167D2AC723bF7486fA41e68D7",
         "id": "0x37a21cb5",
         "path": "contracts/views/strategy/StrategyTriggerViewNoRevert.sol",
-        "version": "1.0.6",
+        "version": "1.0.7",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xa63bbC3322778246f216430BE61771f9566f89D0",
             "0x2BF8A23ECfe84179663e0c6Dfb328cf92b18d561",
             "0xE8Ca11025fC373fb7a42e92eD374f1B8EE2B6F2a",
             "0xbFe9e11963228D82C71F974D0Ff8648569687841",
@@ -345,14 +346,15 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x5E87F822Aa7af376E91BEdF7B6cCE74Be2782B3a",
+        "address": "0xcc3E5093383f99F1a0766E75644960bfbb90c033",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.14",
+        "version": "1.0.15",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x5E87F822Aa7af376E91BEdF7B6cCE74Be2782B3a",
             "0x31fa336650a4c06cAe65985707E9bA09A888bf13",
             "0xB67979842Ec9B462e18834Aee7426ef37938A5Dd",
             "0x5c278b10b839e5ec0a80bcfa8923bae11613c67d",
@@ -849,25 +851,31 @@
     },
     {
         "name": "AaveV3RatioTrigger",
-        "address": "0x61658f75426FCE5e00DFd9c57b5eDe25229DD063",
+        "address": "0xD71a29E4210C2D3DadaF559AAEDB5a29F2F2c878",
         "id": "0x21a42a26",
         "path": "contracts/triggers/AaveV3RatioTrigger.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0xB76e3f7694589D0f34ba43b17AD0D15350Ab5f85"]
+        "history": [
+            "0x61658f75426FCE5e00DFd9c57b5eDe25229DD063",
+            "0xB76e3f7694589D0f34ba43b17AD0D15350Ab5f85"
+        ]
     },
     {
         "name": "AaveV3RatioCheck",
-        "address": "0x6272515E2cC68DE4Eae333A8B2e277C54a9024da",
+        "address": "0xD6FD0ea238aBB0fDcb861Fd18B2478BDF41bc4c9",
         "id": "0x71ef3d4e",
         "path": "contracts/actions/checkers/AaveV3RatioCheck.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x7A36779a7b5F1128B28932604057d5b63361297c"]
+        "history": [
+            "0x6272515E2cC68DE4Eae333A8B2e277C54a9024da",
+            "0x7A36779a7b5F1128B28932604057d5b63361297c"
+        ]
     },
     {
         "name": "FLActionL2",
@@ -1162,14 +1170,15 @@
     },
     {
         "name": "AaveV3OpenRatioCheck",
-        "address": "0x64bfC6d69a43E999728C63EBBA188D2c198ee66B",
+        "address": "0x8803e8529C34669637BD1e1b3Eefc91eB1488F80",
         "id": "0x72b17abf",
         "path": "contracts/actions/checkers/AaveV3OpenRatioCheck.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x64bfC6d69a43E999728C63EBBA188D2c198ee66B",
             "0xAF5D3604B1bE08fadD239b2A7353F01786cE4b0e",
             "0xA41baFAE6832D6D059eEcac0eBB46c4D8c16c248"
         ]
