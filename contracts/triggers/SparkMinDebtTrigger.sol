@@ -4,8 +4,6 @@ pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { ITrigger } from "../interfaces/core/ITrigger.sol";
-import { IPoolV3 } from "../interfaces/protocols/aaveV3/IPoolV3.sol";
-import { IPoolAddressesProvider } from "../interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
 import { ISparkPool } from "../interfaces/protocols/spark/ISparkPool.sol";
 import {
     ISparkPoolAddressesProvider

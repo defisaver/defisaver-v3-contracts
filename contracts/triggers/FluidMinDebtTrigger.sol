@@ -11,6 +11,8 @@ import {
 import { FluidHelper } from "../actions/fluid/helpers/FluidHelper.sol";
 import { ChainlinkPriceLib } from "../utils/ChainlinkPriceLib.sol";
 
+/// @dev This trigger only works for T1 vaults where we have automation
+/// @dev Should be changed in future if we automate other vault types as well
 contract FluidMinDebtTrigger is ITrigger, AdminAuth, FluidHelper {
     using ChainlinkPriceLib for address;
 
