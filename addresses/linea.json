@@ -262,14 +262,14 @@
     },
     {
         "name": "AaveV3DelegateCredit",
-        "address": "0x2A588cBCBd5e6c6ba7ED0E260B8107F599017DDE",
+        "address": "0x1bA6082D2ef1aB92a55B96264c72Eb8049C964Ce",
         "id": "0xf57df0e7",
         "path": "contracts/actions/aaveV3/AaveV3DelegateCredit.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x2A588cBCBd5e6c6ba7ED0E260B8107F599017DDE"]
     },
     {
         "name": "AaveV3DelegateWithSig",
@@ -532,6 +532,17 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FLAaveV3CarryDebt",
+        "address": "0x862E533198C9656B75bB6A5dDF0953F7ED5E8507",
+        "id": "0x66258f8a",
+        "path": "contracts/actions/flashloan/FLAaveV3CarryDebt.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     }

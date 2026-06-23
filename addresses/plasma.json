@@ -251,14 +251,14 @@
     },
     {
         "name": "AaveV3DelegateCredit",
-        "address": "0x0a9b2080C14DaF008AE87C977dFDf5f5D6D0937F",
+        "address": "0x6F53fa9e7d1323d24515a51AB72Da3cf1E9883Bc",
         "id": "0xf57df0e7",
         "path": "contracts/actions/aaveV3/AaveV3DelegateCredit.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x0a9b2080C14DaF008AE87C977dFDf5f5D6D0937F"]
     },
     {
         "name": "AaveV3DelegateWithSig",
@@ -683,6 +683,17 @@
         "address": "0x45314C4265a378427f204483b3eFb89981129085",
         "id": "0xebf16d4a",
         "path": "contracts/actions/exchange/DFSSellNoFee.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FLAaveV3CarryDebt",
+        "address": "0x6Dc6C0e38fBd066b89Ba7E6f711B4288246891b3",
+        "id": "0x66258f8a",
+        "path": "contracts/actions/flashloan/FLAaveV3CarryDebt.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",

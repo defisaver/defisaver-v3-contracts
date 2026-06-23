@@ -2095,14 +2095,14 @@
     },
     {
         "name": "FLAaveV3CarryDebt",
-        "address": "0x7BdD8ACE8a48B7032Df68B7f53E0D6D9Ea9411A7",
+        "address": "0x8225D3833D88BD1420E7d25e69A00F1A27aB9143",
         "id": "0x66258f8a",
         "path": "contracts/actions/flashloan/FLAaveV3CarryDebt.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x7BdD8ACE8a48B7032Df68B7f53E0D6D9Ea9411A7"]
     },
     {
         "name": "AaveV3RatioTrigger",
@@ -5033,6 +5033,17 @@
         "address": "0xF3D7C7e8F5154c669EAA0dE996cdE0575D7d3A00",
         "id": "0x5a07161d",
         "path": "contracts/actions/aaveV4/AaveV4DelegateSetUsingAsCollateralWithSig.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV3DelegateCredit",
+        "address": "0xa7ab39edCb0a1b742DCd908EC6CFe178d8322580",
+        "id": "0xf57df0e7",
+        "path": "contracts/actions/aaveV3/AaveV3DelegateCredit.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
