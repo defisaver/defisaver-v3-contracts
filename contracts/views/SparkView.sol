@@ -25,6 +25,7 @@ import { SparkRatioHelper } from "../actions/spark/helpers/SparkRatioHelper.sol"
 import { TokenUtils } from "../utils/token/TokenUtils.sol";
 import { WadRayMath } from "../_vendor/aave/WadRayMath.sol";
 import { MathUtils } from "../_vendor/aave/MathUtils.sol";
+import { ISparkDebtToken } from "../interfaces/protocols/spark/ISparkDebtToken.sol";
 
 contract SparkView is SparkHelper, SparkRatioHelper {
     uint256 internal constant BORROW_CAP_MASK =
@@ -157,6 +158,19 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         address reserveAddress;
         uint256 supplyRate;
         uint256 variableBorrowRate;
+    }
+
+    /// @notice EOA approval and balance data for a specific asset
+    struct EOAApprovalData {
+        address asset;
+        address spToken;
+        address variableDebtToken;
+        uint256 assetApproval;
+        uint256 spTokenApproval;
+        uint256 variableDebtDelegation;
+        uint256 borrowedVariableAmount;
+        uint256 eoaBalance;
+        uint256 spTokenBalance;
     }
 
     function getHealthFactor(address _market, address _user)
@@ -658,16 +672,16 @@ contract SparkView is SparkHelper, SparkRatioHelper {
                 )
                 .calculateInterestRates(
                     SparkDataTypes.CalculateInterestRatesParams({
-                        unbacked: reserve.unbacked,
-                        liquidityAdded: _reserveParams[i].liquidityAdded,
-                        liquidityTaken: _reserveParams[i].liquidityTaken,
-                        totalStableDebt: currTotalStableDebt,
-                        totalVariableDebt: totalVarDebt,
-                        averageStableBorrowRate: currAvgStableBorrowRate,
-                        reserveFactor: getReserveFactor(reserve.configuration),
-                        reserve: _reserveParams[i].reserveAddress,
-                        aToken: reserve.aTokenAddress
-                    })
+                    unbacked: reserve.unbacked,
+                    liquidityAdded: _reserveParams[i].liquidityAdded,
+                    liquidityTaken: _reserveParams[i].liquidityTaken,
+                    totalStableDebt: currTotalStableDebt,
+                    totalVariableDebt: totalVarDebt,
+                    averageStableBorrowRate: currAvgStableBorrowRate,
+                    reserveFactor: getReserveFactor(reserve.configuration),
+                    reserve: _reserveParams[i].reserveAddress,
+                    aToken: reserve.aTokenAddress
+                })
                 );
 
             estimatedRates[i] = estimatedRate;
@@ -691,5 +705,58 @@ contract SparkView is SparkHelper, SparkRatioHelper {
             variableBorrowIndex =
                 uint128(cumulatedVariableBorrowInterest.rayMul(variableBorrowIndex));
         }
+    }
+
+    /// @notice Fetches EOA balances and approvals towards proxy for all assets in a market
+    /// @param _eoa Address of the EOA
+    /// @param _proxy Address of the proxy/smart wallet
+    /// @param _market Address of the Spark market
+    /// @return approvalData Array of EOAApprovalData for all assets
+    function getEOAApprovalsAndBalancesForAllTokens(address _eoa, address _proxy, address _market)
+        public
+        view
+        returns (EOAApprovalData[] memory approvalData)
+    {
+        ISparkPool lendingPool = ISparkPool(ISparkPoolAddressesProvider(_market).getPool());
+        address[] memory reserveList = lendingPool.getReservesList();
+        approvalData = new EOAApprovalData[](reserveList.length);
+
+        for (uint256 i = 0; i < reserveList.length; i++) {
+            approvalData[i] = getEOAApprovalsAndBalances(reserveList[i], _eoa, _proxy, _market);
+        }
+    }
+
+    /// @notice Fetches `_eoa` balances and approvals towards `_proxy` for `_asset` in a `_market`
+    /// @param _asset Address of the underlying asset
+    /// @param _eoa Address of the EOA
+    /// @param _proxy Address of the smart wallet
+    /// @param _market Address of the Spark market
+    /// @return approvalData EOAApprovalData for selected params
+    function getEOAApprovalsAndBalances(
+        address _asset,
+        address _eoa,
+        address _proxy,
+        address _market
+    ) public view returns (EOAApprovalData memory approvalData) {
+        ISparkPool lendingPool = ISparkPool(ISparkPoolAddressesProvider(_market).getPool());
+        ISparkProtocolDataProvider dataProvider = getSparkDataProvider(_market);
+
+        SparkDataTypes.ReserveData memory reserveData = lendingPool.getReserveData(_asset);
+
+        (uint256 currentSpTokenBalance,, uint256 currentVariableDebt,,,,,,) =
+            dataProvider.getUserReserveData(_asset, _eoa);
+
+        approvalData = EOAApprovalData({
+            asset: _asset,
+            spToken: reserveData.aTokenAddress,
+            variableDebtToken: reserveData.variableDebtTokenAddress,
+            assetApproval: IERC20(_asset).allowance(_eoa, _proxy),
+            spTokenApproval: IERC20(reserveData.aTokenAddress).allowance(_eoa, _proxy),
+            variableDebtDelegation: ISparkDebtToken(reserveData.variableDebtTokenAddress)
+                .borrowAllowance(_eoa, _proxy),
+            borrowedVariableAmount: currentVariableDebt,
+            eoaBalance: IERC20(_asset).balanceOf(_eoa),
+            spTokenBalance: currentSpTokenBalance
+        });
     }
 }
