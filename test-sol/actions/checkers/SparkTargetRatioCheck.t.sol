@@ -205,7 +205,7 @@ contract TestSparkTargetRatioCheck is SparkRatioHelper, SparkPositionCreator {
     function _checkCalldata(uint256 _targetRatio) internal view returns (bytes memory) {
         bytes memory paramsCalldata = abi.encode(
             SparkTargetRatioCheck.Params({
-                targetRatio: _targetRatio, market: DEFAULT_SPARK_MARKET
+                targetRatio: _targetRatio, market: DEFAULT_SPARK_MARKET, user: walletAddr
             })
         );
         return abi.encodeWithSelector(
