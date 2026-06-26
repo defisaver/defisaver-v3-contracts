@@ -8526,6 +8526,92 @@ const createSparkGenericBoostOnPriceStrategy = () => {
     return sparkGenericBoostOnPriceStrategy.encodeForDsProxyCall();
 };
 
+const createSparkGenericFLBoostOnPriceStrategy = () => {
+    const sparkGenericFLBoostOnPriceStrategy = new dfs.Strategy(
+        'SparkGenericFLBoostOnPriceStrategy',
+    );
+
+    sparkGenericFLBoostOnPriceStrategy.addSubSlot('&collAsset', 'address');
+    sparkGenericFLBoostOnPriceStrategy.addSubSlot('&collAssetId', 'uint16');
+    sparkGenericFLBoostOnPriceStrategy.addSubSlot('&debtAsset', 'address');
+    sparkGenericFLBoostOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
+    sparkGenericFLBoostOnPriceStrategy.addSubSlot('&marketAddr', 'address');
+    sparkGenericFLBoostOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
+    sparkGenericFLBoostOnPriceStrategy.addSubSlot('&user', 'address');
+
+    const sparkTrigger = new dfs.triggers.SparkQuotePriceTrigger(
+        nullAddress,
+        nullAddress,
+        '0',
+        '0',
+    );
+    sparkGenericFLBoostOnPriceStrategy.addTrigger(sparkTrigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.SparkFlashLoanAction(
+            ['%debtAsset'], // sent by backend
+            ['%flAmount'], // sent by backend
+            '%nullAddress',
+            [],
+        ),
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&debtAsset', // from subData
+            '&collAsset', // from subData
+            '%flAmount', // sent by backend
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // must stay variable backend sets gasCost
+        '&collAsset', // from subData
+        '$2', // hardcoded output from sell action
+    );
+
+    const supplyAction = new dfs.actions.spark.SparkSupplyAction(
+        '%useDefaultMarket', // hardcoded to false
+        '&marketAddr', // from subData
+        '$3', // amount hardcoded - output of feeTakingAction
+        '&proxy', // proxy hardcoded
+        '&collAsset', // from subData
+        '&collAssetId', // from subData
+        '%enableAsColl', // hardcoded always enable as coll
+        '%useOnBehalf', // hardcoded to true
+        '&user', // EOA/SW addr from subData
+    );
+
+    const borrowAction = new dfs.actions.spark.SparkBorrowAction(
+        '%useDefaultMarket', // hardcoded to false
+        '&marketAddr', // from subData
+        '$1', // from FL amount
+        '%flAddr', // fl address that can change
+        '%rateMode', // hardcoded to VARIABLE = 2
+        '&debtAssetId', // from subData
+        '%useOnBehalf', // hardcoded to true
+        '&user', // EOA/SW addr from subData
+    );
+
+    const checkerAction = new dfs.actions.checkers.SparkTargetRatioCheck(
+        '&targetRatio',
+        '&marketAddr',
+        '&user',
+    );
+
+    sparkGenericFLBoostOnPriceStrategy.addAction(flAction);
+    sparkGenericFLBoostOnPriceStrategy.addAction(sellAction);
+    sparkGenericFLBoostOnPriceStrategy.addAction(feeTakingAction);
+    sparkGenericFLBoostOnPriceStrategy.addAction(supplyAction);
+    sparkGenericFLBoostOnPriceStrategy.addAction(borrowAction);
+    sparkGenericFLBoostOnPriceStrategy.addAction(checkerAction);
+
+    return sparkGenericFLBoostOnPriceStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createRepayStrategy,
     createFLRepayStrategy,
@@ -8663,4 +8749,5 @@ module.exports = {
     createSparkGenericBoostStrategy,
     createSparkGenericFLBoostStrategy,
     createSparkGenericBoostOnPriceStrategy,
+    createSparkGenericFLBoostOnPriceStrategy,
 };
