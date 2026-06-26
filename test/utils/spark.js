@@ -245,6 +245,116 @@ const getSparkReserveDataFromPool = async (tokenAddress, market = null) => {
     return reserveData;
 };
 
+const openSparkEOAPosition = async (
+    eoaAddr,
+    proxy,
+    collSymbol,
+    debtSymbol,
+    collAmountInUSD,
+    debtAmountInUSD,
+    marketAddress = null,
+) => {
+    const eoaSigner = await hre.ethers.getSigner(eoaAddr);
+    const proxyAddr = proxy.address;
+
+    const collAsset = getAssetInfo(collSymbol === 'ETH' ? 'WETH' : collSymbol, chainIds[network]);
+    const debtAsset = getAssetInfo(debtSymbol === 'ETH' ? 'WETH' : debtSymbol, chainIds[network]);
+
+    const collAmount = await fetchAmountInUSDPrice(collAsset.symbol, collAmountInUSD);
+    const debtAmount = await fetchAmountInUSDPrice(debtAsset.symbol, debtAmountInUSD);
+
+    const marketAddr = marketAddress || addrs[network].SPARK_MARKET;
+    const sparkMarketContract = await hre.ethers.getContractAt(
+        'IPoolAddressesProvider',
+        marketAddr,
+    );
+    const poolAddress = await sparkMarketContract.getPool();
+    const poolContractName = network !== 'mainnet' ? 'IL2PoolV3' : 'IPoolV3';
+    const poolContract = await hre.ethers.getContractAt(poolContractName, poolAddress, eoaSigner);
+    const collReserveData = await poolContract.getReserveData(collAsset.address);
+    const debtReserveData = await poolContract.getReserveData(debtAsset.address);
+
+    await setBalance(collAsset.address, eoaAddr, collAmount);
+    await approve(collAsset.address, proxyAddr, eoaSigner);
+
+    // Delegate credit to proxy so proxy can borrow on behalf of EOA
+    const debtTokenContract = await hre.ethers.getContractAt(
+        'ISparkDebtToken',
+        debtReserveData.variableDebtTokenAddress,
+        eoaSigner,
+    );
+    await debtTokenContract.approveDelegation(proxyAddr, debtAmount);
+    console.log('Spark debt token approved for delegation');
+
+    const supplyAction = new dfs.actions.spark.SparkSupplyAction(
+        false, // useDefaultMarket
+        marketAddr, // marketAddr
+        collAmount.toString(),
+        eoaAddr, // from
+        collAsset.address,
+        collReserveData.id,
+        true, // enableAsColl
+        true, // useOnBehalf
+        eoaAddr, // onBehalf
+    );
+    const borrowAction = new dfs.actions.spark.SparkBorrowAction(
+        false, // useDefaultMarket
+        marketAddr,
+        debtAmount.toString(),
+        eoaAddr, // send tokens to EOA
+        2, // rateMode VARIABLE
+        debtReserveData.id,
+        true, // useOnBehalf
+        eoaAddr, // onBehalf
+    );
+    const recipe = new dfs.Recipe('CreateSparkEOAPositionRecipe', [supplyAction, borrowAction]);
+    const functionData = recipe.encodeForDsProxyCall()[1];
+
+    await executeAction('RecipeExecutor', functionData, proxy);
+    console.log('SparkEOAPosition opened');
+};
+
+const setupSparkEOAPermissions = async (
+    userAddress,
+    smartWalletAddress,
+    collTokenAddr,
+    debtTokenAddr,
+    marketAddress = null,
+) => {
+    console.log('Setting up Spark EOA permissions...');
+
+    const userSigner = await hre.ethers.getSigner(userAddress);
+    const marketAddr = marketAddress || addrs[network].SPARK_MARKET;
+
+    const poolAddressesProvider = await hre.ethers.getContractAt(
+        'IPoolAddressesProvider',
+        marketAddr,
+    );
+    const poolAddress = await poolAddressesProvider.getPool();
+    const poolContractName = network !== 'mainnet' ? 'IL2PoolV3' : 'IPoolV3';
+    const lendingPool = await hre.ethers.getContractAt(poolContractName, poolAddress);
+
+    // Approve collateral asset for Smart Wallet
+    await approve(collTokenAddr, smartWalletAddress, userSigner);
+
+    // Approve spToken (aTokenAddress) for Smart Wallet — needed for PullToken in repay strategies
+    const collReserveData = await lendingPool.getReserveData(collTokenAddr);
+    const spTokenAddr = collReserveData.aTokenAddress;
+    console.log(`  - Approving spToken ${spTokenAddr} for Smart Wallet`);
+    await approve(spTokenAddr, smartWalletAddress, userSigner);
+
+    // Delegate variable debt token to Smart Wallet — needed for borrow on behalf in boost/FL repay
+    const debtReserveData = await lendingPool.getReserveData(debtTokenAddr);
+    const variableDebtTokenAddress = debtReserveData.variableDebtTokenAddress;
+    const debtToken = await hre.ethers.getContractAt(
+        'ISparkDebtToken',
+        variableDebtTokenAddress,
+        userSigner,
+    );
+    await debtToken.approveDelegation(smartWalletAddress, hre.ethers.constants.MaxUint256);
+    console.log(`  - Delegated variable debt token ${variableDebtTokenAddress} to Smart Wallet`);
+};
+
 const SPARK_AUTOMATION_TEST_PAIRS = [
     {
         collSymbol: 'WETH',
@@ -436,6 +546,8 @@ module.exports = {
     deploySparkRepayOnPriceBundle,
     deploySparkBoostOnPriceBundle,
     openSparkProxyPosition,
+    openSparkEOAPosition,
+    setupSparkEOAPermissions,
     getSparkPositionRatio,
     getSparkReserveData,
     getSparkReserveDataFromPool,
