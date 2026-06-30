@@ -4,12 +4,16 @@ pragma solidity =0.8.24;
 
 import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { IAaveV3Oracle } from "../interfaces/protocols/aaveV3/IAaveV3Oracle.sol";
+import { ISemiContinuousTracker } from "../interfaces/core/ISemiContinuousTracker.sol";
+import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { DSMath } from "../_vendor/DS/DSMath.sol";
 import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
+import { CoreHelper } from "../core/helpers/CoreHelper.sol";
+import { DFSIds } from "../utils/DFSIds.sol";
 
 /// @title Trigger contract that verifies if current token price ratio is over/under the price ratio specified during subscription
-contract AaveV3QuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelper {
+contract AaveV3QuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelper, CoreHelper {
     enum PriceState {
         OVER,
         UNDER
@@ -26,11 +30,24 @@ contract AaveV3QuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelp
         uint8 state;
     }
 
+    struct CallParams {
+        uint256 subId;
+    }
+
     IAaveV3Oracle public constant aaveOracleV3 = IAaveV3Oracle(AAVE_ORACLE_V3);
+    IDFSRegistry private constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     /// @notice Checks chainlink oracle for current prices and triggers if it's in a correct state
-    function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
+    function isTriggered(bytes memory _callData, bytes memory _subData)
+        public
+        view
+        override
+        returns (bool)
+    {
         SubParams memory triggerSubData = parseSubInputs(_subData);
+        CallParams memory callParams = parseCallInputs(_callData);
+
+        if (_isAlreadyInExecution(callParams.subId)) return true;
 
         uint256 currPrice = getPrice(triggerSubData.baseTokenAddr, triggerSubData.quoteTokenAddr);
 
@@ -69,5 +86,29 @@ contract AaveV3QuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelp
 
     function parseSubInputs(bytes memory _callData) public pure returns (SubParams memory params) {
         params = abi.decode(_callData, (SubParams));
+    }
+
+    function parseCallInputs(bytes memory _callData)
+        public
+        pure
+        returns (CallParams memory params)
+    {
+        params = abi.decode(_callData, (CallParams));
+    }
+
+    function _isAlreadyInExecution(uint256 _subId) internal view returns (bool) {
+        ISemiContinuousTracker semiContinuousTracker =
+            ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER));
+
+        address storedWallet = semiContinuousTracker.getWalletForSub(_subId);
+
+        address stvnrAddr = registry.getAddr(DFSIds.STVNR);
+
+        // we want trigger to always be true for started semi-executed sub
+        if (storedWallet == msg.sender) return true;
+        // for STVNR check, always return true if sub is in storage
+        if (storedWallet != address(0) && msg.sender == stvnrAddr) return true;
+
+        return false;
     }
 }
