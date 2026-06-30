@@ -5,6 +5,10 @@ pragma solidity =0.8.24;
 import { ActionBase } from "../ActionBase.sol";
 import { SubStorage } from "../../core/strategy/SubStorage.sol";
 import { Permission } from "../../auth/Permission.sol";
+import { ISemiContinuousTracker } from "../../interfaces/core/ISemiContinuousTracker.sol";
+import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
+import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
+import { DFSIds } from "../../utils/DFSIds.sol";
 
 /// @title ToggleSub - Sets the state of the sub to active or deactivated.
 /// @notice User can only disable/enable his own subscriptions.
@@ -49,6 +53,10 @@ contract ToggleSub is ActionBase, Permission {
             _givePermissionToAuthContract(_isDSProxy(address(this)));
             SubStorage(SUB_STORAGE_ADDR).activateSub(_inputData.subId);
         } else {
+            ISemiContinuousTracker semiContinuousTracker =
+                ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER));
+            semiContinuousTracker.removeWalletForSub(_inputData.subId);
+
             SubStorage(SUB_STORAGE_ADDR).deactivateSub(_inputData.subId);
         }
     }
