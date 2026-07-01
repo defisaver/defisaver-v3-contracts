@@ -3908,6 +3908,243 @@ const createFluidT1FLLiquidationProtectionL2Strategy = () => {
     return fluidT1FLLiquidationProtectionStrategy.encodeForDsProxyCall();
 };
 
+const createMorphoBlueLiquidationProtectionL2Strategy = () => {
+    const morphoBlueLiquidationProtectionStrategy = new dfs.Strategy(
+        'MorphoBlueLiquidationProtectionL2Strategy',
+    );
+
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&loanToken', 'address');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&collateralToken', 'address');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&oracle', 'address');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&irm', 'address');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&lltv', 'uint256');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&ratioState', 'uint8');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&targetRatio', 'uint256');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&user', 'address');
+
+    const morphoBlueRatioTrigger = new dfs.triggers.MorphoBlueRatioTrigger(0, nullAddress, 0, 0);
+    morphoBlueLiquidationProtectionStrategy.addTrigger(morphoBlueRatioTrigger);
+
+    const withdrawAction = new dfs.actions.morphoblue.MorphoBlueWithdrawCollateralAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '%LiquidationProtectionAmount', // sent by backend
+        '&user',
+        '&proxy',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collateralToken',
+            '&loanToken',
+            '$1', // output of withdraw action
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '%gasStart', // sent by backend
+        '&loanToken',
+        '$2', // output of sell action
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
+        '%l1GasCostInEth', // additional gas cost for L1
+    );
+    const paybackAction = new dfs.actions.morphoblue.MorphoBluePaybackAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '$3', // output of fee taking action
+        '&proxy',
+        '&user',
+    );
+    const morphoBlueRatioCheckAction = new dfs.actions.checkers.MorphoBlueRatioCheckAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '&user',
+        '&ratioState',
+        '&targetRatio',
+    );
+
+    morphoBlueLiquidationProtectionStrategy.addAction(withdrawAction);
+    morphoBlueLiquidationProtectionStrategy.addAction(sellAction);
+    morphoBlueLiquidationProtectionStrategy.addAction(feeTakingAction);
+    morphoBlueLiquidationProtectionStrategy.addAction(paybackAction);
+    morphoBlueLiquidationProtectionStrategy.addAction(morphoBlueRatioCheckAction);
+    return morphoBlueLiquidationProtectionStrategy.encodeForDsProxyCall();
+};
+const createMorphoBlueFLCollLiquidationProtectionL2Strategy = () => {
+    const morphoBlueLiquidationProtectionStrategy = new dfs.Strategy(
+        'MorphoBlueFLCollLiquidationProtectionL2Strategy',
+    );
+
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&loanToken', 'address');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&collateralToken', 'address');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&oracle', 'address');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&irm', 'address');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&lltv', 'uint256');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&ratioState', 'uint8');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&targetRatio', 'uint256');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&user', 'address');
+
+    const morphoBlueRatioTrigger = new dfs.triggers.MorphoBlueRatioTrigger(0, nullAddress, 0, 0);
+    morphoBlueLiquidationProtectionStrategy.addTrigger(morphoBlueRatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        ['%collateralToken'], // sent by backend (no piping available in fl actions)
+        ['%flAmount'], // sent by backend
+        '%nullAddress',
+        [],
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collateralToken',
+            '&loanToken',
+            '%LiquidationProtectionAmount', // same as flamount, sent by backend
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '%gasStart', // sent by backend
+        '&loanToken',
+        '$2', // output of sell action
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
+        '%l1GasCostInEth', // additional gas cost for L1
+    );
+    const paybackAction = new dfs.actions.morphoblue.MorphoBluePaybackAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '$3', // output of fee taking action
+        '&proxy',
+        '&user',
+    );
+    const withdrawAction = new dfs.actions.morphoblue.MorphoBlueWithdrawCollateralAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '$1', // withdraw enough to payback flashloan
+        '&user',
+        '%flAddress', // sent by backend
+    );
+    const morphoBlueRatioCheckAction = new dfs.actions.checkers.MorphoBlueRatioCheckAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '&user',
+        '&ratioState',
+        '&targetRatio',
+    );
+
+    morphoBlueLiquidationProtectionStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
+    morphoBlueLiquidationProtectionStrategy.addAction(sellAction);
+    morphoBlueLiquidationProtectionStrategy.addAction(feeTakingAction);
+    morphoBlueLiquidationProtectionStrategy.addAction(paybackAction);
+    morphoBlueLiquidationProtectionStrategy.addAction(withdrawAction);
+    morphoBlueLiquidationProtectionStrategy.addAction(morphoBlueRatioCheckAction);
+    return morphoBlueLiquidationProtectionStrategy.encodeForDsProxyCall();
+};
+const createMorphoBlueFLDebtLiquidationProtectionL2Strategy = () => {
+    const morphoBlueLiquidationProtectionStrategy = new dfs.Strategy(
+        'MorphoBlueFLDebtLiquidationProtectionL2Strategy',
+    );
+
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&loanToken', 'address');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&collateralToken', 'address');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&oracle', 'address');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&irm', 'address');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&lltv', 'uint256');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&ratioState', 'uint8');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&targetRatio', 'uint256');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&user', 'address');
+
+    const morphoBlueRatioTrigger = new dfs.triggers.MorphoBlueRatioTrigger(0, nullAddress, 0, 0);
+    morphoBlueLiquidationProtectionStrategy.addTrigger(morphoBlueRatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        ['%debtToken'], // sent by backend (no piping available in fl actions)
+        ['%flAmount'], // sent by backend
+        '%nullAddress',
+        [],
+    );
+    const paybackAction = new dfs.actions.morphoblue.MorphoBluePaybackAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '%LiquidationProtectionAmount', // <- same as flAmount
+        '&proxy',
+        '&user',
+    );
+    const withdrawAction = new dfs.actions.morphoblue.MorphoBlueWithdrawCollateralAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '%withdrawAmount', // sent by backend
+        '&user',
+        '&proxy',
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collateralToken',
+            '&loanToken',
+            '$3', // output of withdraw action
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '%gasStart', // sent by backend
+        '&loanToken',
+        '$4', // output of sell action
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
+        '%l1GasCostInEth', // additional gas cost for L1
+    );
+    const sendTokensAction = new dfs.actions.basic.SendTokensAction(
+        ['&loanToken', '&loanToken'],
+        ['%flAddress', '&eoa'], // first one sent by backend, second piped
+        ['$1', '%maxUint'], // first one piped to return fl, second one sent by backend
+    );
+    const morphoBlueRatioCheckAction = new dfs.actions.checkers.MorphoBlueRatioCheckAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '&user',
+        '&ratioState',
+        '&targetRatio',
+    );
+    morphoBlueLiquidationProtectionStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
+    morphoBlueLiquidationProtectionStrategy.addAction(paybackAction);
+    morphoBlueLiquidationProtectionStrategy.addAction(withdrawAction);
+    morphoBlueLiquidationProtectionStrategy.addAction(sellAction);
+    morphoBlueLiquidationProtectionStrategy.addAction(feeTakingAction);
+    morphoBlueLiquidationProtectionStrategy.addAction(sendTokensAction);
+    morphoBlueLiquidationProtectionStrategy.addAction(morphoBlueRatioCheckAction);
+    return morphoBlueLiquidationProtectionStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createAaveV3RepayL2Strategy,
     createAaveFLV3RepayL2Strategy,
@@ -3968,4 +4205,7 @@ module.exports = {
     createAaveV3GenericFLLiquidationProtectionL2Strategy,
     createFluidT1LiquidationProtectionL2Strategy,
     createFluidT1FLLiquidationProtectionL2Strategy,
+    createMorphoBlueLiquidationProtectionL2Strategy,
+    createMorphoBlueFLCollLiquidationProtectionL2Strategy,
+    createMorphoBlueFLDebtLiquidationProtectionL2Strategy,
 };
