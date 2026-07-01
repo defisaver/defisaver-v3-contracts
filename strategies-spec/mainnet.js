@@ -8937,6 +8937,121 @@ const createCompV3EOAFLLiquidationProtectionStrategy = () => {
     return compV3EOAFLLiquidationProtectionStrategy.encodeForDsProxyCall();
 };
 
+const createAaveV4LiquidationProtectionStrategy = () => {
+    const s = new dfs.Strategy('AaveV4LiquidationProtectionStrategy');
+
+    s.addSubSlot('&spoke', 'address');
+    s.addSubSlot('&user', 'address');
+    s.addSubSlot('&ratioState', 'uint256');
+    s.addSubSlot('&targetRatio', 'uint256');
+    // @dev Unused at the moment. Left for future use.
+    s.addSubSlot('&additionalField1', 'uint256');
+    s.addSubSlot('&additionalField2', 'uint256');
+
+    const trigger = new dfs.triggers.AaveV4RatioTrigger('0', '0', '0', '0');
+    s.addTrigger(trigger);
+
+    const withdraw = new dfs.actions.aaveV4.AaveV4WithdrawAction(
+        '&spoke',
+        '&user',
+        '&proxy',
+        '%collAssetId', // Sent by backend.
+        '%amount', // Sent by backend.
+    );
+    const sell = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collAsset', // Sent by backend.
+            '%debtAsset', // Sent by backend.
+            '$1',
+            '%exchangeWrapper', // Sent by backend.
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const takeFee = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // Sent by backend.
+        '%debtAsset', // Sent by backend.
+        '$2',
+    );
+    const payback = new dfs.actions.aaveV4.AaveV4PaybackAction(
+        '&spoke',
+        '&user',
+        '&proxy',
+        '%debtAssetId', // Sent by backend.
+        '$3',
+    );
+    const check = new dfs.actions.checkers.AaveV4RatioCheckAction(
+        '&ratioState',
+        '&targetRatio',
+        '&spoke',
+        '&user',
+    );
+
+    s.addActions([withdraw, sell, takeFee, payback, check]);
+
+    return s.encodeForDsProxyCall();
+};
+const createAaveV4FLLiquidationProtectionStrategy = () => {
+    const s = new dfs.Strategy('AaveV4FLLiquidationProtectionStrategy');
+
+    s.addSubSlot('&spoke', 'address');
+    s.addSubSlot('&user', 'address');
+    s.addSubSlot('&ratioState', 'uint256');
+    s.addSubSlot('&targetRatio', 'uint256');
+    // @dev Unused at the moment. Left for future use.
+    s.addSubSlot('&additionalField1', 'uint256');
+    s.addSubSlot('&additionalField2', 'uint256');
+
+    const trigger = new dfs.triggers.AaveV4RatioTrigger('0', '0', '0', '0');
+    s.addTrigger(trigger);
+
+    const fl = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%collAsset'], // Sent by backend.
+            ['%flAmount'], // Sent by backend.
+        ),
+    );
+    const sell = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collAsset', // Sent by backend.
+            '%debtAsset', // Sent by backend.
+            '%flAmount', // Sent by backend.
+            '%exchangeWrapper', // Sent by backend.
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const takeFee = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // Sent by backend.
+        '%debtAsset', // Sent by backend.
+        '$2',
+    );
+    const payback = new dfs.actions.aaveV4.AaveV4PaybackAction(
+        '&spoke',
+        '&user',
+        '&proxy',
+        '%debtAssetId', // Sent by backend.
+        '$3',
+    );
+    const withdraw = new dfs.actions.aaveV4.AaveV4WithdrawAction(
+        '&spoke',
+        '&user',
+        '%flAddr', // Sent by backend.
+        '%collAssetId', // Sent by backend.
+        '$1',
+    );
+    const check = new dfs.actions.checkers.AaveV4RatioCheckAction(
+        '&ratioState',
+        '&targetRatio',
+        '&spoke',
+        '&user',
+    );
+
+    s.addActions([fl, sell, takeFee, payback, withdraw, check]);
+
+    return s.encodeForDsProxyCall();
+};
+
 module.exports = {
     createRepayStrategy,
     createFLRepayStrategy,
@@ -9082,4 +9197,6 @@ module.exports = {
     createCompV3EOALiquidationProtectionStrategy,
     createCompV3FLLiquidationProtectionStrategy,
     createCompV3EOAFLLiquidationProtectionStrategy,
+    createAaveV4LiquidationProtectionStrategy,
+    createAaveV4FLLiquidationProtectionStrategy,
 };
