@@ -4145,6 +4145,47 @@ const createMorphoBlueFLDebtLiquidationProtectionL2Strategy = () => {
     return morphoBlueLiquidationProtectionStrategy.encodeForDsProxyCall();
 };
 
+const createCompV3LiquidationProtectionL2Strategy = () => {
+    const compV3LiquidationProtectionStrategy = new dfs.Strategy('CompV3LiquidationProtectionL2');
+    addSubSlotsToCompV3Strategy(compV3LiquidationProtectionStrategy);
+
+    compV3LiquidationProtectionStrategy.addTrigger(compV3Trigger);
+    compV3LiquidationProtectionStrategy.addAction(compV3Actions.withdraw('&proxy', '%amount')); // variable amount to withdraw
+    compV3LiquidationProtectionStrategy.addAction(
+        compV3Actions.sellAction('%collAddr', '&baseToken', '$1'),
+    ); // pipe amount from withdraw
+    compV3LiquidationProtectionStrategy.addAction(
+        compV3Actions.feeTakingAction('&baseToken', '$2'),
+    ); // pipe amount from sell
+    compV3LiquidationProtectionStrategy.addAction(compV3Actions.paybackAction('$3')); // pipe amount from fee taking
+    compV3LiquidationProtectionStrategy.addAction(compV3Actions.checkerAction());
+
+    return compV3LiquidationProtectionStrategy.encodeForDsProxyCall();
+};
+
+const createCompV3FLLiquidationProtectionL2Strategy = () => {
+    const compV3FLLiquidationProtectionStrategy = new dfs.Strategy(
+        'CompV3FLLiquidationProtectionL2',
+    );
+    addSubSlotsToCompV3Strategy(compV3FLLiquidationProtectionStrategy);
+
+    compV3FLLiquidationProtectionStrategy.addTrigger(compV3Trigger);
+    compV3FLLiquidationProtectionStrategy.addAction(
+        compV3Actions.flAction('%collAddr', '%repayAmount'),
+    );
+    compV3FLLiquidationProtectionStrategy.addAction(
+        compV3Actions.sellAction('%collAddr', '&baseToken', '%amount'),
+    ); // variable amount to sell
+    compV3FLLiquidationProtectionStrategy.addAction(
+        compV3Actions.feeTakingAction('&baseToken', '$2'),
+    ); // pipe amount from sell
+    compV3FLLiquidationProtectionStrategy.addAction(compV3Actions.paybackAction('$3')); // pipe amount from fee taking
+    compV3FLLiquidationProtectionStrategy.addAction(compV3Actions.withdraw('%flAddr', '$1')); // send back FL amount
+    compV3FLLiquidationProtectionStrategy.addAction(compV3Actions.checkerAction());
+
+    return compV3FLLiquidationProtectionStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createAaveV3RepayL2Strategy,
     createAaveFLV3RepayL2Strategy,
@@ -4208,4 +4249,6 @@ module.exports = {
     createMorphoBlueLiquidationProtectionL2Strategy,
     createMorphoBlueFLCollLiquidationProtectionL2Strategy,
     createMorphoBlueFLDebtLiquidationProtectionL2Strategy,
+    createCompV3LiquidationProtectionL2Strategy,
+    createCompV3FLLiquidationProtectionL2Strategy,
 };
