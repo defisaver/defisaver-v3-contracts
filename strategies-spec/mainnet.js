@@ -8695,6 +8695,248 @@ const createMorphoBlueFLDebtLiquidationProtectionStrategy = () => {
     return morphoBlueFLDebtLiquidationProtectionStrategy.encodeForDsProxyCall();
 };
 
+const createCompV3LiquidationProtectionStrategy = () => {
+    const compV3LiquidationProtectionStrategy = new dfs.Strategy(
+        'CompV3LiquidationProtectionStrategy',
+    );
+
+    compV3LiquidationProtectionStrategy.addSubSlot('&market', 'address');
+    compV3LiquidationProtectionStrategy.addSubSlot('&baseToken', 'address');
+    compV3LiquidationProtectionStrategy.addSubSlot('&ratioState', 'uint256');
+    compV3LiquidationProtectionStrategy.addSubSlot('&targetRatio', 'uint256');
+
+    const compV3Trigger = new dfs.triggers.CompV3RatioTrigger('0', '0', '0');
+    compV3LiquidationProtectionStrategy.addTrigger(compV3Trigger);
+
+    const withdrawAction = new dfs.actions.compoundV3.CompoundV3WithdrawAction(
+        '&market', // comet proxy addr of used market
+        '&proxy', // hardcoded
+        '%assetAddr', // variable token to withdraw
+        '%amount', // variable amount to withdraw
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collAddr', // must stay variable
+            '&baseToken', // baseToken hardcoded
+            '$1', //  hardcoded piped from fee taking
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction('0', '&baseToken', '$2');
+
+    const paybackAction = new dfs.actions.compoundV3.CompoundV3PaybackAction(
+        '&market', // hardcoded
+        '$3', // amount hardcoded
+        '&proxy', // proxy hardcoded (from)
+        '&proxy', // proxy hardcoded (onBehalf)
+        placeHolderAddr, // additional only needed for sdk for front
+    );
+
+    const checkerAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        '&ratioState',
+        '&targetRatio',
+        '&market',
+    );
+
+    compV3LiquidationProtectionStrategy.addAction(withdrawAction);
+    compV3LiquidationProtectionStrategy.addAction(sellAction);
+    compV3LiquidationProtectionStrategy.addAction(feeTakingAction);
+    compV3LiquidationProtectionStrategy.addAction(paybackAction);
+    compV3LiquidationProtectionStrategy.addAction(checkerAction);
+
+    return compV3LiquidationProtectionStrategy.encodeForDsProxyCall();
+};
+
+const createCompV3EOALiquidationProtectionStrategy = () => {
+    const compV3EOALiquidationProtectionStrategy = new dfs.Strategy(
+        'CompV3EOALiquidationProtectionStrategy',
+    );
+
+    compV3EOALiquidationProtectionStrategy.addSubSlot('&market', 'address');
+    compV3EOALiquidationProtectionStrategy.addSubSlot('&baseToken', 'address');
+    compV3EOALiquidationProtectionStrategy.addSubSlot('&ratioState', 'uint256');
+    compV3EOALiquidationProtectionStrategy.addSubSlot('&targetRatio', 'uint256');
+
+    const compV3Trigger = new dfs.triggers.CompV3RatioTrigger('0', '0', '0');
+    compV3EOALiquidationProtectionStrategy.addTrigger(compV3Trigger);
+
+    const withdrawAction = new dfs.actions.compoundV3.CompoundV3WithdrawAction(
+        '&market', // comet proxy addr of used market
+        '&proxy', // hardcoded
+        '%assetAddr', // variable token to withdraw
+        '%amount', // variable amount to withdraw
+        '&eoa', // hardcoded eoa onBehalf param
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collAddr', // must stay variable
+            '&baseToken', // baseToken hardcoded
+            '$1', //  hardcoded piped from fee taking
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction('0', '&baseToken', '$2');
+
+    const paybackAction = new dfs.actions.compoundV3.CompoundV3PaybackAction(
+        '&market', // hardcoded
+        '$3', // amount hardcoded
+        '&proxy', // proxy hardcoded (from)
+        '&eoa', // proxy hardcoded (onBehalf)
+        placeHolderAddr, // additional only needed for sdk for front
+    );
+
+    const checkerAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        '&ratioState',
+        '&targetRatio',
+        '&market',
+        '&eoa',
+    );
+
+    compV3EOALiquidationProtectionStrategy.addAction(withdrawAction);
+    compV3EOALiquidationProtectionStrategy.addAction(sellAction);
+    compV3EOALiquidationProtectionStrategy.addAction(feeTakingAction);
+    compV3EOALiquidationProtectionStrategy.addAction(paybackAction);
+    compV3EOALiquidationProtectionStrategy.addAction(checkerAction);
+
+    return compV3EOALiquidationProtectionStrategy.encodeForDsProxyCall();
+};
+
+const createCompV3FLLiquidationProtectionStrategy = () => {
+    const compV3FLLiquidationProtectionStrategy = new dfs.Strategy(
+        'CompV3FLLiquidationProtectionStrategy',
+    );
+
+    compV3FLLiquidationProtectionStrategy.addSubSlot('&market', 'address');
+    compV3FLLiquidationProtectionStrategy.addSubSlot('&baseToken', 'address');
+    compV3FLLiquidationProtectionStrategy.addSubSlot('&ratioState', 'uint256');
+    compV3FLLiquidationProtectionStrategy.addSubSlot('&targetRatio', 'uint256');
+
+    const compV3Trigger = new dfs.triggers.CompV3RatioTrigger('0', '0', '0');
+    compV3FLLiquidationProtectionStrategy.addTrigger(compV3Trigger);
+
+    const flBalancer = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        ['%collAddr'],
+        ['%repayAmount'],
+    );
+    const flAction = new dfs.actions.flashloan.FLAction(flBalancer);
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collAddr', // must stay variable
+            '&baseToken', // must stay variable
+            '%amount', // variable amount to sell
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction('0', '&baseToken', '$2');
+
+    const paybackAction = new dfs.actions.compoundV3.CompoundV3PaybackAction(
+        '&market', // hardcoded
+        '$3', // amount hardcoded
+        '&proxy', // proxy hardcoded (from)
+        '&proxy', // proxy hardcoded (onBehalf)
+        placeHolderAddr, // additional only needed for sdk for front
+    );
+
+    const withdrawAction = new dfs.actions.compoundV3.CompoundV3WithdrawAction(
+        '&market', // comet proxy addr of used market
+        '%flAddr', // hardcoded
+        '%assetAddr', // variable token to withdraw
+        '$1', // Fl amount
+    );
+
+    const checkerAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        '&ratioState',
+        '&targetRatio',
+        '&market',
+    );
+
+    compV3FLLiquidationProtectionStrategy.addAction(flAction);
+    compV3FLLiquidationProtectionStrategy.addAction(sellAction);
+    compV3FLLiquidationProtectionStrategy.addAction(feeTakingAction);
+    compV3FLLiquidationProtectionStrategy.addAction(paybackAction);
+    compV3FLLiquidationProtectionStrategy.addAction(withdrawAction);
+    compV3FLLiquidationProtectionStrategy.addAction(checkerAction);
+
+    return compV3FLLiquidationProtectionStrategy.encodeForDsProxyCall();
+};
+
+const createCompV3EOAFLLiquidationProtectionStrategy = () => {
+    const compV3EOAFLLiquidationProtectionStrategy = new dfs.Strategy(
+        'CompV3EOAFLLiquidationProtectionStrategy',
+    );
+
+    compV3EOAFLLiquidationProtectionStrategy.addSubSlot('&market', 'address');
+    compV3EOAFLLiquidationProtectionStrategy.addSubSlot('&baseToken', 'address');
+    compV3EOAFLLiquidationProtectionStrategy.addSubSlot('&ratioState', 'uint256');
+    compV3EOAFLLiquidationProtectionStrategy.addSubSlot('&targetRatio', 'uint256');
+
+    const compV3Trigger = new dfs.triggers.CompV3RatioTrigger('0', '0', '0');
+    compV3EOAFLLiquidationProtectionStrategy.addTrigger(compV3Trigger);
+
+    const flBalancer = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        ['%collAddr'],
+        ['%repayAmount'],
+    );
+    const flAction = new dfs.actions.flashloan.FLAction(flBalancer);
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collAddr', // must stay variable
+            '&baseToken', // must stay variable
+            '%amount', // variable amount to sell
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction('0', '&baseToken', '$2');
+
+    const paybackAction = new dfs.actions.compoundV3.CompoundV3PaybackAction(
+        '&market', // hardcoded
+        '$3', // amount hardcoded
+        '&proxy', // proxy hardcoded (from)
+        '&eoa', // user acc. hardcoded (onBehalf)
+        placeHolderAddr, // additional only needed for sdk for front
+    );
+
+    const withdrawAction = new dfs.actions.compoundV3.CompoundV3WithdrawAction(
+        '&market', // comet proxy addr of used market
+        '%flAddr', // hardcoded
+        '%assetAddr', // variable token to withdraw
+        '$1', // Fl amount
+        '&eoa', // hardcoded user acc. onBehalf
+    );
+
+    const checkerAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        '&ratioState',
+        '&targetRatio',
+        '&market',
+        '&eoa',
+    );
+
+    compV3EOAFLLiquidationProtectionStrategy.addAction(flAction);
+    compV3EOAFLLiquidationProtectionStrategy.addAction(sellAction);
+    compV3EOAFLLiquidationProtectionStrategy.addAction(feeTakingAction);
+    compV3EOAFLLiquidationProtectionStrategy.addAction(paybackAction);
+    compV3EOAFLLiquidationProtectionStrategy.addAction(withdrawAction);
+    compV3EOAFLLiquidationProtectionStrategy.addAction(checkerAction);
+
+    return compV3EOAFLLiquidationProtectionStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createRepayStrategy,
     createFLRepayStrategy,
@@ -8836,4 +9078,8 @@ module.exports = {
     createMorphoBlueLiquidationProtectionStrategy,
     createMorphoBlueFLCollLiquidationProtectionStrategy,
     createMorphoBlueFLDebtLiquidationProtectionStrategy,
+    createCompV3LiquidationProtectionStrategy,
+    createCompV3EOALiquidationProtectionStrategy,
+    createCompV3FLLiquidationProtectionStrategy,
+    createCompV3EOAFLLiquidationProtectionStrategy,
 };
