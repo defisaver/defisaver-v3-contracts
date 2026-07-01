@@ -8202,7 +8202,6 @@ const createMcdFLLiquidationProtectionCompositeStrategy = () => {
     return mcdFLLiquidationProtectionStrategy.encodeForDsProxyCall();
 };
 
-// ! SPARK
 const createSparkLiquidationProtectionStrategy = () => {
     const sparkLiquidationProtectionStrategy = new dfs.Strategy(
         'SparkLiquidationProtectionStrategy',
@@ -8344,7 +8343,6 @@ const createSparkFLLiquidationProtectionStrategy = () => {
     return sparkFLLiquidationProtectionStrategy.encodeForDsProxyCall();
 };
 
-// ! FLUID
 const createFluidT1LiquidationProtectionStrategy = () => {
     const fluidT1LiquidationProtectionStrategy = new dfs.Strategy(
         'FluidT1LiquidationProtectionStrategy',
