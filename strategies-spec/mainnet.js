@@ -7978,6 +7978,723 @@ const createSparkFLCollateralSwitchStrategy = () => {
     return sparkFLCollateralSwitchStrategy.encodeForDsProxyCall();
 };
 
+const createAaveV3GenericLiquidationProtectionStrategy = () => {
+    const aaveV3GenericLiquidationProtectionStrategy = new dfs.Strategy(
+        'AaveV3GenericLiquidationProtectionStrategy',
+    );
+
+    aaveV3GenericLiquidationProtectionStrategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV3GenericLiquidationProtectionStrategy.addSubSlot('&checkRepayState', 'uint8');
+    aaveV3GenericLiquidationProtectionStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3GenericLiquidationProtectionStrategy.addSubSlot('&user', 'address');
+
+    const aaveV3Trigger = new dfs.triggers.AaveV3RatioTrigger(nullAddress, nullAddress, '0', '0');
+    aaveV3GenericLiquidationProtectionStrategy.addTrigger(aaveV3Trigger);
+
+    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+        '%aCollTokenAddr', // aToken for collateral
+        '&user', // hardcoded from subData
+        '%amount', // must stay variable
+    );
+
+    const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        '%useDefaultMarket', // hardcoded to false
+        '&marketAddr', // from subData
+        '$1', // output of pullTokenAction
+        '&proxy', // hardcoded
+        '%assetId', // must stay variable can choose diff. asset
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collAddr', // must stay variable
+            '%debtAddr', // must stay variable
+            '$2', //  hardcoded piped from withdraw action
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // must stay variable backend sets gasCost
+        '%debtAddr', // must stay variable as debt can differ
+        '$3', // hardcoded output from sell action
+        '%dfsFeeDivider', // defaults at 0.05%
+    );
+
+    const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
+        '%useDefaultMarket', // hardcoded to false
+        '&marketAddr', // from subData
+        '$4', // amount hardcoded - output of feeTakingAction
+        '&proxy', // proxy hardcoded
+        '%rateMode', // variable type of debt - 2
+        '%debtAddr', // used just for sdk not actually sent
+        '%assetId', // must be variable
+        '%useOnBehalf', // hardcoded true
+        '&user', // EOA/SW from subData
+    );
+
+    const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
+        '&checkRepayState',
+        '&targetRatio',
+        '&marketAddr',
+        '&user',
+    );
+
+    aaveV3GenericLiquidationProtectionStrategy.addAction(pullTokenAction);
+    aaveV3GenericLiquidationProtectionStrategy.addAction(withdrawAction);
+    aaveV3GenericLiquidationProtectionStrategy.addAction(sellAction);
+    aaveV3GenericLiquidationProtectionStrategy.addAction(feeTakingAction);
+    aaveV3GenericLiquidationProtectionStrategy.addAction(paybackAction);
+    aaveV3GenericLiquidationProtectionStrategy.addAction(checkerAction);
+
+    return aaveV3GenericLiquidationProtectionStrategy.encodeForDsProxyCall();
+};
+
+const createAaveV3GenericFLLiquidationProtectionStrategy = () => {
+    const aaveV3GenericFLLiquidationProtectionStrategy = new dfs.Strategy(
+        'AaveV3GenericFLLiquidationProtectionStrategy',
+    );
+
+    aaveV3GenericFLLiquidationProtectionStrategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV3GenericFLLiquidationProtectionStrategy.addSubSlot('&checkRepayState', 'uint8');
+    aaveV3GenericFLLiquidationProtectionStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3GenericFLLiquidationProtectionStrategy.addSubSlot('&user', 'address');
+
+    const aaveV3Trigger = new dfs.triggers.AaveV3RatioTrigger(nullAddress, nullAddress, '0', '0');
+    aaveV3GenericFLLiquidationProtectionStrategy.addTrigger(aaveV3Trigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%collAsset'], // sent by backend
+            ['%flAmount'], // sent by backend
+            nullAddress,
+            [],
+        ),
+    );
+
+    aaveV3GenericFLLiquidationProtectionStrategy.addAction(flAction);
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collAddr', // must stay variable
+            '%debtAddr', // must stay variable
+            '%amount', //  can't hard code because of potential FL fee
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // must stay variable backend sets gasCost
+        '%debtAddr', // must stay variable as debt can differ
+        '$2', // hardcoded output from sell
+        '%dfsFeeDivider', // defaults at 0.05%
+    );
+
+    const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
+        '%useDefaultMarket', // hardcoded to false
+        '&marketAddr', // from subData
+        '$3', // amount hardcoded
+        '&proxy', // proxy hardcoded
+        '%rateMode', // variable type of debt
+        '%debtAddr', // used just for sdk not actually sent
+        '%assetId', // must be variable
+        '%useOnBehalf', // hardcoded true
+        '&user', // EOA/SW addr from subData
+    );
+
+    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+        '%aCollTokenAddr', // aToken for collateral
+        '&user', // EOA/SW addr from subData
+        '$1', // output of FL action
+    );
+
+    const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        '%useDefaultMarket', // hardcoded to false
+        '&marketAddr', // from subData
+        '$5', // repay fl amount
+        '%flAddr', // flAddr not hardcoded (tx will fail if not returned to correct addr)
+        '%assetId', // must stay variable can choose diff. asset
+    );
+
+    const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
+        '&checkRepayState',
+        '&targetRatio',
+        '&marketAddr',
+        '&user',
+    );
+
+    aaveV3GenericFLLiquidationProtectionStrategy.addAction(sellAction);
+    aaveV3GenericFLLiquidationProtectionStrategy.addAction(feeTakingAction);
+    aaveV3GenericFLLiquidationProtectionStrategy.addAction(paybackAction);
+    aaveV3GenericFLLiquidationProtectionStrategy.addAction(pullTokenAction);
+    aaveV3GenericFLLiquidationProtectionStrategy.addAction(withdrawAction);
+    aaveV3GenericFLLiquidationProtectionStrategy.addAction(checkerAction);
+
+    return aaveV3GenericFLLiquidationProtectionStrategy.encodeForDsProxyCall();
+};
+
+const createMcdLiquidationProtectionCompositeStrategy = () => {
+    const mcdLiquidationProtectionStrategy = new dfs.Strategy(
+        'MakerLiquidationProtectionCompositeStrategy',
+    );
+
+    mcdLiquidationProtectionStrategy.addSubSlot('&vaultId', 'uint256');
+    mcdLiquidationProtectionStrategy.addSubSlot('&targetRatio', 'uint256');
+    mcdLiquidationProtectionStrategy.addSubSlot('&daiAddr', 'address');
+
+    const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
+    mcdLiquidationProtectionStrategy.addTrigger(mcdRatioTrigger);
+
+    const repayCompositeAction = new dfs.actions.maker.MakerRepayCompositeAction(
+        '&vaultId',
+        '%joinAddr',
+        '%gasUsed',
+        '%flAddr',
+        '%flAmount',
+        '%nextPrice',
+        '%targetRatio',
+        formatExchangeObj('%wethAddr', '&daiAddr', '%repayAmount', '%exchangeWrapper'),
+    );
+
+    mcdLiquidationProtectionStrategy.addAction(repayCompositeAction);
+
+    return mcdLiquidationProtectionStrategy.encodeForDsProxyCall();
+};
+
+const createMcdFLLiquidationProtectionCompositeStrategy = () => {
+    const mcdFLLiquidationProtectionStrategy = new dfs.Strategy(
+        'MakerFLLiquidationProtectionCompositeStrategy',
+    );
+
+    mcdFLLiquidationProtectionStrategy.addSubSlot('&vaultId', 'uint256');
+    mcdFLLiquidationProtectionStrategy.addSubSlot('&targetRatio', 'uint256');
+    mcdFLLiquidationProtectionStrategy.addSubSlot('&daiAddr', 'address');
+
+    const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
+    mcdFLLiquidationProtectionStrategy.addTrigger(mcdRatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        ['%collAddr'],
+        ['%loanAmount'],
+        nullAddress,
+        [],
+    );
+
+    mcdFLLiquidationProtectionStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
+
+    const repayCompositeAction = new dfs.actions.maker.MakerRepayCompositeAction(
+        '&vaultId',
+        '%joinAddr',
+        '%gasUsed',
+        '%flAddr',
+        '$1',
+        '%nextPrice',
+        '%targetRatio',
+        formatExchangeObj('%wethAddr', '&daiAddr', '%repayAmount', '%exchangeWrapper'),
+    );
+
+    mcdFLLiquidationProtectionStrategy.addAction(repayCompositeAction);
+
+    return mcdFLLiquidationProtectionStrategy.encodeForDsProxyCall();
+};
+
+// ! SPARK
+const createSparkLiquidationProtectionStrategy = () => {
+    const sparkLiquidationProtectionStrategy = new dfs.Strategy(
+        'SparkLiquidationProtectionStrategy',
+    );
+
+    sparkLiquidationProtectionStrategy.addSubSlot('&targetRatio', 'uint256');
+    sparkLiquidationProtectionStrategy.addSubSlot('&checkRepayState', 'uint256');
+    sparkLiquidationProtectionStrategy.addSubSlot('&useDefaultMarket', 'bool');
+    sparkLiquidationProtectionStrategy.addSubSlot('&useOnBehalf', 'bool');
+
+    const sparkTrigger = new dfs.triggers.SparkRatioTrigger('0', '0', '0');
+    sparkLiquidationProtectionStrategy.addTrigger(sparkTrigger);
+
+    const withdrawAction = new dfs.actions.spark.SparkWithdrawAction(
+        '&useDefaultMarket', // set to true hardcoded
+        '%market', // hardcoded because default market is true
+        '%amount', // must stay variable
+        '&proxy', // hardcoded
+        '%assetId', // must stay variable can choose diff. asset
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collAddr', // must stay variable
+            '%debtAddr', // must stay variable
+            '$1', //  hardcoded piped from fee taking
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // must stay variable backend sets gasCost
+        '%debtAddr', // must stay variable as debt can differ
+        '$2', // hardcoded output from withdraw action
+        '%dfsFeeDivider', // defaults at 0.05%
+    );
+
+    const paybackAction = new dfs.actions.spark.SparkPaybackAction(
+        '&useDefaultMarket', // set to true hardcoded
+        '%market', // hardcoded because default market is true
+        '$3', // amount hardcoded
+        '&proxy', // proxy hardcoded
+        '%rateMode', // variable type of debt
+        '%debtAddr', // used just for sdk not actually sent (should this be here?)
+        '%assetId', // must be variable
+        '&useOnBehalf', // hardcoded false
+        '%onBehalf', // hardcoded 0 as its false
+    );
+
+    const checkerAction = new dfs.actions.checkers.SparkRatioCheckAction(
+        '&checkRepayState',
+        '&targetRatio',
+    );
+
+    sparkLiquidationProtectionStrategy.addAction(withdrawAction);
+    sparkLiquidationProtectionStrategy.addAction(sellAction);
+    sparkLiquidationProtectionStrategy.addAction(feeTakingAction);
+    sparkLiquidationProtectionStrategy.addAction(paybackAction);
+    sparkLiquidationProtectionStrategy.addAction(checkerAction);
+
+    return sparkLiquidationProtectionStrategy.encodeForDsProxyCall();
+};
+
+const createSparkFLLiquidationProtectionStrategy = () => {
+    const sparkFLLiquidationProtectionStrategy = new dfs.Strategy(
+        'SparkFLLiquidationProtectionStrategy',
+    );
+
+    sparkFLLiquidationProtectionStrategy.addSubSlot('&targetRatio', 'uint256');
+    sparkFLLiquidationProtectionStrategy.addSubSlot('&checkRepayState', 'uint256');
+    sparkFLLiquidationProtectionStrategy.addSubSlot('&useDefaultMarket', 'bool');
+    sparkFLLiquidationProtectionStrategy.addSubSlot('&useOnBehalf', 'bool');
+
+    const sparkTrigger = new dfs.triggers.SparkRatioTrigger('0', '0', '0');
+    sparkFLLiquidationProtectionStrategy.addTrigger(sparkTrigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.SparkFlashLoanAction(
+            ['%collAddr'],
+            ['%loanAmount'],
+            nullAddress,
+            [],
+        ),
+    );
+
+    sparkFLLiquidationProtectionStrategy.addAction(flAction);
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collAddr', // must stay variable
+            '%debtAddr', // must stay variable
+            '0', //  can't hard code because of fee
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // must stay variable backend sets gasCost
+        '%debtAddr', // must stay variable as coll can differ
+        '$2', // hardcoded output from sell
+        '%dfsFeeDivider', // defaults at 0.05%
+    );
+
+    const paybackAction = new dfs.actions.spark.SparkPaybackAction(
+        '&useDefaultMarket', // set to true hardcoded
+        '%market', // hardcoded because default market is true
+        '$3', // amount hardcoded
+        '&proxy', // proxy hardcoded
+        '%rateMode', // variable type of debt
+        '%debtAddr', // used just for sdk not actually sent (should this be here?)
+        '%assetId', // must be variable
+        '&useOnBehalf', // hardcoded false
+        '%onBehalf', // hardcoded 0 as its false
+    );
+
+    const withdrawAction = new dfs.actions.spark.SparkWithdrawAction(
+        '&useDefaultMarket', // set to true hardcoded
+        '%market', // hardcoded because default market is true
+        '$1', // repay fl amount
+        '%flAddr', // flAddr not hardcoded (tx will fail if not returned to correct addr)
+        '%assetId', // must stay variable can choose diff. asset
+    );
+
+    const checkerAction = new dfs.actions.checkers.SparkRatioCheckAction(
+        '&checkRepayState',
+        '&targetRatio',
+    );
+
+    sparkFLLiquidationProtectionStrategy.addAction(sellAction);
+    sparkFLLiquidationProtectionStrategy.addAction(feeTakingAction);
+    sparkFLLiquidationProtectionStrategy.addAction(paybackAction);
+    sparkFLLiquidationProtectionStrategy.addAction(withdrawAction);
+    sparkFLLiquidationProtectionStrategy.addAction(checkerAction);
+
+    return sparkFLLiquidationProtectionStrategy.encodeForDsProxyCall();
+};
+
+// ! FLUID
+const createFluidT1LiquidationProtectionStrategy = () => {
+    const fluidT1LiquidationProtectionStrategy = new dfs.Strategy(
+        'FluidT1LiquidationProtectionStrategy',
+    );
+    fluidT1LiquidationProtectionStrategy.addSubSlot('&nftId', 'uint256');
+    fluidT1LiquidationProtectionStrategy.addSubSlot('&vault', 'address');
+    fluidT1LiquidationProtectionStrategy.addSubSlot('&ratioState', 'uint256');
+    fluidT1LiquidationProtectionStrategy.addSubSlot('&targetRatio', 'uint256');
+    fluidT1LiquidationProtectionStrategy.addSubSlot('&wrapEth', 'bool'); // hardcode to true
+
+    const fluidRatioTrigger = new dfs.triggers.FluidRatioTrigger('nftId', 'ratio', 'ratioState');
+    fluidT1LiquidationProtectionStrategy.addTrigger(fluidRatioTrigger);
+
+    const fluidWithdrawAction = new dfs.actions.fluid.FluidVaultT1WithdrawAction(
+        '&vault',
+        '&nftId',
+        '%amount', // sent by backend
+        '&proxy',
+        '&wrapEth',
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collToken', // sent by backend. If collToken is ETH, pass WETH address
+            '%debtToken', // sent by backend. If debtToken is ETH, pass WETH address
+            '$1',
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gas', // sent by backend
+        '%debtToken', // sent by backend. If debtToken is ETH, pass WETH address
+        '$2',
+    );
+    const fluidPaybackAction = new dfs.actions.fluid.FluidVaultT1PaybackAction(
+        '&vault',
+        '&nftId',
+        '$3',
+        '&proxy',
+    );
+    const fluidRatioCheckAction = new dfs.actions.checkers.FluidRatioCheckAction(
+        '&nftId',
+        '&ratioState',
+        '&targetRatio',
+    );
+    fluidT1LiquidationProtectionStrategy.addAction(fluidWithdrawAction);
+    fluidT1LiquidationProtectionStrategy.addAction(sellAction);
+    fluidT1LiquidationProtectionStrategy.addAction(feeTakingAction);
+    fluidT1LiquidationProtectionStrategy.addAction(fluidPaybackAction);
+    fluidT1LiquidationProtectionStrategy.addAction(fluidRatioCheckAction);
+
+    return fluidT1LiquidationProtectionStrategy.encodeForDsProxyCall();
+};
+const createFluidT1FLLiquidationProtectionStrategy = () => {
+    const fluidT1FLLiquidationProtectionStrategy = new dfs.Strategy(
+        'FluidT1FLLiquidationProtectionStrategy',
+    );
+    fluidT1FLLiquidationProtectionStrategy.addSubSlot('&nftId', 'uint256');
+    fluidT1FLLiquidationProtectionStrategy.addSubSlot('&vault', 'address');
+    fluidT1FLLiquidationProtectionStrategy.addSubSlot('&ratioState', 'uint256');
+    fluidT1FLLiquidationProtectionStrategy.addSubSlot('&targetRatio', 'uint256');
+    fluidT1FLLiquidationProtectionStrategy.addSubSlot('&wrapEth', 'bool'); // hardcode to true
+    fluidT1FLLiquidationProtectionStrategy.addSubSlot('&CollActionType.WITHDRAW', 'uint8');
+    fluidT1FLLiquidationProtectionStrategy.addSubSlot('&DebtActionType.PAYBACK', 'uint8');
+
+    const fluidRatioTrigger = new dfs.triggers.FluidRatioTrigger('nftId', 'ratio', 'ratioState');
+    fluidT1FLLiquidationProtectionStrategy.addTrigger(fluidRatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%collToken'], // sent by backend. If collToken is ETH, pass WETH address
+            ['%flAmount'], // sent by backend
+        ),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collToken', // sent by backend. If collToken is ETH, pass WETH address
+            '%debtToken', // sent by backend. If debtToken is ETH, pass WETH address
+            '%flAmount', // sent by backend
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gas', // sent by backend
+        '%debtToken', // sent by backend. If debtToken is ETH, pass WETH address
+        '$2',
+    );
+    const fluidAdjustAction = new dfs.actions.fluid.FluidVaultT1AdjustAction(
+        '&vault',
+        '&nftId',
+        '$1',
+        '$3',
+        '&proxy',
+        '%flAddress', // sent by backend
+        '&wrapEth',
+        '&CollActionType.WITHDRAW',
+        '&DebtActionType.PAYBACK',
+    );
+    const fluidRatioCheckAction = new dfs.actions.checkers.FluidRatioCheckAction(
+        '&nftId',
+        '&ratioState',
+        '&targetRatio',
+    );
+    fluidT1FLLiquidationProtectionStrategy.addAction(flAction);
+    fluidT1FLLiquidationProtectionStrategy.addAction(sellAction);
+    fluidT1FLLiquidationProtectionStrategy.addAction(feeTakingAction);
+    fluidT1FLLiquidationProtectionStrategy.addAction(fluidAdjustAction);
+    fluidT1FLLiquidationProtectionStrategy.addAction(fluidRatioCheckAction);
+
+    return fluidT1FLLiquidationProtectionStrategy.encodeForDsProxyCall();
+};
+
+const createMorphoBlueLiquidationProtectionStrategy = () => {
+    const morphoBlueLiquidationProtectionStrategy = new dfs.Strategy(
+        'MorphoBlueLiquidationProtectionStrategy',
+    );
+
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&loanToken', 'address');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&collateralToken', 'address');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&oracle', 'address');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&irm', 'address');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&lltv', 'uint256');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&ratioState', 'uint8');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&targetRatio', 'uint256');
+    morphoBlueLiquidationProtectionStrategy.addSubSlot('&user', 'address');
+
+    const morphoBlueRatioTrigger = new dfs.triggers.MorphoBlueRatioTrigger(0, nullAddress, 0, 0);
+    morphoBlueLiquidationProtectionStrategy.addTrigger(morphoBlueRatioTrigger);
+
+    const withdrawAction = new dfs.actions.morphoblue.MorphoBlueWithdrawCollateralAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '%repayAmount', // sent by backend
+        '&user',
+        '&proxy',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collateralToken',
+            '&loanToken',
+            '$1', // output of withdraw action
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // sent by backend
+        '&loanToken',
+        '$2', // output of sell action
+    );
+    const paybackAction = new dfs.actions.morphoblue.MorphoBluePaybackAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '$3', // output of fee taking action
+        '&proxy',
+        '&user',
+    );
+    const morphoBlueRatioCheckAction = new dfs.actions.checkers.MorphoBlueRatioCheckAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '&user',
+        '&ratioState',
+        '&targetRatio',
+    );
+
+    morphoBlueLiquidationProtectionStrategy.addAction(withdrawAction);
+    morphoBlueLiquidationProtectionStrategy.addAction(sellAction);
+    morphoBlueLiquidationProtectionStrategy.addAction(feeTakingAction);
+    morphoBlueLiquidationProtectionStrategy.addAction(paybackAction);
+    morphoBlueLiquidationProtectionStrategy.addAction(morphoBlueRatioCheckAction);
+    return morphoBlueLiquidationProtectionStrategy.encodeForDsProxyCall();
+};
+const createMorphoBlueFLCollLiquidationProtectionStrategy = () => {
+    const morphoBlueFLCollLiquidationProtectionStrategy = new dfs.Strategy(
+        'MorphoBlueFLCollLiquidationProtectionStrategy',
+    );
+
+    morphoBlueFLCollLiquidationProtectionStrategy.addSubSlot('&loanToken', 'address');
+    morphoBlueFLCollLiquidationProtectionStrategy.addSubSlot('&collateralToken', 'address');
+    morphoBlueFLCollLiquidationProtectionStrategy.addSubSlot('&oracle', 'address');
+    morphoBlueFLCollLiquidationProtectionStrategy.addSubSlot('&irm', 'address');
+    morphoBlueFLCollLiquidationProtectionStrategy.addSubSlot('&lltv', 'uint256');
+    morphoBlueFLCollLiquidationProtectionStrategy.addSubSlot('&ratioState', 'uint8');
+    morphoBlueFLCollLiquidationProtectionStrategy.addSubSlot('&targetRatio', 'uint256');
+    morphoBlueFLCollLiquidationProtectionStrategy.addSubSlot('&user', 'address');
+
+    const morphoBlueRatioTrigger = new dfs.triggers.MorphoBlueRatioTrigger(0, nullAddress, 0, 0);
+    morphoBlueFLCollLiquidationProtectionStrategy.addTrigger(morphoBlueRatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        ['%collateralToken'], // sent by backend (no piping available in fl actions)
+        ['%flAmount'], // sent by backend
+        '%nullAddress',
+        [],
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collateralToken',
+            '&loanToken',
+            '%repayAmount', // same as flamount, sent by backend
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // sent by backend
+        '&loanToken',
+        '$2', // output of sell action
+    );
+    const paybackAction = new dfs.actions.morphoblue.MorphoBluePaybackAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '$3', // output of fee taking action
+        '&proxy',
+        '&user',
+    );
+    const withdrawAction = new dfs.actions.morphoblue.MorphoBlueWithdrawCollateralAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '$1', // withdraw enough to payback flashloan
+        '&user',
+        '%flAddress', // sent by backend
+    );
+    const morphoBlueRatioCheckAction = new dfs.actions.checkers.MorphoBlueRatioCheckAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '&user',
+        '&ratioState',
+        '&targetRatio',
+    );
+
+    morphoBlueFLCollLiquidationProtectionStrategy.addAction(
+        new dfs.actions.flashloan.FLAction(flAction),
+    );
+    morphoBlueFLCollLiquidationProtectionStrategy.addAction(sellAction);
+    morphoBlueFLCollLiquidationProtectionStrategy.addAction(feeTakingAction);
+    morphoBlueFLCollLiquidationProtectionStrategy.addAction(paybackAction);
+    morphoBlueFLCollLiquidationProtectionStrategy.addAction(withdrawAction);
+    morphoBlueFLCollLiquidationProtectionStrategy.addAction(morphoBlueRatioCheckAction);
+    return morphoBlueFLCollLiquidationProtectionStrategy.encodeForDsProxyCall();
+};
+const createMorphoBlueFLDebtLiquidationProtectionStrategy = () => {
+    const morphoBlueFLDebtLiquidationProtectionStrategy = new dfs.Strategy(
+        'MorphoBlueFLDebtLiquidationProtectionStrategy',
+    );
+
+    morphoBlueFLDebtLiquidationProtectionStrategy.addSubSlot('&loanToken', 'address');
+    morphoBlueFLDebtLiquidationProtectionStrategy.addSubSlot('&collateralToken', 'address');
+    morphoBlueFLDebtLiquidationProtectionStrategy.addSubSlot('&oracle', 'address');
+    morphoBlueFLDebtLiquidationProtectionStrategy.addSubSlot('&irm', 'address');
+    morphoBlueFLDebtLiquidationProtectionStrategy.addSubSlot('&lltv', 'uint256');
+    morphoBlueFLDebtLiquidationProtectionStrategy.addSubSlot('&ratioState', 'uint8');
+    morphoBlueFLDebtLiquidationProtectionStrategy.addSubSlot('&targetRatio', 'uint256');
+    morphoBlueFLDebtLiquidationProtectionStrategy.addSubSlot('&user', 'address');
+
+    const morphoBlueRatioTrigger = new dfs.triggers.MorphoBlueRatioTrigger(0, nullAddress, 0, 0);
+    morphoBlueFLDebtLiquidationProtectionStrategy.addTrigger(morphoBlueRatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        ['%debtToken'], // sent by backend (no piping available in fl actions)
+        ['%flAmount'], // sent by backend
+        '%nullAddress',
+        [],
+    );
+    const paybackAction = new dfs.actions.morphoblue.MorphoBluePaybackAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '%repayAmount', // <- same as flAmount
+        '&proxy',
+        '&user',
+    );
+    const withdrawAction = new dfs.actions.morphoblue.MorphoBlueWithdrawCollateralAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '%withdrawAmount', // sent by backend
+        '&user',
+        '&proxy',
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collateralToken',
+            '&loanToken',
+            '$3', // output of withdraw action
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // sent by backend
+        '&loanToken',
+        '$4', // output of sell action
+    );
+    const sendTokensAction = new dfs.actions.basic.SendTokensAction(
+        ['&loanToken', '&loanToken'],
+        ['%flAddress', '&eoa'], // first one sent by backend, second piped
+        ['$1', '%maxUint'], // first one piped to return fl, second one sent by backend
+    );
+    const morphoBlueRatioCheckAction = new dfs.actions.checkers.MorphoBlueRatioCheckAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '&user',
+        '&ratioState',
+        '&targetRatio',
+    );
+    morphoBlueFLDebtLiquidationProtectionStrategy.addAction(
+        new dfs.actions.flashloan.FLAction(flAction),
+    );
+    morphoBlueFLDebtLiquidationProtectionStrategy.addAction(paybackAction);
+    morphoBlueFLDebtLiquidationProtectionStrategy.addAction(withdrawAction);
+    morphoBlueFLDebtLiquidationProtectionStrategy.addAction(sellAction);
+    morphoBlueFLDebtLiquidationProtectionStrategy.addAction(feeTakingAction);
+    morphoBlueFLDebtLiquidationProtectionStrategy.addAction(sendTokensAction);
+    morphoBlueFLDebtLiquidationProtectionStrategy.addAction(morphoBlueRatioCheckAction);
+    return morphoBlueFLDebtLiquidationProtectionStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createRepayStrategy,
     createFLRepayStrategy,
@@ -8108,4 +8825,15 @@ module.exports = {
     createAaveV4FLCloseToCollStrategy,
     createAaveV4FLCollateralSwitchStrategy,
     createSparkFLCollateralSwitchStrategy,
+    createAaveV3GenericLiquidationProtectionStrategy,
+    createAaveV3GenericFLLiquidationProtectionStrategy,
+    createMcdLiquidationProtectionCompositeStrategy,
+    createMcdFLLiquidationProtectionCompositeStrategy,
+    createSparkLiquidationProtectionStrategy,
+    createSparkFLLiquidationProtectionStrategy,
+    createFluidT1LiquidationProtectionStrategy,
+    createFluidT1FLLiquidationProtectionStrategy,
+    createMorphoBlueLiquidationProtectionStrategy,
+    createMorphoBlueFLCollLiquidationProtectionStrategy,
+    createMorphoBlueFLDebtLiquidationProtectionStrategy,
 };
