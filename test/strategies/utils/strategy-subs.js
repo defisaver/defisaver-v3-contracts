@@ -1469,6 +1469,32 @@ const subAaveV4FLCollateralSwitchStrategy = async (
     const subId = await subToStrategy(proxy, strategySub);
     return { subId, strategySub };
 };
+const subSparkLeverageManagementGeneric = async (
+    bundleId,
+    proxy,
+    eoaAddr,
+    marketAddr,
+    ratioState,
+    targetRatio,
+    triggerRatio,
+    isEOA,
+) => {
+    const encoder = automationSdk.strategySubService.sparkEncode;
+
+    const user = isEOA ? eoaAddr : proxy.address;
+
+    const strategySub = encoder.leverageManagementGeneric(
+        bundleId, // strategyOrBundleId
+        marketAddr,
+        user, // user - EOA / SW, depending if it is EOA strategy
+        ratioState, // ratioState -> 0 for boost, 1 for repay
+        targetRatio,
+        triggerRatio,
+    );
+
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
 
 module.exports = {
     subDcaStrategy,
@@ -1520,4 +1546,5 @@ module.exports = {
     subAaveV4CloseOnPrice,
     subAaveV4FLCollateralSwitchStrategy,
     subSparkFLCollateralSwitchStrategy,
+    subSparkLeverageManagementGeneric,
 };
