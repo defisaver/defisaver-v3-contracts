@@ -6622,7 +6622,7 @@ const createAaveV3FLDebtSwitchStrategy = () => {
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
         '%false', // useDefaultMarket - Sent by backend
         '&marketAddr',
-        '$1', // output of FL action - Sent by backend
+        '$1', // output of FL action
         '%flAddress', // Sent by backend
         '%rateMode', // variable type of debt - Sent by backend
         '&toAssetId',
