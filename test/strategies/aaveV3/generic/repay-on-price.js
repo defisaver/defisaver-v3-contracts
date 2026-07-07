@@ -71,6 +71,8 @@ const runRepayOnPriceTests = () => {
             flAddr = flContract.address;
 
             // Redeploys
+            // trigger reads SemiContinuousTracker from registry, so it has to be deployed
+            await redeploy('SemiContinuousTracker', isFork);
             await redeploy('AaveV3QuotePriceTrigger', isFork);
             await redeploy('AaveV3Borrow', isFork);
             await redeploy('AaveV3Payback', isFork);
