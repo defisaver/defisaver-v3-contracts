@@ -22,8 +22,7 @@ contract ArbitrumUtilAddresses {
     address internal constant MKR_PROXY_REGISTRY = 0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895;
     address internal constant DFS_PROXY_REGISTRY_ADDR = 0xeCF15D0aE171F757175c6aBDD2C70e9a8806984C;
 
-    // TODO: not needed now
-    address internal constant FEE_RECEIVER_ADMIN_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address internal constant FEE_RECEIVER_ADMIN_ADDR = 0x808beD429C8edd8A724608425eC7c83f7dBC7C89;
     address internal constant UNI_V2_ROUTER = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant WSTETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant STETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;

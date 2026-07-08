@@ -1621,5 +1621,16 @@
         "changeTime": 0,
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "FeeReceiver",
+        "address": "0x0909201d8bc9906C95B248c1A4476C07a7769983",
+        "id": "0x6a17809a",
+        "path": "contracts/utils/fee/FeeReceiver.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
     }
 ]
