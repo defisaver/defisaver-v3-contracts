@@ -14,10 +14,14 @@ const {
 const {
     createMorphoBlueFLCloseToDebtL2Strategy,
     createMorphoBlueFLCloseToCollL2Strategy,
+    createMorphoBlueRepayOnPriceL2Strategy,
+    createMorphoBlueFLRepayOnPriceL2Strategy,
 } = require('../../strategies-spec/l2');
 const {
     createMorphoBlueFLCloseToDebtStrategy,
     createMorphoBlueFLCloseToCollStrategy,
+    createMorphoBlueRepayOnPriceStrategy,
+    createMorphoBlueFLRepayOnPriceStrategy,
 } = require('../../strategies-spec/mainnet');
 const { createStrategy, createBundle } = require('../strategies/utils/utils-strategies');
 const { morphoBlueSupplyCollateral, morphoBlueBorrow } = require('./actions');
@@ -156,6 +160,22 @@ const deployMorphoBlueCloseBundle = async () => {
     return bundleId;
 };
 
+const deployMorphoBlueRepayOnPriceBundle = async (isFork = isNetworkFork()) => {
+    const isL2 = network !== 'mainnet';
+    await openStrategyAndBundleStorage(isFork);
+    const repayOnPriceStrategy = isL2
+        ? createMorphoBlueRepayOnPriceL2Strategy()
+        : createMorphoBlueRepayOnPriceStrategy();
+    const flRepayOnPriceStrategy = isL2
+        ? createMorphoBlueFLRepayOnPriceL2Strategy()
+        : createMorphoBlueFLRepayOnPriceStrategy();
+    const continuous = false;
+    const repayOnPriceStrategyId = await createStrategy(...repayOnPriceStrategy, continuous);
+    const flRepayOnPriceStrategyId = await createStrategy(...flRepayOnPriceStrategy, continuous);
+    const bundleId = await createBundle([repayOnPriceStrategyId, flRepayOnPriceStrategyId]);
+    return bundleId;
+};
+
 const formatMarketParams = (marketParams) => [
     marketParams.loanToken,
     marketParams.collateralToken,
@@ -221,6 +241,7 @@ module.exports = {
     getMarkets,
     supplyToMarket,
     deployMorphoBlueCloseBundle,
+    deployMorphoBlueRepayOnPriceBundle,
     formatMarketParams,
     openMorphoBlueProxyPosition,
     getMorphoBluePositionRatio,
