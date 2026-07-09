@@ -56,7 +56,7 @@ contract SparkRatioCheck is ActionBase, SparkRatioHelper {
         if (market == address(0)) market = DEFAULT_SPARK_MARKET;
         if (user == address(0)) user = address(this);
 
-        uint256 currRatio = getRatio(market, user);
+        uint256 currRatio = getSafetyRatioWithLtvZeroFallback(market, user);
 
         uint256 startRatio = uint256(tempStorage.getBytes32("SPARK_RATIO"));
 
