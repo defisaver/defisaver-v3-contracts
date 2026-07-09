@@ -1,24 +1,13 @@
-// AaveV3 Close strategies
+// AaveV3 Semi-Continuous Close strategies
 const hre = require('hardhat');
 const { expect } = require('chai');
-const { getAssetInfo } = require('@defisaver/tokens');
 const automationSdk = require('@defisaver/automation-sdk');
 
 const {
-    getProxy,
     network,
-    addrs,
-    takeSnapshot,
-    revertToSnapshot,
     chainIds,
-    getContractFromRegistry,
-    getStrategyExecutorContract,
-    getAndSetMockExchangeWrapper,
     formatMockExchangeObjUsdFeed,
     fetchAmountInUSDPrice,
-    isNetworkFork,
-    redeploy,
-    sendEther,
     addBalancerFlLiquidity,
     getCloseStrategyTypeName,
     getCloseStrategyConfigs,
@@ -28,7 +17,6 @@ const {
     nullAddress,
 } = require('../../../utils/utils');
 
-const { addBotCaller } = require('../../utils/utils-strategies');
 const { subAaveV3CloseGeneric } = require('../../utils/strategy-subs');
 const {
     callAaveV3GenericFLCloseToCollStrategy,
@@ -36,134 +24,68 @@ const {
 } = require('../../utils/strategy-calls');
 const {
     AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY,
-    openAaveV3ProxyPosition,
-    openAaveV3EOAPosition,
     getAaveV3PositionRatio,
     deployAaveV3CloseGenericBundle,
-    setupAaveV3EOAPermissions,
     getAaveV3ReserveData,
 } = require('../../../utils/aave');
+const {
+    WALLET_TYPES,
+    setupGenericTestEnv,
+    useSnapshots,
+    openAaveV3TestPosition,
+    getTestPairInfo,
+} = require('./common');
 
 const runSemiContinuousCloseTests = () => {
     describe('AaveV3 Semi-Continuous Close Strategies', () => {
-        let snapshotId;
-        let senderAcc;
-        let proxy;
-        let botAcc;
-        let strategyExecutor;
-        let mockWrapper;
-        let flAddr;
-        let bundleId;
+        let env;
         let semiContinuousTracker;
         let subStorage;
 
         before(async () => {
-            // Setup
-            const isFork = isNetworkFork();
-            await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', ['0x0']);
-
-            senderAcc = (await hre.ethers.getSigners())[0];
-            botAcc = (await hre.ethers.getSigners())[1];
-            await sendEther(senderAcc, addrs[network].OWNER_ACC, '10');
-            proxy = await getProxy(senderAcc.address);
-            await addBotCaller(botAcc.address, isFork);
-            strategyExecutor = (await getStrategyExecutorContract()).connect(botAcc);
-            mockWrapper = await getAndSetMockExchangeWrapper(senderAcc);
-
-            const flContract = await getContractFromRegistry('FLAction', isFork);
-            flAddr = flContract.address;
-
+            env = await setupGenericTestEnv({
+                extraRedeploys: [
+                    // RecipeExecutor with semi-continuous support + the tracker it reads
+                    // from registry (the close triggers read the tracker too)
+                    'RecipeExecutor',
+                    'SemiContinuousTracker',
+                    'AaveV3QuotePriceTrigger',
+                    'AaveV3QuotePriceRangeTrigger',
+                    'SendTokenAndUnwrap',
+                    'SendTokensAndUnwrap',
+                ],
+                deployBundleFn: deployAaveV3CloseGenericBundle,
+            });
+            semiContinuousTracker = env.contracts.SemiContinuousTracker;
             subStorage = await hre.ethers.getContractAt(
                 'SubStorage',
                 await getAddrFromRegistry('SubStorage'),
             );
-
-            // Redeploys
-            // RecipeExecutor with semi-continuous support + the tracker it reads from registry
-            await redeploy('RecipeExecutor', isFork);
-            semiContinuousTracker = await redeploy('SemiContinuousTracker', isFork);
-            await redeploy('AaveV3QuotePriceTrigger', isFork);
-            await redeploy('AaveV3QuotePriceRangeTrigger', isFork);
-            await redeploy('AaveV3Borrow', isFork);
-            await redeploy('AaveV3Payback', isFork);
-            await redeploy('AaveV3Supply', isFork);
-            await redeploy('AaveV3Withdraw', isFork);
-            await redeploy('AaveV3RatioCheck', isFork);
-            await redeploy('AaveV3OpenRatioCheck', isFork);
-            await redeploy('AaveV3View', isFork);
-            await redeploy('SubProxy', isFork);
-            await redeploy('SendTokenAndUnwrap', isFork);
-            await redeploy('SendTokensAndUnwrap', isFork);
-
-            bundleId = await deployAaveV3CloseGenericBundle();
         });
 
-        beforeEach(async () => {
-            snapshotId = await takeSnapshot();
-        });
+        useSnapshots();
 
-        afterEach(async () => {
-            await revertToSnapshot(snapshotId);
-        });
-
-        const baseTest = async (
-            collAsset,
-            debtAsset,
-            collAmountInUSD,
-            debtAmountInUSD,
-            isEOA,
-            stopLossPrice,
-            stopLossType,
-            takeProfitPrice,
-            takeProfitType,
-            marketAddress,
-        ) => {
+        const baseTest = async ({ collAsset, debtAsset, pair, config, isEOA }) => {
+            const { senderAcc, proxy, strategyExecutor, mockWrapper, flAddr, bundleId } = env;
+            const { collAmountInUSD, debtAmountInUSD, marketAddr } = pair;
+            const { stopLossPrice, stopLossType, takeProfitPrice, takeProfitType } = config;
             const positionOwner = isEOA ? senderAcc.address : proxy.address;
 
-            // Open position
-            if (isEOA) {
-                await openAaveV3EOAPosition(
-                    senderAcc.address,
-                    proxy,
-                    collAsset.symbol,
-                    debtAsset.symbol,
-                    collAmountInUSD,
-                    debtAmountInUSD,
-                    marketAddress,
-                );
-
-                // EOA delegates to the actual Smart Wallet address that executes the strategy
-                await setupAaveV3EOAPermissions(
-                    senderAcc.address,
-                    proxy.address, // The actual Smart Wallet executing address
-                    collAsset.address,
-                    debtAsset.address,
-                    marketAddress,
-                );
-            } else {
-                await openAaveV3ProxyPosition(
-                    senderAcc.address,
-                    proxy,
-                    collAsset.symbol,
-                    debtAsset.symbol,
-                    collAmountInUSD,
-                    debtAmountInUSD,
-                    marketAddress,
-                );
-            }
+            await openAaveV3TestPosition({
+                isEOA,
+                senderAcc,
+                proxy,
+                collAsset,
+                debtAsset,
+                collAmountInUSD,
+                debtAmountInUSD,
+                marketAddress: marketAddr,
+            });
 
             // Get reserve data (asset ids + aToken/variableDebtToken addrs for position tracking)
-            const collReserveData = await getAaveV3ReserveData(collAsset.address, marketAddress);
-            const debtReserveData = await getAaveV3ReserveData(debtAsset.address, marketAddress);
-            const collAssetId = collReserveData.id;
-            const debtAssetId = debtReserveData.id;
+            const collReserveData = await getAaveV3ReserveData(collAsset.address, marketAddr);
+            const debtReserveData = await getAaveV3ReserveData(debtAsset.address, marketAddr);
 
-            const user = isEOA ? senderAcc.address : proxy.address;
-
-            console.log('STOP LOSS PRICE', stopLossPrice);
-            console.log('STOP LOSS TYPE', stopLossType);
-            console.log('TAKE PROFIT PRICE', takeProfitPrice);
-            console.log('TAKE PROFIT TYPE', takeProfitType);
             // Determine close strategy type based on parameters
             const closeStrategyType = automationSdk.utils.getCloseStrategyType(
                 stopLossPrice,
@@ -171,36 +93,24 @@ const runSemiContinuousCloseTests = () => {
                 takeProfitPrice,
                 takeProfitType,
             );
+            const closeToDebt = isCloseToDebtType(automationSdk, closeStrategyType);
+            console.log('Close strategy type:', closeStrategyType, 'closeToDebt:', closeToDebt);
 
-            // Create subscription based on whether it's EOA or proxy
-            const result = await subAaveV3CloseGeneric(
+            const { subId, strategySub } = await subAaveV3CloseGeneric(
                 proxy,
-                user,
+                positionOwner,
                 collAsset.address,
-                collAssetId,
+                collReserveData.id,
                 debtAsset.address,
-                debtAssetId,
-                marketAddress,
+                debtReserveData.id,
+                marketAddr,
                 stopLossPrice,
                 stopLossType,
                 takeProfitPrice,
                 takeProfitType,
                 bundleId,
             );
-            const repaySubId = result.subId;
-            const strategySub = result.strategySub;
 
-            console.log('SUBBED !!!!');
-            // console.log(repaySubId, strategySub);
-
-            const closeToDebt = isCloseToDebtType(automationSdk, closeStrategyType);
-
-            console.log(
-                'Executing FL Close strategy with type:',
-                closeStrategyType,
-                'closeToDebt:',
-                closeToDebt,
-            );
             await addBalancerFlLiquidity(debtAsset.address);
             await addBalancerFlLiquidity(collAsset.address);
 
@@ -210,7 +120,7 @@ const runSemiContinuousCloseTests = () => {
                     debtReserveData.variableDebtTokenAddress,
                     positionOwner,
                 );
-                const ratio = await getAaveV3PositionRatio(positionOwner, null, marketAddress);
+                const ratio = await getAaveV3PositionRatio(positionOwner, null, marketAddr);
                 console.log(`---------------- ${label} ----------------`);
                 console.log(
                     `COLL LEFT IN POSITION: ${hre.ethers.utils.formatUnits(
@@ -229,9 +139,9 @@ const runSemiContinuousCloseTests = () => {
             };
 
             const verifyTrackerAndSubState = async (expectedWallet, expectedIsEnabled) => {
-                const storedWallet = await semiContinuousTracker.getWalletForSub(repaySubId);
-                const storedSub = await subStorage.getSub(repaySubId);
-                console.log(`TRACKER WALLET FOR SUB ${repaySubId}: ${storedWallet}`);
+                const storedWallet = await semiContinuousTracker.getWalletForSub(subId);
+                const storedSub = await subStorage.getSub(subId);
+                console.log(`TRACKER WALLET FOR SUB ${subId}: ${storedWallet}`);
                 console.log(`SUB ENABLED: ${storedSub.isEnabled}`);
                 expect(storedWallet.toLowerCase()).to.be.eq(expectedWallet.toLowerCase());
                 expect(storedSub.isEnabled).to.be.eq(expectedIsEnabled);
@@ -243,152 +153,119 @@ const runSemiContinuousCloseTests = () => {
             // sub active and track the executing wallet
             const callCloseStrategy = async (partialCloseUsdAmount) => {
                 const isPartial = !!partialCloseUsdAmount;
-                const semiContinuousOptions = {
-                    partialClose: isPartial
-                        ? {
-                              paybackAmount: await fetchAmountInUSDPrice(
-                                  debtAsset.symbol,
-                                  partialCloseUsdAmount,
-                              ),
-                              // pull 3% more collateral than debt repaid so the sale covers
-                              // FL repayment + gas fee, leftovers are sent to the user
-                              pullAmount: await fetchAmountInUSDPrice(
-                                  collAsset.symbol,
-                                  Math.round(partialCloseUsdAmount * 1.03),
-                              ),
-                          }
-                        : null,
-                };
+                const partialClose = isPartial
+                    ? {
+                          paybackAmount: await fetchAmountInUSDPrice(
+                              debtAsset.symbol,
+                              partialCloseUsdAmount,
+                          ),
+                          // pull 3% more collateral than debt repaid so the sale covers
+                          // FL repayment + gas fee, leftovers are sent to the user
+                          pullAmount: await fetchAmountInUSDPrice(
+                              collAsset.symbol,
+                              Math.round(partialCloseUsdAmount * 1.03),
+                          ),
+                      }
+                    : null;
 
+                // Close to debt: flash loan debt asset and sell collateral to repay it.
+                // Close to collateral: flash loan collateral asset and sell it for debt asset.
+                // Either way the flash loan covers the debt being repaid, +1% buffer
+                const flAsset = closeToDebt ? debtAsset : collAsset;
+                const flAmount = (
+                    await fetchAmountInUSDPrice(
+                        flAsset.symbol,
+                        isPartial ? partialCloseUsdAmount : debtAmountInUSD,
+                    )
+                )
+                    .mul(hre.ethers.BigNumber.from(100))
+                    .div(hre.ethers.BigNumber.from(99));
+
+                let sellAmount = flAmount;
                 if (closeToDebt) {
-                    // Close to debt: flash loan debt asset, sell collateral to repay
-                    const sellAmount = isPartial
-                        ? semiContinuousOptions.partialClose.pullAmount
+                    sellAmount = isPartial
+                        ? partialClose.pullAmount
                         : await fetchAmountInUSDPrice(collAsset.symbol, collAmountInUSD);
-                    const exchangeObject = await formatMockExchangeObjUsdFeed(
-                        collAsset,
-                        debtAsset,
-                        sellAmount,
-                        mockWrapper,
-                    );
-                    const flAmount = (
-                        await fetchAmountInUSDPrice(
-                            debtAsset.symbol,
-                            isPartial ? partialCloseUsdAmount : debtAmountInUSD,
-                        )
-                    )
-                        .mul(hre.ethers.BigNumber.from(100))
-                        .div(hre.ethers.BigNumber.from(99));
-
-                    await callAaveV3GenericFLCloseToDebtStrategy(
-                        strategyExecutor,
-                        0,
-                        repaySubId,
-                        strategySub,
-                        exchangeObject,
-                        flAmount,
-                        flAddr,
-                        marketAddress,
-                        semiContinuousOptions,
-                    );
-                } else {
-                    // Close to collateral: flash loan collateral asset, sell to get debt asset
-                    const flAmount = (
-                        await fetchAmountInUSDPrice(
-                            collAsset.symbol,
-                            isPartial ? partialCloseUsdAmount : debtAmountInUSD,
-                        )
-                    )
-                        .mul(hre.ethers.BigNumber.from(100))
-                        .div(hre.ethers.BigNumber.from(99));
-                    const exchangeObject = await formatMockExchangeObjUsdFeed(
-                        collAsset,
-                        debtAsset,
-                        flAmount,
-                        mockWrapper,
-                    );
-
-                    await callAaveV3GenericFLCloseToCollStrategy(
-                        strategyExecutor,
-                        1,
-                        repaySubId,
-                        strategySub,
-                        exchangeObject,
-                        flAmount,
-                        flAddr,
-                        marketAddress,
-                        semiContinuousOptions,
-                    );
                 }
+                const exchangeObject = await formatMockExchangeObjUsdFeed(
+                    collAsset,
+                    debtAsset,
+                    sellAmount,
+                    mockWrapper,
+                );
+
+                const callStrategy = closeToDebt
+                    ? callAaveV3GenericFLCloseToDebtStrategy
+                    : callAaveV3GenericFLCloseToCollStrategy;
+                await callStrategy(
+                    strategyExecutor,
+                    closeToDebt ? 0 : 1,
+                    subId,
+                    strategySub,
+                    exchangeObject,
+                    flAmount,
+                    flAddr,
+                    marketAddr,
+                    { partialClose },
+                );
             };
 
-            const stateBefore = await logPositionState('BEFORE ANY EXECUTION');
+            // One partial execution: repays part of the debt, the sub must stay active
+            // and the tracker must remember the executing wallet
+            const executePartialClose = async (label, partialCloseUsdAmount, stateBefore) => {
+                console.log(`>>>>>> ${label}`);
+                await callCloseStrategy(partialCloseUsdAmount);
+                const stateAfter = await logPositionState(`AFTER ${label}`);
+                console.log(
+                    `REPAID: ${hre.ethers.utils.formatUnits(
+                        stateBefore.debtBalance.sub(stateAfter.debtBalance),
+                        debtAsset.decimals,
+                    )} ${debtAsset.symbol}`,
+                );
+                expect(stateAfter.debtBalance).to.be.lt(stateBefore.debtBalance);
+                expect(stateAfter.ratio).to.be.gt(0);
+                await verifyTrackerAndSubState(proxy.address, true);
+                return stateAfter;
+            };
+
+            let state = await logPositionState('BEFORE ANY EXECUTION');
             // nothing tracked before the first execution, sub is enabled
             await verifyTrackerAndSubState(nullAddress, true);
 
-            // 1st execution - partially closes ~50% of the debt, sub must stay active
-            console.log('>>>>>> EXECUTION 1 - PARTIAL CLOSE (~50% OF DEBT)');
-            await callCloseStrategy(debtAmountInUSD / 2);
-            const stateAfterFirst = await logPositionState('AFTER 1st (PARTIAL) EXECUTION');
-            console.log(
-                `REPAID: ${hre.ethers.utils.formatUnits(
-                    stateBefore.debtBalance.sub(stateAfterFirst.debtBalance),
-                    debtAsset.decimals,
-                )} ${debtAsset.symbol}`,
+            state = await executePartialClose(
+                'EXECUTION 1 - PARTIAL CLOSE (~50% OF DEBT)',
+                debtAmountInUSD / 2,
+                state,
             );
-            expect(stateAfterFirst.debtBalance).to.be.lt(stateBefore.debtBalance);
-            expect(stateAfterFirst.ratio).to.be.gt(0);
-            await verifyTrackerAndSubState(proxy.address, true);
 
             // TODO: also verify the trigger price bypass directly (isTriggered returning true
             // even when the price condition is no longer met). Needs oracle price
             // mocking/manipulation between executions - currently the price condition stays
             // true for the whole test so the tracker bypass is only implicitly exercised
 
-            // 2nd execution - partially closes half of the remaining debt (~25% of start)
-            console.log('>>>>>> EXECUTION 2 - PARTIAL CLOSE (~25% OF DEBT)');
-            await callCloseStrategy(debtAmountInUSD / 4);
-            const stateAfterSecond = await logPositionState('AFTER 2nd (PARTIAL) EXECUTION');
-            console.log(
-                `REPAID: ${hre.ethers.utils.formatUnits(
-                    stateAfterFirst.debtBalance.sub(stateAfterSecond.debtBalance),
-                    debtAsset.decimals,
-                )} ${debtAsset.symbol}`,
+            await executePartialClose(
+                'EXECUTION 2 - PARTIAL CLOSE (~25% OF DEBT)',
+                debtAmountInUSD / 4,
+                state,
             );
-            expect(stateAfterSecond.debtBalance).to.be.lt(stateAfterFirst.debtBalance);
-            expect(stateAfterSecond.ratio).to.be.gt(0);
-            await verifyTrackerAndSubState(proxy.address, true);
 
-            // 3rd execution - no extra actionsCallData element -> default behaviour:
+            // final execution - no extra actionsCallData element -> default behaviour:
             // fully closes the position, deactivates the sub and clears the tracker
             console.log('>>>>>> EXECUTION 3 - FULL CLOSE');
             await callCloseStrategy(null);
-            const stateAfterThird = await logPositionState('AFTER 3rd (FINAL) EXECUTION');
+            const finalState = await logPositionState('AFTER 3rd (FINAL) EXECUTION');
             // ratio should be 0 at the end because position is closed
-            expect(stateAfterThird.ratio).to.be.eq(0);
+            expect(finalState.ratio).to.be.eq(0);
             await verifyTrackerAndSubState(nullAddress, false);
         };
 
         const testPairs = AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY[chainIds[network]] || [];
         const closeStrategyConfigs = getCloseStrategyConfigs(automationSdk);
 
-        for (let i = 0; i < testPairs.length; ++i) {
-            const pair = testPairs[i];
-            const collAsset = getAssetInfo(
-                pair.collSymbol === 'ETH' ? 'WETH' : pair.collSymbol,
-                chainIds[network],
-            );
-            const debtAsset = getAssetInfo(
-                pair.debtSymbol === 'ETH' ? 'WETH' : pair.debtSymbol,
-                chainIds[network],
-            );
+        testPairs.forEach((pair) => {
+            const { collAsset, debtAsset, marketName } = getTestPairInfo(pair);
 
-            // Determine market name for test description
-            const marketName =
-                pair.marketAddr === addrs[network].AAVE_MARKET ? 'Core Market' : 'Prime Market';
-
-            for (let j = 0; j < closeStrategyConfigs.length; ++j) {
-                const config = closeStrategyConfigs[j];
+            closeStrategyConfigs.forEach((config) => {
                 const strategyTypeName = automationSdk.utils.getCloseStrategyType(
                     config.stopLossPrice,
                     config.stopLossType,
@@ -396,51 +273,16 @@ const runSemiContinuousCloseTests = () => {
                     config.takeProfitType,
                 );
 
-                // SW Tests
-                it(`... should execute aaveV3 SW Close (${getCloseStrategyTypeName(
-                    strategyTypeName,
-                )}) for ${pair.collSymbol} / ${
-                    pair.debtSymbol
-                } pair on Aave V3 ${marketName}`, async () => {
-                    const isEOA = false;
-                    console.log(`Testing SW Close strategy type: ${strategyTypeName}`);
-                    await baseTest(
-                        collAsset,
-                        debtAsset,
-                        pair.collAmountInUSD,
-                        pair.debtAmountInUSD,
-                        isEOA,
-                        config.stopLossPrice,
-                        config.stopLossType,
-                        config.takeProfitPrice,
-                        config.takeProfitType,
-                        pair.marketAddr,
-                    );
+                WALLET_TYPES.forEach(({ isEOA, label }) => {
+                    it(`... should execute aaveV3 ${label} Close (${getCloseStrategyTypeName(
+                        strategyTypeName,
+                    )}) for ${pair.collSymbol} / ${pair.debtSymbol} pair on Aave V3 ${marketName}`, async () => {
+                        console.log(`Testing ${label} Close strategy type: ${strategyTypeName}`);
+                        await baseTest({ collAsset, debtAsset, pair, config, isEOA });
+                    });
                 });
-
-                // EOA Tests
-                it(`... should execute aaveV3 EOA Close (${getCloseStrategyTypeName(
-                    strategyTypeName,
-                )}) for ${pair.collSymbol} / ${
-                    pair.debtSymbol
-                } pair on Aave V3 ${marketName}`, async () => {
-                    const isEOA = true;
-                    console.log(`Testing EOA Close strategy type: ${strategyTypeName}`);
-                    await baseTest(
-                        collAsset,
-                        debtAsset,
-                        pair.collAmountInUSD,
-                        pair.debtAmountInUSD,
-                        isEOA,
-                        config.stopLossPrice,
-                        config.stopLossType,
-                        config.takeProfitPrice,
-                        config.takeProfitType,
-                        pair.marketAddr,
-                    );
-                });
-            }
-        }
+            });
+        });
     });
 };
 
