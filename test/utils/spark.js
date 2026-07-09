@@ -28,6 +28,8 @@ const {
     createSparkGenericFLRepayOnPriceStrategy,
     createSparkGenericBoostStrategy,
     createSparkGenericFLBoostStrategy,
+    createSparkGenericBoostOnPriceStrategy,
+    createSparkGenericFLBoostOnPriceStrategy,
 } = require('../../strategies-spec/mainnet');
 const { createStrategy, createBundle } = require('../strategies/utils/utils-strategies');
 const { getAssetInfo } = require('@defisaver/tokens');
@@ -457,6 +459,17 @@ const deploySparkRepayOnPriceGenericBundle = async () => {
     const bundleId = await createBundle([repayStrategyId, flRepayStrategyId]);
     return bundleId;
 };
+const deploySparkBoostOnPriceGenericBundle = async () => {
+    const isFork = isNetworkFork();
+    await openStrategyAndBundleStorage(isFork);
+    const boostStrategy = createSparkGenericBoostOnPriceStrategy();
+    const flBoostStrategy = createSparkGenericFLBoostOnPriceStrategy();
+    const continuous = true;
+    const boostStrategyId = await createStrategy(...boostStrategy, continuous);
+    const flBoostStrategyId = await createStrategy(...flBoostStrategy, continuous);
+    const bundleId = await createBundle([boostStrategyId, flBoostStrategyId]);
+    return bundleId;
+};
 
 const SPARK_AUTOMATION_TEST_PAIRS = [
     {
@@ -648,6 +661,7 @@ module.exports = {
     deploySparkRepayGenericBundle,
     deploySparkBoostGenericBundle,
     deploySparkRepayOnPriceGenericBundle,
+    deploySparkBoostOnPriceGenericBundle,
     mockSparkOracle,
     getSparkPositionRatio,
     getSparkReserveData,
