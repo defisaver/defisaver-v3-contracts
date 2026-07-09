@@ -510,7 +510,7 @@ const SPARK_AUTOMATION_TEST_PAIRS_BOOST = [
         boostAmountInUSD: 7_000,
     },
     {
-        collSymbol: 'TBTC',
+        collSymbol: 'WBTC',
         debtSymbol: 'USDC',
         marketAddr: addrs[network].SPARK_MARKET,
         triggerRatioBoost: 190,
