@@ -1308,6 +1308,37 @@ const _subSparkLeverageManagementOnPrice = async (
     return { subId, strategySub };
 };
 
+const subSparkLeverageManagementOnPriceGeneric = async (
+    proxy,
+    user,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+    marketAddr,
+    targetRatio,
+    triggerPrice,
+    priceState,
+    bundleId,
+) => {
+    const strategySub =
+        automationSdk.strategySubService.sparkEncode.leverageManagementOnPriceGeneric(
+            bundleId,
+            triggerPrice,
+            priceState,
+            collAsset,
+            collAssetId,
+            debtAsset,
+            debtAssetId,
+            marketAddr,
+            targetRatio,
+            user,
+        );
+
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
 const subSparkRepayOnPriceBundle = async (
     proxy,
     bundleId,
@@ -1547,4 +1578,5 @@ module.exports = {
     subAaveV4FLCollateralSwitchStrategy,
     subSparkFLCollateralSwitchStrategy,
     subSparkLeverageManagementGeneric,
+    subSparkLeverageManagementOnPriceGeneric,
 };

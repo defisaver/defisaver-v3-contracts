@@ -24,6 +24,8 @@ const {
     createSparkFLCollateralSwitchStrategy,
     createSparkGenericRepayStrategy,
     createSparkGenericFLRepayStrategy,
+    createSparkGenericRepayOnPriceStrategy,
+    createSparkGenericFLRepayOnPriceStrategy,
     createSparkGenericBoostStrategy,
     createSparkGenericFLBoostStrategy,
 } = require('../../strategies-spec/mainnet');
@@ -444,6 +446,17 @@ const deploySparkBoostGenericBundle = async () => {
     const bundleId = await createBundle([boostStrategyId, flBoostStrategyId]);
     return bundleId;
 };
+const deploySparkRepayOnPriceGenericBundle = async () => {
+    const isFork = isNetworkFork();
+    await openStrategyAndBundleStorage(isFork);
+    const repayStrategy = createSparkGenericRepayOnPriceStrategy();
+    const flRepayStrategy = createSparkGenericFLRepayOnPriceStrategy();
+    const continuous = true;
+    const repayStrategyId = await createStrategy(...repayStrategy, continuous);
+    const flRepayStrategyId = await createStrategy(...flRepayStrategy, continuous);
+    const bundleId = await createBundle([repayStrategyId, flRepayStrategyId]);
+    return bundleId;
+};
 
 const SPARK_AUTOMATION_TEST_PAIRS = [
     {
@@ -634,6 +647,7 @@ module.exports = {
     setupSparkEOAPermissions,
     deploySparkRepayGenericBundle,
     deploySparkBoostGenericBundle,
+    deploySparkRepayOnPriceGenericBundle,
     mockSparkOracle,
     getSparkPositionRatio,
     getSparkReserveData,
