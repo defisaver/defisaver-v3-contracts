@@ -53,12 +53,11 @@ exclude_lints = [
     # "unsafe-cheatcode",
     # "erc20-unchecked-transfer",
     # "divide-before-multiply",
-    # ! Commented out due to foundry version
-    # "unsafe-typecast",
-    # "named-struct-fields",
-    # "unwrapped-modifier-logic",
-    "asm-keccak256",
 
+    "unsafe-typecast",
+    "named-struct-fields",
+    "unwrapped-modifier-logic",
+    "asm-keccak256",
     "mixed-case-function",
     "mixed-case-variable",
     "screaming-snake-case-const",
