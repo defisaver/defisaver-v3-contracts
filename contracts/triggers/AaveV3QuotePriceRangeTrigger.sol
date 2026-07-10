@@ -3,14 +3,11 @@
 pragma solidity =0.8.24;
 
 import { ITrigger } from "../interfaces/core/ITrigger.sol";
-import { ISemiContinuousTracker } from "../interfaces/core/ISemiContinuousTracker.sol";
-import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 import { IAaveV3Oracle } from "../interfaces/protocols/aaveV3/IAaveV3Oracle.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { DSMath } from "../_vendor/DS/DSMath.sol";
 import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
-import { CoreHelper } from "../core/helpers/CoreHelper.sol";
-import { DFSIds } from "../utils/DFSIds.sol";
+import { SemiContinuousHelper } from "./helpers/SemiContinuousHelper.sol";
 
 /// @title Trigger contract that verifies if current token price ratio is outside of given range specified during subscription
 /// @dev Uses the Aave V3 oracle, which provides asset prices in a shared base currency.
@@ -22,7 +19,7 @@ contract AaveV3QuotePriceRangeTrigger is
     AdminAuth,
     DSMath,
     AaveV3RatioHelper,
-    CoreHelper
+    SemiContinuousHelper
 {
     /// @param baseTokenAddr address of the base token which is quoted
     /// @param quoteTokenAddr address of the quote token
@@ -40,7 +37,6 @@ contract AaveV3QuotePriceRangeTrigger is
     }
 
     IAaveV3Oracle public constant aaveOracleV3 = IAaveV3Oracle(AAVE_ORACLE_V3);
-    IDFSRegistry private constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     /// @notice Checks Aave V3 oracle for current prices and triggers if it's in a correct state
     function isTriggered(bytes memory _callData, bytes memory _subData)
@@ -94,21 +90,5 @@ contract AaveV3QuotePriceRangeTrigger is
         returns (CallParams memory params)
     {
         params = abi.decode(_callData, (CallParams));
-    }
-
-    function _isAlreadyInExecution(uint256 _subId) internal view returns (bool) {
-        ISemiContinuousTracker semiContinuousTracker =
-            ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER));
-
-        address storedWallet = semiContinuousTracker.getWalletForSub(_subId);
-
-        address stvnrAddr = registry.getAddr(DFSIds.STVNR);
-
-        // we want trigger to always be true for started semi-executed sub
-        if (storedWallet == msg.sender) return true;
-        // for STVNR check, always return true if sub is in storage
-        if (storedWallet != address(0) && msg.sender == stvnrAddr) return true;
-
-        return false;
     }
 }
