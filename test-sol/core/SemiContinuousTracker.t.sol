@@ -40,104 +40,104 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function test_should_set_sub_to_wallet() public {
-        assertFalse(cut.isSet(SUB_ID));
+    function test_should_start_execution() public {
+        assertFalse(cut.isInExecution(SUB_ID));
 
         vm.expectEmit(true, true, false, true, address(cut));
-        emit SetInStorage(SUB_ID, subOwnerWallet);
+        emit ExecutionStarted(SUB_ID, subOwnerWallet);
 
         prank(subOwnerWallet);
-        cut.setSubToWallet(SUB_ID);
+        cut.startExecution(SUB_ID);
 
-        assertTrue(cut.isSet(SUB_ID));
-        assertEq(cut.getWalletForSub(SUB_ID), subOwnerWallet);
+        assertTrue(cut.isInExecution(SUB_ID));
+        assertEq(cut.executionWalletOf(SUB_ID), subOwnerWallet);
     }
 
-    function test_should_return_early_when_sub_already_set() public {
-        _setSubToWallet();
+    function test_should_return_early_when_sub_already_in_execution() public {
+        _startExecution();
 
         vm.recordLogs();
         prank(subOwnerWallet);
-        cut.setSubToWallet(SUB_ID);
+        cut.startExecution(SUB_ID);
 
         Vm.Log[] memory logs = vm.getRecordedLogs();
         assertEq(logs.length, 0);
-        assertEq(cut.getWalletForSub(SUB_ID), subOwnerWallet);
+        assertEq(cut.executionWalletOf(SUB_ID), subOwnerWallet);
     }
 
-    function test_should_skip_owner_check_when_sub_already_set() public {
-        _setSubToWallet();
+    function test_should_skip_owner_check_when_sub_already_in_execution() public {
+        _startExecution();
 
         prank(bob);
-        cut.setSubToWallet(SUB_ID);
+        cut.startExecution(SUB_ID);
 
-        assertEq(cut.getWalletForSub(SUB_ID), subOwnerWallet);
+        assertEq(cut.executionWalletOf(SUB_ID), subOwnerWallet);
     }
 
-    function test_should_revert_when_setting_sub_for_non_owner() public {
+    function test_should_revert_when_starting_execution_for_non_owner() public {
         vm.expectRevert(abi.encodeWithSelector(NotSubOwner.selector, SUB_ID, bob));
         prank(bob);
-        cut.setSubToWallet(SUB_ID);
+        cut.startExecution(SUB_ID);
     }
 
-    function test_should_remove_wallet_for_sub() public {
-        _setSubToWallet();
+    function test_should_finish_execution() public {
+        _startExecution();
 
         vm.expectEmit(true, true, false, true, address(cut));
-        emit RemovedFromStorage(SUB_ID, subOwnerWallet);
+        emit ExecutionFinished(SUB_ID, subOwnerWallet);
 
         prank(subOwnerWallet);
-        cut.removeWalletForSub(SUB_ID);
+        cut.finishExecution(SUB_ID);
 
-        assertFalse(cut.isSet(SUB_ID));
-        assertEq(cut.getWalletForSub(SUB_ID), address(0));
+        assertFalse(cut.isInExecution(SUB_ID));
+        assertEq(cut.executionWalletOf(SUB_ID), address(0));
     }
 
-    function test_should_return_early_when_removing_sub_that_is_not_set() public {
-        assertFalse(cut.isSet(SUB_ID));
+    function test_should_return_early_when_finishing_execution_that_is_not_started() public {
+        assertFalse(cut.isInExecution(SUB_ID));
 
         vm.recordLogs();
         prank(subOwnerWallet);
-        cut.removeWalletForSub(SUB_ID);
+        cut.finishExecution(SUB_ID);
 
         Vm.Log[] memory logs = vm.getRecordedLogs();
         assertEq(logs.length, 0);
-        assertFalse(cut.isSet(SUB_ID));
+        assertFalse(cut.isInExecution(SUB_ID));
     }
 
-    function test_should_skip_owner_check_when_removing_sub_that_is_not_set() public {
+    function test_should_skip_owner_check_when_finishing_execution_that_is_not_started() public {
         prank(bob);
-        cut.removeWalletForSub(SUB_ID);
+        cut.finishExecution(SUB_ID);
 
-        assertFalse(cut.isSet(SUB_ID));
+        assertFalse(cut.isInExecution(SUB_ID));
     }
 
-    function test_should_revert_when_removing_sub_for_non_owner() public {
-        _setSubToWallet();
+    function test_should_revert_when_finishing_execution_for_non_owner() public {
+        _startExecution();
 
         vm.expectRevert(abi.encodeWithSelector(NotSubOwner.selector, SUB_ID, bob));
         prank(bob);
-        cut.removeWalletForSub(SUB_ID);
+        cut.finishExecution(SUB_ID);
     }
 
-    function test_should_set_again_after_removal() public {
-        _setSubToWallet();
+    function test_should_start_execution_again_after_finish() public {
+        _startExecution();
 
         prank(subOwnerWallet);
-        cut.removeWalletForSub(SUB_ID);
-        assertFalse(cut.isSet(SUB_ID));
+        cut.finishExecution(SUB_ID);
+        assertFalse(cut.isInExecution(SUB_ID));
 
-        _setSubToWallet();
+        _startExecution();
 
-        assertTrue(cut.isSet(SUB_ID));
-        assertEq(cut.getWalletForSub(SUB_ID), subOwnerWallet);
+        assertTrue(cut.isInExecution(SUB_ID));
+        assertEq(cut.executionWalletOf(SUB_ID), subOwnerWallet);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function _setSubToWallet() internal {
+    function _startExecution() internal {
         prank(subOwnerWallet);
-        cut.setSubToWallet(SUB_ID);
+        cut.startExecution(SUB_ID);
     }
 }

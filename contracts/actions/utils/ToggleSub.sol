@@ -55,7 +55,7 @@ contract ToggleSub is ActionBase, Permission {
         } else {
             ISemiContinuousTracker semiContinuousTracker =
                 ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER));
-            semiContinuousTracker.removeWalletForSub(_inputData.subId);
+            semiContinuousTracker.finishExecution(_inputData.subId);
 
             SubStorage(SUB_STORAGE_ADDR).deactivateSub(_inputData.subId);
         }

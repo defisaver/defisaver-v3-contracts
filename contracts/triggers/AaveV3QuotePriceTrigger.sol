@@ -49,7 +49,7 @@ contract AaveV3QuotePriceTrigger is
         SubParams memory triggerSubData = parseSubInputs(_subData);
         CallParams memory callParams = parseCallInputs(_callData);
 
-        if (_isAlreadyInExecution(callParams.subId)) return true;
+        if (_shouldTriggerAnyway(callParams.subId)) return true;
 
         uint256 currPrice = getPrice(triggerSubData.baseTokenAddr, triggerSubData.quoteTokenAddr);
 

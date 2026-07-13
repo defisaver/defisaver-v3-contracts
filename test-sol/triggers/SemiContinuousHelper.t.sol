@@ -11,8 +11,8 @@ import { BaseTest } from "../utils/BaseTest.sol";
 import { RegistryUtils } from "../utils/RegistryUtils.sol";
 
 contract SemiContinuousHelperHarness is SemiContinuousHelper {
-    function isAlreadyInExecution(uint256 _subId) external view returns (bool) {
-        return _isAlreadyInExecution(_subId);
+    function shouldTriggerAnyway(uint256 _subId) external view returns (bool) {
+        return _shouldTriggerAnyway(_subId);
     }
 }
 
@@ -54,54 +54,54 @@ contract TestSemiContinuousHelper is RegistryUtils, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function test_should_return_true_when_caller_is_stored_wallet() public {
-        _storeWalletForSub();
+    function test_should_return_true_when_caller_is_execution_wallet() public {
+        _startExecutionForSub();
 
         prank(subOwnerWallet);
-        bool inExecution = cut.isAlreadyInExecution(SUB_ID);
+        bool shouldTrigger = cut.shouldTriggerAnyway(SUB_ID);
 
-        assertTrue(inExecution);
+        assertTrue(shouldTrigger);
     }
 
-    function test_should_return_true_for_stvnr_when_sub_is_stored() public {
-        _storeWalletForSub();
+    function test_should_return_true_for_stvnr_when_sub_is_in_execution() public {
+        _startExecutionForSub();
 
         prank(stvnrAddr);
-        bool inExecution = cut.isAlreadyInExecution(SUB_ID);
+        bool shouldTrigger = cut.shouldTriggerAnyway(SUB_ID);
 
-        assertTrue(inExecution);
+        assertTrue(shouldTrigger);
     }
 
-    function test_should_return_false_for_random_caller_when_sub_is_stored() public {
-        _storeWalletForSub();
+    function test_should_return_false_for_random_caller_when_sub_is_in_execution() public {
+        _startExecutionForSub();
 
         prank(bob);
-        bool inExecution = cut.isAlreadyInExecution(SUB_ID);
+        bool shouldTrigger = cut.shouldTriggerAnyway(SUB_ID);
 
-        assertFalse(inExecution);
+        assertFalse(shouldTrigger);
     }
 
-    function test_should_return_false_for_wallet_when_sub_is_not_stored() public {
+    function test_should_return_false_for_wallet_when_sub_is_not_in_execution() public {
         prank(subOwnerWallet);
-        bool inExecution = cut.isAlreadyInExecution(SUB_ID);
+        bool shouldTrigger = cut.shouldTriggerAnyway(SUB_ID);
 
-        assertFalse(inExecution);
+        assertFalse(shouldTrigger);
     }
 
-    function test_should_return_false_for_stvnr_when_sub_is_not_stored() public {
+    function test_should_return_false_for_stvnr_when_sub_is_not_in_execution() public {
         prank(stvnrAddr);
-        bool inExecution = cut.isAlreadyInExecution(SUB_ID);
+        bool shouldTrigger = cut.shouldTriggerAnyway(SUB_ID);
 
-        assertFalse(inExecution);
+        assertFalse(shouldTrigger);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function _storeWalletForSub() internal {
+    function _startExecutionForSub() internal {
         prank(subOwnerWallet);
-        tracker.setSubToWallet(SUB_ID);
+        tracker.startExecution(SUB_ID);
 
-        assertEq(tracker.getWalletForSub(SUB_ID), subOwnerWallet);
+        assertEq(tracker.executionWalletOf(SUB_ID), subOwnerWallet);
     }
 }

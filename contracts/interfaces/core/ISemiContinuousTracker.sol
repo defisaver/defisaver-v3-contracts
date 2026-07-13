@@ -3,10 +3,10 @@
 pragma solidity =0.8.24;
 
 interface ISemiContinuousTracker {
-    error NotSubOwner(uint256, address);
+    error NotSubOwner(uint256 subId, address caller);
 
-    function setSubToWallet(uint256 _subId) external;
-    function removeWalletForSub(uint256 _subId) external;
-    function getWalletForSub(uint256 _subId) external view returns (address);
+    function startExecution(uint256 _subId) external;
+    function finishExecution(uint256 _subId) external;
+    function executionWalletOf(uint256 _subId) external view returns (address);
+    function isInExecution(uint256 _subId) external view returns (bool);
 }
-

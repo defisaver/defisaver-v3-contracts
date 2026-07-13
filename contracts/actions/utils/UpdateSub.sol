@@ -59,7 +59,7 @@ contract UpdateSub is ActionBase {
     function updateSubData(Params memory _inputData) internal {
         ISemiContinuousTracker semiContinuousTracker =
             ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER));
-        semiContinuousTracker.removeWalletForSub(_inputData.subId);
+        semiContinuousTracker.finishExecution(_inputData.subId);
 
         SubStorage(SUB_STORAGE_ADDR).updateSubData(_inputData.subId, _inputData.sub);
     }

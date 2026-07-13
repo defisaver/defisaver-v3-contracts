@@ -139,11 +139,11 @@ const runSemiContinuousCloseTests = () => {
             };
 
             const verifyTrackerAndSubState = async (expectedWallet, expectedIsEnabled) => {
-                const storedWallet = await semiContinuousTracker.getWalletForSub(subId);
+                const executionWallet = await semiContinuousTracker.executionWalletOf(subId);
                 const storedSub = await subStorage.getSub(subId);
-                console.log(`TRACKER WALLET FOR SUB ${subId}: ${storedWallet}`);
+                console.log(`TRACKER EXECUTION WALLET FOR SUB ${subId}: ${executionWallet}`);
                 console.log(`SUB ENABLED: ${storedSub.isEnabled}`);
-                expect(storedWallet.toLowerCase()).to.be.eq(expectedWallet.toLowerCase());
+                expect(executionWallet.toLowerCase()).to.be.eq(expectedWallet.toLowerCase());
                 expect(storedSub.isEnabled).to.be.eq(expectedIsEnabled);
             };
 
