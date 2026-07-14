@@ -14,5 +14,4 @@ library DFSIds {
         bytes4(keccak256("CurveUsdSwapperTransient"));
     bytes4 internal constant SFPROXY_ENTRY_POINT = bytes4(keccak256("SFProxyEntryPoint"));
     bytes4 internal constant SEMI_CONTINUOUS_TRACKER = bytes4(keccak256("SemiContinuousTracker"));
-    bytes4 internal constant STVNR = bytes4(keccak256("StrategyTriggerViewNoRevert"));
 }

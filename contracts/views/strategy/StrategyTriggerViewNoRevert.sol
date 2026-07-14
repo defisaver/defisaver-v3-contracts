@@ -3,16 +3,19 @@ pragma solidity =0.8.24;
 
 import { ITrigger } from "../../interfaces/core/ITrigger.sol";
 import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
+import { ISemiContinuousTracker } from "../../interfaces/core/ISemiContinuousTracker.sol";
 
 import { BundleStorage } from "../../core/strategy/BundleStorage.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { StrategyStorage } from "../../core/strategy/StrategyStorage.sol";
-import { SemiContinuousHelper } from "../../triggers/helpers/SemiContinuousHelper.sol";
+import { DFSIds } from "../../utils/DFSIds.sol";
 
 /// @title StrategyTriggerViewNoRevert - Helper contract to check whether a trigger is triggered or not for a given sub.
 /// @dev This contract is designed to avoid reverts from checking triggers.
-contract StrategyTriggerViewNoRevert is StrategyModel, SemiContinuousHelper {
+contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper {
+    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
+
     enum TriggerStatus {
         FALSE,
         TRUE,
@@ -92,8 +95,11 @@ contract StrategyTriggerViewNoRevert is StrategyModel, SemiContinuousHelper {
         bytes4[] calldata _additionalTriggerIds,
         bytes[] calldata _additionalTriggerCallData
     ) public returns (TriggerStatus) {
-        if (_shouldTriggerAnyway(_subId)) {
-            return TriggerStatus.TRUE;
+        // If the sub is in "semi" execution, we want to short-circuit to TRUE without checking any triggers.
+        {
+            ISemiContinuousTracker semiContinuousTracker =
+                ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER));
+            if (semiContinuousTracker.isInExecution(_subId)) return TriggerStatus.TRUE;
         }
 
         Strategy memory strategy;

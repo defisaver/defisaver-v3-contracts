@@ -8,22 +8,11 @@ import { DFSIds } from "../../utils/DFSIds.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 contract SemiContinuousHelper is CoreHelper {
-    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
+    IDFSRegistry private constant registry = IDFSRegistry(REGISTRY_ADDR);
 
+    /// @notice If the sub is in semi-continuous execution, should always be triggered
     function _shouldTriggerAnyway(uint256 _subId) internal view returns (bool) {
-        ISemiContinuousTracker semiContinuousTracker =
-            ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER));
-
-        address executionWallet = semiContinuousTracker.executionWalletOf(_subId);
-
-        // TODO -> STVNR should be added to registry
-        address stvnrAddr = registry.getAddr(DFSIds.STVNR);
-
-        // we want trigger to always be true for a sub that is already in execution
-        if (executionWallet == msg.sender) return true;
-        // for STVNR check, always return true if sub is in execution
-        if (executionWallet != address(0) && address(this) == stvnrAddr) return true;
-
-        return false;
+        return ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER))
+                .executionWalletOf(_subId) == msg.sender;
     }
 }

@@ -69,8 +69,6 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, RegistryUtils, StrategyTri
 
         tracker = new SemiContinuousTracker();
         redeploy("SemiContinuousTracker", address(tracker));
-        // this test contract inherits STVNR and is the contract under test, so register it as STVNR
-        redeploy("StrategyTriggerViewNoRevert", address(this));
     }
 
     /*//////////////////////////////////////////////////////////////////////////
