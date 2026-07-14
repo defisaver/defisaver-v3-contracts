@@ -8,6 +8,7 @@ import { BotAuth } from "../../contracts/core/strategy/BotAuth.sol";
 import { StrategyExecutor } from "../../contracts/core/strategy/StrategyExecutor.sol";
 import { RecipeExecutor } from "../../contracts/core/RecipeExecutor.sol";
 import { SubStorage } from "../../contracts/core/strategy/SubStorage.sol";
+import { SemiContinuousTracker } from "../../contracts/core/strategy/SemiContinuousTracker.sol";
 import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
 import { CreateSub } from "../../contracts/actions/utils/CreateSub.sol";
 import { ToggleSub } from "../../contracts/actions/utils/ToggleSub.sol";
@@ -70,6 +71,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         redeploy("CreateSub", address(new CreateSub()));
         redeploy("ToggleSub", address(new ToggleSub()));
         redeploy("BotAuth", botAuthAddr);
+        redeploy("SemiContinuousTracker", address(new SemiContinuousTracker()));
     }
 
     /*//////////////////////////////////////////////////////////////////////////

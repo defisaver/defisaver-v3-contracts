@@ -29,7 +29,6 @@ contract TestSemiContinuousHelper is RegistryUtils, BaseTest {
 
     SemiContinuousTracker tracker;
     address subOwnerWallet;
-    address stvnrAddr;
 
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
@@ -39,10 +38,8 @@ contract TestSemiContinuousHelper is RegistryUtils, BaseTest {
 
         cut = new SemiContinuousHelperHarness();
         tracker = new SemiContinuousTracker();
-        stvnrAddr = makeAddr("STVNR");
 
         redeploy("SemiContinuousTracker", address(tracker));
-        redeploy("StrategyTriggerViewNoRevert", stvnrAddr);
 
         StrategyModel.StoredSubData memory subData = ISubStorage(SUB_STORAGE_ADDR).getSub(SUB_ID);
         subOwnerWallet = address(subData.walletAddr);
@@ -63,15 +60,6 @@ contract TestSemiContinuousHelper is RegistryUtils, BaseTest {
         assertTrue(shouldTrigger);
     }
 
-    function test_should_return_true_for_stvnr_when_sub_is_in_execution() public {
-        _startExecutionForSub();
-
-        prank(stvnrAddr);
-        bool shouldTrigger = cut.shouldTriggerAnyway(SUB_ID);
-
-        assertTrue(shouldTrigger);
-    }
-
     function test_should_return_false_for_random_caller_when_sub_is_in_execution() public {
         _startExecutionForSub();
 
@@ -83,13 +71,6 @@ contract TestSemiContinuousHelper is RegistryUtils, BaseTest {
 
     function test_should_return_false_for_wallet_when_sub_is_not_in_execution() public {
         prank(subOwnerWallet);
-        bool shouldTrigger = cut.shouldTriggerAnyway(SUB_ID);
-
-        assertFalse(shouldTrigger);
-    }
-
-    function test_should_return_false_for_stvnr_when_sub_is_not_in_execution() public {
-        prank(stvnrAddr);
         bool shouldTrigger = cut.shouldTriggerAnyway(SUB_ID);
 
         assertFalse(shouldTrigger);

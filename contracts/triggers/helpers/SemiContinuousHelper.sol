@@ -8,7 +8,7 @@ import { DFSIds } from "../../utils/DFSIds.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 contract SemiContinuousHelper is CoreHelper {
-    IDFSRegistry private constant registry = IDFSRegistry(REGISTRY_ADDR);
+    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     function _shouldTriggerAnyway(uint256 _subId) internal view returns (bool) {
         ISemiContinuousTracker semiContinuousTracker =
@@ -22,7 +22,7 @@ contract SemiContinuousHelper is CoreHelper {
         // we want trigger to always be true for a sub that is already in execution
         if (executionWallet == msg.sender) return true;
         // for STVNR check, always return true if sub is in execution
-        if (executionWallet != address(0) && msg.sender == stvnrAddr) return true;
+        if (executionWallet != address(0) && address(this) == stvnrAddr) return true;
 
         return false;
     }

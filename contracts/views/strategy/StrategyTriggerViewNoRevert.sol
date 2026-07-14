@@ -8,12 +8,11 @@ import { BundleStorage } from "../../core/strategy/BundleStorage.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { StrategyStorage } from "../../core/strategy/StrategyStorage.sol";
+import { SemiContinuousHelper } from "../../triggers/helpers/SemiContinuousHelper.sol";
 
 /// @title StrategyTriggerViewNoRevert - Helper contract to check whether a trigger is triggered or not for a given sub.
 /// @dev This contract is designed to avoid reverts from checking triggers.
-contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper {
-    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
-
+contract StrategyTriggerViewNoRevert is StrategyModel, SemiContinuousHelper {
     enum TriggerStatus {
         FALSE,
         TRUE,
@@ -81,16 +80,22 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper {
     /// @notice Check if a strategy is triggered or not for a given sub
     /// @dev This function uses high level `isTriggered` call with try-catch to avoid revert.
     /// @param _sub - The subscription to check.
+    /// @param _subId - The subscription ID to check.
     /// @param _triggerCallData - The calldata to pass to the triggers.
     /// @param _additionalTriggerIds - The additional trigger IDs to check
     /// @param _additionalTriggerCallData - The calldata to pass to the additional triggers.
     /// @return TriggerStatus - The status of the trigger (FALSE, TRUE, REVERT).
     function checkTriggers(
         StrategySub memory _sub,
+        uint256 _subId,
         bytes[] calldata _triggerCallData,
         bytes4[] calldata _additionalTriggerIds,
         bytes[] calldata _additionalTriggerCallData
     ) public returns (TriggerStatus) {
+        if (_shouldTriggerAnyway(_subId)) {
+            return TriggerStatus.TRUE;
+        }
+
         Strategy memory strategy;
 
         uint256 strategyId = _sub.strategyOrBundleId;
