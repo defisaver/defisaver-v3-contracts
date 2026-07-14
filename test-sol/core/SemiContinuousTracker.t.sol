@@ -65,9 +65,10 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
         assertEq(cut.executionWalletOf(SUB_ID), subOwnerWallet);
     }
 
-    function test_should_skip_owner_check_when_sub_already_in_execution() public {
+    function test_should_revert_for_non_owner_even_when_sub_already_in_execution() public {
         _startExecution();
 
+        vm.expectRevert(abi.encodeWithSelector(NotSubOwner.selector, SUB_ID, bob));
         prank(bob);
         cut.startExecution(SUB_ID);
 
@@ -105,7 +106,10 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
         assertFalse(cut.isInExecution(SUB_ID));
     }
 
-    function test_should_skip_owner_check_when_finishing_execution_that_is_not_started() public {
+    function test_should_revert_for_non_owner_even_when_execution_is_not_started() public {
+        assertFalse(cut.isInExecution(SUB_ID));
+
+        vm.expectRevert(abi.encodeWithSelector(NotSubOwner.selector, SUB_ID, bob));
         prank(bob);
         cut.finishExecution(SUB_ID);
 

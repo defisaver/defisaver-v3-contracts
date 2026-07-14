@@ -14,28 +14,25 @@ contract SemiContinuousTracker is CoreHelper {
 
     mapping(uint256 => address) public executionWalletOf;
 
-    function startExecution(uint256 _subId) external {
-        if (isInExecution(_subId)) return;
-
+    modifier onlySubOwner(uint256 _subId) {
         StrategyModel.StoredSubData memory subData = ISubStorage(SUB_STORAGE_ADDR).getSub(_subId);
 
         // TODO -> Do we want to have admin option to start/finish execution?
-        if (subData.walletAddr != bytes20(msg.sender)) {
+        if (address(subData.walletAddr) != msg.sender) {
             revert NotSubOwner(_subId, msg.sender);
         }
+        _;
+    }
+
+    function startExecution(uint256 _subId) external onlySubOwner(_subId) {
+        if (isInExecution(_subId)) return;
 
         executionWalletOf[_subId] = msg.sender;
         emit ExecutionStarted(_subId, msg.sender);
     }
 
-    function finishExecution(uint256 _subId) external {
+    function finishExecution(uint256 _subId) external onlySubOwner(_subId) {
         if (!isInExecution(_subId)) return;
-
-        StrategyModel.StoredSubData memory subData = ISubStorage(SUB_STORAGE_ADDR).getSub(_subId);
-
-        if (subData.walletAddr != bytes20(msg.sender)) {
-            revert NotSubOwner(_subId, msg.sender);
-        }
 
         delete executionWalletOf[_subId];
         emit ExecutionFinished(_subId, msg.sender);
