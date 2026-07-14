@@ -6593,6 +6593,7 @@ const createAaveV3FLDebtSwitchStrategy = () => {
             ['%flAmount'], // Sent by backend.
         ),
     );
+
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
             '&toAsset',
@@ -6603,11 +6604,13 @@ const createAaveV3FLDebtSwitchStrategy = () => {
         '&proxy',
         '&proxy',
     );
+
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '%gasStart', // Sent by backend.
         '&fromAsset',
         '$2',
     );
+
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
         '%false', //  useDefaultMarket - Sent by backend.
         '&marketAddr',
@@ -6619,6 +6622,7 @@ const createAaveV3FLDebtSwitchStrategy = () => {
         '&useOnBehalf',
         '%address(0)', // onBehalf - Sent by backend
     );
+
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
         '%false', // useDefaultMarket - Sent by backend
         '&marketAddr',
