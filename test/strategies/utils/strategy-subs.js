@@ -840,6 +840,37 @@ const subAaveV3FLCollateralSwitchStrategy = async (
     const subId = await subToStrategy(proxy, strategySub);
     return { subId, strategySub };
 };
+const subAaveV3FLDebtSwitchStrategy = async (
+    proxy,
+    strategyId,
+    fromAsset,
+    fromAssetId,
+    toAsset,
+    toAssetId,
+    marketAddr,
+    amountToSwitch,
+    // ! Check what is base and what is quote trigger? Should be related to debt/coll or from & to or usd always or what?
+    baseTokenAddress,
+    quoteTokenAddress,
+    triggerPrice,
+    priceState,
+) => {
+    const strategySub = automationSdk.strategySubService.aaveV3Encode.debtSwitch(
+        strategyId,
+        fromAsset,
+        fromAssetId,
+        toAsset,
+        toAssetId,
+        marketAddr,
+        amountToSwitch,
+        baseTokenAddress,
+        quoteTokenAddress,
+        triggerPrice,
+        priceState,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
 const subSparkFLCollateralSwitchStrategy = async (
     proxy,
     strategyId,
@@ -1511,6 +1542,7 @@ module.exports = {
     subCompV3BoostOnPriceBundle,
     subCompV3CloseOnPriceBundle,
     subAaveV3FLCollateralSwitchStrategy,
+    subAaveV3FLDebtSwitchStrategy,
     subSparkCloseGeneric,
     subMorphoBlueClose,
     subSparkRepayOnPriceBundle,
