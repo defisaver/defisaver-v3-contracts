@@ -10,12 +10,21 @@ import {
 import {
     SkyStakingEngineSelectFarm
 } from "../../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
+import { SkyStake } from "../../../contracts/actions/sky/SkyStake.sol";
 
 import { ExecuteActionsBase } from "./ExecuteActionsBase.sol";
 import { SmartWallet } from "../SmartWallet.sol";
 import { SkyStakingEncode } from "../encode/SkyStakingEncode.sol";
 
 contract SkyExecuteActions is ExecuteActionsBase, SkyHelper {
+    /// @dev StakingRewards contracts for direct USDS staking (SkyStake/SkyUnstake/SkyClaimRewards)
+    address internal constant USDS_SKY_STAKING_REWARDS = 0x0650CAF159C5A49f711e8169D4336ECB9b950275;
+    /// @dev points farm, no ERC20 rewards token
+    address internal constant USDS_POINTS_STAKING_REWARDS =
+        0x10ab606B067C9C461d8893c47C7512472E19e2Ce;
+    address internal constant USDS_GROOVE_STAKING_REWARDS =
+        0x4E41488C19cD35EB4de3083Fc3e204854c75c86a;
+
     function executeSkyStakingEngineOpen(
         address _stakingEngine,
         SkyStakingEngineOpen _cut,
@@ -68,6 +77,23 @@ contract SkyExecuteActions is ExecuteActionsBase, SkyHelper {
         bytes memory _calldata = abi.encodeWithSelector(
             SkyStakingEngineStake.executeActionDirect.selector, paramsCalldata
         );
+
+        _wallet.execute(address(_cut), _calldata, 0);
+    }
+
+    function executeSkyStake(
+        address _stakingContract,
+        address _stakingToken,
+        uint256 _amount,
+        address _from,
+        SkyStake _cut,
+        SmartWallet _wallet
+    ) internal {
+        bytes memory paramsCalldata = SkyStakingEncode.skyStake(
+            _stakingContract, _stakingToken, _amount, _from
+        );
+        bytes memory _calldata =
+            abi.encodeWithSelector(SkyStake.executeActionDirect.selector, paramsCalldata);
 
         _wallet.execute(address(_cut), _calldata, 0);
     }
