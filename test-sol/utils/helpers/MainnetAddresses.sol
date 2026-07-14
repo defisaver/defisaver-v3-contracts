@@ -49,9 +49,16 @@ library Addresses {
     address public constant STK_USDT_TOKEN = 0xA484Ab92fe32B143AEE7019fC1502b1dAA522D31;
     address public constant STK_GHO_TOKEN = 0x4f827A63755855cDf3e8f3bcD20265C833f15033;
 
+    // CompV3 Comets
+    address public constant COMET_WETH = 0xA17581A9E3356d9A858b789D68B4d866e593aE94;
+    address public constant COMET_USDS = 0x5D409e56D886231aDAf00c8775665AD0f9897b56;
+    address public constant COMET_USDC = 0xc3d688B66703497DAA19211EEdff47f25384cdc3;
+    address public constant COMET_USDT = 0x3Afdc9BCA9213A35503b077a6072F3D0d5AB0840;
+    address public constant COMET_WBTC = 0xe85Dc543813B8c2CFEaAc371517b925a166a9293;
+    address public constant COMET_WSTETH = 0x3D0bb1ccaB520A66e607822fC55BC921738fAFE3;
+
     // Other
     address public constant DS_PROXY_FACTORY = 0xA26e15C895EFc0616177B7c1e7270A4C7D51C997;
-    address public constant COMET_USDC = 0xc3d688B66703497DAA19211EEdff47f25384cdc3;
     address public constant SAFE_PROXY_FACTORY = 0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67;
     address public constant SAFE_SINGLETON = 0x41675C099F32341bf84BFc5382aF534df5C7461a;
     address public constant UNISWAP_ROUTER = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
