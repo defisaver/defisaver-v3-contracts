@@ -6,8 +6,6 @@ import { ActionBase } from "../ActionBase.sol";
 import { SubStorage } from "../../core/strategy/SubStorage.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { ISemiContinuousTracker } from "../../interfaces/core/ISemiContinuousTracker.sol";
-import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
-import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 import { DFSIds } from "../../utils/DFSIds.sol";
 
 /// @title Updates users sub information on SubStorage contract

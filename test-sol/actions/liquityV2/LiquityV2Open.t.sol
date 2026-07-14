@@ -263,6 +263,7 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
 
     function _executeOpen(LiquityV2Open.Params memory _params, TestConfig memory _config)
         internal
+        view
         returns (bytes memory executeActionCallData)
     {
         executeActionCallData = executeActionCalldata(

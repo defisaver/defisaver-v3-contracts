@@ -10,7 +10,6 @@ import { SparkRatioHelper } from "../../../contracts/actions/spark/helpers/Spark
 import { ActionBase } from "../../../contracts/actions/ActionBase.sol";
 import { SparkDataTypes } from "../../../contracts/interfaces/protocols/spark/SparkDataTypes.sol";
 
-import { BaseTest } from "../../utils/BaseTest.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { SparkPositionCreator } from "../../utils/positions/SparkPositionCreator.sol";
 import { SparkEncode } from "../../utils/encode/SparkEncode.sol";
