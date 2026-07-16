@@ -5039,5 +5039,16 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "UniswapClaim",
+        "address": "0x4Eed50e142BFaE83b2d05ce960C55F4c536d123f",
+        "id": "0x48d60efb",
+        "path": "contracts/actions/uniswap/UniswapClaim.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     }
 ]
