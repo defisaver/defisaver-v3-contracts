@@ -7,13 +7,20 @@ import { IAaveV3Oracle } from "../interfaces/protocols/aaveV3/IAaveV3Oracle.sol"
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { DSMath } from "../_vendor/DS/DSMath.sol";
 import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
+import { SemiContinuousHelper } from "./helpers/SemiContinuousHelper.sol";
 
 /// @title Trigger contract that verifies if current token price ratio is outside of given range specified during subscription
 /// @dev Uses the Aave V3 oracle, which provides asset prices in a shared base currency.
 /// @notice The contract computes the base/quote ratio by dividing the oracle prices of the two tokens.
 /// @notice The trigger expects the lowerPrice and upperPrice inputs to be scaled by 1e8.
 /// @notice It is possible to check only one side of the range by setting the other side price to 0.
-contract AaveV3QuotePriceRangeTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelper {
+contract AaveV3QuotePriceRangeTrigger is
+    ITrigger,
+    AdminAuth,
+    DSMath,
+    AaveV3RatioHelper,
+    SemiContinuousHelper
+{
     /// @param baseTokenAddr address of the base token which is quoted
     /// @param quoteTokenAddr address of the quote token
     /// @param lowerPrice lower price of the base token in terms of the quote token that represents the triggerable point.
@@ -25,11 +32,23 @@ contract AaveV3QuotePriceRangeTrigger is ITrigger, AdminAuth, DSMath, AaveV3Rati
         uint256 upperPrice;
     }
 
+    struct CallParams {
+        uint256 subId;
+    }
+
     IAaveV3Oracle public constant aaveOracleV3 = IAaveV3Oracle(AAVE_ORACLE_V3);
 
     /// @notice Checks Aave V3 oracle for current prices and triggers if it's in a correct state
-    function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
+    function isTriggered(bytes memory _callData, bytes memory _subData)
+        public
+        view
+        override
+        returns (bool)
+    {
         SubParams memory triggerSubData = parseSubInputs(_subData);
+        CallParams memory callParams = parseCallInputs(_callData);
+
+        if (_shouldTriggerAnyway(callParams.subId)) return true;
 
         uint256 currPrice = getPrice(triggerSubData.baseTokenAddr, triggerSubData.quoteTokenAddr);
 
@@ -63,5 +82,13 @@ contract AaveV3QuotePriceRangeTrigger is ITrigger, AdminAuth, DSMath, AaveV3Rati
 
     function parseSubInputs(bytes memory _callData) public pure returns (SubParams memory params) {
         params = abi.decode(_callData, (SubParams));
+    }
+
+    function parseCallInputs(bytes memory _callData)
+        public
+        pure
+        returns (CallParams memory params)
+    {
+        params = abi.decode(_callData, (CallParams));
     }
 }
