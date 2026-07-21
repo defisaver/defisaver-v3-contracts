@@ -41,13 +41,13 @@ contract MidnightView is MidnightHelper {
     function getMarketInfo(bytes32 _id) public view returns (MarketInfo memory info) {
         // Use separate calls to avoid stack too deep errors.
         info.id = _id;
-        info.totalUnits = MIDNIGHT.totalUnits(info.id);
-        info.lossFactor = MIDNIGHT.lossFactor(info.id);
-        info.withdrawable = MIDNIGHT.withdrawable(info.id);
-        info.continuousFeeCredit = MIDNIGHT.continuousFeeCredit(info.id);
-        info.continuousFee = MIDNIGHT.continuousFee(info.id);
-        info.tickSpacing = MIDNIGHT.tickSpacing(info.id);
-        info.settlementFees = MIDNIGHT.settlementFeeCbps(info.id);
+        info.totalUnits = MIDNIGHT.totalUnits(_id);
+        info.lossFactor = MIDNIGHT.lossFactor(_id);
+        info.withdrawable = MIDNIGHT.withdrawable(_id);
+        info.continuousFeeCredit = MIDNIGHT.continuousFeeCredit(_id);
+        info.settlementFees = MIDNIGHT.settlementFeeCbps(_id);
+        info.continuousFee = MIDNIGHT.continuousFee(_id);
+        info.tickSpacing = MIDNIGHT.tickSpacing(_id);
 
         Market memory market = toMarket(_id);
         info.prices = new uint256[](market.collateralParams.length);
