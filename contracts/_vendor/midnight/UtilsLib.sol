@@ -8,6 +8,7 @@ pragma solidity =0.8.24;
 /// - `clearBit`
 /// - `mulDivDown`
 /// - `mulDivUp`
+/// - `min`
 /// - `msb` -> implementation is changed to work with cancun and 0.8.24 compiler (can't use clz from Osaka)
 library UtilsLib {
     function zeroFloorSub(uint256 x, uint256 y) internal pure returns (uint256 z) {
@@ -44,5 +45,12 @@ library UtilsLib {
     /// @dev Returns (x * y) / d rounded up.
     function mulDivUp(uint256 x, uint256 y, uint256 d) internal pure returns (uint256) {
         return (x * y + (d - 1)) / d;
+    }
+
+    /// @dev Returns min(a, b).
+    function min(uint256 x, uint256 y) internal pure returns (uint256 z) {
+        assembly {
+            z := xor(x, mul(xor(x, y), lt(y, x)))
+        }
     }
 }
