@@ -3,13 +3,14 @@ pragma solidity =0.8.24;
 
 /// @dev Taken from: https://github.com/morpho-org/midnight
 /// @dev Changes:
-/// Removed all functions except for:
+/// 1. Removed all functions except for:
 /// - zeroFloorSub
 /// - `clearBit`
 /// - `mulDivDown`
 /// - `mulDivUp`
 /// - `min`
-/// - `msb` -> implementation is changed to work with cancun and 0.8.24 compiler (can't use clz from Osaka)
+/// 2. `msb` implementation is changed to work with cancun and 0.8.24 compiler (can't use clz from Osaka)
+/// 3. min(x,y,z) and min(x,y,z,w) are added to the library
 library UtilsLib {
     function zeroFloorSub(uint256 x, uint256 y) internal pure returns (uint256 z) {
         assembly {
@@ -47,10 +48,20 @@ library UtilsLib {
         return (x * y + (d - 1)) / d;
     }
 
-    /// @dev Returns min(a, b).
+    /// @dev Returns min(x, y).
     function min(uint256 x, uint256 y) internal pure returns (uint256 z) {
         assembly {
             z := xor(x, mul(xor(x, y), lt(y, x)))
         }
+    }
+
+    /// @dev Returns min(x, y, z).
+    function min(uint256 x, uint256 y, uint256 z) internal pure returns (uint256) {
+        return min(min(x, y), z);
+    }
+
+    /// @dev Returns min(x, y, z, w).
+    function min(uint256 x, uint256 y, uint256 z, uint256 w) internal pure returns (uint256) {
+        return min(min(x, y, z), w);
     }
 }

@@ -10,6 +10,10 @@ import { BaseMidnightAddresses } from "./BaseMidnightAddresses.sol";
 
 contract MidnightHelper is BaseMidnightAddresses {
     error InvalidCollateralIndex();
+    error InvalidOfferType();
+    error InvalidOfferMarketId();
+    error NoOrdersProvided();
+    error ZeroAmountRequested();
 
     /// @dev Oracle price is scaled by 1e36 + debtDec - collDec
     /// If we want to calculate collateral value in deb tokens:
