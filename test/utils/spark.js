@@ -22,6 +22,7 @@ const {
     createSparkBoostOnPriceStrategy,
     createSparkFLBoostOnPriceStrategy,
     createSparkFLCollateralSwitchStrategy,
+    createSparkGenericFLCollateralSwitchStrategy,
     createSparkGenericRepayStrategy,
     createSparkGenericFLRepayStrategy,
     createSparkGenericRepayOnPriceStrategy,
@@ -540,7 +541,7 @@ const SPARK_AUTOMATION_TEST_PAIRS_BOOST = [
         debtSymbol: 'USDC',
         marketAddr: addrs[network].SPARK_MARKET,
         triggerRatioBoost: 190,
-        targetRatioBoost: 170,
+        targetRatioBoost: 180,
         collAmountInUSD: 40_000,
         debtAmountInUSD: 15_000,
         boostAmountInUSD: 4_000,
@@ -616,6 +617,18 @@ const deploySparkFLCollateralSwitchStrategy = async () => {
     return flCollateralSwitchStrategyId;
 };
 
+const deploySparkGenericFLCollateralSwitchStrategy = async () => {
+    const isFork = isNetworkFork();
+    await openStrategyAndBundleStorage(isFork);
+    const flCollateralSwitchStrategy = createSparkGenericFLCollateralSwitchStrategy();
+    const continuous = false;
+    const flCollateralSwitchStrategyId = await createStrategy(
+        ...flCollateralSwitchStrategy,
+        continuous,
+    );
+    return flCollateralSwitchStrategyId;
+};
+
 const SPARK_COLL_SWITCH_TEST_PAIRS = [
     // {
     //     fromAsset: 'WETH',
@@ -670,5 +683,6 @@ module.exports = {
     SPARK_AUTOMATION_TEST_PAIRS_BOOST,
     SPARK_AUTOMATION_TEST_PAIRS_REPAY,
     deploySparkFLCollateralSwitchStrategy,
+    deploySparkGenericFLCollateralSwitchStrategy,
     SPARK_COLL_SWITCH_TEST_PAIRS,
 };

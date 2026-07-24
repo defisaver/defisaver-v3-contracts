@@ -7978,6 +7978,93 @@ const createSparkFLCollateralSwitchStrategy = () => {
     return sparkFLCollateralSwitchStrategy.encodeForDsProxyCall();
 };
 
+const createSparkGenericFLCollateralSwitchStrategy = () => {
+    const sparkGenericFLCollateralSwitchStrategy = new dfs.Strategy(
+        'SparkGenericFLCollateralSwitchStrategy',
+    );
+
+    sparkGenericFLCollateralSwitchStrategy.addSubSlot('&fromAsset', 'address');
+    sparkGenericFLCollateralSwitchStrategy.addSubSlot('&fromAssetId', 'uint16');
+    sparkGenericFLCollateralSwitchStrategy.addSubSlot('&toAsset', 'address');
+    sparkGenericFLCollateralSwitchStrategy.addSubSlot('&toAssetId', 'uint16');
+    sparkGenericFLCollateralSwitchStrategy.addSubSlot('&marketAddr', 'address');
+    sparkGenericFLCollateralSwitchStrategy.addSubSlot('&amountToSwitch', 'uint256');
+    sparkGenericFLCollateralSwitchStrategy.addSubSlot('&user', 'address');
+
+    const trigger = new dfs.triggers.SparkQuotePriceTrigger(nullAddress, nullAddress, '0', '0');
+    sparkGenericFLCollateralSwitchStrategy.addTrigger(trigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%fromAsset'], // Sent by backend.
+            ['%flAmount'], // Sent by backend.
+        ),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&fromAsset',
+            '&toAsset',
+            '%flAmount', // Sent by backend.
+            '%exchangeWrapper', // Sent by backend.
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // Sent by backend.
+        '&toAsset',
+        '$2',
+    );
+    const supplyAction = new dfs.actions.spark.SparkSupplyAction(
+        '%false', // useDefaultMarket - Sent by backend.
+        '&marketAddr',
+        '$3',
+        '&proxy',
+        '&toAsset',
+        '&toAssetId',
+        '%true', // enableAsColl - Sent by backend.
+        '%true', // useOnBehalf - Sent by backend.
+        '&user',
+    );
+    /// @dev No effect for proxy positions where spTokens are already on the proxy.
+    /// Required for EOA positions so withdraw can burn pulled spTokens.
+    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+        '%spFromTokenAddr', // spToken for fromAsset - Sent by backend.
+        '&user',
+        '&amountToSwitch',
+    );
+    const withdrawAction = new dfs.actions.spark.SparkWithdrawAction(
+        '%false', // useDefaultMarket - Sent by backend.
+        '&marketAddr',
+        '$5',
+        '&proxy',
+        '&fromAssetId',
+    );
+    const returnFLAction = new dfs.actions.basic.SendTokenAction(
+        '&fromAsset',
+        '%flAddress', // Sent by backend.
+        '$1',
+    );
+    const returnAnyDust = new dfs.actions.basic.SendTokenAndUnwrapAction(
+        '&fromAsset',
+        '&eoa',
+        '%max(uint)', // Sent by backend.
+    );
+
+    sparkGenericFLCollateralSwitchStrategy.addActions([
+        flAction,
+        sellAction,
+        feeTakingAction,
+        supplyAction,
+        pullTokenAction,
+        withdrawAction,
+        returnFLAction,
+        returnAnyDust,
+    ]);
+
+    return sparkGenericFLCollateralSwitchStrategy.encodeForDsProxyCall();
+};
+
 const createSparkGenericRepayStrategy = () => {
     const sparkGenericRepayStrategy = new dfs.Strategy('SparkGenericRepayStrategy');
 
@@ -8899,6 +8986,7 @@ module.exports = {
     createAaveV4FLCloseToCollStrategy,
     createAaveV4FLCollateralSwitchStrategy,
     createSparkFLCollateralSwitchStrategy,
+    createSparkGenericFLCollateralSwitchStrategy,
     createSparkGenericRepayStrategy,
     createSparkGenericFLRepayStrategy,
     createSparkGenericRepayOnPriceStrategy,
