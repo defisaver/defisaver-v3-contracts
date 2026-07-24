@@ -1632,5 +1632,49 @@
         "changeTime": 0,
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "MidnightView",
+        "address": "0x3aa272f329E8B562A3bA56Bb6979a44D23A28839",
+        "id": "0xecc0f913",
+        "path": "contracts/views/MidnightView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MidnightPaybackDirect",
+        "address": "0xC1B049A038f9E9811dc1Ad1D335369844d4268D9",
+        "id": "0x410d1066",
+        "path": "contracts/actions/midnight/MidnightPaybackDirect.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MidnightSupplyCollateral",
+        "address": "0xC83C7Ca37203FC30636EDcd3Ef127194542504c5",
+        "id": "0xbb30ee9a",
+        "path": "contracts/actions/midnight/MidnightSupplyCollateral.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MidnightWithdrawCollateral",
+        "address": "0x4fA4DA5fDD813279409B4Bf0Bde5Fe9ca8006A9C",
+        "id": "0xa1f04e15",
+        "path": "contracts/actions/midnight/MidnightWithdrawCollateral.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     }
 ]
