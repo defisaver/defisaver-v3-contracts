@@ -16,6 +16,7 @@ import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { MidnightHelper } from "./helpers/MidnightHelper.sol";
 
 /// @title MidnightPaybackFromOrders
+/// @dev Logic adapted from MidnightBundlesV1. See: https://github.com/morpho-org/bundles/blob/main/src/midnight/MidnightBundlesV1.sol
 contract MidnightPaybackFromOrders is ActionBase, MidnightHelper {
     using SafeERC20 for IERC20;
     using TokenUtils for address;

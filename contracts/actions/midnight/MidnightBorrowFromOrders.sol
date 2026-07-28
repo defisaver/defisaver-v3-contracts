@@ -15,6 +15,7 @@ import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { MidnightHelper } from "./helpers/MidnightHelper.sol";
 
 /// @title MidnightBorrowFromOrders
+/// @dev Logic adapted from MidnightBundlesV1. See: https://github.com/morpho-org/bundles/blob/main/src/midnight/MidnightBundlesV1.sol
 contract MidnightBorrowFromOrders is ActionBase, MidnightHelper {
     using TokenUtils for address;
 
