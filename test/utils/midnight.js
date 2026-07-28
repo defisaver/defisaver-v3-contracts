@@ -4,6 +4,7 @@ const MIDNIGHT_API_URL = 'https://api.morpho.org/v0/midnight/books';
 const DEFAULT_SLIPPAGE = '0.5';
 const MAX_QUOTE_ATTEMPTS = 10;
 const WAD = hre.ethers.constants.WeiPerEther;
+const MAX_UINT128 = hre.ethers.BigNumber.from(2).pow(128).sub(1);
 
 const formatCollateralParams = (collateral) => [
     collateral.token,
@@ -47,8 +48,23 @@ const formatOfferFill = (offerFill) => [
     offerFill.units,
 ];
 
-const fetchMidnightQuote = async ({ marketId, side, assets, slippage = DEFAULT_SLIPPAGE }) => {
-    const url = `${MIDNIGHT_API_URL}/${marketId}/${side}/quote?assets=${assets.toString()}&slippage=${slippage}`;
+const fetchMidnightQuote = async ({
+    marketId,
+    side,
+    assets,
+    units,
+    slippage = DEFAULT_SLIPPAGE,
+}) => {
+    const hasAssets = assets !== undefined && assets !== null;
+    const hasUnits = units !== undefined && units !== null;
+
+    if (hasAssets === hasUnits) {
+        throw new Error('Midnight quote requires exactly one of assets or units');
+    }
+
+    const quoteType = hasAssets ? 'assets' : 'units';
+    const quoteAmount = hasAssets ? assets : units;
+    const url = `${MIDNIGHT_API_URL}/${marketId}/${side}/quote?${quoteType}=${quoteAmount.toString()}&slippage=${slippage}`;
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -72,6 +88,42 @@ const calculateMaxUnits = (assets, averageWorstPrice) => {
     const priceBn = hre.ethers.BigNumber.from(averageWorstPrice);
 
     return assetsBn.mul(WAD).add(priceBn.sub(1)).div(priceBn);
+};
+
+const calculateMinUnits = (assets, averageWorstPrice) => {
+    const assetsBn = hre.ethers.BigNumber.from(assets);
+    const priceBn = hre.ethers.BigNumber.from(averageWorstPrice);
+
+    return assetsBn.mul(WAD).div(priceBn);
+};
+
+const seedMidnightDebt = async (midnight, marketId, user, debt) => {
+    const debtBn = hre.ethers.BigNumber.from(debt);
+    if (debtBn.gt(MAX_UINT128)) throw new Error('Midnight debt exceeds uint128');
+
+    const innerMappingSlot = hre.ethers.utils.keccak256(
+        hre.ethers.utils.defaultAbiCoder.encode(['bytes32', 'uint256'], [marketId, 0]),
+    );
+    const positionSlot = hre.ethers.utils.keccak256(
+        hre.ethers.utils.defaultAbiCoder.encode(['address', 'bytes32'], [user, innerMappingSlot]),
+    );
+    const debtAndBitmapSlot = hre.ethers.BigNumber.from(positionSlot).add(2);
+    const paddedSlot = hre.ethers.utils.hexZeroPad(debtAndBitmapSlot.toHexString(), 32);
+    const currentValue = hre.ethers.BigNumber.from(
+        await hre.ethers.provider.getStorageAt(midnight.address, paddedSlot),
+    );
+    const updatedValue = currentValue.shr(128).shl(128).or(debtBn);
+
+    await hre.network.provider.send('hardhat_setStorageAt', [
+        midnight.address,
+        paddedSlot,
+        hre.ethers.utils.hexZeroPad(updatedValue.toHexString(), 32),
+    ]);
+
+    const seededDebt = await midnight.debt(marketId, user);
+    if (!seededDebt.eq(debtBn)) {
+        throw new Error(`Failed to seed Midnight debt: expected ${debtBn}, got ${seededDebt}`);
+    }
 };
 
 const fetchMidnightQuoteForMinFills = async ({
@@ -112,6 +164,8 @@ const fetchMidnightQuoteForMinFills = async ({
 
 module.exports = {
     calculateMaxUnits,
+    calculateMinUnits,
     fetchMidnightQuote,
     fetchMidnightQuoteForMinFills,
+    seedMidnightDebt,
 };

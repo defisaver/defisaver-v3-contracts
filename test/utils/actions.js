@@ -3920,6 +3920,18 @@ const midnightBorrowFromOrders = async (
     maxUnits,
     offerFills,
 ) => {
+    const functionData = encodeMidnightBorrowFromOrders(
+        marketId,
+        onBehalf,
+        to,
+        amount,
+        maxUnits,
+        offerFills,
+    );
+    return executeAction('MidnightBorrowFromOrders', functionData, proxy);
+};
+
+const encodeMidnightBorrowFromOrders = (marketId, onBehalf, to, amount, maxUnits, offerFills) => {
     const action = new dfs.actions.midnight.MidnightBorrowFromOrdersAction(
         marketId,
         onBehalf,
@@ -3928,8 +3940,46 @@ const midnightBorrowFromOrders = async (
         maxUnits,
         offerFills,
     );
-    const functionData = action.encodeForDsProxyCall()[1];
-    return executeAction('MidnightBorrowFromOrders', functionData, proxy);
+    return action.encodeForDsProxyCall()[1];
+};
+
+const midnightPaybackFromOrders = async (
+    proxy,
+    marketId,
+    onBehalf,
+    from,
+    amount,
+    minUnits,
+    offerFills,
+) => {
+    const functionData = encodeMidnightPaybackFromOrders(
+        marketId,
+        onBehalf,
+        from,
+        amount,
+        minUnits,
+        offerFills,
+    );
+    return executeAction('MidnightPaybackFromOrders', functionData, proxy);
+};
+
+const encodeMidnightPaybackFromOrders = (
+    marketId,
+    onBehalf,
+    from,
+    amount,
+    minUnits,
+    offerFills,
+) => {
+    const action = new dfs.actions.midnight.MidnightPaybackFromOrdersAction(
+        marketId,
+        onBehalf,
+        from,
+        amount,
+        minUnits,
+        offerFills,
+    );
+    return action.encodeForDsProxyCall()[1];
 };
 
 module.exports = {
@@ -4163,6 +4213,9 @@ module.exports = {
 
     midnightSupplyCollateral,
     midnightBorrowFromOrders,
+    encodeMidnightBorrowFromOrders,
+    midnightPaybackFromOrders,
+    encodeMidnightPaybackFromOrders,
 
     kingClaim,
 };

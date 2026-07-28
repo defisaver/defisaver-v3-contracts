@@ -13,7 +13,11 @@ const {
     setForkForTesting,
     takeSnapshot,
 } = require('../../utils/utils');
-const { midnightBorrowFromOrders, midnightSupplyCollateral } = require('../../utils/actions');
+const {
+    encodeMidnightBorrowFromOrders,
+    midnightBorrowFromOrders,
+    midnightSupplyCollateral,
+} = require('../../utils/actions');
 const {
     calculateMaxUnits,
     fetchMidnightQuote,
@@ -32,6 +36,7 @@ describe('Midnight-Borrow-From-Orders', function () {
     let senderAcc;
     let proxy;
     let midnight;
+    let borrowAction;
     let snapshotId;
 
     before(async function () {
@@ -40,11 +45,12 @@ describe('Midnight-Borrow-From-Orders', function () {
         dfs.configure({ chainId: 8453, testingMode: true });
         senderAcc = (await hre.ethers.getSigners())[0];
         await setForkForTesting();
+        await hre.network.provider.send('evm_mine');
         proxy = await getProxy(senderAcc.address, false);
         midnight = await hre.ethers.getContractAt('IMidnight', MIDNIGHT_ADDRESS);
 
         await redeploy('MidnightSupplyCollateral');
-        await redeploy('MidnightBorrowFromOrders');
+        borrowAction = await redeploy('MidnightBorrowFromOrders');
 
         const collateralAmount = hre.ethers.utils.parseUnits('1000', 8);
         await setBalance(CBBTC_ADDRESS, senderAcc.address, collateralAmount);
@@ -151,16 +157,17 @@ describe('Midnight-Borrow-From-Orders', function () {
     });
 
     it('should revert when no orders are provided', async () => {
+        const functionData = encodeMidnightBorrowFromOrders(
+            MARKET_ID,
+            nullAddress,
+            senderAcc.address,
+            hre.ethers.utils.parseUnits('2', 6),
+            hre.ethers.constants.MaxUint256,
+            [],
+        );
+
         await expect(
-            midnightBorrowFromOrders(
-                proxy,
-                MARKET_ID,
-                nullAddress,
-                senderAcc.address,
-                hre.ethers.utils.parseUnits('2', 6),
-                hre.ethers.constants.MaxUint256,
-                [],
-            ),
+            senderAcc.sendTransaction({ to: borrowAction.address, data: functionData }),
         ).to.be.revertedWith('NoOrdersProvided');
     });
 
@@ -174,17 +181,17 @@ describe('Midnight-Borrow-From-Orders', function () {
         });
         const offerFills = quote.offerFills.slice(0, 1);
         offerFills[0][0][1] = false;
+        const functionData = encodeMidnightBorrowFromOrders(
+            MARKET_ID,
+            nullAddress,
+            senderAcc.address,
+            borrowAmount,
+            hre.ethers.constants.MaxUint256,
+            offerFills,
+        );
 
         await expect(
-            midnightBorrowFromOrders(
-                proxy,
-                MARKET_ID,
-                nullAddress,
-                senderAcc.address,
-                borrowAmount,
-                hre.ethers.constants.MaxUint256,
-                offerFills,
-            ),
+            senderAcc.sendTransaction({ to: borrowAction.address, data: functionData }),
         ).to.be.revertedWith('InvalidOfferType');
     });
 });
