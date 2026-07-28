@@ -3892,6 +3892,46 @@ const fluidClaim = async (
     return tx;
 };
 
+const midnightSupplyCollateral = async (
+    proxy,
+    marketId,
+    onBehalf,
+    from,
+    amount,
+    collateralIndex,
+) => {
+    const action = new dfs.actions.midnight.MidnightSupplyCollateralAction(
+        marketId,
+        onBehalf,
+        from,
+        amount,
+        collateralIndex,
+    );
+    const functionData = action.encodeForDsProxyCall()[1];
+    return executeAction('MidnightSupplyCollateral', functionData, proxy);
+};
+
+const midnightBorrowFromOrders = async (
+    proxy,
+    marketId,
+    onBehalf,
+    to,
+    amount,
+    maxUnits,
+    offerFills,
+) => {
+    const action = new dfs.actions.midnight.MidnightBorrowFromOrdersAction(
+        marketId,
+        onBehalf,
+        to,
+        amount,
+        maxUnits,
+        offerFills,
+    );
+    const functionData = action.encodeForDsProxyCall()[1];
+    return executeAction('MidnightBorrowFromOrders', functionData, proxy);
+};
+
 module.exports = {
     executeAction,
     sell,
@@ -4120,6 +4160,9 @@ module.exports = {
     fluidT1VaultOpen,
     fluidDexOpen,
     fluidClaim,
+
+    midnightSupplyCollateral,
+    midnightBorrowFromOrders,
 
     kingClaim,
 };
