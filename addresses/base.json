@@ -1676,5 +1676,27 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "MidnightBorrowFromOrders",
+        "address": "0x82F9dd7eA821463178A2c7bC4047057Bd338E5e5",
+        "id": "0x493c5822",
+        "path": "contracts/actions/midnight/MidnightBorrowFromOrders.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MidnightPaybackFromOrders",
+        "address": "0x4B0c242195B1C941A2e7a871Bfa242c40dbf032F",
+        "id": "0x190b0b43",
+        "path": "contracts/actions/midnight/MidnightPaybackFromOrders.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     }
 ]
