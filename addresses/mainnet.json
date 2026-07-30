@@ -3110,14 +3110,14 @@
     },
     {
         "name": "CurveUsdHealthRatioTrigger",
-        "address": "0x7fFc15c11b8dEbAe73e60E38cDD4d2987d1C8843",
+        "address": "0xB73f6211d593655Dd9018f63e6C4C64F01Bcc04B",
         "id": "0xbcde585a",
         "path": "contracts/triggers/CurveUsdHealthRatioTrigger.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x7fFc15c11b8dEbAe73e60E38cDD4d2987d1C8843"]
     },
     {
         "name": "CurveUsdCollRatioCheck",
