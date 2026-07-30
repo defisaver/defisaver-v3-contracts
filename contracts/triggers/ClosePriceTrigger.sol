@@ -8,6 +8,7 @@ import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 import { TokenPriceHelper } from "../utils/token/TokenPriceHelper.sol";
 
 /// @title Trigger contract that verifies if the current price of token is outside of given range
+/// @dev The trigger expects the lowerPrice/upperPrice inputs to be scaled by 1e8.
 contract ClosePriceTrigger is ITrigger, AdminAuth, TriggerHelper, TokenPriceHelper {
     /// @param tokenAddr address of the token
     /// @param lowerPrice lower price of the token

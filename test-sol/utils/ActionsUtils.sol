@@ -130,11 +130,11 @@ contract ActionsUtils {
     }
 
     function gasFeeEncode(uint256 _gasUsed, address _feeToken) public pure returns (bytes memory) {
-        GasFeeTaker.GasFeeTakerParams memory params = GasFeeTaker.GasFeeTakerParams({
-            gasUsed: _gasUsed, feeToken: _feeToken, availableAmount: 0, dfsFeeDivider: 0
-        });
-
-        return abi.encode(params);
+        return abi.encode(
+            GasFeeTaker.Params({
+                gasUsed: _gasUsed, feeToken: _feeToken, availableAmount: 0, dfsFeeDivider: 0
+            })
+        );
     }
 
     function flActionEncode(address _tokenAddr, uint256 _amount, FLSource _flSource)

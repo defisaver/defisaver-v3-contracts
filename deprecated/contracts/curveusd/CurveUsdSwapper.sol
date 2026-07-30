@@ -2,18 +2,19 @@
 pragma solidity =0.8.24;
 
 import { ISwapRouterNG } from "../../../interfaces/protocols/curve/ISwapRouterNG.sol";
+import { IERC20 } from "../../../interfaces/token/IERC20.sol";
+import { ICrvUsdController } from "../../../interfaces/protocols/curveusd/ICurveUsd.sol";
+import { IDiscount } from "../../../interfaces/utils/IDiscount.sol";
 
 import { AdminAuth } from "../../../auth/AdminAuth.sol";
 import { CurveUsdHelper } from "../helpers/CurveUsdHelper.sol";
-import { Discount } from "../../../utils/Discount.sol";
 import { FeeRecipient } from "../../../utils/fee/FeeRecipient.sol";
-import { GasFeeHelper } from "../../../actions/fee/helpers/GasFeeHelper.sol";
+import { GasFeeHelper } from "../../../utils/fee/GasFeeHelper.sol";
 import { ExchangeHelper } from "../../../exchangeV3/helpers/ExchangeHelper.sol";
 import { TokenGroupRegistry } from "../../../exchangeV3/registries/TokenGroupRegistry.sol";
-import { ICrvUsdController } from "../../../interfaces/protocols/curveusd/ICurveUsd.sol";
 import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
-import { IERC20 } from "../../../interfaces/token/IERC20.sol";
 import { SafeERC20 } from "../../../_vendor/openzeppelin/SafeERC20.sol";
+import { DFSFeeLib } from "../../../utils/fee/DFSFeeLib.sol";
 
 /// @title CurveUsdSwapper Callback contract for CurveUsd extended actions, swaps directly on curve
 contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminAuth {
@@ -21,11 +22,6 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
     using TokenUtils for address;
 
     ISwapRouterNG internal constant exchangeContract = ISwapRouterNG(CURVE_ROUTER_NG);
-    /// @dev Divider for swap fee, 25 bps
-    uint256 internal constant STANDARD_DFS_FEE = 400;
-
-    /// @dev Divider for automatisation fee, 5 bps
-    uint256 internal constant AUTOMATION_DFS_FEE = 2000;
 
     event LogCurveUsdSwapper(
         address indexed user,
@@ -164,15 +160,14 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
             getSwapPath(_swapData, _collToken, _collToUsd);
 
         // check custom fee if front sends a non standard fee param
-        if (dfsFeeDivider != STANDARD_DFS_FEE) {
+        if (dfsFeeDivider != DFSFeeLib.SELL_STANDARD_FEE_DIVIDER) {
             dfsFeeDivider = uint24(
                 TokenGroupRegistry(TOKEN_GROUP_REGISTRY).getFeeForTokens(srcToken, destToken)
             );
         }
 
         // get dfs fee and update swap amount
-        (uint256 swapFee, uint256 feeDividerForAutomation) =
-            takeSwapFee(swapAmount, _user, srcToken, dfsFeeDivider);
+        uint256 swapFee = takeSwapFee(swapAmount, _user, srcToken, dfsFeeDivider);
         swapAmount -= swapFee;
 
         IERC20(srcToken).safeApprove(address(exchangeContract), swapAmount);
@@ -187,8 +182,14 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
         );
 
         if (gasUsed > 0) {
-            amountOut -= takeAutomationFee(amountOut, destToken, gasUsed, feeDividerForAutomation);
+            amountOut -= takeGasAndAutomationFee(
+                gasUsed,
+                destToken,
+                amountOut,
+                swapFee > 0 ? DFSFeeLib.MAX_AUTOMATION_FEE_DIVIDER : 0
+            );
         }
+
         // free the storage only needed inside tx as transient storage
         delete additionalRoutes;
         delete swapZapPools;
@@ -231,42 +232,11 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
         address _wallet,
         address _token,
         uint24 _dfsFeeDivider
-    ) internal returns (uint256 feeAmount, uint256 dfsFeeDivider) {
-        dfsFeeDivider = _dfsFeeDivider;
-        if (dfsFeeDivider != 0 && Discount(DISCOUNT_ADDRESS).serviceFeesDisabled(_wallet)) {
-            dfsFeeDivider = 0;
-        }
-
-        // take dfs fee if set, and add to feeAmount
-        if (dfsFeeDivider != 0) {
-            feeAmount = _sellAmount / _dfsFeeDivider;
-        }
-
-        address walletAddr = FeeRecipient(FEE_RECIPIENT_ADDRESS).getFeeAddr();
-        _token.withdrawTokens(walletAddr, feeAmount);
-    }
-
-    function takeAutomationFee(
-        uint256 _destTokenAmount,
-        address _token,
-        uint256 _gasUsed,
-        uint256 _dfsFeeDivider
     ) internal returns (uint256 feeAmount) {
-        // we need to take the fee for tx cost as well, as it"s in a strategy
-
-        feeAmount += calcGasCost(_gasUsed, _token, 0);
-
-        // gas fee can't go over 20% of the whole amount
-        if (feeAmount > (_destTokenAmount / 5)) {
-            feeAmount = _destTokenAmount / 5;
-        }
-
-        if (_dfsFeeDivider != 0) {
-            feeAmount += _destTokenAmount / AUTOMATION_DFS_FEE;
-        }
-
-        address walletAddr = FeeRecipient(FEE_RECIPIENT_ADDRESS).getFeeAddr();
-        _token.withdrawTokens(walletAddr, feeAmount);
+        feeAmount = DFSFeeLib.calculateSellFee(
+            _dfsFeeDivider, _sellAmount, IDiscount(DISCOUNT_ADDRESS), _wallet
+        );
+        _token.withdrawTokens(FeeRecipient(FEE_RECIPIENT_ADDRESS).getFeeAddr(), feeAmount);
     }
 
     /// @dev Encode swapParams in 1 uint256 as the values are small
