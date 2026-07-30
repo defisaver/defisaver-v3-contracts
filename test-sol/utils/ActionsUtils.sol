@@ -5,7 +5,6 @@ import { ActionBase } from "../../contracts/actions/ActionBase.sol";
 import { DFSSell } from "../../contracts/actions/exchange/DFSSell.sol";
 import { DFSExchangeData } from "../../contracts/exchangeV3/DFSExchangeData.sol";
 import { GasFeeTaker } from "../../contracts/actions/fee/GasFeeTaker.sol";
-import { CompV3RatioCheck } from "../../contracts/actions/checkers/CompV3RatioCheck.sol";
 import { IFlashLoanBase } from "../../contracts/interfaces/flashloan/IFlashLoanBase.sol";
 import { SumInputs } from "../../contracts/actions/utils/SumInputs.sol";
 import { PullToken } from "../../contracts/actions/utils/PullToken.sol";

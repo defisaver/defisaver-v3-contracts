@@ -71,7 +71,14 @@ const getNetworkNameByChainId = (chainId) => {
     return 'ethereum';
 };
 
-const getBebopQuote = async (sellAssetInfo, buyAssetInfo, amount, bebopWrapper, chainId) => {
+const getBebopQuote = async (
+    sellAssetInfo,
+    buyAssetInfo,
+    amount,
+    bebopWrapper,
+    chainId,
+    originAddress,
+) => {
     const options = {
         method: 'GET',
         baseURL: `https://api.bebop.xyz/pmm/${getNetworkNameByChainId(chainId)}/v3/quote`,
@@ -80,6 +87,7 @@ const getBebopQuote = async (sellAssetInfo, buyAssetInfo, amount, bebopWrapper, 
             sell_tokens: [sellAssetInfo.address].toString(),
             sell_amounts: amount.toString(),
             taker_address: bebopWrapper.address,
+            origin_address: originAddress,
             skip_validation: true,
             gasless: false,
             source: `${process.env.BEBOP_SOURCE}`,
@@ -88,7 +96,9 @@ const getBebopQuote = async (sellAssetInfo, buyAssetInfo, amount, bebopWrapper, 
             'source-auth': `${process.env.BEBOP_SOURCE_AUTH}`,
         },
     };
+    console.log('Bebop quote request:', JSON.stringify(options, null, 2));
     const response = await axios(options);
+    console.log('Bebop quote response:', JSON.stringify(response.data, null, 2));
     return response.data;
 };
 
@@ -143,8 +153,10 @@ const bebopTest = async () => {
                         amount,
                         bebopWrapper,
                         chainId,
+                        senderAcc.address,
                     );
-                    const allowanceTarget = priceObject.tx.to;
+                    const exchangeAddr = priceObject.tx.to;
+                    const allowanceTarget = priceObject.approvalTarget || priceObject.tx.to;
                     const price = 1; // just for testing, anything bigger than 0 triggers offchain if
                     const protocolFee = 0;
                     const callData = priceObject.tx.data;
@@ -160,14 +172,14 @@ const bebopTest = async () => {
                         buyAssetInfo.address,
                         amount,
                         bebopWrapper.address,
-                        allowanceTarget,
+                        exchangeAddr,
                         allowanceTarget,
                         price,
                         protocolFee,
                         specialCalldata,
                     );
 
-                    await addToExchangeAggregatorRegistry(senderAcc, allowanceTarget);
+                    await addToExchangeAggregatorRegistry(senderAcc, exchangeAddr);
                 });
 
                 it(`should sell ${sellToken} for ${buyToken} (single action)`, async () => {

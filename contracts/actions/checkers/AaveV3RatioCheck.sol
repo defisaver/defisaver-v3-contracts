@@ -58,7 +58,7 @@ contract AaveV3RatioCheck is ActionBase, AaveV3RatioHelper {
         if (market == address(0)) market = DEFAULT_AAVE_MARKET; // if not specified -> default to default market
         if (user == address(0)) user = address(this); // default to proxy
 
-        uint256 currRatio = getRatio(market, user);
+        uint256 currRatio = getSafetyRatioWithLtvZeroFallback(market, user);
 
         uint256 startRatio = uint256(tempStorage.getBytes32("AAVE_RATIO"));
 

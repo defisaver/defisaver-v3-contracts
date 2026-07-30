@@ -2,9 +2,49 @@ require('dotenv-safe').config();
 
 const hre = require('hardhat');
 const ethers = require('ethers');
+const axios = require('axios');
 const { write } = require('./writer');
 
 const DEPLOYMENT_GAS_LIMIT = 30_000_000;
+
+// Verify a deployed contract on the Tenderly VNet via its Etherscan-compatible `<rpc>/verify`.
+const verifyOnTenderlyFork = async (contractName, contract, args) => {
+    try {
+        const fqn = (await hre.artifacts.getAllFullyQualifiedNames()).find(
+            (n) => n === contractName || n.endsWith(`:${contractName}`),
+        );
+        const buildInfo = await hre.artifacts.getBuildInfo(fqn);
+        const [sourceName, shortName] = fqn.split(':');
+        const usedSources = JSON.parse(
+            buildInfo.output.contracts[sourceName][shortName].metadata,
+        ).sources;
+
+        const params = new URLSearchParams({
+            module: 'contract',
+            action: 'verifysourcecode',
+            apikey: process.env.TENDERLY_ACCESS_KEY || 'tenderly',
+            codeformat: 'solidity-standard-json-input',
+            sourceCode: JSON.stringify({
+                ...buildInfo.input,
+                sources: Object.fromEntries(
+                    Object.keys(usedSources).map((s) => [s, buildInfo.input.sources[s]]),
+                ),
+            }),
+            contractname: fqn,
+            compilerversion: `v${buildInfo.solcLongVersion}`,
+            contractaddress: contract.address,
+            constructorArguements: contract.interface.encodeDeploy(args).slice(2),
+        });
+
+        const res = await axios.post(`${hre.network.config.url}/verify`, params.toString(), {
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            timeout: 180_000,
+        });
+        console.log(`[verify] ${contractName}:`, JSON.stringify(res.data));
+    } catch (e) {
+        console.log(`[verify] ${contractName} failed:`, e.response?.data || e.message);
+    }
+};
 
 const getGasPrice = async (exGasPrice) => {
     let defaultGasPrice = 1000000000000;
@@ -58,6 +98,11 @@ const deploy = async (contractName, signer, action, gasPrice, nonce, ...args) =>
         console.log(`Mainnet link: https://etherscan.io/address/${contract.address}`);
 
         await write(contractName, hre.network.name, contract.address, ...args);
+
+        if (hre.network.config.type === 'tenderly') {
+            await verifyOnTenderlyFork(contractName, contract, args);
+        }
+
         console.log('-------------------------------------------------------------');
         return contract;
     } catch (e) {

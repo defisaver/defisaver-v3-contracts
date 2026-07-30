@@ -3,6 +3,7 @@ pragma solidity =0.8.24;
 
 import { SparkSupply } from "../../../contracts/actions/spark/SparkSupply.sol";
 import { SparkBorrow } from "../../../contracts/actions/spark/SparkBorrow.sol";
+import { SparkPayback } from "../../../contracts/actions/spark/SparkPayback.sol";
 import { SparkSetEMode } from "../../../contracts/actions/spark/SparkSetEMode.sol";
 
 library SparkEncode {
@@ -44,6 +45,30 @@ library SparkEncode {
             SparkBorrow.Params({
                 amount: _amount,
                 to: _to,
+                rateMode: _rateMode,
+                assetId: _assetId,
+                useDefaultMarket: _useDefaultMarket,
+                useOnBehalf: _useOnBehalf,
+                market: _market,
+                onBehalf: _onBehalf
+            })
+        );
+    }
+
+    function payback(
+        uint256 _amount,
+        address _from,
+        uint8 _rateMode,
+        uint16 _assetId,
+        bool _useDefaultMarket,
+        bool _useOnBehalf,
+        address _market,
+        address _onBehalf
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            SparkPayback.Params({
+                amount: _amount,
+                from: _from,
                 rateMode: _rateMode,
                 assetId: _assetId,
                 useDefaultMarket: _useDefaultMarket,

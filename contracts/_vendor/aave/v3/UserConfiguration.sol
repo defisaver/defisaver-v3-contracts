@@ -118,4 +118,19 @@ library UserConfiguration {
     function isEmpty(DataTypes.UserConfigurationMap memory self) internal pure returns (bool) {
         return self.data == 0;
     }
+
+    /**
+     * @notice Returns the borrowed and collateral flags for the first asset on the bitmap and the bitmap shifted by two.
+     * @dev This function mutates the input and the 2 bit slots in the bitmap will no longer correspond to the reserve index.
+     * This is useful in situations where we want to iterate the bitmap as it allows for early exit once the bitmap turns zero.
+     * @param data The configuration uint256
+     * @return The bitmap shifted by 2 bits, so that the first asset points to the *next* asset.
+     * @return True if the first asset in the bitmap is borrowed.
+     * @return True if the first asset in the bitmap is a collateral.
+     */
+    function getNextFlags(uint256 data) internal pure returns (uint256, bool, bool) {
+        bool isBorrowed = data & 1 == 1;
+        bool isEnabledAsCollateral = data & 2 == 2;
+        return (data >> 2, isBorrowed, isEnabledAsCollateral);
+    }
 }

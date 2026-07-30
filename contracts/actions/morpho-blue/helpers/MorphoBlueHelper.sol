@@ -78,4 +78,8 @@ contract MorphoBlueHelper is MainnetMorphoBlueAddresses {
         if (debt == 0) return 0;
         ratio = collateral * oraclePrice / debt / 1e18;
     }
+
+    function _isRatioZero(uint256 _ratio) internal pure returns (bool) {
+        return _ratio == 0;
+    }
 }

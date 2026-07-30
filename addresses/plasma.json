@@ -169,14 +169,15 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xCeB876C6A4dd76aFe645622db00D4E051D16dA66",
+        "address": "0xFdfeA6469c537b19A334726E01621810bc49B929",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xCeB876C6A4dd76aFe645622db00D4E051D16dA66",
             "0x8C6eC1A4869e2B307Ee1667e1c18D5776b61CCe3",
             "0x5B0B7E38C2a8e46CfAe13c360BC5927570BeEe94",
             "0xD8E67968d8a0df4beCf2D50daE1e34d4d80C701C"
@@ -250,14 +251,14 @@
     },
     {
         "name": "AaveV3DelegateCredit",
-        "address": "0x0a9b2080C14DaF008AE87C977dFDf5f5D6D0937F",
+        "address": "0x6F53fa9e7d1323d24515a51AB72Da3cf1E9883Bc",
         "id": "0xf57df0e7",
         "path": "contracts/actions/aaveV3/AaveV3DelegateCredit.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x0a9b2080C14DaF008AE87C977dFDf5f5D6D0937F"]
     },
     {
         "name": "AaveV3DelegateWithSig",
@@ -685,6 +686,28 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FLAaveV3CarryDebt",
+        "address": "0x6Dc6C0e38fBd066b89Ba7E6f711B4288246891b3",
+        "id": "0x66258f8a",
+        "path": "contracts/actions/flashloan/FLAaveV3CarryDebt.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FeeReceiver",
+        "address": "0x1A8B4DF4DE4274630A5c5a8E42Fa5F0DdF654ec2",
+        "id": "0x6a17809a",
+        "path": "contracts/utils/fee/FeeReceiver.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     }

@@ -47,4 +47,8 @@ contract CompV3RatioHelper is DSMath, MainnetCompV3Addresses {
     function isInAsset(uint16 assetsIn, uint8 assetOffset) internal pure returns (bool) {
         return (assetsIn & (uint16(1) << assetOffset) != 0);
     }
+
+    function _isRatioZero(uint256 _ratio) internal pure returns (bool) {
+        return _ratio == 0;
+    }
 }

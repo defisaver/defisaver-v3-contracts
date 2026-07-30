@@ -40,10 +40,19 @@ contract SparkTargetRatioCheck is ActionBase, SparkRatioHelper {
 
         /// @notice If `targetRatio` is 999% or more then skip `RATIO_OFFSET` check because it is very hard to be precise under 5%.
         if (targetRatio < RATIO_LIMIT) {
-            if (
-                currRatio > (targetRatio + RATIO_OFFSET) || currRatio < (targetRatio - RATIO_OFFSET)
-            ) {
-                revert BadAfterRatio(currRatio, targetRatio);
+            /// @notice If user is subscribed on full repay, currRatio must be exactly 0
+            if (_isRatioZero(targetRatio)) {
+                if (!_isRatioZero(currRatio)) {
+                    revert BadAfterRatio(currRatio, targetRatio);
+                }
+            } else {
+                /// @notice Normal repay/boost on price with target ratio, we accept 5% offset
+                if (
+                    currRatio > (targetRatio + RATIO_OFFSET)
+                        || currRatio < (targetRatio - RATIO_OFFSET)
+                ) {
+                    revert BadAfterRatio(currRatio, targetRatio);
+                }
             }
         }
 

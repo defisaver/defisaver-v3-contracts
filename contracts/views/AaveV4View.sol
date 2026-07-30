@@ -8,12 +8,18 @@ import { ITokenizationSpoke } from "../interfaces/protocols/aaveV4/ITokenization
 import { IAaveV4Oracle } from "../interfaces/protocols/aaveV4/IAaveV4Oracle.sol";
 import { IConfigPositionManager } from "../interfaces/protocols/aaveV4/IConfigPositionManager.sol";
 import { ITakerPositionManager } from "../interfaces/protocols/aaveV4/ITakerPositionManager.sol";
+import {
+    IBasicInterestRateStrategy
+} from "../interfaces/protocols/aaveV4/IBasicInterestRateStrategy.sol";
 import { IERC20 } from "../interfaces/token/IERC20.sol";
 
+import { WadRayMath } from "../_vendor/aave/v4/WadRayMath.sol";
 import { AaveV4Helper } from "../actions/aaveV4/helpers/AaveV4Helper.sol";
 
 /// @title Helper contract to aggregate data from AaveV4 protocol
 contract AaveV4View is AaveV4Helper {
+    using WadRayMath for *;
+
     /**
      *
      *
@@ -228,6 +234,28 @@ contract AaveV4View is AaveV4Helper {
         address user; // The address of the user.
         uint256 userSuppliedAssets; // The amount of user-supplied assets, expressed in asset units.
         uint256 userSuppliedShares; // The amount of user-supplied shares, expressed in asset units.
+    }
+
+    /// @notice Params for supply and borrow rate estimation
+    struct LiquidityChangeParams {
+        uint256 reserveId; // The identifier of the reserve. Doesn't have to match the assetId in the Hub.
+        uint256 liquidityAdded; // Amount of liquidity added (supply/repay). In asset units
+        uint256 liquidityTaken; // Amount of liquidity taken (borrow/withdraw). In asset units
+        bool isDebtAsset; // isDebtAsset if operation is borrow/payback
+    }
+
+    /// @notice Helper struct used for supply and borrow rate estimation.
+    /// @dev Only the post-action drawn rate needs to be calculated explicitly,
+    ///      since the supply rate can be derived from the drawn rate:
+    ///      utilization = drawn / (liquidity + drawn + swept)
+    ///      supplyRate = drawnRate * utilization * (1 - liquidityFee)
+    struct EstimatedRates {
+        uint256 reserveId; // The identifier of the reserve. Doesn't have to match the assetId in the Hub.
+        uint256 hubDrawnRateEstimation; // The rate at which drawn assets grows, expressed in RAY.
+        uint256 hubTotalDrawnEstimation; // The total amount of drawn assets, including liquidity change estimation, expressed in asset units
+        uint256 hubTotalLiquidityEstimation; // The liquidity available to be accessed, including liquidity change estimation, expressed in asset units.
+        uint256 hubSwept; // The outstanding liquidity which has been invested by the reinvestment controller, expressed in asset units.
+        uint16 liquidityFee; // The protocol fee charged on drawn and premium liquidity growth, expressed in BPS.
     }
 
     /**
@@ -528,6 +556,53 @@ contract AaveV4View is AaveV4Helper {
             spokeData.userSuppliedShares = IERC20(_spoke).balanceOf(_user);
             spokeData.userSuppliedAssets = ts.convertToAssets(spokeData.userSuppliedShares);
         }
+    }
+
+    function getApyAfterValuesEstimation(
+        address _spoke,
+        LiquidityChangeParams[] memory _reserveParams
+    ) public view returns (EstimatedRates[] memory) {
+        EstimatedRates[] memory estimatedRates = new EstimatedRates[](_reserveParams.length);
+        for (uint256 i = 0; i < _reserveParams.length; ++i) {
+            ISpoke.Reserve memory reserve = ISpoke(_spoke).getReserve(_reserveParams[i].reserveId);
+            IHub.Asset memory hubAsset = IHub(reserve.hub).getAsset(reserve.assetId);
+
+            // Estimate how new hub liquidity would look like
+            uint256 liquidity = hubAsset.liquidity + _reserveParams[i].liquidityAdded;
+            liquidity = liquidity >= _reserveParams[i].liquidityTaken
+                ? liquidity - _reserveParams[i].liquidityTaken
+                : 0;
+
+            // Estimate how new total debt would look like
+            uint256 drawnIndex = IHub(reserve.hub).getAssetDrawnIndex(reserve.assetId);
+            uint256 totalDrawn = hubAsset.drawnShares.rayMulUp(drawnIndex);
+            if (_reserveParams[i].isDebtAsset) {
+                totalDrawn += _reserveParams[i].liquidityTaken;
+                totalDrawn = totalDrawn >= _reserveParams[i].liquidityAdded
+                    ? totalDrawn - _reserveParams[i].liquidityAdded
+                    : 0;
+            }
+
+            uint256 estimatedDrawnRate = IBasicInterestRateStrategy(hubAsset.irStrategy)
+                .calculateInterestRate(
+                    reserve.assetId,
+                    liquidity,
+                    totalDrawn,
+                    hubAsset.deficitRay.fromRayUp(),
+                    hubAsset.swept
+                );
+
+            estimatedRates[i] = EstimatedRates(
+                _reserveParams[i].reserveId,
+                estimatedDrawnRate,
+                totalDrawn,
+                liquidity,
+                hubAsset.swept,
+                hubAsset.liquidityFee
+            );
+        }
+
+        return estimatedRates;
     }
 
     /**
