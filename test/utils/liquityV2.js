@@ -17,7 +17,10 @@ const {
     createLiquityV2PaybackFromSPStrategy,
     createLiquityV2InterestRateAdjustmentStrategy,
 } = require('../../strategies-spec/mainnet');
-const { createStrategy, createBundle } = require('../strategies/utils/utils-strategies');
+const createStrategy = async (...args) =>
+    require('../strategies/utils/utils-strategies').createStrategy(...args);
+const createBundle = async (...args) =>
+    require('../strategies/utils/utils-strategies').createBundle(...args);
 
 const CollActionType = { SUPPLY: 0, WITHDRAW: 1 };
 const DebtActionType = { PAYBACK: 0, BORROW: 1 };
