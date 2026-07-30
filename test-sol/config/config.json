@@ -10,6 +10,7 @@
     },
 
     "SparkViewSmall": { "mainnet": 23764256 },
+    "SparkRatioHelper": { "mainnet": 25374135 },
     "PendleTokenRedeem": { "mainnet": 22875735 },
     "StrategyTriggerViewNoRevert": { "mainnet": 24741489 },
     "LiquityV2Adjust": { "mainnet": 22519730 },

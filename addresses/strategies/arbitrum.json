@@ -222,7 +222,7 @@
             ["&1", "$3", "&proxy", "&proxy"],
             ["&3", "&4", "&1", 0]
         ],
-        "bundleId": 4
+        "bundleId": 32
     },
     {
         "name": "CompV3FlRepayL2",
@@ -245,7 +245,7 @@
             ["&1", 0, 0, "$1", 0],
             ["&3", "&4", "&1", 0]
         ],
-        "bundleId": 4
+        "bundleId": 32
     },
     {
         "name": "CompV3BoostL2",
@@ -398,7 +398,7 @@
             ["&2", "&1", "$3", "&proxy"],
             ["&1", "&3", "&4"]
         ],
-        "bundleId": 8
+        "bundleId": 30
     },
     {
         "name": "FluidT1FLRepayL2Strategy",
@@ -419,7 +419,7 @@
             ["&2", "&1", "$1", "$3", "&proxy", 0, "&5", "&6", "&7"],
             ["&1", "&3", "&4"]
         ],
-        "bundleId": 8
+        "bundleId": 30
     },
     {
         "name": "FluidT1BoostL2Strategy",
@@ -616,7 +616,7 @@
             ["&1", "$3", "&proxy", "&eoa"],
             ["&3", "&4", "&1", "&eoa"]
         ],
-        "bundleId": 16
+        "bundleId": 33
     },
     {
         "name": "CompV3EOAFlRepayL2Strategy",
@@ -639,7 +639,7 @@
             ["&1", 0, 0, "$1", "&eoa"],
             ["&3", "&4", "&1", "&eoa"]
         ],
-        "bundleId": 16
+        "bundleId": 33
     },
     {
         "name": "CompV3EOABoostL2Strategy",
@@ -706,7 +706,7 @@
             ["$4", "&proxy", 0, 0, 0, 0, "&3", "&4"],
             ["&2", "&1", "&3", "&4"]
         ],
-        "bundleId": 18
+        "bundleId": 34
     },
     {
         "name": "AaveV3GenericFLRepayL2Strategy",
@@ -731,7 +731,7 @@
             [0, 0, "$5", 0, "&3"],
             ["&2", "&1", "&3", "&4"]
         ],
-        "bundleId": 18
+        "bundleId": 34
     },
     {
         "name": "AaveV3GenericBoostL2Strategy",
@@ -942,7 +942,7 @@
             ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&8"],
             ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
         ],
-        "bundleId": 26
+        "bundleId": 35
     },
     {
         "name": "MorphoBlueFLCollRepayL2Strategy",
@@ -965,7 +965,7 @@
             ["&1", "&2", "&3", "&4", "&5", "$1", "&8", 0],
             ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
         ],
-        "bundleId": 26
+        "bundleId": 35
     },
     {
         "name": "MorphoBlueFLDebtRepayL2Strategy",
@@ -990,7 +990,7 @@
             ["&1", "&1", 0, "&eoa", "$1", 0],
             ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
         ],
-        "bundleId": 26
+        "bundleId": 35
     },
     {
         "name": "MorphoBlueBoostL2Strategy",
@@ -1178,5 +1178,49 @@
             ["&2", "&1", "&eoa", "&eoa", 0, 0]
         ],
         "bundleId": 28
+    },
+    {
+        "name": "MorphoBlueRepayOnPriceL2Strategy",
+        "id": 53,
+        "isContinuous": false,
+        "triggerIds": ["MorphoBluePriceTrigger"],
+        "actionIds": [
+            "MorphoBlueWithdrawCollateral",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "MorphoBluePayback",
+            "MorphoBlueTargetRatioCheck"
+        ],
+        "paramMapping": [
+            ["&1", "&2", "&3", "&4", "&5", 0, "&7", "&proxy"],
+            ["&2", "&1", "$1", "&proxy", "&proxy"],
+            ["&1", "$2", 0],
+            ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&7"],
+            ["&1", "&2", "&3", "&4", "&5", "&7", "&6"]
+        ],
+        "bundleId": 36
+    },
+    {
+        "name": "MorphoBlueFLRepayOnPriceL2Strategy",
+        "id": 54,
+        "isContinuous": false,
+        "triggerIds": ["MorphoBluePriceTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "MorphoBluePayback",
+            "MorphoBlueWithdrawCollateral",
+            "MorphoBlueTargetRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&2", "&1", 0, "&proxy", "&proxy"],
+            ["&1", "$2", 0],
+            ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&7"],
+            ["&1", "&2", "&3", "&4", "&5", "$1", "&7", 0],
+            ["&1", "&2", "&3", "&4", "&5", "&7", "&6"]
+        ],
+        "bundleId": 36
     }
 ]

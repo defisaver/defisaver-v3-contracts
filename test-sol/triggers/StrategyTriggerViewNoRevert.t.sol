@@ -8,12 +8,10 @@ import { SmartWallet } from "../utils/SmartWallet.sol";
 import {
     StrategyTriggerViewNoRevert
 } from "../../contracts/views/strategy/StrategyTriggerViewNoRevert.sol";
-import { AaveV3CollateralSwitch } from "../../contracts/actions/aaveV3/AaveV3CollateralSwitch.sol";
 import { IPoolV3 } from "../../contracts/interfaces/protocols/aaveV3/IPoolV3.sol";
 import {
     IPoolAddressesProvider
 } from "../../contracts/interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
-import { IDSProxy } from "../../contracts/interfaces/DS/IDSProxy.sol";
 
 import { AaveV3Supply } from "../../contracts/actions/aaveV3/AaveV3Supply.sol";
 import { AaveV3Borrow } from "../../contracts/actions/aaveV3/AaveV3Borrow.sol";
