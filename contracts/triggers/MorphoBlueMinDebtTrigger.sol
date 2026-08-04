@@ -5,17 +5,13 @@ pragma solidity =0.8.24;
 import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { IERC20 } from "../interfaces/token/IERC20.sol";
-import { Id, MarketParams, IMorphoBlue } from "../interfaces/protocols/morpho-blue/IMorphoBlue.sol";
-import {
-    MainnetMorphoBlueAddresses
-} from "../actions/morpho-blue/helpers/MainnetMorphoBlueAddresses.sol";
+import { Id, MarketParams } from "../interfaces/protocols/morpho-blue/IMorphoBlue.sol";
+import { MorphoBlueHelper } from "../actions/morpho-blue/helpers/MorphoBlueHelper.sol";
 import { MorphoBalancesLib } from "../actions/morpho-blue/helpers/MorphoBlueLib.sol";
 import { ChainlinkPriceLib } from "../utils/ChainlinkPriceLib.sol";
 
-contract MorphoBlueMinDebtTrigger is ITrigger, AdminAuth, MainnetMorphoBlueAddresses {
+contract MorphoBlueMinDebtTrigger is ITrigger, AdminAuth, MorphoBlueHelper {
     using ChainlinkPriceLib for address;
-
-    IMorphoBlue public constant morphoBlue = IMorphoBlue(MORPHO_BLUE_ADDRESS);
 
     /// @param user address of the user whose position we check
     /// @param marketId bytes32 representing a MorphoBlue market
