@@ -7215,6 +7215,11 @@ const callAaveV3GenericFLCloseToDebtStrategy = async (
     flAmount,
     flAddr,
     marketAddress,
+    // pass { partialClose: { paybackAmount, pullAmount } } for semi-continuous partial
+    // execution. Any truthy value encodes the real subId in triggerCallData, and
+    // partialClose additionally appends an extra actionsCallData element so
+    // RecipeExecutor keeps the sub active
+    semiContinuousOptions = null,
 ) => {
     const isL2 = network !== 'mainnet';
     const triggerCallData = [];
@@ -7222,6 +7227,7 @@ const callAaveV3GenericFLCloseToDebtStrategy = async (
     const gasCost = 1000000;
     const collToken = exchangeObject[0];
     const debtToken = exchangeObject[1];
+    const partialClose = semiContinuousOptions && semiContinuousOptions.partialClose;
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction([debtToken], [flAmount]),
@@ -7230,7 +7236,7 @@ const callAaveV3GenericFLCloseToDebtStrategy = async (
     const aaveV3PaybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
         false,
         placeHolderAddr,
-        MAX_UINT,
+        partialClose ? partialClose.paybackAmount : MAX_UINT,
         placeHolderAddr,
         2,
         placeHolderAddr, // debtAsset
@@ -7247,7 +7253,7 @@ const callAaveV3GenericFLCloseToDebtStrategy = async (
     const pullTokenAction = new dfs.actions.basic.PullTokenAction(
         aTokenAddr,
         placeHolderAddr, // from (EOA address)
-        MAX_UINT, // amount to pull
+        partialClose ? partialClose.pullAmount : MAX_UINT, // amount to pull
     );
     const aaveV3WithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         false,
@@ -7282,11 +7288,18 @@ const callAaveV3GenericFLCloseToDebtStrategy = async (
     actionsCallData.push(sendTokenToFLAction.encodeForRecipe()[0]);
     actionsCallData.push(sendTokenToEOAAction.encodeForRecipe()[0]);
 
+    if (partialClose) {
+        // extra element signals RecipeExecutor to keep the sub active (semi-continuous exec)
+        actionsCallData.push('0x');
+    }
+
     triggerCallData.push(
-        abiCoder.encode(
-            ['address', 'address', 'uint256', 'uint256'],
-            [placeHolderAddr, placeHolderAddr, 0, 0],
-        ),
+        semiContinuousOptions
+            ? abiCoder.encode(['uint256'], [subId])
+            : abiCoder.encode(
+                  ['address', 'address', 'uint256', 'uint256'],
+                  [placeHolderAddr, placeHolderAddr, 0, 0],
+              ),
     );
 
     const { callData, receipt } = await executeStrategy(
@@ -7315,12 +7328,18 @@ const callAaveV3GenericFLCloseToCollStrategy = async (
     flAmount,
     flAddr,
     marketAddress,
+    // pass { partialClose: { paybackAmount, pullAmount } } for semi-continuous partial
+    // execution. Any truthy value encodes the real subId in triggerCallData, and
+    // partialClose additionally appends an extra actionsCallData element so
+    // RecipeExecutor keeps the sub active
+    semiContinuousOptions = null,
 ) => {
     const isL2 = network !== 'mainnet';
     const triggerCallData = [];
     const actionsCallData = [];
     const gasCost = 1000000;
     const collToken = exchangeObject[0];
+    const partialClose = semiContinuousOptions && semiContinuousOptions.partialClose;
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction([collToken], [flAmount]),
@@ -7335,7 +7354,7 @@ const callAaveV3GenericFLCloseToCollStrategy = async (
     const aaveV3PaybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
         false,
         placeHolderAddr,
-        MAX_UINT,
+        partialClose ? partialClose.paybackAmount : MAX_UINT,
         placeHolderAddr,
         2,
         placeHolderAddr, // debtAsset
@@ -7352,7 +7371,7 @@ const callAaveV3GenericFLCloseToCollStrategy = async (
     const pullTokenAction = new dfs.actions.basic.PullTokenAction(
         aTokenAddr,
         placeHolderAddr, // from (EOA address)
-        MAX_UINT, // amount to pull
+        partialClose ? partialClose.pullAmount : MAX_UINT, // amount to pull
     );
     const aaveV3WithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         false,
@@ -7383,11 +7402,18 @@ const callAaveV3GenericFLCloseToCollStrategy = async (
     actionsCallData.push(sendTokenToFLAction.encodeForRecipe()[0]);
     actionsCallData.push(sendTokensAction.encodeForRecipe()[0]);
 
+    if (partialClose) {
+        // extra element signals RecipeExecutor to keep the sub active (semi-continuous exec)
+        actionsCallData.push('0x');
+    }
+
     triggerCallData.push(
-        abiCoder.encode(
-            ['address', 'address', 'uint256', 'uint256'],
-            [placeHolderAddr, placeHolderAddr, 0, 0],
-        ),
+        semiContinuousOptions
+            ? abiCoder.encode(['uint256'], [subId])
+            : abiCoder.encode(
+                  ['address', 'address', 'uint256', 'uint256'],
+                  [placeHolderAddr, placeHolderAddr, 0, 0],
+              ),
     );
 
     const { callData, receipt } = await executeStrategy(

@@ -2,6 +2,8 @@
 
 pragma solidity =0.8.24;
 
+import { ISubStorage } from "../../contracts/interfaces/core/ISubStorage.sol";
+import { ITrigger } from "../../contracts/interfaces/core/ITrigger.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
 import { RegistryUtils } from "../utils/RegistryUtils.sol";
 import {
@@ -9,9 +11,9 @@ import {
 } from "../../contracts/views/strategy/StrategyTriggerViewNoRevert.sol";
 import { BundleStorage } from "../../contracts/core/strategy/BundleStorage.sol";
 import { StrategyStorage } from "../../contracts/core/strategy/StrategyStorage.sol";
+import { SemiContinuousTracker } from "../../contracts/core/strategy/SemiContinuousTracker.sol";
 import { AaveV3MinDebtTrigger } from "../../contracts/triggers/AaveV3MinDebtTrigger.sol";
 import { AaveV3RatioTrigger } from "../../contracts/triggers/AaveV3RatioTrigger.sol";
-import { ITrigger } from "../../contracts/interfaces/core/ITrigger.sol";
 
 contract TestStrategyTriggerViewNoRevert is BaseTest, RegistryUtils, StrategyTriggerViewNoRevert {
     /*//////////////////////////////////////////////////////////////////////////
@@ -22,6 +24,9 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, RegistryUtils, StrategyTri
 
     /// @dev AaveV3 repay bundle the sub is subscribed to on mainnet.
     uint64 internal constant AAVE_V3_REPAY_BUNDLE_ID = 8;
+
+    /// @dev Placeholder subId for testing;
+    uint256 internal constant SUB_ID = 2154;
 
     /// @dev Mainnet AaveV3 main market (PoolAddressesProvider), the market the sub points at.
     address internal constant AAVE_V3_MARKET = 0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e;
@@ -37,6 +42,8 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, RegistryUtils, StrategyTri
                                     VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
     AaveV3MinDebtTrigger internal aaveV3MinDebtTrigger;
+
+    SemiContinuousTracker internal tracker;
 
     /// @dev Sub trigger (AaveV3RatioTrigger) address resolved from the repay bundle - mock target.
     address internal ratioTriggerAddr;
@@ -59,6 +66,9 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, RegistryUtils, StrategyTri
         minDebtTriggerAddr = address(aaveV3MinDebtTrigger);
 
         ratioTriggerAddr = _resolveSubTriggerAddr(AAVE_V3_REPAY_BUNDLE_ID);
+
+        tracker = new SemiContinuousTracker();
+        redeploy("SemiContinuousTracker", address(tracker));
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -108,7 +118,7 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, RegistryUtils, StrategyTri
         _mockTriggerOutcome(ratioTriggerAddr, TriggerStatus.TRUE);
 
         TriggerStatus status = this.checkTriggers(
-            _aaveV3RepaySub(), _emptySubTriggerCallData(), new bytes4[](0), new bytes[](0)
+            _aaveV3RepaySub(), SUB_ID, _emptySubTriggerCallData(), new bytes4[](0), new bytes[](0)
         );
 
         assertEq(
@@ -128,7 +138,7 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, RegistryUtils, StrategyTri
         additionalCallData[0] = bytes("");
 
         TriggerStatus status = this.checkTriggers(
-            _aaveV3RepaySub(), _emptySubTriggerCallData(), additionalIds, additionalCallData
+            _aaveV3RepaySub(), SUB_ID, _emptySubTriggerCallData(), additionalIds, additionalCallData
         );
 
         assertEq(
@@ -136,9 +146,36 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, RegistryUtils, StrategyTri
         );
     }
 
+    /// @dev When the sub is in execution, STVNR short-circuits to TRUE without evaluating any
+    ///      trigger, even though the sub trigger would return FALSE.
+    function test_checkTriggers_subInExecution_returnsTrueWithoutCheckingTriggers() public {
+        _startExecutionForSub(SUB_ID);
+
+        _mockTriggerOutcome(ratioTriggerAddr, TriggerStatus.FALSE);
+
+        TriggerStatus status = this.checkTriggers(
+            _aaveV3RepaySub(), SUB_ID, _emptySubTriggerCallData(), new bytes4[](0), new bytes[](0)
+        );
+
+        assertEq(
+            uint256(status), uint256(TriggerStatus.TRUE), "sub in execution should short-circuit"
+        );
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
+    /// @dev Starts semi-continuous execution for a sub by pranking its owner wallet.
+    function _startExecutionForSub(uint256 _subId) internal {
+        address subOwnerWallet = address(ISubStorage(SUB_STORAGE_ADDR).getSub(_subId).walletAddr);
+        assertTrue(subOwnerWallet != address(0), "sub owner wallet not found");
+
+        prank(subOwnerWallet);
+        tracker.startExecution(_subId);
+
+        assertEq(tracker.executionWalletOf(_subId), subOwnerWallet);
+    }
+
     /// @dev Mocks the ratio + min debt trigger outcomes, runs checkTriggers and asserts the result.
     function _assertCombination(
         TriggerStatus _ratioOutcome,
@@ -152,7 +189,7 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, RegistryUtils, StrategyTri
             _minDebtAdditionalTrigger(MIN_DEBT);
 
         TriggerStatus status = this.checkTriggers(
-            _aaveV3RepaySub(), _emptySubTriggerCallData(), additionalIds, additionalCallData
+            _aaveV3RepaySub(), SUB_ID, _emptySubTriggerCallData(), additionalIds, additionalCallData
         );
 
         assertEq(uint256(status), uint256(_expected), "unexpected checkTriggers outcome");

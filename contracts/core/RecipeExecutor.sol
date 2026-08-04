@@ -107,6 +107,7 @@ import {
 import { IStrategyStorage } from "../interfaces/core/IStrategyStorage.sol";
 import { IBundleStorage } from "../interfaces/core/IBundleStorage.sol";
 import { ISubStorage } from "../interfaces/core/ISubStorage.sol";
+import { ISemiContinuousTracker } from "../interfaces/core/ISemiContinuousTracker.sol";
 import { Permission } from "../auth/Permission.sol";
 import { SmartWalletUtils } from "../utils/SmartWalletUtils.sol";
 import { ActionBase } from "../actions/ActionBase.sol";
@@ -252,9 +253,22 @@ contract RecipeExecutor is
             revert TriggerNotActiveError(errIndex);
         }
 
-        // if this is a one time strategy
-        if (!strategy.continuous) {
-            ISubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId);
+        // reading from registry
+        ISemiContinuousTracker semiContinuousTracker =
+            ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER));
+
+        // if length is the same, it is default behaviour - disable the sub and finish execution
+        if (_actionCallData.length == strategy.actionIds.length) {
+            // if this is a one time strategy
+            if (!strategy.continuous) {
+                ISemiContinuousTracker(semiContinuousTracker).finishExecution(_subId);
+                ISubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId);
+            }
+        } else {
+            // if different, don't disable sub and start semi-continuous execution
+            if (!strategy.continuous) {
+                ISemiContinuousTracker(semiContinuousTracker).startExecution(_subId);
+            }
         }
 
         // format recipe from strategy
