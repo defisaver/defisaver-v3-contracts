@@ -9,6 +9,8 @@ import {
 import { ChainlinkPriceLib } from "../../contracts/utils/ChainlinkPriceLib.sol";
 import { IERC20 } from "../../contracts/interfaces/token/IERC20.sol";
 import { IFeedRegistry } from "../../contracts/interfaces/protocols/chainlink/IFeedRegistry.sol";
+import { IFluidVaultT1 } from "../../contracts/interfaces/protocols/fluid/vaults/IFluidVaultT1.sol";
+import { TokenUtils } from "../../contracts/utils/token/TokenUtils.sol";
 
 import { FluidTestBase } from "../actions/fluid/FluidTestBase.t.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
@@ -38,22 +40,31 @@ contract TestFluidMinDebtTrigger is FluidTestBase {
     /// @dev getPriceInUSD returns prices with 8 decimals; scale MIN_DEBT by this to compare.
     uint256 internal constant PRECISION = 1e8;
 
-    /// @dev Chainlink Feed Registry on mainnet, used by ChainlinkPriceLib for USD prices.
-    address internal constant CHAINLINK_FEED_REGISTRY = 0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf;
-
     /*//////////////////////////////////////////////////////////////////////////
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkFromEnv("FluidMinDebtTrigger");
 
-        if (isL2NetworkSelected()) vm.skip(true, "FluidMinDebtTrigger test is mainnet only");
-
         cut = new FluidMinDebtTrigger();
         openAction = new FluidVaultT1Open();
         wallet = new SmartWallet(bob);
 
         vaults = getT1Vaults();
+
+        /// @dev getT1Vaults() always returns 8 entries, padded with FLUID_VAULT_NOT_FOUND on
+        ///      chains where a vault does not exist, so emptiness has to be read from the contents.
+        bool anyVaultOnThisChain;
+        for (uint256 i = 0; i < vaults.length; ++i) {
+            if (!isMissingVault(vaults[i])) {
+                anyVaultOnThisChain = true;
+                break;
+            }
+        }
+
+        if (!anyVaultOnThisChain) {
+            vm.skip(true, "No Fluid T1 vaults on the selected network");
+        }
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -78,8 +89,11 @@ contract TestFluidMinDebtTrigger is FluidTestBase {
     /// @notice When the debt token has no usable price (Chainlink returns 0), the trigger
     ///         should always return true, even if the user has no debt.
     function test_should_trigger_when_price_is_zero_even_with_no_debt() public {
-        // Open a supply-only (zero debt) position on the first available vault.
-        address vault = _firstAvailableVault();
+        // Open a supply-only (zero debt) position on the first usable vault.
+        (address vault, bool found) = _firstUsableVault();
+        if (!found) {
+            vm.skip(true, "No usable Fluid T1 vault on the selected network");
+        }
         uint256 nftId = executeFluidVaultT1Open(vault, 30_000, 0, wallet, address(openAction));
         assertFalse(nftId == 0, "failed to open fluid position");
 
@@ -88,7 +102,7 @@ contract TestFluidMinDebtTrigger is FluidTestBase {
 
         // Force the debt token's USD price to 0 for all Chainlink registry lookups.
         vm.mockCall(
-            CHAINLINK_FEED_REGISTRY,
+            address(ChainlinkPriceLib.getFeedRegistry()),
             abi.encodeWithSelector(IFeedRegistry.latestRoundData.selector),
             abi.encode(uint80(0), int256(0), uint256(0), uint256(0), uint80(0))
         );
@@ -98,13 +112,6 @@ contract TestFluidMinDebtTrigger is FluidTestBase {
         vm.clearMockedCalls();
     }
 
-    function _firstAvailableVault() internal view returns (address) {
-        for (uint256 i = 0; i < vaults.length; ++i) {
-            if (!isMissingVault(vaults[i])) return vaults[i];
-        }
-        revert("no fluid vault available");
-    }
-
     /*//////////////////////////////////////////////////////////////////////////
                                     BASE TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -112,6 +119,12 @@ contract TestFluidMinDebtTrigger is FluidTestBase {
         for (uint256 i = 0; i < vaults.length; ++i) {
             if (isMissingVault(vaults[i])) {
                 logVaultNotFound(vaults[i]);
+                continue;
+            }
+            /// @dev Opening the position sizes both legs in USD, so a vault holding a token we
+            ///      cannot price has to be skipped.
+            if (!_isVaultPriced(vaults[i])) {
+                console.log("SKIPPED, vault has no usable prices:", vaults[i]);
                 continue;
             }
             uint256 snapshotId = vm.snapshotState();
@@ -125,6 +138,22 @@ contract TestFluidMinDebtTrigger is FluidTestBase {
     /// @param _vault Fluid T1 vault to open the position on.
     /// @param _targetDebtUsd Debt to create, in whole USD (0 == supply-only position).
     function _baseTest(address _vault, uint256 _targetDebtUsd) internal {
+        (, address debtToken) = _vaultTokens(_vault);
+
+        /// @dev The trigger short-circuits to true when the debt token has no Chainlink price, so
+        ///      for those vaults that branch is all there is to assert. Opened supply-only, since
+        ///      the borrow leg cannot be sized without a price.
+        if (debtToken.getPriceInUSD() == 0) {
+            console.log("SKIPPED debt math, debt token has no chainlink price:", _vault);
+            uint256 supplyOnlyNftId =
+                executeFluidVaultT1Open(_vault, 30_000, 0, wallet, address(openAction));
+            assertFalse(supplyOnlyNftId == 0, "failed to open fluid position");
+            assertTrue(
+                _isTriggered(supplyOnlyNftId, MIN_DEBT), "unpriced debt token must return true"
+            );
+            return;
+        }
+
         // Over-collateralize 3x so the borrow always goes through. Supply-only when no debt.
         uint256 collUsd = _targetDebtUsd == 0 ? 30_000 : _targetDebtUsd * 3;
         uint256 nftId =
@@ -160,6 +189,41 @@ contract TestFluidMinDebtTrigger is FluidTestBase {
             FluidMinDebtTrigger.CallDataParams({ nftId: _nftId, minDebt: _minDebt });
 
         return cut.isTriggered(abi.encode(params), bytes(""));
+    }
+
+    /// @dev First vault that exists on this chain, can be sized, and whose debt token the trigger
+    ///      can price. The last part matters because the zero price test needs a real price as its
+    ///      baseline before mocking the feed to 0.
+    function _firstUsableVault() internal returns (address vault, bool found) {
+        for (uint256 i = 0; i < vaults.length; ++i) {
+            if (isMissingVault(vaults[i])) continue;
+            if (!_isVaultPriced(vaults[i])) continue;
+
+            (, address debtToken) = _vaultTokens(vaults[i]);
+            if (debtToken.getPriceInUSD() != 0) return (vaults[i], true);
+        }
+    }
+
+    /// @dev Vault tokens as executeFluidVaultT1Open sizes them, so native ETH is read as WETH.
+    function _vaultTokens(address _vault)
+        internal
+        view
+        returns (address supplyToken, address debtToken)
+    {
+        IFluidVaultT1.ConstantViews memory constants = IFluidVaultT1(_vault).constantsView();
+
+        supplyToken = constants.supplyToken == TokenUtils.ETH_ADDR
+            ? TokenUtils.WETH_ADDR
+            : constants.supplyToken;
+        debtToken = constants.borrowToken == TokenUtils.ETH_ADDR
+            ? TokenUtils.WETH_ADDR
+            : constants.borrowToken;
+    }
+
+    /// @dev Both legs need a price for amountInUSDPrice to be able to size the position.
+    function _isVaultPriced(address _vault) internal returns (bool) {
+        (address supplyToken, address debtToken) = _vaultTokens(_vault);
+        return getTokenPriceInUSD(supplyToken) != 0 && getTokenPriceInUSD(debtToken) != 0;
     }
 
     /// @dev Mirrors the trigger's debt math: borrow * price(8dec) / scale -> USD (8dec).
