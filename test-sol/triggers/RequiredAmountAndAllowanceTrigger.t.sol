@@ -3,7 +3,7 @@ pragma solidity =0.8.24;
 
 import {
     RequiredAmountAndAllowanceTrigger
-} from "../../contracts/triggers/RequiredAmountAndAllowanceTrigger.sol";
+} from "../../contracts/triggers-additional/RequiredAmountAndAllowanceTrigger.sol";
 import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
 import { ISafeProxyFactory } from "../../contracts/interfaces/protocols/safe/ISafeProxyFactory.sol";
 

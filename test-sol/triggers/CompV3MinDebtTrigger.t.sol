@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { CompV3MinDebtTrigger } from "../../contracts/triggers/CompV3MinDebtTrigger.sol";
+import { CompV3MinDebtTrigger } from "../../contracts/triggers-additional/CompV3MinDebtTrigger.sol";
 import { IComet } from "../../contracts/interfaces/protocols/compoundV3/IComet.sol";
 import { PriceLib } from "../../contracts/utils/PriceLib.sol";
 

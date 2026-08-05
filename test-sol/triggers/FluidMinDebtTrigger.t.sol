@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { FluidMinDebtTrigger } from "../../contracts/triggers/FluidMinDebtTrigger.sol";
+import { FluidMinDebtTrigger } from "../../contracts/triggers-additional/FluidMinDebtTrigger.sol";
 import { FluidVaultT1Open } from "../../contracts/actions/fluid/vaultT1/FluidVaultT1Open.sol";
 import {
     IFluidVaultResolver

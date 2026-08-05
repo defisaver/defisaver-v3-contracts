@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { McdMinDebtTrigger } from "../../contracts/triggers/McdMinDebtTrigger.sol";
+import { McdMinDebtTrigger } from "../../contracts/triggers-additional/McdMinDebtTrigger.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
 import { console } from "forge-std/console.sol";

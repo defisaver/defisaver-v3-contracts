@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { MorphoBlueMinDebtTrigger } from "../../contracts/triggers/MorphoBlueMinDebtTrigger.sol";
+import {
+    MorphoBlueMinDebtTrigger
+} from "../../contracts/triggers-additional/MorphoBlueMinDebtTrigger.sol";
 import { MarketParams } from "../../contracts/interfaces/protocols/morpho-blue/IMorphoBlue.sol";
 import {
     MarketParamsLib,

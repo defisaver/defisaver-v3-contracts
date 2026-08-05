@@ -9,7 +9,7 @@ import {
 } from "../../contracts/views/strategy/StrategyTriggerViewNoRevert.sol";
 import { BundleStorage } from "../../contracts/core/strategy/BundleStorage.sol";
 import { StrategyStorage } from "../../contracts/core/strategy/StrategyStorage.sol";
-import { AaveV3MinDebtTrigger } from "../../contracts/triggers/AaveV3MinDebtTrigger.sol";
+import { AaveV3MinDebtTrigger } from "../../contracts/triggers-additional/AaveV3MinDebtTrigger.sol";
 import { AaveV3RatioTrigger } from "../../contracts/triggers/AaveV3RatioTrigger.sol";
 import { ITrigger } from "../../contracts/interfaces/core/ITrigger.sol";
 
