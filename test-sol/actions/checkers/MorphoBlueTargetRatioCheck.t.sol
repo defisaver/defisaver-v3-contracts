@@ -15,9 +15,9 @@ import { MarketParams } from "../../../contracts/interfaces/protocols/morpho-blu
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
-import { Addresses } from "../../utils/helpers/MainnetAddresses.sol";
+import { MorphoBlueTestHelper } from "../../utils/morphoBlue/MorphoBlueTestHelper.sol";
 
-contract TestMorphoBlueTargetRatioCheck is BaseTest, ActionsUtils {
+contract TestMorphoBlueTargetRatioCheck is BaseTest, ActionsUtils, MorphoBlueTestHelper {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -36,7 +36,11 @@ contract TestMorphoBlueTargetRatioCheck is BaseTest, ActionsUtils {
     /// @dev Mirrors MorphoBlueTargetRatioCheck.RATIO_OFFSET (5% acceptable offset).
     uint256 internal constant RATIO_OFFSET = 5e16;
 
-    /// @dev wstETH / WETH mainnet Morpho Blue market.
+    /// @dev Position size in whole USD, sized so the ratio stays well below RATIO_LIMIT.
+    uint256 internal constant COLL_USD = 100_000;
+    uint256 internal constant DEBT_USD = 40_000;
+
+    /// @dev Morpho Blue market of the selected network.
     MarketParams market;
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -54,13 +58,7 @@ contract TestMorphoBlueTargetRatioCheck is BaseTest, ActionsUtils {
         borrowAction = new MorphoBlueBorrow();
         paybackAction = new MorphoBluePayback();
 
-        market = MarketParams({
-            loanToken: Addresses.WETH_ADDR,
-            collateralToken: Addresses.WSTETH_ADDR,
-            oracle: 0xbD60A6770b27E084E8617335ddE769241B0e71D8,
-            irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
-            lltv: 965_000_000_000_000_000
-        });
+        market = getMarketForChain();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -148,9 +146,10 @@ contract TestMorphoBlueTargetRatioCheck is BaseTest, ActionsUtils {
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
 
-    /// @dev Opens a 20 wstETH coll / 10 WETH debt Morpho Blue position owned by the wallet.
+    /// @dev Opens a COLL_USD coll / DEBT_USD debt Morpho Blue position owned by the wallet.
+    ///      Sized in USD because loan/collateral tokens differ per network.
     function _createPosition() internal {
-        uint256 collAmount = 20 ether;
+        uint256 collAmount = amountInUSDPrice(market.collateralToken, COLL_USD);
         give(market.collateralToken, walletAddr, collAmount);
         wallet.execute(
             address(supplyAction),
@@ -168,7 +167,7 @@ contract TestMorphoBlueTargetRatioCheck is BaseTest, ActionsUtils {
             0
         );
 
-        uint256 borrowAmount = 10 ether;
+        uint256 borrowAmount = amountInUSDPrice(market.loanToken, DEBT_USD);
         wallet.execute(
             address(borrowAction),
             executeActionCalldata(
@@ -189,7 +188,8 @@ contract TestMorphoBlueTargetRatioCheck is BaseTest, ActionsUtils {
     /// @dev Fully pays back the wallet's loan-token debt, leaving the collateral.
     function _fullPayback() internal {
         // Fund the wallet with more than the debt to cover any accrued interest.
-        give(market.loanToken, walletAddr, 30 ether);
+        (uint256 currentDebt,) = getCurrentDebt(market, walletAddr);
+        give(market.loanToken, walletAddr, currentDebt * 2);
         wallet.execute(
             address(paybackAction),
             executeActionCalldata(

@@ -16,6 +16,43 @@ contract MorphoBlueTestHelper is MorphoBlueHelper, MainnetMorphoBlueMarketsAddre
     /// @dev How many markets getMarkets() returns when not asked for all of them.
     uint256 internal constant DEFAULT_MARKETS_COUNT = 5;
 
+    error NoMarketForChain(uint256 chainId);
+
+    function getMarketForChain() internal view returns (MarketParams memory market) {
+        // wstETH/ETH  0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e
+        if (block.chainid == 1) {
+            return MarketParams({
+                loanToken: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,
+                collateralToken: 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0,
+                oracle: 0xbD60A6770b27E084E8617335ddE769241B0e71D8,
+                irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
+                lltv: 965_000_000_000_000_000
+            });
+        }
+        // wstETH/ETH  0x6aa81f51dfc955df598e18006deae56ce907ac02b0b5358705f1a28fcea23cc0
+        if (block.chainid == 8453) {
+            return MarketParams({
+                loanToken: 0x4200000000000000000000000000000000000006,
+                collateralToken: 0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452,
+                oracle: 0xaE10cbdAa587646246c8253E4532A002EE4fa7A4,
+                irm: 0x46415998764C29aB2a25CbeA6254146D50D22687,
+                lltv: 965_000_000_000_000_000
+            });
+        }
+        // ETH/USDC  0xca83d02be579485cc10945c9597a6141e772f1cf0e0aa28d09a327b6cbd8642c
+        if (block.chainid == 42_161) {
+            return MarketParams({
+                loanToken: 0xaf88d065e77c8cC2239327C5EDb3A432268e5831,
+                collateralToken: 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1,
+                oracle: 0x282FEB10549fde52bD61A6979424Ddf18A4971A2,
+                irm: 0x66F30587FB8D4206918deb78ecA7d5eBbafD06DA,
+                lltv: 860_000_000_000_000_000
+            });
+        }
+
+        revert NoMarketForChain(block.chainid);
+    }
+
     /// @notice Returns the first DEFAULT_MARKETS_COUNT markets supported on the selected network.
     function getMarkets() internal pure returns (MarketParams[] memory markets) {
         markets = getMarkets(false);
