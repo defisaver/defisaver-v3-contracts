@@ -31,7 +31,8 @@ contract SparkRatioTrigger is ITrigger, AdminAuth, SparkRatioHelper, TriggerHelp
     function isTriggered(bytes memory, bytes memory _subData) external override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
-        uint256 currRatio = getSafetyRatio(triggerSubData.market, triggerSubData.user);
+        uint256 currRatio =
+            getSafetyRatioWithLtvZeroFallback(triggerSubData.market, triggerSubData.user);
 
         if (currRatio == 0) return false;
 

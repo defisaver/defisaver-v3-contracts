@@ -97,7 +97,9 @@ contract AaveV3DelegateCredit is ActionBase, AaveV3Helper {
         } else {
             revert NonExistantRateMode();
         }
-        logData = abi.encode(_params);
+        logData = abi.encode(
+            _params.amount, _params.delegatee, tokenAddr, _params.rateMode, _params.market
+        );
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

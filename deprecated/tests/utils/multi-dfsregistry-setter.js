@@ -10,9 +10,9 @@ const {
     ADMIN_ACC,
     addrs,
     WETH_ADDRESS,
-} = require('../utils/utils');
+} = require('../../../test/utils/utils');
 
-const { deployAsOwner } = require('../../scripts/utils/deployer');
+const { deployAsOwner } = require('../../../scripts/utils/deployer');
 
 describe('Multi-DFSRegistry-Setter', function () {
     this.timeout(80000);

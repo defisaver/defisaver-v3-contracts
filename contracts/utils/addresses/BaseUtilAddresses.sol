@@ -20,8 +20,7 @@ contract BaseUtilAddresses {
     address internal constant MKR_PROXY_REGISTRY = 0x425fA97285965E01Cc5F951B62A51F6CDEA5cc0d;
     address internal constant DFS_PROXY_REGISTRY_ADDR = 0x2D8BFD9FF88E3106ce7214621b0770c1578749A1;
 
-    // TODO: not needed now
-    address internal constant FEE_RECEIVER_ADMIN_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address internal constant FEE_RECEIVER_ADMIN_ADDR = 0x808beD429C8edd8A724608425eC7c83f7dBC7C89;
     address internal constant UNI_V2_ROUTER = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant WSTETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant STETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;

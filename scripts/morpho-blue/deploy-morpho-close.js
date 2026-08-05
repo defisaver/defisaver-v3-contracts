@@ -1,7 +1,7 @@
 const hre = require('hardhat');
-const { topUp } = require('./utils/fork');
-const { getOwnerAddr, redeploy, network } = require('../test/utils/utils');
-const { deployMorphoBlueCloseBundle } = require('../test/utils/morpho-blue');
+const { topUp } = require('../utils/fork');
+const { getOwnerAddr, redeploy, network } = require('../../test/utils/utils');
+const { deployMorphoBlueCloseBundle } = require('../../test/utils/morpho-blue');
 
 async function main() {
     const senderAcc = (await hre.ethers.getSigners())[0];

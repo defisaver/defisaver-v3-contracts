@@ -5016,6 +5016,205 @@ const callMorphoBlueFLBoostOnTargetPriceStrategy = async (
         `GasUsed callMorphoBlueFLBoostOnTargetPriceStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
     );
 };
+const callMorphoBlueRepayOnPriceStrategy = async (
+    strategyExecutor,
+    strategyIndex,
+    subId,
+    strategySub,
+    repayAmount,
+    exchangeObject,
+) => {
+    const isL2 = network !== 'mainnet';
+    const triggerCallData = [];
+    const actionsCallData = [];
+    const gasCost = 1000000;
+
+    // recipe: withdraw -> sell -> gasFee -> payback -> ratioCheck
+    // placeholders are resolved from strategySub at execution; only dynamic amounts are set here
+    const withdrawAction = new dfs.actions.morphoblue.MorphoBlueWithdrawCollateralAction(
+        placeHolderAddr, // &loanToken
+        placeHolderAddr, // &collateralToken
+        placeHolderAddr, // &oracle
+        placeHolderAddr, // &irm
+        0, // &lltv
+        repayAmount, // %repayAmount
+        placeHolderAddr, // &user
+        placeHolderAddr, // &proxy
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        exchangeObject, // coll->loan; amount = $1 (withdraw output)
+        placeHolderAddr, // &proxy
+        placeHolderAddr, // &proxy
+    );
+    const feeTakingAction = isL2
+        ? new dfs.actions.basic.GasFeeActionL2(
+              gasCost, // %gasStart
+              placeHolderAddr, // &loanToken
+              '0', // $2 (sell output)
+              '0', // %dfsFeeDivider
+              '10000000', // %l1GasCostInEth
+          )
+        : new dfs.actions.basic.GasFeeAction(
+              gasCost, // %gasStart
+              placeHolderAddr, // &loanToken
+              '0', // $2 (sell output)
+          );
+    const paybackAction = new dfs.actions.morphoblue.MorphoBluePaybackAction(
+        placeHolderAddr, // &loanToken
+        placeHolderAddr, // &collateralToken
+        placeHolderAddr, // &oracle
+        placeHolderAddr, // &irm
+        0, // &lltv
+        0, // $3 (loan token after gas fee)
+        placeHolderAddr, // &proxy
+        placeHolderAddr, // &user
+    );
+    const targetRatioCheckAction = new dfs.actions.checkers.MorphoBlueTargetRatioCheckAction(
+        placeHolderAddr, // &loanToken
+        placeHolderAddr, // &collateralToken
+        placeHolderAddr, // &oracle
+        placeHolderAddr, // &irm
+        0, // &lltv
+        placeHolderAddr, // &user
+        0, // &targetRatio
+    );
+
+    actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(paybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(targetRatioCheckAction.encodeForRecipe()[0]);
+    triggerCallData.push(
+        abiCoder.encode(
+            ['address', 'address', 'address', 'uint256', 'uint8'],
+            [
+                placeHolderAddr, // &loanToken
+                placeHolderAddr, // &collateralToken
+                placeHolderAddr, // &oracle
+                0, // &price (triggerData)
+                0, // &priceState (triggerData)
+            ],
+        ),
+    );
+    const { callData, receipt } = await executeStrategy(
+        isL2,
+        strategyExecutor,
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+    );
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasCost, 0, callData);
+    console.log(
+        `GasUsed callMorphoBlueRepayOnPriceStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
+};
+const callMorphoBlueFLRepayOnPriceStrategy = async (
+    strategyExecutor,
+    strategyIndex,
+    subId,
+    strategySub,
+    flAmount,
+    exchangeObject,
+    collToken,
+    flAddress,
+) => {
+    const isL2 = network !== 'mainnet';
+    const triggerCallData = [];
+    const actionsCallData = [];
+    const gasCost = 1000000;
+
+    // recipe: FL(coll) -> sell -> gasFee -> payback -> withdraw(to FL) -> ratioCheck
+    // placeholders are resolved from strategySub at execution; only dynamic amounts are set here
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            [collToken], // %collateralToken
+            [flAmount], // %flAmount
+        ),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        exchangeObject, // coll->loan; amount = %repayAmount (= flAmount)
+        placeHolderAddr, // &proxy
+        placeHolderAddr, // &proxy
+    );
+    const feeTakingAction = isL2
+        ? new dfs.actions.basic.GasFeeActionL2(
+              gasCost, // %gasStart
+              placeHolderAddr, // &loanToken
+              '0', // $2 (sell output)
+              '0', // %dfsFeeDivider
+              '10000000', // %l1GasCostInEth
+          )
+        : new dfs.actions.basic.GasFeeAction(
+              gasCost, // %gasStart
+              placeHolderAddr, // &loanToken
+              '0', // $2 (sell output)
+          );
+    const paybackAction = new dfs.actions.morphoblue.MorphoBluePaybackAction(
+        placeHolderAddr, // &loanToken
+        placeHolderAddr, // &collateralToken
+        placeHolderAddr, // &oracle
+        placeHolderAddr, // &irm
+        0, // &lltv
+        0, // $3 (loan token after gas fee)
+        placeHolderAddr, // &proxy
+        placeHolderAddr, // &user
+    );
+    const withdrawAction = new dfs.actions.morphoblue.MorphoBlueWithdrawCollateralAction(
+        placeHolderAddr, // &loanToken
+        placeHolderAddr, // &collateralToken
+        placeHolderAddr, // &oracle
+        placeHolderAddr, // &irm
+        0, // &lltv
+        0, // $1 (FL amount)
+        placeHolderAddr, // &user
+        flAddress, // %flAddress
+    );
+    const targetRatioCheckAction = new dfs.actions.checkers.MorphoBlueTargetRatioCheckAction(
+        placeHolderAddr, // &loanToken
+        placeHolderAddr, // &collateralToken
+        placeHolderAddr, // &oracle
+        placeHolderAddr, // &irm
+        0, // &lltv
+        placeHolderAddr, // &user
+        0, // &targetRatio
+    );
+
+    actionsCallData.push(flAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(paybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(withdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(targetRatioCheckAction.encodeForRecipe()[0]);
+    triggerCallData.push(
+        abiCoder.encode(
+            ['address', 'address', 'address', 'uint256', 'uint8'],
+            [
+                placeHolderAddr, // &loanToken
+                placeHolderAddr, // &collateralToken
+                placeHolderAddr, // &oracle
+                0, // &price (triggerData)
+                0, // &priceState (triggerData)
+            ],
+        ),
+    );
+    const { callData, receipt } = await executeStrategy(
+        isL2,
+        strategyExecutor,
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+    );
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasCost, 0, callData);
+    console.log(
+        `GasUsed callMorphoBlueFLRepayOnPriceStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
+};
 const callLiquityV2RepayStrategy = async (
     strategyExecutor,
     strategyIndex,
@@ -9352,6 +9551,8 @@ module.exports = {
     callAaveV3FLOpenOrderFromDebtStrategy,
     callMorphoBlueBoostOnTargetPriceStrategy,
     callMorphoBlueFLBoostOnTargetPriceStrategy,
+    callMorphoBlueRepayOnPriceStrategy,
+    callMorphoBlueFLRepayOnPriceStrategy,
     callLiquityV2RepayStrategy,
     callLiquityV2FLRepayStrategy,
     callLiquityV2BoostStrategy,
