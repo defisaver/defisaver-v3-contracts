@@ -3,8 +3,7 @@ pragma solidity =0.8.24;
 
 import { CompV3MinDebtTrigger } from "../../contracts/triggers/CompV3MinDebtTrigger.sol";
 import { IComet } from "../../contracts/interfaces/protocols/compoundV3/IComet.sol";
-import { ChainlinkPriceLib } from "../../contracts/utils/ChainlinkPriceLib.sol";
-import { IFeedRegistry } from "../../contracts/interfaces/protocols/chainlink/IFeedRegistry.sol";
+import { PriceLib } from "../../contracts/utils/PriceLib.sol";
 
 import { CompUser } from "../utils/compV3/CompUser.sol";
 import { Addresses } from "../utils/helpers/MainnetAddresses.sol";
@@ -12,7 +11,7 @@ import { BaseTest } from "../utils/BaseTest.sol";
 import { console } from "forge-std/console.sol";
 
 contract TestCompV3MinDebtTrigger is BaseTest {
-    using ChainlinkPriceLib for address;
+    using PriceLib for address;
 
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
@@ -91,12 +90,8 @@ contract TestCompV3MinDebtTrigger is BaseTest {
             _isTriggered(market, user, MIN_DEBT), "no debt should not trigger with real price"
         );
 
-        // Force the base token's USD price to 0 for all Chainlink registry lookups.
-        vm.mockCall(
-            address(ChainlinkPriceLib.getFeedRegistry()),
-            abi.encodeWithSelector(IFeedRegistry.latestRoundData.selector),
-            abi.encode(uint80(0), int256(0), uint256(0), uint256(0), uint80(0))
-        );
+        // Force the base token's USD price to 0 on every price source PriceLib uses.
+        mockZeroTokenPrices();
 
         assertTrue(_isTriggered(market, user, MIN_DEBT), "zero price must return true");
 

@@ -6,9 +6,8 @@ import { FluidVaultT1Open } from "../../contracts/actions/fluid/vaultT1/FluidVau
 import {
     IFluidVaultResolver
 } from "../../contracts/interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
-import { ChainlinkPriceLib } from "../../contracts/utils/ChainlinkPriceLib.sol";
+import { PriceLib } from "../../contracts/utils/PriceLib.sol";
 import { IERC20 } from "../../contracts/interfaces/token/IERC20.sol";
-import { IFeedRegistry } from "../../contracts/interfaces/protocols/chainlink/IFeedRegistry.sol";
 import { IFluidVaultT1 } from "../../contracts/interfaces/protocols/fluid/vaults/IFluidVaultT1.sol";
 import { TokenUtils } from "../../contracts/utils/token/TokenUtils.sol";
 
@@ -17,7 +16,7 @@ import { SmartWallet } from "../utils/SmartWallet.sol";
 import { console } from "forge-std/console.sol";
 
 contract TestFluidMinDebtTrigger is FluidTestBase {
-    using ChainlinkPriceLib for address;
+    using PriceLib for address;
 
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
@@ -100,12 +99,8 @@ contract TestFluidMinDebtTrigger is FluidTestBase {
         // Baseline: with a real price and no debt, the trigger must not fire.
         assertFalse(_isTriggered(nftId, MIN_DEBT), "no debt should not trigger with real price");
 
-        // Force the debt token's USD price to 0 for all Chainlink registry lookups.
-        vm.mockCall(
-            address(ChainlinkPriceLib.getFeedRegistry()),
-            abi.encodeWithSelector(IFeedRegistry.latestRoundData.selector),
-            abi.encode(uint80(0), int256(0), uint256(0), uint256(0), uint80(0))
-        );
+        // Force the debt token's USD price to 0 on every price source PriceLib uses.
+        mockZeroTokenPrices();
 
         assertTrue(_isTriggered(nftId, MIN_DEBT), "zero price must return true");
 

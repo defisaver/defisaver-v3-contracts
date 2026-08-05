@@ -8,10 +8,10 @@ import { IERC20 } from "../interfaces/token/IERC20.sol";
 import { Id, MarketParams } from "../interfaces/protocols/morpho-blue/IMorphoBlue.sol";
 import { MorphoBlueHelper } from "../actions/morpho-blue/helpers/MorphoBlueHelper.sol";
 import { MorphoBalancesLib } from "../actions/morpho-blue/helpers/MorphoBlueLib.sol";
-import { ChainlinkPriceLib } from "../utils/ChainlinkPriceLib.sol";
+import { PriceLib } from "../utils/PriceLib.sol";
 
 contract MorphoBlueMinDebtTrigger is ITrigger, AdminAuth, MorphoBlueHelper {
-    using ChainlinkPriceLib for address;
+    using PriceLib for address;
 
     /// @param user address of the user whose position we check
     /// @param marketId bytes32 representing a MorphoBlue market
