@@ -4,16 +4,14 @@ pragma solidity =0.8.24;
 
 import { BaseTest } from "../utils/BaseTest.sol";
 import { RegistryUtils } from "../utils/RegistryUtils.sol";
-import {
-    StrategyTriggerViewNoRevert
-} from "../../contracts/views/strategy/StrategyTriggerViewNoRevert.sol";
+import { TriggerView } from "../../contracts/views/strategy/TriggerView.sol";
 import { BundleStorage } from "../../contracts/core/strategy/BundleStorage.sol";
 import { StrategyStorage } from "../../contracts/core/strategy/StrategyStorage.sol";
 import { AaveV3MinDebtTrigger } from "../../contracts/triggers-additional/AaveV3MinDebtTrigger.sol";
 import { AaveV3RatioTrigger } from "../../contracts/triggers/AaveV3RatioTrigger.sol";
 import { ITrigger } from "../../contracts/interfaces/core/ITrigger.sol";
 
-contract TestStrategyTriggerViewNoRevert is BaseTest, RegistryUtils, StrategyTriggerViewNoRevert {
+contract TestTriggerView is BaseTest, RegistryUtils, TriggerView {
     /*//////////////////////////////////////////////////////////////////////////
                                     CONSTANTS
     //////////////////////////////////////////////////////////////////////////*/
@@ -48,10 +46,10 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, RegistryUtils, StrategyTri
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkFromEnv("StrategyTriggerViewNoRevert");
+        forkFromEnv("TriggerView");
 
         if (!isMainnetSelected()) {
-            vm.skip(true, "StrategyTriggerViewNoRevert test is mainnet only");
+            vm.skip(true, "TriggerView test is mainnet only");
         }
 
         aaveV3MinDebtTrigger = new AaveV3MinDebtTrigger();

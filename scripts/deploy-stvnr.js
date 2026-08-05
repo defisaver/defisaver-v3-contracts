@@ -7,11 +7,11 @@ async function main() {
     await topUp(senderAcc.address, network);
     await topUp(getOwnerAddr(), network);
 
-    const stvnr = await redeploy('StrategyTriggerViewNoRevert', true);
+    const stvnr = await redeploy('TriggerView', true);
     const fluidMinDebtChecker = await redeploy('FluidMinDebtTrigger', true);
     const aaveV3MinDebtChecker = await redeploy('AaveV3MinDebtTrigger', true);
 
-    console.log('StrategyTriggerViewNoRevert:', stvnr.address);
+    console.log('TriggerView:', stvnr.address);
     console.log('FluidMinDebtTrigger:', fluidMinDebtChecker.address);
     console.log('AaveV3MinDebtTrigger:', aaveV3MinDebtChecker.address);
 }
