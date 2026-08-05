@@ -149,6 +149,9 @@ contract TestMorphoBlueTargetRatioCheck is BaseTest, ActionsUtils, MorphoBlueTes
     /// @dev Opens a COLL_USD coll / DEBT_USD debt Morpho Blue position owned by the wallet.
     ///      Sized in USD because loan/collateral tokens differ per network.
     function _createPosition() internal {
+        // Forked markets can be fully utilized, so make sure the borrow has liquidity.
+        supplyMarketLiquidity(market, DEBT_USD * 2);
+
         uint256 collAmount = amountInUSDPrice(market.collateralToken, COLL_USD);
         give(market.collateralToken, walletAddr, collAmount);
         wallet.execute(

@@ -167,10 +167,7 @@ contract TestMorphoBlueMinDebtTrigger is BaseTest, MorphoBlueTestHelper {
     ///      borrow of ~`_targetDebtUsd` for USER directly on the MorphoBlue singleton.
     function _openPosition(MarketParams memory _market, uint256 _targetDebtUsd) internal {
         // Supply loan token liquidity so the borrow always has something to draw from.
-        uint256 supplyAmount = amountInUSDPrice(_market.loanToken, _targetDebtUsd * 2);
-        gibTokens(address(this), _market.loanToken, supplyAmount);
-        approve(_market.loanToken, address(morphoBlue), supplyAmount);
-        morphoBlue.supply(_market, supplyAmount, 0, address(this), "");
+        supplyMarketLiquidity(_market, _targetDebtUsd * 2);
 
         // Over-collateralize 3x so the borrow always goes through.
         uint256 collateralAmount = amountInUSDPrice(_market.collateralToken, _targetDebtUsd * 3);

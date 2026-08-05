@@ -7,14 +7,18 @@ import {
     MorphoBlueHelper
 } from "../../../contracts/actions/morpho-blue/helpers/MorphoBlueHelper.sol";
 import { MainnetMorphoBlueMarketsAddresses } from "./MainnetMorphoBlueMarketsAddresses.sol";
+import { BaseTest } from "../BaseTest.sol";
 
 /// @notice Shared helper for MorphoBlue tests.
 /// @dev The market list is network specific and comes from {Network}MorphoBlueMarketsAddresses,
 ///      which cmd/change-repo-network.js swaps together with every other *Addresses import.
 ///      `morphoBlue` is inherited from MorphoBlueHelper, so it is network correct as well.
-contract MorphoBlueTestHelper is MorphoBlueHelper, MainnetMorphoBlueMarketsAddresses {
+contract MorphoBlueTestHelper is BaseTest, MorphoBlueHelper, MainnetMorphoBlueMarketsAddresses {
     /// @dev How many markets getMarkets() returns when not asked for all of them.
     uint256 internal constant DEFAULT_MARKETS_COUNT = 5;
+
+    /// @dev Dedicated lender used to seed markets, kept apart from the accounts under test.
+    address internal constant MARKET_LIQUIDITY_PROVIDER = address(0x119);
 
     error NoMarketForChain(uint256 chainId);
 
@@ -51,6 +55,23 @@ contract MorphoBlueTestHelper is MorphoBlueHelper, MainnetMorphoBlueMarketsAddre
         }
 
         revert NoMarketForChain(block.chainid);
+    }
+
+    /// @notice Supplies loan token liquidity to a market so later borrows have something to draw
+    ///         from. Forked markets are often close to fully utilized, which makes borrows revert
+    ///         with "insufficient liquidity".
+    /// @param _market Market to seed.
+    /// @param _amountUsd Liquidity to supply, in whole USD.
+    function supplyMarketLiquidity(MarketParams memory _market, uint256 _amountUsd) internal {
+        uint256 supplyAmount = amountInUSDPrice(_market.loanToken, _amountUsd);
+        // gibTokens instead of give: loan tokens vary per market and a direct balance write works
+        // for all of them, including the ones give() has to buy on Uniswap.
+        gibTokens(MARKET_LIQUIDITY_PROVIDER, _market.loanToken, supplyAmount);
+
+        startPrank(MARKET_LIQUIDITY_PROVIDER);
+        approve(_market.loanToken, address(morphoBlue), supplyAmount);
+        morphoBlue.supply(_market, supplyAmount, 0, MARKET_LIQUIDITY_PROVIDER, "");
+        stopPrank();
     }
 
     /// @notice Returns the first DEFAULT_MARKETS_COUNT markets supported on the selected network.

@@ -23,13 +23,13 @@ no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,
 no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation,aaveV3/umbrella,AaveView,aaveV4.aavev4,AaveV4View,AaveV4}*"
 
 [profile.optimism]
-no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation,aaveV3/umbrella,fluid,AaveView,aaveV4,aavev4,AaveV4View,AaveV4}*"
+no_match_path = "test-sol/{actions,views,triggers,strategies}/*{eulerV2,etherFi,gho,liquityV2,pendle,renzo,sky,Sky,Spark,summerfi,Curve,Automation,aaveV3/umbrella,fluid,AaveView,aaveV4,aavev4,AaveV4View,AaveV4,MorphoBlue}*"
 
 [profile.linea]
-match_path = "test-sol/{actions,core,views}/{aaveV3/AaveV3,AaveV3,DFSRegistry,RecipeExecutor,SafeModuleAuth,SmartWalletUtils}*"
+match_path = "test-sol/{actions,core,views}/{aaveV3/AaveV3,AaveV3,DFSRegistry,RecipeExecutor,SafeModuleAuth,SmartWalletUtils,MorphoBlue}*"
 
 [profile.plasma]
-match_path = "test-sol/{actions,core,views}/{aaveV3/AaveV3,AaveV3,DFSRegistry,RecipeExecutor,SafeModuleAuth,SmartWalletUtils}*"
+match_path = "test-sol/{actions,core,views}/{aaveV3/AaveV3,AaveV3,DFSRegistry,RecipeExecutor,SafeModuleAuth,SmartWalletUtils,MorphoBlue}*"
 
 
 # Formatting -> https://getfoundry.sh/config/reference/formatter/
