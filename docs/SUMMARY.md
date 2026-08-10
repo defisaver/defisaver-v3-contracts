@@ -36,6 +36,7 @@
   * [LimitSell](actions/exchange/dfs-sell-1.md)
 * [Flash loans](actions/flash-loans/README.md)
   * [FLAction](actions/flash-loans/flaction.md)
+  * [FLAaveV3CarryDebt](actions/flash-loans/flaavev3carrydebt.md)
 * [Utils](actions/utils/README.md)
   * [ApproveToken](actions/utils/approvetoken.md)
   * [AutomationV2Unsub](actions/utils/automationv2unsub.md)
