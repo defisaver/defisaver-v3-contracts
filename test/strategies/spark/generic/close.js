@@ -1,4 +1,4 @@
-// Spark Close strategies
+// Spark Generic Close strategies
 const hre = require('hardhat');
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
@@ -21,25 +21,25 @@ const {
     sendEther,
     addBalancerFlLiquidity,
     isCloseToDebtType,
-} = require('../../utils/utils');
+} = require('../../../utils/utils');
 
-const { addBotCaller } = require('../utils/utils-strategies');
-const { subSparkCloseGeneric } = require('../utils/strategy-subs');
+const { addBotCaller } = require('../../utils/utils-strategies');
+const { subSparkCloseGeneric } = require('../../utils/strategy-subs');
 const {
     callSparkGenericFLCloseToCollStrategy,
     callSparkGenericFLCloseToDebtStrategy,
-} = require('../utils/strategy-calls');
+} = require('../../utils/strategy-calls');
 const {
     deploySparkCloseGenericBundle,
     openSparkProxyPosition,
     getSparkPositionRatio,
     SPARK_AUTOMATION_TEST_PAIRS,
     getSparkReserveDataFromPool,
-} = require('../../utils/spark');
-const { getCloseStrategyTypeName, getCloseStrategyConfigs } = require('../../utils/utils');
+} = require('../../../utils/spark');
+const { getCloseStrategyTypeName, getCloseStrategyConfigs } = require('../../../utils/utils');
 
 const runCloseTests = () => {
-    describe('Spark Close To Debt Strategies Tests', () => {
+    describe('Spark Generic Close Strategies Tests', () => {
         let snapshotId;
         let senderAcc;
         let proxy;
@@ -246,14 +246,6 @@ const runCloseTests = () => {
         }
     });
 };
-
-describe('Spark close strategies test', function () {
-    this.timeout(80000);
-
-    it('... test Spark close strategies', async () => {
-        await runCloseTests();
-    }).timeout(50000);
-});
 
 module.exports = {
     runCloseTests,
