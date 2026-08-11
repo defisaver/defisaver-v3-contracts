@@ -5050,5 +5050,16 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "EtherFiStakeFromLido",
+        "address": "0xD4815aA46fc39e667fd7ab3194458639B59bcD82",
+        "id": "0xc9f2b6aa",
+        "path": "contracts/actions/etherfi/EtherFiStakeFromLido.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     }
 ]
