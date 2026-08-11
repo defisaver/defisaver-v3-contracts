@@ -5,6 +5,7 @@ const dfs = require('@defisaver/sdk');
 const {
     approve,
     balanceOf,
+    getAllowance,
     getProxy,
     nullAddress,
     redeploy,
@@ -22,13 +23,28 @@ const {
     calculateMaxUnits,
     fetchMidnightQuote,
     fetchMidnightQuoteForMinFills,
+    fetchQuote,
 } = require('../../utils/midnight');
 
 const MARKET_ID = '0x05959752fdeff325962b9d263edb421efc6e2186a49360dba6c32e86ebf6c84c';
+const TENOR_MARKET_ID = '0x44495af1cca7842191a65a73978e01ed72238731e193c3b11460083efd60a318';
 const MIDNIGHT_ADDRESS = '0xAdedD8ab6dE832766Fedf0FaC4992E5C4D3EA18A';
 const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
 const CBBTC_ADDRESS = '0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf';
 const SLIPPAGE = '0.5';
+
+const BORROW_MARKETS = [
+    {
+        name: 'one Morpho order',
+        marketId: MARKET_ID,
+        quoteProvider: 'morpho',
+    },
+    {
+        name: 'a Tenor route',
+        marketId: TENOR_MARKET_ID,
+        quoteProvider: 'tenor',
+    },
+];
 
 describe('Midnight-Borrow-From-Orders', function () {
     this.timeout(150000);
@@ -53,16 +69,22 @@ describe('Midnight-Borrow-From-Orders', function () {
         borrowAction = await redeploy('MidnightBorrowFromOrders');
 
         const collateralAmount = hre.ethers.utils.parseUnits('1000', 8);
-        await setBalance(CBBTC_ADDRESS, senderAcc.address, collateralAmount);
-        await approve(CBBTC_ADDRESS, proxy.address, senderAcc);
-        await midnightSupplyCollateral(
-            proxy,
-            MARKET_ID,
-            nullAddress,
+        await setBalance(
+            CBBTC_ADDRESS,
             senderAcc.address,
-            collateralAmount,
-            0,
+            collateralAmount.mul(BORROW_MARKETS.length),
         );
+        await approve(CBBTC_ADDRESS, proxy.address, senderAcc);
+        for (const { marketId } of BORROW_MARKETS) {
+            await midnightSupplyCollateral(
+                proxy,
+                marketId,
+                nullAddress,
+                senderAcc.address,
+                collateralAmount,
+                0,
+            );
+        }
     });
 
     beforeEach(async () => {
@@ -73,41 +95,51 @@ describe('Midnight-Borrow-From-Orders', function () {
         await revertToSnapshot(snapshotId);
     });
 
-    it('should borrow using one order', async () => {
-        const borrowAmount = hre.ethers.utils.parseUnits('2', 6);
-        const quote = await fetchMidnightQuote({
-            marketId: MARKET_ID,
-            side: 'bids',
-            assets: borrowAmount,
-            slippage: SLIPPAGE,
+    BORROW_MARKETS.forEach(({ name, marketId, quoteProvider }) => {
+        it(`should borrow using ${name}`, async () => {
+            const borrowAmount = hre.ethers.utils.parseUnits('2', 6);
+            const quote = await fetchQuote({
+                quoteProvider,
+                marketId,
+                side: 'bids',
+                assets: borrowAmount,
+                slippage: SLIPPAGE,
+                taker: proxy.address,
+            });
+            const offerFills =
+                quoteProvider === 'tenor' ? quote.offerFills : quote.offerFills.slice(0, 1);
+            const maxUnits =
+                quoteProvider === 'tenor'
+                    ? quote.quotedUnits
+                    : calculateMaxUnits(borrowAmount, quote.averageWorstPrice);
+            const [offer] = offerFills[0];
+
+            const balanceBefore = await balanceOf(USDC_ADDRESS, senderAcc.address);
+            const debtBefore = await midnight.debt(marketId, proxy.address);
+            const consumedBefore = await midnight.consumed(offer[2], offer[6]);
+
+            await midnightBorrowFromOrders(
+                proxy,
+                marketId,
+                nullAddress,
+                senderAcc.address,
+                borrowAmount,
+                maxUnits,
+                offerFills,
+            );
+
+            const balanceAfter = await balanceOf(USDC_ADDRESS, senderAcc.address);
+            const debtAfter = await midnight.debt(marketId, proxy.address);
+            const consumedAfter = await midnight.consumed(offer[2], offer[6]);
+            const debtIncrease = debtAfter.sub(debtBefore);
+
+            expect(balanceAfter.sub(balanceBefore)).to.eq(borrowAmount);
+            expect(debtIncrease).to.be.gt(0);
+            expect(debtIncrease).to.be.lte(maxUnits);
+            expect(consumedAfter).to.be.gt(consumedBefore);
+            expect(await balanceOf(USDC_ADDRESS, proxy.address)).to.eq(0);
+            expect(await getAllowance(USDC_ADDRESS, proxy.address, MIDNIGHT_ADDRESS)).to.eq(0);
         });
-        const offerFills = quote.offerFills.slice(0, 1);
-        const maxUnits = calculateMaxUnits(borrowAmount, quote.averageWorstPrice);
-        const [offer] = offerFills[0];
-
-        const balanceBefore = await balanceOf(USDC_ADDRESS, senderAcc.address);
-        const debtBefore = await midnight.debt(MARKET_ID, proxy.address);
-        const consumedBefore = await midnight.consumed(offer[2], offer[6]);
-
-        await midnightBorrowFromOrders(
-            proxy,
-            MARKET_ID,
-            nullAddress,
-            senderAcc.address,
-            borrowAmount,
-            maxUnits,
-            offerFills,
-        );
-
-        const balanceAfter = await balanceOf(USDC_ADDRESS, senderAcc.address);
-        const debtAfter = await midnight.debt(MARKET_ID, proxy.address);
-        const consumedAfter = await midnight.consumed(offer[2], offer[6]);
-        const debtIncrease = debtAfter.sub(debtBefore);
-
-        expect(balanceAfter.sub(balanceBefore)).to.eq(borrowAmount);
-        expect(debtIncrease).to.be.gt(0);
-        expect(debtIncrease).to.be.lte(maxUnits);
-        expect(consumedAfter).to.be.gt(consumedBefore);
     });
 
     it('should borrow using at least three orders', async () => {

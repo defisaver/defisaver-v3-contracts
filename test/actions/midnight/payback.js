@@ -22,6 +22,7 @@ const {
     calculateMinUnits,
     fetchMidnightQuote,
     fetchMidnightQuoteForMinFills,
+    fetchQuote,
     seedMidnightDebt,
 } = require('../../utils/midnight');
 
@@ -30,6 +31,11 @@ const MIDNIGHT_ADDRESS = '0xAdedD8ab6dE832766Fedf0FaC4992E5C4D3EA18A';
 const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
 const SLIPPAGE = '0.5';
 const WAD = hre.ethers.constants.WeiPerEther;
+
+const PAYBACK_MARKETS = [
+    { name: 'one Morpho order', marketId: MARKET_ID, quoteProvider: 'morpho' },
+    { name: 'a Tenor route', marketId: MARKET_ID, quoteProvider: 'tenor' },
+];
 
 const sumOfferFillUnits = (offerFills) =>
     offerFills.reduce((sum, offerFill) => sum.add(offerFill[2]), hre.ethers.constants.Zero);
@@ -117,47 +123,66 @@ describe('Midnight-Payback-From-Orders', function () {
         await revertToSnapshot(snapshotId);
     });
 
-    it('should pay back using one order', async () => {
-        const paybackAmount = hre.ethers.utils.parseUnits('2', 6);
-        const quote = await fetchSmallAskQuote(paybackAmount);
-        const expectedUnits = calculateMinUnits(paybackAmount, quote.averageBestPrice);
-        const offerFill = quote.offerFills.find((fill) =>
-            hre.ethers.BigNumber.from(fill[2]).gt(expectedUnits),
-        );
-        if (!offerFill) throw new Error('Midnight quote has no single ask large enough');
+    PAYBACK_MARKETS.forEach(({ name, marketId, quoteProvider }) => {
+        it(`should pay back using ${name}`, async () => {
+            const paybackAmount = hre.ethers.utils.parseUnits('2', 6);
+            const quote = await fetchQuote({
+                quoteProvider,
+                marketId,
+                side: 'asks',
+                assets: paybackAmount,
+                slippage: SLIPPAGE,
+                taker: proxy.address,
+            });
 
-        const offerFills = [offerFill];
-        const [offer] = offerFill;
-        const minUnits = calculateMinUnits(paybackAmount, quote.averageWorstPrice);
-        const seededDebt = hre.ethers.BigNumber.from(offerFill[2]);
+            let offerFills;
+            let minUnits;
+            let seededDebt;
+            if (quoteProvider === 'tenor') {
+                offerFills = quote.offerFills;
+                minUnits = quote.quotedUnits;
+                seededDebt = quote.quotedUnits.mul(2);
+            } else {
+                const expectedUnits = calculateMinUnits(paybackAmount, quote.averageBestPrice);
+                const offerFill = quote.offerFills.find((fill) =>
+                    hre.ethers.BigNumber.from(fill[2]).gt(expectedUnits),
+                );
+                if (!offerFill) throw new Error('Midnight quote has no single ask large enough');
 
-        await seedMidnightDebt(midnight, MARKET_ID, proxy.address, seededDebt);
-        await fundAndApprove(paybackAmount);
+                offerFills = [offerFill];
+                minUnits = calculateMinUnits(paybackAmount, quote.averageWorstPrice);
+                seededDebt = hre.ethers.BigNumber.from(offerFill[2]);
+            }
 
-        const balanceBefore = await balanceOf(USDC_ADDRESS, senderAcc.address);
-        const debtBefore = await midnight.debt(MARKET_ID, proxy.address);
-        const consumedBefore = await midnight.consumed(offer[2], offer[6]);
+            const [offer] = offerFills[0];
+            await seedMidnightDebt(midnight, marketId, proxy.address, seededDebt);
+            await fundAndApprove(paybackAmount);
 
-        await midnightPaybackFromOrders(
-            proxy,
-            MARKET_ID,
-            nullAddress,
-            senderAcc.address,
-            paybackAmount,
-            minUnits,
-            offerFills,
-        );
+            const balanceBefore = await balanceOf(USDC_ADDRESS, senderAcc.address);
+            const debtBefore = await midnight.debt(marketId, proxy.address);
+            const consumedBefore = await midnight.consumed(offer[2], offer[6]);
 
-        const balanceAfter = await balanceOf(USDC_ADDRESS, senderAcc.address);
-        const debtAfter = await midnight.debt(MARKET_ID, proxy.address);
-        const consumedAfter = await midnight.consumed(offer[2], offer[6]);
-        const repaidUnits = debtBefore.sub(debtAfter);
+            await midnightPaybackFromOrders(
+                proxy,
+                marketId,
+                nullAddress,
+                senderAcc.address,
+                paybackAmount,
+                minUnits,
+                offerFills,
+            );
 
-        expect(balanceBefore.sub(balanceAfter)).to.eq(paybackAmount);
-        expect(repaidUnits).to.be.gte(minUnits);
-        expect(debtAfter).to.be.gt(0);
-        expect(consumedAfter).to.be.gt(consumedBefore);
-        await assertNoTokenResidue(proxy.address);
+            const balanceAfter = await balanceOf(USDC_ADDRESS, senderAcc.address);
+            const debtAfter = await midnight.debt(marketId, proxy.address);
+            const consumedAfter = await midnight.consumed(offer[2], offer[6]);
+            const repaidUnits = debtBefore.sub(debtAfter);
+
+            expect(balanceBefore.sub(balanceAfter)).to.eq(paybackAmount);
+            expect(repaidUnits).to.be.gte(minUnits);
+            expect(debtAfter).to.be.gt(0);
+            expect(consumedAfter).to.be.gt(consumedBefore);
+            await assertNoTokenResidue(proxy.address);
+        });
     });
 
     it('should pay back using at least three orders', async () => {
