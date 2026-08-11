@@ -3062,14 +3062,14 @@
     },
     {
         "name": "CurveUsdSelfLiquidate",
-        "address": "0xd90d8a4955DfE9D4f45F7f60595313B0925ee1da",
+        "address": "0x0B21996Fc90993f975D8279bE8ff2D34518da79C",
         "id": "0x77f22040",
         "path": "contracts/actions/curveusd/CurveUsdSelfLiquidate.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xd90d8a4955DfE9D4f45F7f60595313B0925ee1da"]
     },
     {
         "name": "CurveUsdLevCreate",
@@ -3206,14 +3206,17 @@
     },
     {
         "name": "LlamaLendSelfLiquidate",
-        "address": "0x46173C379Fbf998E6db0B47F45b73f77C64d3897",
+        "address": "0xF0D7b730B40b02Ad555E27CFe5FAF43D6a75dfba",
         "id": "0xafcc4eb7",
         "path": "contracts/actions/llamalend/LlamaLendSelfLiquidate.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": ["0xE4944E0e46177300fa4c351EF72b95b9655E8394"]
+        "history": [
+            "0x46173C379Fbf998E6db0B47F45b73f77C64d3897",
+            "0xE4944E0e46177300fa4c351EF72b95b9655E8394"
+        ]
     },
     {
         "name": "LlamaLendPayback",
@@ -4320,28 +4323,32 @@
     },
     {
         "name": "FluidVaultT1Payback",
-        "address": "0xA81bb6ce68a01d2d6CEC1631c7712e3CCd41275C",
+        "address": "0x8D56b267C6a3e5295EFAebC67Ac413483c885C05",
         "id": "0x101b4845",
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Payback",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xA81bb6ce68a01d2d6CEC1631c7712e3CCd41275C",
             "0xa7A4B84D38CD33F9901922687db24B8aE14f2455",
             "0x13b021b52989e257537b4C0ee6Ef12E77AFD4652"
         ]
     },
     {
         "name": "FluidVaultT1Adjust",
-        "address": "0x8f1443c9F24843D14fa6b302A55C59468ED7D28B",
+        "address": "0x0Dfe1e40F3DA8687a68824022176bE547Ecc0906",
         "id": "0xce25def6",
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Adjust",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x792D40CAE821905A2B57522BF8a77347e7BB0c0a"]
+        "history": [
+            "0x8f1443c9F24843D14fa6b302A55C59468ED7D28B",
+            "0x792D40CAE821905A2B57522BF8a77347e7BB0c0a"
+        ]
     },
     {
         "name": "FluidRatioTrigger",
@@ -4436,14 +4443,14 @@
     },
     {
         "name": "FluidDexPayback",
-        "address": "0xD733BD32F4AAEe92a983E2021B85ca5d31236FA0",
+        "address": "0x12D0D7c4c2c5304E5ba96A019E0F092FdF555123",
         "id": "0x1de2c822",
         "path": "contracts/actions/fluid/dex/FluidDexPayback",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0xD733BD32F4AAEe92a983E2021B85ca5d31236FA0"]
     },
     {
         "name": "KingClaim",
