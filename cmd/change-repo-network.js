@@ -130,10 +130,27 @@ async function changeNetworkNameForAddresses(newNetwork) {
 }
 
 async function changeTestAddressesImport(newNetwork) {
+    // Not every protocol has an addresses file for every network (e.g. MorphoBlue markets only
+    // exist for Mainnet, Arbitrum and Base). Swapping those imports anyway would point them at a
+    // file that doesn't exist, so only swap when the new network actually has one. This mirrors
+    // what changeNetworkNameForAddresses does for ./contracts, where such an import is left on
+    // its current network instead.
+    const addressesFiles = new Set(
+        [...getAllFiles('./contracts'), ...getAllFiles('./test-sol')]
+            .filter((f) => f.endsWith('Addresses.sol'))
+            .map((f) => path.basename(f)),
+    );
+
     const files = getAllFiles('./test-sol').filter((f) => f.endsWith('.sol'));
     for (const file of files) {
         const content = fs.readFileSync(file).toString();
-        const updated = content.replace(networkAddressesRgx(), `${newNetwork}$2`);
+        const updated = content.replace(
+            networkAddressesRgx(),
+            (match, oldNetwork, addressesName) =>
+                addressesFiles.has(`${newNetwork}${addressesName}.sol`)
+                    ? `${newNetwork}${addressesName}`
+                    : match,
+        );
         if (updated !== content) {
             console.log(file);
             fs.writeFileSync(file, updated);
