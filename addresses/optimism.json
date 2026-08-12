@@ -1336,5 +1336,38 @@
         "changeTime": 0,
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "AaveV3MinDebtTrigger",
+        "address": "0x8F521d036b395E2dd4B3A10348d323ec75A375e6",
+        "id": "0xb3fa1599",
+        "path": "contracts/triggers-additional/AaveV3MinDebtTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "RequiredAmountAndAllowanceTrigger",
+        "address": "0x6CF5c0daBD33FD24258936eb90cE5d1b4D5FF974",
+        "id": "0xbd30ff8e",
+        "path": "contracts/triggers-additional/RequiredAmountAndAllowanceTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "TriggerView",
+        "address": "0x4e30a875883187F6Af8E3493127d11a322E52379",
+        "id": "0x628ee7ee",
+        "path": "contracts/views/strategy/TriggerView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
     }
 ]
