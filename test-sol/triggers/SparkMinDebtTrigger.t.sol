@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { SparkMinDebtTrigger } from "../../contracts/triggers/SparkMinDebtTrigger.sol";
+import { SparkMinDebtTrigger } from "../../contracts/triggers-additional/SparkMinDebtTrigger.sol";
 import { ISparkPool } from "../../contracts/interfaces/protocols/spark/ISparkPool.sol";
 import {
     ISparkPoolAddressesProvider

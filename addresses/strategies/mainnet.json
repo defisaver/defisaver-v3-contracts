@@ -312,7 +312,7 @@
             ["&1", "$3", "&proxy", "&proxy"],
             ["&3", "&4", "&1"]
         ],
-        "bundleId": 28
+        "bundleId": 82
     },
     {
         "name": "CompV3FLRepay",
@@ -335,7 +335,7 @@
             ["&1", 0, 0, "$1"],
             ["&3", "&4", "&1"]
         ],
-        "bundleId": 3
+        "bundleId": 73
     },
     {
         "name": "CompV3CompositeRepay",
@@ -430,7 +430,7 @@
             ["&1", "$3", "&proxy", "&eoa"],
             ["&3", "&4", "&1", "&eoa"]
         ],
-        "bundleId": 30
+        "bundleId": 83
     },
     {
         "name": "CompV3FlEOARepayStrategy",
@@ -453,7 +453,7 @@
             ["&1", 0, 0, "$1", "&eoa"],
             ["&3", "&4", "&1", "&eoa"]
         ],
-        "bundleId": 5
+        "bundleId": 74
     },
     {
         "name": "CompV3EOACompositeRepay",
@@ -663,7 +663,7 @@
         "triggerIds": ["McdRatioTrigger"],
         "actionIds": ["McdRepayComposite"],
         "paramMapping": [["&1", 0, 0, 0, 0, 0]],
-        "bundleId": 10
+        "bundleId": 75
     },
     {
         "name": "MakerFLRepayCompositeStrategy",
@@ -675,7 +675,7 @@
             [0, 0, 0, 0, 0, 0],
             ["&1", 0, "$1", 0, 0, 0]
         ],
-        "bundleId": 10
+        "bundleId": 75
     },
     {
         "name": "MakerBoostCompositeStrategy",
@@ -986,7 +986,7 @@
             ["$3", "&proxy", 0, 0, "&3", "&4", 0, 0],
             ["&2", "&1"]
         ],
-        "bundleId": 18
+        "bundleId": 72
     },
     {
         "name": "SparkFLRepay",
@@ -1009,7 +1009,7 @@
             [0, "&3", "$1", 0, 0],
             ["&2", "&1"]
         ],
-        "bundleId": 18
+        "bundleId": 72
     },
     {
         "name": "SparkBoost",
@@ -1499,7 +1499,7 @@
             ["&1", 0, 0, "$1", 0],
             ["&3", "&4", "&1", 0]
         ],
-        "bundleId": 28
+        "bundleId": 82
     },
     {
         "name": "CompV3FlBoostStrategyV2",
@@ -1545,7 +1545,7 @@
             ["&1", 0, 0, "$1", "&eoa"],
             ["&3", "&4", "&1", "&eoa"]
         ],
-        "bundleId": 30
+        "bundleId": 83
     },
     {
         "name": "CompV3EOAFlBoostStrategyV2",
@@ -1589,7 +1589,7 @@
             ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&8"],
             ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
         ],
-        "bundleId": 34
+        "bundleId": 81
     },
     {
         "name": "MorphoBlueFLCollRepayStrategy",
@@ -1612,7 +1612,7 @@
             ["&1", "&2", "&3", "&4", "&5", "$1", "&proxy", 0],
             ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
         ],
-        "bundleId": 32
+        "bundleId": 78
     },
     {
         "name": "MorphoBlueFLDebtRepayStrategy",
@@ -1637,7 +1637,7 @@
             ["&1", "&1", 0, "&eoa", "$1", 0],
             ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
         ],
-        "bundleId": 34
+        "bundleId": 81
     },
     {
         "name": "MorphoBlueBoostStrategy",
@@ -1741,7 +1741,7 @@
             ["&1", "&2", "&3", "&4", "&5", "$1", "&8", 0],
             ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
         ],
-        "bundleId": 34
+        "bundleId": 81
     },
     {
         "name": "AaveV3OpenOrderFromCollStrategy",
@@ -2195,7 +2195,7 @@
             ["&2", "&1", "$3", "&proxy"],
             ["&1", "&3", "&4"]
         ],
-        "bundleId": 44
+        "bundleId": 76
     },
     {
         "name": "FluidT1FLRepayStrategy",
@@ -2216,7 +2216,7 @@
             ["&2", "&1", "$1", "$3", "&proxy", 0, "&5", "&6", "&7"],
             ["&1", "&3", "&4"]
         ],
-        "bundleId": 44
+        "bundleId": 76
     },
     {
         "name": "FluidT1BoostStrategy",
@@ -2420,7 +2420,7 @@
             ["$4", "&proxy", 0, 0, 0, 0, "&3", "&4"],
             ["&2", "&1", "&3", "&4"]
         ],
-        "bundleId": 52
+        "bundleId": 79
     },
     {
         "name": "AaveV3GenericFLRepayStrategy",
@@ -2445,7 +2445,7 @@
             [0, 0, "$5", 0, "&3"],
             ["&2", "&1", "&3", "&4"]
         ],
-        "bundleId": 52
+        "bundleId": 79
     },
     {
         "name": "AaveV3GenericBoostStrategy",
@@ -2866,7 +2866,7 @@
             ["&1", "&2", "&proxy", 0, "$3"],
             ["&3", "&4", "&1", "&2"]
         ],
-        "bundleId": 66
+        "bundleId": 80
     },
     {
         "name": "AaveV4FLRepayStrategy",
@@ -2889,7 +2889,7 @@
             ["&1", "&2", 0, 0, "$1"],
             ["&3", "&4", "&1", "&2"]
         ],
-        "bundleId": 66
+        "bundleId": 80
     },
     {
         "name": "AaveV4BoostStrategy",
@@ -3146,5 +3146,49 @@
             ["&1", 0, "$1"],
             ["&1", "&eoa", 0]
         ]
+    },
+    {
+        "name": "MorphoBlueRepayOnPriceStrategy",
+        "id": 157,
+        "isContinuous": false,
+        "triggerIds": ["MorphoBluePriceTrigger"],
+        "actionIds": [
+            "MorphoBlueWithdrawCollateral",
+            "DFSSell",
+            "GasFeeTaker",
+            "MorphoBluePayback",
+            "MorphoBlueTargetRatioCheck"
+        ],
+        "paramMapping": [
+            ["&1", "&2", "&3", "&4", "&5", 0, "&7", "&proxy"],
+            ["&2", "&1", "$1", "&proxy", "&proxy"],
+            ["&1", "$2", 0],
+            ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&7"],
+            ["&1", "&2", "&3", "&4", "&5", "&7", "&6"]
+        ],
+        "bundleId": 84
+    },
+    {
+        "name": "MorphoBlueFLRepayOnPriceStrategy",
+        "id": 158,
+        "isContinuous": false,
+        "triggerIds": ["MorphoBluePriceTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTaker",
+            "MorphoBluePayback",
+            "MorphoBlueWithdrawCollateral",
+            "MorphoBlueTargetRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&2", "&1", 0, "&proxy", "&proxy"],
+            ["&1", "$2", 0],
+            ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&7"],
+            ["&1", "&2", "&3", "&4", "&5", "$1", "&7", 0],
+            ["&1", "&2", "&3", "&4", "&5", "&7", "&6"]
+        ],
+        "bundleId": 84
     }
 ]

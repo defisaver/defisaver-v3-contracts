@@ -9,12 +9,12 @@ import {
     IFluidVaultResolver
 } from "../interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidHelper } from "../actions/fluid/helpers/FluidHelper.sol";
-import { ChainlinkPriceLib } from "../utils/ChainlinkPriceLib.sol";
+import { PriceLib } from "../utils/PriceLib.sol";
 
 /// @dev This trigger only works for T1 vaults where we have automation
 /// @dev Should be changed in future if we automate other vault types as well
 contract FluidMinDebtTrigger is ITrigger, AdminAuth, FluidHelper {
-    using ChainlinkPriceLib for address;
+    using PriceLib for address;
 
     /// @param nftId nft id of the fluid position
     /// @param minDebt minimum debt in whole USD (no decimals, e.g. 5000 for 5000 USD) that the user must have for the trigger to return true

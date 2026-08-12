@@ -5,10 +5,10 @@ pragma solidity =0.8.24;
 import { IComet } from "../interfaces/protocols/compoundV3/IComet.sol";
 import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { ChainlinkPriceLib } from "../utils/ChainlinkPriceLib.sol";
+import { PriceLib } from "../utils/PriceLib.sol";
 
 contract CompV3MinDebtTrigger is ITrigger, AdminAuth {
-    using ChainlinkPriceLib for address;
+    using PriceLib for address;
 
     /// @param user address of the user whose position we check
     /// @param market address of the compoundV3 market

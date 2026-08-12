@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { AaveV3MinDebtTrigger } from "../../contracts/triggers/AaveV3MinDebtTrigger.sol";
+import { AaveV3MinDebtTrigger } from "../../contracts/triggers-additional/AaveV3MinDebtTrigger.sol";
 import { IPoolV3 } from "../../contracts/interfaces/protocols/aaveV3/IPoolV3.sol";
 import {
     IPoolAddressesProvider

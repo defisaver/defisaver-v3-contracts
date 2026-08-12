@@ -20,6 +20,7 @@ import { HandleAuth } from "../../contracts/actions/utils/HandleAuth.sol";
 import { SummerfiUnsub } from "../../contracts/actions/summerfi/SummerfiUnsub.sol";
 import { SummerfiUnsubV2 } from "../../contracts/actions/summerfi/SummerfiUnsubV2.sol";
 import { TokenizedVaultAdapter } from "../../contracts/actions/utils/TokenizedVaultAdapter.sol";
+import { UniswapClaim } from "../../contracts/actions/uniswap/UniswapClaim.sol";
 
 contract ActionsUtils {
     // @dev Change this value if we ever need to add more parameters to any action.
@@ -334,6 +335,19 @@ contract ActionsUtils {
                 from: _from,
                 to: _to,
                 operationId: _operationId
+            })
+        );
+    }
+
+    function uniswapClaimEncode(
+        uint256 _index,
+        address _to,
+        uint256 _amount,
+        bytes32[] memory _merkleProof
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            UniswapClaim.Params({
+                index: _index, to: _to, amount: _amount, merkleProof: _merkleProof
             })
         );
     }

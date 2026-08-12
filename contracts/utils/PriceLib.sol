@@ -4,11 +4,18 @@ pragma solidity =0.8.24;
 
 import { IFeedRegistry } from "../interfaces/protocols/chainlink/IFeedRegistry.sol";
 import { IWStEth } from "../interfaces/protocols/lido/IWStEth.sol";
+import {
+    ILendingPoolAddressesProviderV2
+} from "../interfaces/protocols/aaveV2/ILendingPoolAddressesProviderV2.sol";
+import { IPriceOracleGetterAave } from "../interfaces/protocols/aaveV2/IPriceOracleGetterAave.sol";
 import { Denominations } from "./Denominations.sol";
 
-/// @title ChainlinkPriceLib Simple library for fetching a token's USD price from Chainlink.
-/// @dev Uses the Chainlink Feed Registry for the current chain. Prices are returned with 8 decimals. Returns 0 if no feed exists.
-library ChainlinkPriceLib {
+/// @title PriceLib Simple library for fetching a token's USD price from Chainlink with fallback to Aave V3 oracle.
+/// @dev Uses the Chainlink Feed Registry for the current chain. Prices are returned with 8 decimals.
+/// @dev If the token has no USD feed, will fallback to using the ETH feed and the ETH/USD feed to calculate the USD price.
+/// @dev If there's no USD or ETH feed, will fallback to Aave V3 oracle.
+/// @dev If there's no price available from any source, returns 0.
+library PriceLib {
     error UnsupportedChain(uint256 chainId);
 
     uint256 internal constant WAD = 10 ** 18;
@@ -22,10 +29,11 @@ library ChainlinkPriceLib {
     address internal constant CHAINLINK_WBTC_ADDR = 0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB;
 
     /// @dev If the token has no USD feed, will fallback to using the ETH feed and the ETH/USD feed to calculate the USD price.
+    /// @dev If there's no USD or ETH feed, will fallback to Aave V3 oracle.
+    /// @dev If there's no price available from any source, returns 0.
     /// @notice Reverts if the chain is not supported.
     /// @param _inputTokenAddr Token address to fetch the USD price for.
     /// @return uint256 - Returns the latest USD price (8 decimals) for a token, or 0 if no feed exists.
-
     function getPriceInUSD(address _inputTokenAddr) internal view returns (uint256) {
         address chainlinkTokenAddr = _inputTokenAddr;
 
@@ -35,6 +43,9 @@ library ChainlinkPriceLib {
         }
 
         int256 price = getChainlinkPriceInUSD(chainlinkTokenAddr, true);
+        if (price == 0) {
+            price = int256(getAaveV3TokenPriceInUSD(_inputTokenAddr));
+        }
         if (price == 0) {
             return 0;
         }
@@ -112,6 +123,36 @@ library ChainlinkPriceLib {
             tokenAddrForChainlinkUsage = CHAINLINK_WBTC_ADDR;
         } else {
             tokenAddrForChainlinkUsage = _inputTokenAddr;
+        }
+    }
+
+    /// @dev Returns the USD price of a token from the Aave V3 oracle.
+    function getAaveV3TokenPriceInUSD(address _tokenAddr) internal view returns (uint256 price) {
+        address priceOracleAddress =
+            ILendingPoolAddressesProviderV2(getAaveV3Market()).getPriceOracle();
+
+        try IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr) returns (
+            uint256 tokenPrice
+        ) {
+            price = tokenPrice;
+        } catch {
+            price = 0;
+        }
+    }
+
+    function getAaveV3Market() internal view returns (address market) {
+        if (block.chainid == 1) {
+            market = 0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e;
+        } else if (block.chainid == 10) {
+            market = 0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb;
+        } else if (block.chainid == 8453) {
+            market = 0xe20fCBdBfFC4Dd138cE8b2E6FBb6CB49777ad64D;
+        } else if (block.chainid == 42_161) {
+            market = 0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb;
+        } else if (block.chainid == 59_144) {
+            market = 0x89502c3731F69DDC95B65753708A07F8Cd0373F4;
+        } else if (block.chainid == 9745) {
+            market = 0x061D8e131F26512348ee5FA42e2DF1bA9d6505E9;
         }
     }
 
