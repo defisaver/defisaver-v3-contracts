@@ -25,9 +25,9 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
     error UntrustedInitiator();
     /// @dev Caller in these functions must be relevant FL source address
     error UntrustedLender();
-    // Wrong FL payback amount sent
+    /// @dev Wrong FL payback amount sent
     error WrongPaybackAmountError();
-    // When FL source is not found
+    /// @dev When FL source is not found
     error NonexistentFLSource();
 
     enum FLSource {
