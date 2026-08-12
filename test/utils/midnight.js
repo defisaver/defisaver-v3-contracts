@@ -6,8 +6,29 @@ const MIDNIGHT_ADDRESS = '0xAdedD8ab6dE832766Fedf0FaC4992E5C4D3EA18A';
 const BASE_CHAIN_ID = 8453;
 const DEFAULT_SLIPPAGE = '0.5';
 const MAX_QUOTE_ATTEMPTS = 10;
+const BPS = hre.ethers.BigNumber.from(10_000);
 const WAD = hre.ethers.constants.WeiPerEther;
 const MAX_UINT128 = hre.ethers.BigNumber.from(2).pow(128).sub(1);
+
+const parseTenorSlippageBps = (slippagePercentString) => {
+    if (typeof slippagePercentString !== 'string') {
+        throw new Error('Tenor slippage must be a decimal percent string');
+    }
+
+    const slippageBps = hre.ethers.utils.parseUnits(slippagePercentString, 2);
+    if (slippageBps.lt(0) || slippageBps.gte(BPS)) {
+        throw new Error('Tenor slippage must be greater than or equal to 0 and less than 100');
+    }
+
+    return slippageBps;
+};
+
+const parseTenorQuotedUnits = (quotedUnits) => {
+    const units = hre.ethers.BigNumber.from(quotedUnits);
+    if (units.lte(0)) throw new Error('Tenor quoted units must be greater than 0');
+
+    return units;
+};
 
 const formatCollateralParams = (collateral) => [
     collateral.token,
@@ -158,15 +179,29 @@ const fetchTenorQuote = async ({ marketId, side, assets, units, taker }) => {
 
     return {
         quotedUnits,
+        rate: hre.ethers.BigNumber.from(result.rate),
+        rateQuoted: hre.ethers.BigNumber.from(result.rate_quoted),
         buyerAssets: hre.ethers.BigNumber.from(result.buyer_assets),
         sellerAssets: hre.ethers.BigNumber.from(result.seller_assets),
         offerFills: result.offers.map(formatTenorOfferFill),
     };
 };
 
-const fetchQuote = ({ quoteProvider = 'morpho', ...params }) => {
-    if (quoteProvider === 'morpho') return fetchMidnightQuote(params);
-    if (quoteProvider === 'tenor') return fetchTenorQuote(params);
+const fetchQuote = ({
+    quoteProvider = 'morpho',
+    marketId,
+    side,
+    assets,
+    units,
+    slippage = DEFAULT_SLIPPAGE,
+    taker,
+}) => {
+    if (quoteProvider === 'morpho') {
+        return fetchMidnightQuote({ marketId, side, assets, units, slippage });
+    }
+    if (quoteProvider === 'tenor') {
+        return fetchTenorQuote({ marketId, side, assets, units, taker });
+    }
 
     throw new Error(`Unsupported Midnight quote provider: ${quoteProvider}`);
 };
@@ -183,6 +218,22 @@ const calculateMinUnits = (assets, averageWorstPrice) => {
     const priceBn = hre.ethers.BigNumber.from(averageWorstPrice);
 
     return assetsBn.mul(WAD).div(priceBn);
+};
+
+const calculateTenorMaxUnits = (quotedUnits, slippagePercentString) => {
+    const units = parseTenorQuotedUnits(quotedUnits);
+    const slippageBps = parseTenorSlippageBps(slippagePercentString);
+    const denominator = BPS.sub(slippageBps);
+
+    return units.mul(BPS).div(denominator);
+};
+
+const calculateTenorMinUnits = (quotedUnits, slippagePercentString) => {
+    const units = parseTenorQuotedUnits(quotedUnits);
+    const slippageBps = parseTenorSlippageBps(slippagePercentString);
+    const denominator = BPS.add(slippageBps);
+
+    return units.mul(BPS).add(denominator.sub(1)).div(denominator);
 };
 
 const seedMidnightDebt = async (midnight, marketId, user, debt) => {
@@ -253,6 +304,8 @@ const fetchMidnightQuoteForMinFills = async ({
 module.exports = {
     calculateMaxUnits,
     calculateMinUnits,
+    calculateTenorMaxUnits,
+    calculateTenorMinUnits,
     fetchQuote,
     fetchMidnightQuote,
     fetchMidnightQuoteForMinFills,

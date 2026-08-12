@@ -21,6 +21,7 @@ const {
 } = require('../../utils/actions');
 const {
     calculateMaxUnits,
+    calculateTenorMaxUnits,
     fetchMidnightQuote,
     fetchMidnightQuoteForMinFills,
     fetchQuote,
@@ -110,8 +111,11 @@ describe('Midnight-Borrow-From-Orders', function () {
                 quoteProvider === 'tenor' ? quote.offerFills : quote.offerFills.slice(0, 1);
             const maxUnits =
                 quoteProvider === 'tenor'
-                    ? quote.quotedUnits
+                    ? calculateTenorMaxUnits(quote.quotedUnits, SLIPPAGE)
                     : calculateMaxUnits(borrowAmount, quote.averageWorstPrice);
+            if (quoteProvider === 'tenor') {
+                expect(maxUnits).to.be.gt(quote.quotedUnits);
+            }
             const [offer] = offerFills[0];
 
             const balanceBefore = await balanceOf(USDC_ADDRESS, senderAcc.address);

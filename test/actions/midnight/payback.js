@@ -20,6 +20,7 @@ const {
 } = require('../../utils/actions');
 const {
     calculateMinUnits,
+    calculateTenorMinUnits,
     fetchMidnightQuote,
     fetchMidnightQuoteForMinFills,
     fetchQuote,
@@ -140,8 +141,9 @@ describe('Midnight-Payback-From-Orders', function () {
             let seededDebt;
             if (quoteProvider === 'tenor') {
                 offerFills = quote.offerFills;
-                minUnits = quote.quotedUnits;
+                minUnits = calculateTenorMinUnits(quote.quotedUnits, SLIPPAGE);
                 seededDebt = quote.quotedUnits.mul(2);
+                expect(minUnits).to.be.lt(quote.quotedUnits);
             } else {
                 const expectedUnits = calculateMinUnits(paybackAmount, quote.averageBestPrice);
                 const offerFill = quote.offerFills.find((fill) =>
@@ -231,55 +233,68 @@ describe('Midnight-Payback-From-Orders', function () {
         await assertNoTokenResidue(proxy.address);
     });
 
-    it('should fully pay back with max amount and refund unused tokens', async () => {
-        const seededDebt = hre.ethers.utils.parseUnits('100', 6);
-        const quote = await fetchMidnightQuote({
-            marketId: MARKET_ID,
-            side: 'asks',
-            units: seededDebt,
-            slippage: SLIPPAGE,
+    PAYBACK_MARKETS.forEach(({ marketId, quoteProvider }) => {
+        it(`should fully pay back with max amount using ${quoteProvider} and refund unused tokens`, async () => {
+            const seededDebt = hre.ethers.utils.parseUnits('100', 6);
+            const quote = await fetchQuote({
+                quoteProvider,
+                marketId,
+                side: 'asks',
+                units: seededDebt,
+                slippage: SLIPPAGE,
+                taker: proxy.address,
+            });
+
+            if (quoteProvider === 'tenor') {
+                expect(quote.quotedUnits).to.eq(seededDebt);
+                expect(quote.buyerAssets).to.be.lt(seededDebt);
+            } else if (!quote.averageBestPrice.lt(WAD)) {
+                throw new Error('Midnight ask price must be below one for the refund test');
+            }
+
+            const offers = getUniqueOffers(quote.offerFills);
+            await seedMidnightDebt(midnight, marketId, proxy.address, seededDebt);
+            await fundAndApprove(seededDebt);
+
+            const consumedBefore = await Promise.all(
+                offers.map((offer) => midnight.consumed(offer[2], offer[6])),
+            );
+            const balanceBefore = await balanceOf(USDC_ADDRESS, senderAcc.address);
+
+            await midnightPaybackFromOrders(
+                proxy,
+                marketId,
+                nullAddress,
+                senderAcc.address,
+                hre.ethers.constants.MaxUint256,
+                seededDebt,
+                quote.offerFills,
+            );
+
+            const consumedAfter = await Promise.all(
+                offers.map((offer) => midnight.consumed(offer[2], offer[6])),
+            );
+            const usedOffers = consumedAfter.filter((consumed, i) =>
+                consumed.gt(consumedBefore[i]),
+            ).length;
+            const balanceAfter = await balanceOf(USDC_ADDRESS, senderAcc.address);
+            const spentAmount = balanceBefore.sub(balanceAfter);
+
+            expect(await midnight.debt(marketId, proxy.address)).to.eq(0);
+            expect(spentAmount).to.be.gt(0);
+            expect(spentAmount).to.be.lt(seededDebt);
+            if (quoteProvider === 'tenor') {
+                expect(spentAmount).to.eq(quote.buyerAssets);
+                expect(balanceAfter).to.eq(seededDebt.sub(quote.buyerAssets));
+            } else {
+                const worstPrice = quote.averageWorstPrice.gt(WAD) ? WAD : quote.averageWorstPrice;
+                const maxSpend = seededDebt.mul(worstPrice).add(WAD.sub(1)).div(WAD);
+                expect(spentAmount).to.be.lte(maxSpend);
+                expect(balanceAfter).to.eq(seededDebt.sub(spentAmount));
+            }
+            expect(usedOffers).to.be.gte(1);
+            await assertNoTokenResidue(proxy.address);
         });
-        if (!quote.averageBestPrice.lt(WAD)) {
-            throw new Error('Midnight ask price must be below one for the refund test');
-        }
-
-        const offers = getUniqueOffers(quote.offerFills);
-        await seedMidnightDebt(midnight, MARKET_ID, proxy.address, seededDebt);
-        await fundAndApprove(seededDebt);
-
-        const consumedBefore = await Promise.all(
-            offers.map((offer) => midnight.consumed(offer[2], offer[6])),
-        );
-        const balanceBefore = await balanceOf(USDC_ADDRESS, senderAcc.address);
-
-        await midnightPaybackFromOrders(
-            proxy,
-            MARKET_ID,
-            nullAddress,
-            senderAcc.address,
-            hre.ethers.constants.MaxUint256,
-            seededDebt,
-            quote.offerFills,
-        );
-
-        const consumedAfter = await Promise.all(
-            offers.map((offer) => midnight.consumed(offer[2], offer[6])),
-        );
-        const usedOffers = consumedAfter.filter((consumed, i) =>
-            consumed.gt(consumedBefore[i]),
-        ).length;
-        const balanceAfter = await balanceOf(USDC_ADDRESS, senderAcc.address);
-        const spentAmount = balanceBefore.sub(balanceAfter);
-        const worstPrice = quote.averageWorstPrice.gt(WAD) ? WAD : quote.averageWorstPrice;
-        const maxSpend = seededDebt.mul(worstPrice).add(WAD.sub(1)).div(WAD);
-
-        expect(await midnight.debt(MARKET_ID, proxy.address)).to.eq(0);
-        expect(spentAmount).to.be.gt(0);
-        expect(spentAmount).to.be.lt(seededDebt);
-        expect(spentAmount).to.be.lte(maxSpend);
-        expect(balanceAfter).to.eq(seededDebt.sub(spentAmount));
-        expect(usedOffers).to.be.gte(1);
-        await assertNoTokenResidue(proxy.address);
     });
 
     it('should skip a failed order and use a fallback order', async () => {
