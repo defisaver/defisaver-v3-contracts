@@ -343,6 +343,7 @@
   * [UniSupplyV3](actions/uniswap-v3/uniswapsupplyv3.md)
   * [UniCollectV3](actions/uniswap-v3/uniswapcollectv3.md)
   * [UniWithdrawV3](actions/uniswap-v3/uniswapwithdrawv3.md)
+  * [UniswapClaim](actions/uniswap-v3/uniswapclaim.md)
 * [Yearn](actions/yearn/README.md)
   * [YearnWithdraw](actions/yearn/yearnwithdraw.md)
   * [YearnSupply](actions/yearn/yearnsupply.md)
@@ -351,6 +352,15 @@
 
 ## Deployed Triggers <a href="#triggers" id="triggers"></a>
 
+* [Additional](triggers/additional/README.md)
+  * [AaveV3MinDebtTrigger](triggers/additional/aavev3mindebttrigger.md)
+  * [AaveV4MinDebtTrigger](triggers/additional/aavev4mindebttrigger.md)
+  * [CompV3MinDebtTrigger](triggers/additional/compv3mindebttrigger.md)
+  * [SparkMinDebtTrigger](triggers/additional/sparkmindebttrigger.md)
+  * [McdMinDebtTrigger](triggers/additional/mcdmindebttrigger.md)
+  * [MorphoBlueMinDebtTrigger](triggers/additional/morphobluemindebttrigger.md)
+  * [FluidMinDebtTrigger](triggers/additional/fluidmindebttrigger.md)
+  * [RequiredAmountAndAllowanceTrigger](triggers/additional/requiredamountandallowancetrigger.md)
 * [Utils](triggers/utils/README.md)
   * [ChainlinkPriceTrigger](triggers/utils/chainlinkpricetrigger.md)
   * [ClosePriceTrigger](triggers/utils/closepricetrigger.md)
