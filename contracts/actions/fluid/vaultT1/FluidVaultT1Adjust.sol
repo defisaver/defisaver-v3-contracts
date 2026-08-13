@@ -305,10 +305,11 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
             uint256 dustAmount = borrowTokenBalanceAfter - _snapshot.borrowTokenBalanceBefore;
             // This also supports plain ETH.
             _borrowToken.withdrawTokens(_params.from, dustAmount);
-            // Remove any dust approval left.
-            if (_borrowToken != TokenUtils.ETH_ADDR) {
-                _borrowToken.approveToken(_params.vault, 0);
-            }
+        }
+
+        // Remove any approval left.
+        if (_borrowToken != TokenUtils.ETH_ADDR) {
+            _borrowToken.removeAllowance(_params.vault);
         }
     }
 }

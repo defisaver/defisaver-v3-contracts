@@ -97,9 +97,12 @@ library FluidPaybackDexLogic {
                 TokenUtils.WETH_ADDR.withdrawTokens(_data.from, refund);
             } else {
                 _tokens.token0.withdrawTokens(_data.from, refund);
-                // Remove any dust approval.
-                _tokens.token0.approveToken(_data.vault, 0);
             }
+        }
+
+        // Remove any approval left.
+        if (!vars.isToken0Native) {
+            _tokens.token0.removeAllowance(_data.vault);
         }
     }
 
@@ -157,9 +160,12 @@ library FluidPaybackDexLogic {
                 TokenUtils.WETH_ADDR.withdrawTokens(_data.from, refund);
             } else {
                 _tokens.token1.withdrawTokens(_data.from, refund);
-                // Remove any dust approval.
-                _tokens.token1.approveToken(_data.vault, 0);
             }
+        }
+
+        // Remove any approval left.
+        if (!vars.isToken1Native) {
+            _tokens.token1.removeAllowance(_data.vault);
         }
     }
 

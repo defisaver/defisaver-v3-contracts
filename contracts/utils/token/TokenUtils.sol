@@ -21,6 +21,12 @@ library TokenUtils {
         }
     }
 
+    function removeAllowance(address _tokenAddr, address _to) internal {
+        if (_tokenAddr == ETH_ADDR) return;
+
+        IERC20(_tokenAddr).safeApprove(_to, 0);
+    }
+
     function pullTokensIfNeeded(address _token, address _from, uint256 _amount)
         internal
         returns (uint256)

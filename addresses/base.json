@@ -1379,28 +1379,32 @@
     },
     {
         "name": "FluidVaultT1Payback",
-        "address": "0x85Bfa7695e7FD1a14884797c9E80E1D7180f3755",
+        "address": "0xD4cEe5755e4f713B69f5Fc73068505ec6B9ee2a2",
         "id": "0x101b4845",
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Payback",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x85Bfa7695e7FD1a14884797c9E80E1D7180f3755",
             "0xA65daAa4FB4Fe9feaDF25bf2C062c3Faa2b02e5D",
             "0x56ca4b24D85c33F3A4Be918b7f2ce2831a723704"
         ]
     },
     {
         "name": "FluidVaultT1Adjust",
-        "address": "0x4405A81c25Be495325f76Aa4d82176f9ae3275bc",
+        "address": "0x2f7839a733B93641aa6a6AF0b593202335c351D3",
         "id": "0xce25def6",
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Adjust",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x93bFBf44b87be48D46b25Fe0C7F549A79Ca05167"]
+        "history": [
+            "0x4405A81c25Be495325f76Aa4d82176f9ae3275bc",
+            "0x93bFBf44b87be48D46b25Fe0C7F549A79Ca05167"
+        ]
     },
     {
         "name": "FluidRatioTrigger",
@@ -1547,14 +1551,14 @@
     },
     {
         "name": "FluidDexPayback",
-        "address": "0xc177c885872592EDA598276bD3FAe5B6d27F80Bf",
+        "address": "0xcaa8877aD3847B428135653AcA5fAd13a2811483",
         "id": "0x1de2c822",
         "path": "contracts/actions/fluid/dex/FluidDexPayback.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xc177c885872592EDA598276bD3FAe5B6d27F80Bf"]
     },
     {
         "name": "AaveV3QuotePriceRangeTrigger",

@@ -581,25 +581,25 @@
     },
     {
         "name": "FluidVaultT1Payback",
-        "address": "0x1420f4977E7B71AFddccBFc6F6e1505CefdF99F0",
+        "address": "0xdeF8B05Ce194D50C376233C9C5530027f6180442",
         "id": "0x101b4845",
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Payback.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x1420f4977E7B71AFddccBFc6F6e1505CefdF99F0"]
     },
     {
         "name": "FluidVaultT1Adjust",
-        "address": "0xD37d4DB98E67305ef92f34886B25500500E04Aed",
+        "address": "0xC196dC97Eb0B58E3755a71143b41D3F24595643f",
         "id": "0xce25def6",
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Adjust.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xD37d4DB98E67305ef92f34886B25500500E04Aed"]
     },
     {
         "name": "FluidDexOpen",
@@ -647,14 +647,14 @@
     },
     {
         "name": "FluidDexPayback",
-        "address": "0x04ce4b2a9F524d976a8eD8a49B9313C5a2C3ccAD",
+        "address": "0x3094D0D64fa5318162150720c19669d1A163937B",
         "id": "0x1de2c822",
         "path": "contracts/actions/fluid/dex/FluidDexPayback.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x04ce4b2a9F524d976a8eD8a49B9313C5a2C3ccAD"]
     },
     {
         "name": "PendleTokenRedeem",

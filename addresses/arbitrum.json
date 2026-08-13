@@ -1190,14 +1190,14 @@
     },
     {
         "name": "LlamaLendSelfLiquidate",
-        "address": "0xe63e836C3ab61481F60A9a56aA72d1D0c55Fc280",
+        "address": "0xC330F048B15CA5aadF34A9033B3a24c65200230A",
         "id": "0xafcc4eb7",
         "path": "contracts/actions/llamalend/LlamaLendSelfLiquidate.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xe63e836C3ab61481F60A9a56aA72d1D0c55Fc280"]
     },
     {
         "name": "LlamaLendPayback",
@@ -1406,28 +1406,32 @@
     },
     {
         "name": "FluidVaultT1Payback",
-        "address": "0xb1d9a049E9bbC212DdDfE9D6F37d268B1cf2b4B6",
+        "address": "0x19FF948437B7f1221173effC029739568F5f844a",
         "id": "0x101b4845",
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Payback",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xb1d9a049E9bbC212DdDfE9D6F37d268B1cf2b4B6",
             "0x226c871E0a27B12065c9128b8e7440b054b59155",
             "0x9Fc3FD0E181bD48e2D254dd071809527dED37e95"
         ]
     },
     {
         "name": "FluidVaultT1Adjust",
-        "address": "0xF8374Aa0F6d9D28790f90745f0360b5C945DEA20",
+        "address": "0x212bB7577B6b302450860E128Eb73Eb2F83514c7",
         "id": "0xce25def6",
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Adjust",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x00d45Aa82b487E633EF0D9fD9940cc786E9dcc14"]
+        "history": [
+            "0xF8374Aa0F6d9D28790f90745f0360b5C945DEA20",
+            "0x00d45Aa82b487E633EF0D9fD9940cc786E9dcc14"
+        ]
     },
     {
         "name": "FluidRatioTrigger",
@@ -1508,14 +1512,14 @@
     },
     {
         "name": "FluidDexPayback",
-        "address": "0xA9B46Da016F22cf9F8841A30881bB88E2Ad5CA94",
+        "address": "0x72b9AAf4864631976D764574f4780B1562CCF0F4",
         "id": "0x1de2c822",
         "path": "contracts/actions/fluid/dex/FluidDexPayback",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xA9B46Da016F22cf9F8841A30881bB88E2Ad5CA94"]
     },
     {
         "name": "CreateSub",
