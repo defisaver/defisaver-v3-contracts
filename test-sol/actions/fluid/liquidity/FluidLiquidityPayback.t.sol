@@ -8,6 +8,7 @@ import {
 import {
     IFluidVaultResolver
 } from "../../../../contracts/interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
+import { IERC20 } from "../../../../contracts/interfaces/token/IERC20.sol";
 import { FluidVaultT1Open } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Open.sol";
 import {
     FluidVaultT1Payback
@@ -263,6 +264,10 @@ contract TestFluidLiquidityPayback is FluidTestBase {
 
             // make sure no dust is left on wallet
             assertEq(vars.walletBorrowTokenBalanceAfter, vars.walletBorrowTokenBalanceBefore);
+
+            if (_isMaxPayback && !isNativePayback) {
+                assertEq(IERC20(tokens.borrow0).allowance(walletAddr, vaults[i]), 0);
+            }
 
             if (_isMaxPayback) {
                 assertEq(userPositionAfter.borrow, 0);

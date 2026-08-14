@@ -12,6 +12,7 @@ const {
     getContractFromRegistry,
     getProxy,
     approve,
+    getAllowance,
     setBalance,
     balanceOf,
     nullAddress,
@@ -1043,6 +1044,10 @@ const curveUsdSelfLiquidateTest = () =>
                     senderAcc.address,
                     senderAcc.address,
                 );
+
+                expect(
+                    await getAllowance(crvusdAddress, proxy.address, controllerAddress),
+                ).to.be.eq(0);
             });
 
             it('... should test liquidate action where we have enough in crvUsd', async () => {
@@ -1071,6 +1076,10 @@ const curveUsdSelfLiquidateTest = () =>
                     senderAcc.address,
                     senderAcc.address,
                 );
+
+                expect(
+                    await getAllowance(crvusdAddress, proxy.address, controllerAddress),
+                ).to.be.eq(0);
             });
 
             it(`... should test transient liquidate with collateral selling all coll for crvUSD for ${assetSymbol}`, async () => {

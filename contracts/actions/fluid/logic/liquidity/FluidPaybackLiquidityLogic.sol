@@ -86,10 +86,11 @@ library FluidPaybackLiquidityLogic {
                 uint256 dustAmount = borrowTokenBalanceAfter - borrowTokenBalanceBefore;
                 // This also supports plain ETH.
                 _data.borrowToken.withdrawTokens(_data.from, dustAmount);
-                // Remove any dust approval left.
-                if (!isEthPayback) {
-                    _data.borrowToken.approveToken(_data.vault, 0);
-                }
+            }
+
+            // Remove any approval left.
+            if (!isEthPayback) {
+                _data.borrowToken.removeAllowance(_data.vault);
             }
         }
 
