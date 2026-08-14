@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 contract MainnetFLAddresses {
-    address internal constant SOLO_MARGIN_ADDRESS = 0x1E0447b19BB6EcFdAe1e4AE1694b0C3659614e4e;
     address internal constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address internal constant DYDX_FL_FEE_FAUCET = 0x47f159C90850D5cE09E21F931d504536840f34b4;
