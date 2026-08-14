@@ -4163,25 +4163,31 @@
     },
     {
         "name": "LiquityV2SPDeposit",
-        "address": "0x73FF552646A7D93764Ff8D1F9e7662c422E715ef",
+        "address": "0x256e97E7f7B42Cf7De5258C59A2935AdEdDdfC63",
         "id": "0x042eb099",
         "path": "contracts/actions/liquityV2/stabilityPool/LiquityV2SPDeposit.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x1556711572a53c89912AE185f3a6Dba9FF365Bf3"]
+        "history": [
+            "0x73FF552646A7D93764Ff8D1F9e7662c422E715ef",
+            "0x1556711572a53c89912AE185f3a6Dba9FF365Bf3"
+        ]
     },
     {
         "name": "LiquityV2SPWithdraw",
-        "address": "0x8E8a4213745Ed68b3fce9d1500f563d885D02FDf",
+        "address": "0x7ab4A43DE2628EA53c88E27755325d090f28D9c9",
         "id": "0x1eea7fdb",
         "path": "contracts/actions/liquityV2/stabilityPool/LiquityV2SPWithdraw.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x237eaB8D7f9bBeaF8D27dB9797EB835e4062B8C2"]
+        "history": [
+            "0x8E8a4213745Ed68b3fce9d1500f563d885D02FDf",
+            "0x237eaB8D7f9bBeaF8D27dB9797EB835e4062B8C2"
+        ]
     },
     {
         "name": "LiquityV2SPClaimColl",
@@ -4196,14 +4202,15 @@
     },
     {
         "name": "LiquityV2View",
-        "address": "0xF1f3D940392ddAD78A5e2dE1b595aB529f63c365",
+        "address": "0x812985DaF1c471F1bA456e901258d98a9e759461",
         "id": "0xe993f355",
         "path": "contracts/views/LiquityV2View.sol",
-        "version": "1.0.5",
+        "version": "1.0.6",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
         "history": [
+            "0xF1f3D940392ddAD78A5e2dE1b595aB529f63c365",
             "0x111b737CF5233734cE16A6Ee2599aE862fB04485",
             "0x8ABc5D6850DF33D621c30ae487bab843deb9CB63",
             "0x60128705250fDf19F1e18b197D1436B30eDa3899",
