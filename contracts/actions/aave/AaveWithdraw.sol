@@ -5,7 +5,7 @@ pragma solidity =0.8.24;
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveHelper } from "./helpers/AaveHelper.sol";
-import { FLFeeFaucet } from "../../utils/fee/FLFeeFaucet.sol";
+import { FeeFaucet } from "../../utils/fee/FeeFaucet.sol";
 import { ILendingPoolV2 } from "../../interfaces/protocols/aaveV2/ILendingPoolV2.sol";
 
 /// @title Withdraw a token from an Aave market
@@ -85,9 +85,9 @@ contract AaveWithdraw is ActionBase, AaveHelper {
                 uint256 difference = _amount - aTokenBalance;
 
                 if (difference < 3) {
-                    FLFeeFaucet(DYDX_FL_FEE_FAUCET).my2Wei(_tokenAddr);
+                    FeeFaucet(FEE_FAUCET).my2Wei(_tokenAddr);
                     _tokenAddr.withdrawTokens(_to, difference);
-                    _tokenAddr.withdrawTokens(DYDX_FL_FEE_FAUCET, 2 - difference);
+                    _tokenAddr.withdrawTokens(FEE_FAUCET, 2 - difference);
                     amountToWithdraw = aTokenBalance;
                 }
             }

@@ -16,7 +16,7 @@ contract FLActionPaybackHarness is FLAction {
     }
 
     function faucetAddr() external pure returns (address) {
-        return DYDX_FL_FEE_FAUCET;
+        return FEE_FAUCET;
     }
 }
 

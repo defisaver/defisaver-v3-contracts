@@ -502,7 +502,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
         }
 
         // Take 2 wei of stETH to cover the rounding deficit.
-        flFeeFaucet.my2Wei(ST_ETH_ADDR);
+        feeFaucet.my2Wei(ST_ETH_ADDR);
 
         currBalance = ST_ETH_ADDR.getBalance(address(this));
 
@@ -513,7 +513,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
         // Keeping it would not cause issues, but returning it simplifies reasoning
         // and preserves the invariant that the flash loan should not leave any dust.
         if (currBalance > _expectedBalance) {
-            ST_ETH_ADDR.withdrawTokens(address(flFeeFaucet), currBalance - _expectedBalance);
+            ST_ETH_ADDR.withdrawTokens(address(feeFaucet), currBalance - _expectedBalance);
             currBalance = ST_ETH_ADDR.getBalance(address(this));
         }
 

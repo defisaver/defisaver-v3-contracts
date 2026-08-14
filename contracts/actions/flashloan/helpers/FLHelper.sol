@@ -11,7 +11,7 @@ import {
 } from "../../../interfaces/protocols/summerfi/IAccountImplementation.sol";
 import { IInstaAccountV2 } from "../../../interfaces/protocols/insta/IInstaAccountV2.sol";
 import { MainnetFLAddresses } from "./MainnetFLAddresses.sol";
-import { FLFeeFaucet } from "../../../utils/fee/FLFeeFaucet.sol";
+import { FeeFaucet } from "../../../utils/fee/FeeFaucet.sol";
 import { StrategyModel } from "../../../core/strategy/StrategyModel.sol";
 import { WalletType } from "../../../utils/DFSTypes.sol";
 import { DFSIds } from "../../../utils/DFSIds.sol";
@@ -21,7 +21,7 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
     uint16 internal constant AAVE_REFERRAL_CODE = 64;
     uint16 internal constant SPARK_REFERRAL_CODE = 64;
     string internal constant DEFISAVER_CONNECTOR_ID = "DEFI-SAVER-A";
-    FLFeeFaucet internal constant flFeeFaucet = FLFeeFaucet(DYDX_FL_FEE_FAUCET);
+    FeeFaucet internal constant feeFaucet = FeeFaucet(FEE_FAUCET);
 
     // Revert if execution fails when using safe wallet
     error SafeExecutionError();
