@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
+import {
+    ILlamaLendController
+} from "../../../interfaces/protocols/llamalend/ILlamaLendController.sol";
+import { ILlamaLendSwapper } from "../../../interfaces/protocols/llamalend/ILlamaLendSwapper.sol";
 import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { LlamaLendHelper } from "../helpers/LlamaLendHelper.sol";
 import { DFSExchangeData } from "../../../exchangeV3/DFSExchangeData.sol";
-import {
-    ILlamaLendController
-} from "../../../interfaces/protocols/llamalend/ILlamaLendController.sol";
 import { DFSIds } from "../../../utils/DFSIds.sol";
 
 /// @title LlamaLendBoost
@@ -58,21 +59,36 @@ contract LlamaLendBoost is ActionBase, LlamaLendHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _boost(Params memory _params) internal returns (uint256, bytes memory) {
-        if (_params.exData.srcAmount == 0) revert();
+        if (_params.exData.srcAmount == 0) revert LlamaLendZeroAmountError();
         if (!isControllerValid(_params.controllerAddress, _params.controllerId)) {
             revert InvalidLlamaLendController();
         }
 
+        address collToken = ILlamaLendController(_params.controllerAddress).collateral_token();
+        address debtToken = ILlamaLendController(_params.controllerAddress).borrowed_token();
+
+        // Validate exchange data (we are selling debt to buy more collateral)
+        if (_params.exData.srcAddr != debtToken) revert LlamaLendInvalidExchangeSrcToken();
+        if (_params.exData.destAddr != collToken) revert LlamaLendInvalidExchangeDestToken();
+
         address llamalendSwapper = registry.getAddr(DFSIds.LLAMALEND_SWAPPER);
 
-        uint256[] memory info = new uint256[](5);
-        info[0] = _params.gasUsed;
-        info[1] = _params.controllerId;
+        uint256[] memory callbackArgs = new uint256[](5);
+        callbackArgs[0] = _params.gasUsed;
+        callbackArgs[1] = _params.controllerId;
 
         transientStorage.setBytesTransiently(abi.encode(_params.exData));
 
         ILlamaLendController(_params.controllerAddress)
-            .borrow_more_extended(0, _params.exData.srcAmount, llamalendSwapper, info);
+            .borrow_more_extended(0, _params.exData.srcAmount, llamalendSwapper, callbackArgs);
+
+        // Sanity check:
+        // This should never happen and there shouldn't be any funds left on swapper contract after sell,
+        // but withdrawing it just in case. Since this action does not have a user recipient parameter,
+        // any recovered funds remain on the wallet itself, which is acceptable because:
+        // 1. It is not expected to happen at all
+        // 2. If it does happen, the user can withdraw the funds from the smart wallet at any time
+        ILlamaLendSwapper(llamalendSwapper).withdrawAll(_params.controllerAddress);
 
         return (_params.exData.srcAmount, abi.encode(_params));
     }

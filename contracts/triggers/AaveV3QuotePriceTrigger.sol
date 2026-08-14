@@ -9,6 +9,7 @@ import { DSMath } from "../_vendor/DS/DSMath.sol";
 import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 
 /// @title Trigger contract that verifies if current token price ratio is over/under the price ratio specified during subscription
+/// @dev The trigger expects the price input to be scaled by 1e8.
 contract AaveV3QuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelper {
     enum PriceState {
         OVER,

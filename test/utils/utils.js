@@ -1861,6 +1861,15 @@ const isCloseToDebtType = (automationSdk, closeStrategyType) => {
     );
 };
 
+const setNextBlockBaseFeeToOneWei = async () => {
+    if (hre.network.name === 'fork') return;
+
+    const method = hre.network.config.isAnvil
+        ? 'anvil_setNextBlockBaseFeePerGas'
+        : 'hardhat_setNextBlockBaseFeePerGas';
+    await hre.network.provider.send(method, ['0x1']);
+};
+
 module.exports = {
     addToExchangeAggregatorRegistry,
     getAddrFromRegistry,
@@ -1945,6 +1954,7 @@ module.exports = {
     isCloseToDebtType,
     fetchAmountInUSDPriceByAddress,
     formatMockExchangeObjUsingExistingPrices,
+    setNextBlockBaseFeeToOneWei,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,

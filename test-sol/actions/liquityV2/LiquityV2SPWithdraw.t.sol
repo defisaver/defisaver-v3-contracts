@@ -178,6 +178,8 @@ contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions, LiquityV2Utils {
 
         _simulateCollGain(_vars.stabilityPool, _vars.simulatedCollGain, _vars.collToken, walletAddr);
 
+        vm.warp(block.timestamp + 30 days);
+
         _vars.senderCollBalanceBefore = balanceOf(_vars.collToken, sender);
 
         _vars.senderBoldBalanceBefore = balanceOf(BOLD, sender);
@@ -225,6 +227,8 @@ contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions, LiquityV2Utils {
                 _vars.senderBoldBalanceAfter,
                 _vars.senderBoldBalanceBefore + _vars.withdrawAmount + _vars.boldGain
             );
+            assertEq(balanceOf(BOLD, walletAddr), 0);
+            assertEq(balanceOf(_vars.collToken, walletAddr), 0);
             assertEq(_vars.collGainAfter, 0);
             assertEq(_vars.boldGainAfter, 0);
         }
