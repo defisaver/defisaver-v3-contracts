@@ -14,7 +14,6 @@ contract PlasmaFLAddresses {
      * Token Addresses
      *
      */
-    address internal constant WETH_ADDR = 0x6100E367285b01F48D07953803A2d8dCA5D19873;
     address internal constant DAI_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant ST_ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant GHO_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;

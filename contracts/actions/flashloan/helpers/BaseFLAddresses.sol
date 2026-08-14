@@ -14,7 +14,6 @@ contract BaseFLAddresses {
      * Token Addresses
      *
      */
-    address internal constant WETH_ADDR = 0x4200000000000000000000000000000000000006;
     address internal constant DAI_ADDR = 0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb;
     address internal constant ST_ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant GHO_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
