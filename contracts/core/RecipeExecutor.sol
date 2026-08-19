@@ -136,6 +136,8 @@ contract RecipeExecutor is
                                 CONST
     //////////////////////////////////////////////////////////////*/
     IDFSRegistry private constant registry = IDFSRegistry(REGISTRY_ADDR);
+    /// @dev Marker passed as the extra last element of _actionCallData to request semi-continuous execution
+    bytes32 internal constant SEMI_CONTINUOUS_FLAG = keccak256("SEMI_CONTINUOUS_FLAG");
 
     /*//////////////////////////////////////////////////////////////
                                 ERRORS
@@ -149,6 +151,12 @@ contract RecipeExecutor is
 
     /// When calling TxSaver functions, caller has to be TxSaverExecutor
     error TxSaverAuthorizationError(address caller);
+
+    // Lengths must match, or actionsCallData must be one longer with the last element being SEMI_CONTINUOUS_FLAG
+    error InvalidActionCallDataLength(uint256 actionCallDataLength, uint256 strategyActionLength);
+
+    // When executing a strategy with semi-continuous execution, the last element of actionsCallData must be SEMI_CONTINUOUS_FLAG
+    error InvalidSemiContinuousFlag(bytes actionCallDataFlag, bytes32 semiContinuousFlag);
 
     /*//////////////////////////////////////////////////////////////
                                 EXTERNAL
@@ -257,17 +265,28 @@ contract RecipeExecutor is
         ISemiContinuousTracker semiContinuousTracker =
             ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER));
 
-        // if length is the same, it is default behaviour - disable the sub and finish execution
-        if (_actionCallData.length == strategy.actionIds.length) {
+        // must be either same length as strategy actions or one more with the last element being SEMI_CONTINUOUS_FLAG
+        if (_actionCallData.length > strategy.actionIds.length + 1) {
+            revert InvalidActionCallDataLength(_actionCallData.length, strategy.actionIds.length);
+        }
+
+        // if length is one more, the last actionCalldata must be SEMI_CONTINUOUS_FLAG
+        if (_actionCallData.length == strategy.actionIds.length + 1) {
+            if (bytes32(_actionCallData[_actionCallData.length - 1]) != SEMI_CONTINUOUS_FLAG) {
+                revert InvalidSemiContinuousFlag(
+                    _actionCallData[_actionCallData.length - 1], SEMI_CONTINUOUS_FLAG
+                );
+            }
+
+            // don't disable sub and start semi-continuous execution
+            if (!strategy.continuous) {
+                ISemiContinuousTracker(semiContinuousTracker).startExecution(_subId);
+            }
+        } else {
             // if this is a one time strategy
             if (!strategy.continuous) {
                 ISemiContinuousTracker(semiContinuousTracker).finishExecution(_subId);
                 ISubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId);
-            }
-        } else {
-            // if different, don't disable sub and start semi-continuous execution
-            if (!strategy.continuous) {
-                ISemiContinuousTracker(semiContinuousTracker).startExecution(_subId);
             }
         }
 
