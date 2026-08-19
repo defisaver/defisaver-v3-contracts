@@ -272,10 +272,10 @@ contract RecipeExecutor is
 
         // if length is one more, the last actionCalldata must be SEMI_CONTINUOUS_FLAG
         if (_actionCallData.length == strategy.actionIds.length + 1) {
-            if (bytes32(_actionCallData[_actionCallData.length - 1]) != SEMI_CONTINUOUS_FLAG) {
-                revert InvalidSemiContinuousFlag(
-                    _actionCallData[_actionCallData.length - 1], SEMI_CONTINUOUS_FLAG
-                );
+            bytes calldata flagData = _actionCallData[_actionCallData.length - 1];
+
+            if (flagData.length != 32 || bytes32(flagData) != SEMI_CONTINUOUS_FLAG) {
+                revert InvalidSemiContinuousFlag(flagData, SEMI_CONTINUOUS_FLAG);
             }
 
             // don't disable sub and start semi-continuous execution
