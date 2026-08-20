@@ -25,10 +25,6 @@ contract AaveV3QuotePriceRangeTrigger is ITrigger, AdminAuth, DSMath, AaveV3Rati
         uint256 upperPrice;
     }
 
-    struct CallParams {
-        uint256 subId;
-    }
-
     IAaveV3Oracle public constant aaveOracleV3 = IAaveV3Oracle(AAVE_ORACLE_V3);
 
     /// @notice Checks Aave V3 oracle for current prices and triggers if it's in a correct state

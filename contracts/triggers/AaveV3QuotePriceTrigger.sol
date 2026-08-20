@@ -26,10 +26,6 @@ contract AaveV3QuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelp
         uint8 state;
     }
 
-    struct CallParams {
-        uint256 subId;
-    }
-
     IAaveV3Oracle public constant aaveOracleV3 = IAaveV3Oracle(AAVE_ORACLE_V3);
 
     /// @notice Checks chainlink oracle for current prices and triggers if it's in a correct state
