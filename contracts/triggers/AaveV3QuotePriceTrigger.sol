@@ -7,16 +7,9 @@ import { IAaveV3Oracle } from "../interfaces/protocols/aaveV3/IAaveV3Oracle.sol"
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { DSMath } from "../_vendor/DS/DSMath.sol";
 import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
-import { SemiContinuousHelper } from "./helpers/SemiContinuousHelper.sol";
 
 /// @title Trigger contract that verifies if current token price ratio is over/under the price ratio specified during subscription
-contract AaveV3QuotePriceTrigger is
-    ITrigger,
-    AdminAuth,
-    DSMath,
-    AaveV3RatioHelper,
-    SemiContinuousHelper
-{
+contract AaveV3QuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelper {
     enum PriceState {
         OVER,
         UNDER
@@ -40,16 +33,8 @@ contract AaveV3QuotePriceTrigger is
     IAaveV3Oracle public constant aaveOracleV3 = IAaveV3Oracle(AAVE_ORACLE_V3);
 
     /// @notice Checks chainlink oracle for current prices and triggers if it's in a correct state
-    function isTriggered(bytes memory _callData, bytes memory _subData)
-        public
-        view
-        override
-        returns (bool)
-    {
+    function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
-        CallParams memory callParams = parseCallInputs(_callData);
-
-        if (_shouldTriggerAnyway(callParams.subId)) return true;
 
         uint256 currPrice = getPrice(triggerSubData.baseTokenAddr, triggerSubData.quoteTokenAddr);
 
@@ -88,13 +73,5 @@ contract AaveV3QuotePriceTrigger is
 
     function parseSubInputs(bytes memory _callData) public pure returns (SubParams memory params) {
         params = abi.decode(_callData, (SubParams));
-    }
-
-    function parseCallInputs(bytes memory _callData)
-        public
-        pure
-        returns (CallParams memory params)
-    {
-        params = abi.decode(_callData, (CallParams));
     }
 }

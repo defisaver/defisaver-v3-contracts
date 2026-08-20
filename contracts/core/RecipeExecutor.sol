@@ -253,12 +253,18 @@ contract RecipeExecutor is
             strategy = IStrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
         }
 
-        // check if all the triggers are true
-        (bool triggered, uint256 errIndex) =
-            _checkTriggers(strategy, _sub, _triggerCallData, _subId, SUB_STORAGE_ADDR);
+        // skip triggers check if the sub is already in semi-continuous execution
+        if (
+            ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER))
+                    .executionWalletOf(_subId) != address(this)
+        ) {
+            // check if all the triggers are true
+            (bool triggered, uint256 errIndex) =
+                _checkTriggers(strategy, _sub, _triggerCallData, _subId, SUB_STORAGE_ADDR);
 
-        if (!triggered) {
-            revert TriggerNotActiveError(errIndex);
+            if (!triggered) {
+                revert TriggerNotActiveError(errIndex);
+            }
         }
 
         // reading from registry
