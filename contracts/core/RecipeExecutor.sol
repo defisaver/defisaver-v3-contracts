@@ -272,7 +272,10 @@ contract RecipeExecutor is
             ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER));
 
         // must be either same length as strategy actions or one more with the last element being SEMI_CONTINUOUS_FLAG
-        if (_actionCallData.length > strategy.actionIds.length + 1) {
+        if (
+            _actionCallData.length < strategy.actionIds.length
+                || _actionCallData.length > strategy.actionIds.length + 1
+        ) {
             revert InvalidActionCallDataLength(_actionCallData.length, strategy.actionIds.length);
         }
 
