@@ -163,10 +163,17 @@ contract TestTriggerView is BaseTest, RegistryUtils, TriggerView {
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    /// @dev Starts semi-continuous execution for a sub by pranking its owner wallet.
+    /// @dev Starts semi-continuous execution for a sub. Mirrors the production flow: the
+    ///      registered StrategyExecutor approves the start first, then the owner wallet starts it.
     function _startExecutionForSub(uint256 _subId) internal {
         address subOwnerWallet = address(ISubStorage(SUB_STORAGE_ADDR).getSub(_subId).walletAddr);
         assertTrue(subOwnerWallet != address(0), "sub owner wallet not found");
+
+        address strategyExecutor = getAddr("StrategyExecutorID");
+        assertTrue(strategyExecutor != address(0), "strategy executor not registered");
+
+        prank(strategyExecutor);
+        tracker.approveStartOfExecution(_subId);
 
         prank(subOwnerWallet);
         tracker.startExecution(_subId);

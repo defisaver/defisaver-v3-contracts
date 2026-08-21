@@ -19,6 +19,9 @@ contract SemiContinuousTracker is CoreHelper, AdminAuth {
     /// @notice only strategy executor can approve sub to start execution
     error NotStrategyExecutor(address caller, address strategyExecutor);
 
+    /// @notice only approved sub can start execution
+    error NotApproved(uint256 subId, address caller);
+
     event ExecutionStarted(uint256 indexed subId, address indexed wallet);
     event ExecutionFinished(
         uint256 indexed subId, address indexed subOwner, address indexed initiator
@@ -46,6 +49,10 @@ contract SemiContinuousTracker is CoreHelper, AdminAuth {
     function startExecution(uint256 _subId) external {
         if (isInExecution(_subId)) return;
 
+        if (!isApprovedToStartExecution(_subId)) {
+            revert NotApproved(_subId, msg.sender);
+        }
+
         StrategyModel.StoredSubData memory subData = ISubStorage(SUB_STORAGE_ADDR).getSub(_subId);
         if (address(subData.walletAddr) != msg.sender) {
             revert NotSubOwner(_subId, msg.sender);
@@ -55,7 +62,7 @@ contract SemiContinuousTracker is CoreHelper, AdminAuth {
         emit ExecutionStarted(_subId, msg.sender);
     }
 
-    /// @notice only sub owner or admin can finish execution
+    /// @notice only sub owner or admin vault owner can finish execution
     function finishExecution(uint256 _subId) external {
         if (!isInExecution(_subId)) return;
 
@@ -68,14 +75,14 @@ contract SemiContinuousTracker is CoreHelper, AdminAuth {
         emit ExecutionFinished(_subId, address(subData.walletAddr), msg.sender);
     }
 
-    function isApprovedToStartExecution(uint256 _subId) external view returns (bool approved) {
+    function isInExecution(uint256 _subId) public view returns (bool) {
+        return executionWalletOf[_subId] != address(0);
+    }
+
+    function isApprovedToStartExecution(uint256 _subId) internal view returns (bool approved) {
         bytes32 slot = keccak256(abi.encode(START_APPROVAL_SLOT, _subId));
         assembly {
             approved := tload(slot)
         }
-    }
-
-    function isInExecution(uint256 _subId) public view returns (bool) {
-        return executionWalletOf[_subId] != address(0);
     }
 }
