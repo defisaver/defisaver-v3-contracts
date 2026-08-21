@@ -4,6 +4,14 @@ pragma solidity =0.8.24;
 
 import { IERC20 } from "../../contracts/interfaces/token/IERC20.sol";
 import { SafeERC20 } from "../../contracts/_vendor/openzeppelin/SafeERC20.sol";
+import { IFeedRegistry } from "../../contracts/interfaces/protocols/chainlink/IFeedRegistry.sol";
+import {
+    ILendingPoolAddressesProviderV2
+} from "../../contracts/interfaces/protocols/aaveV2/ILendingPoolAddressesProviderV2.sol";
+import {
+    IPriceOracleGetterAave
+} from "../../contracts/interfaces/protocols/aaveV2/IPriceOracleGetterAave.sol";
+import { PriceLib } from "../../contracts/utils/PriceLib.sol";
 import { Config } from "../config/Config.sol";
 import { Addresses } from "./helpers/MainnetAddresses.sol";
 
@@ -186,6 +194,22 @@ contract BaseTest is Config {
 
     function startPrank(address _sender) internal {
         vm.startPrank(_sender);
+    }
+
+    /// @notice Forces PriceLib.getPriceInUSD to 0 for every token.
+    /// @dev PriceLib reads Chainlink first and falls back to the Aave V3 oracle, so both sources
+    ///      have to be silenced.
+    function mockZeroTokenPrices() internal {
+        vm.mockCall(
+            address(PriceLib.getFeedRegistry()),
+            abi.encodeWithSelector(IFeedRegistry.latestRoundData.selector),
+            abi.encode(uint80(0), int256(0), uint256(0), uint256(0), uint80(0))
+        );
+        vm.mockCall(
+            ILendingPoolAddressesProviderV2(PriceLib.getAaveV3Market()).getPriceOracle(),
+            abi.encodeWithSelector(IPriceOracleGetterAave.getAssetPrice.selector),
+            abi.encode(uint256(0))
+        );
     }
 
     function removeSelector(bytes memory _data) internal pure returns (bytes memory) {

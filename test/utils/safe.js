@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 const hre = require('hardhat');
-const { nullAddress } = require('./utils');
+
+const nullAddress = '0x0000000000000000000000000000000000000000';
 
 const SAFE_PROXY_FACTORY_ADDR = '0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67';
 const SAFE_SINGLETON_ADDR = '0x41675C099F32341bf84BFc5382aF534df5C7461a';

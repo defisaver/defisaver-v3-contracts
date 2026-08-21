@@ -66,7 +66,8 @@ contract LiquityV2SPWithdraw is ActionBase, LiquityV2Helper {
     function _spWithdraw(Params memory _params) internal returns (uint256, bytes memory) {
         IStabilityPool pool = IStabilityPool(IAddressesRegistry(_params.market).stabilityPool());
 
-        uint256 boldGain = _params.doClaim ? pool.getDepositorYieldGain(address(this)) : 0;
+        uint256 boldGain =
+            _params.doClaim ? pool.getDepositorYieldGainWithPending(address(this)) : 0;
 
         uint256 collGain = _params.doClaim
             ? pool.getDepositorCollGain(address(this)) + pool.stashedColl(address(this))
