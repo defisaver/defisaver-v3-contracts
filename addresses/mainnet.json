@@ -2117,14 +2117,17 @@
     },
     {
         "name": "SparkRatioTrigger",
-        "address": "0xE79EB831D3Fd8e9AC9B709ABC000131FB761f930",
+        "address": "0x8011ebcD2423f8ED1f91d623EF4867A8aD2cBaD8",
         "id": "0xbfb2ea35",
         "path": "contracts/triggers/SparkRatioTrigger.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x1F61250B3eFB747C7C0A9dF4851935C95CE387cC"]
+        "history": [
+            "0xE79EB831D3Fd8e9AC9B709ABC000131FB761f930",
+            "0x1F61250B3eFB747C7C0A9dF4851935C95CE387cC"
+        ]
     },
     {
         "name": "AaveV3RatioCheck",
@@ -2142,14 +2145,17 @@
     },
     {
         "name": "SparkRatioCheck",
-        "address": "0x234dCAF981FE2BdB2D0255F4bCdDbEDED0892f5B",
+        "address": "0x6d4B33a9190CA2980de02102cDC086048d24628a",
         "id": "0xaf91e475",
         "path": "contracts/actions/checkers/SparkRatioCheck.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x38D9fdc88f304d9E271679447FF07126F54CDff9"]
+        "history": [
+            "0x234dCAF981FE2BdB2D0255F4bCdDbEDED0892f5B",
+            "0x38D9fdc88f304d9E271679447FF07126F54CDff9"
+        ]
     },
     {
         "name": "AaveV3View",
@@ -2181,14 +2187,15 @@
     },
     {
         "name": "SparkView",
-        "address": "0xB6893bd106f6b15D1213d570A8E362aC081C9C74",
+        "address": "0x834e866B3A33a4b186e80FB8aD36d27961C0024E",
         "id": "0xd6f690a9",
         "path": "contracts/views/SparkView.sol",
-        "version": "1.0.6",
+        "version": "1.0.7",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xB6893bd106f6b15D1213d570A8E362aC081C9C74",
             "0x79df6aF8738d98D12c16ca59e908445F981F7eAb",
             "0x080f99a5E039e863EC61bbEBBc48a409E75C58F5",
             "0xD3780b6A694C3573C669A10bc10f61e3401412B8",
@@ -3595,14 +3602,15 @@
     },
     {
         "name": "CompV3RatioCheck",
-        "address": "0x314Bd8fFe51f6Ea7bAf978c61762F7eAaA1B5D34",
+        "address": "0xc6382c776Ff008B4f60E336f763499166Cb0ebF5",
         "id": "0x2ce67bb9",
         "path": "contracts/actions/checkers/CompV3RatioCheck.sol",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x314Bd8fFe51f6Ea7bAf978c61762F7eAaA1B5D34",
             "0xC98d94791216E6c5cf24FD3D2BBFdc577113331B",
             "0x008E50774B26E92179fe25233E6ee7399c5A11F5",
             "0xEeb7e195d69479910d071Ac1dBC923A17d042960"
@@ -3610,14 +3618,17 @@
     },
     {
         "name": "CompV3RatioTrigger",
-        "address": "0x802bBe746AcE6D0bED9aB58622D88E553fe59720",
+        "address": "0xe0153E644736a57e0aC47100D5F4CE682576D772",
         "id": "0x506812d0",
         "path": "contracts/triggers/CompV3RatioTrigger.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x8ACCaf4e0054AD73789A3ebF344c3061804c29D8"]
+        "history": [
+            "0x802bBe746AcE6D0bED9aB58622D88E553fe59720",
+            "0x8ACCaf4e0054AD73789A3ebF344c3061804c29D8"
+        ]
     },
     {
         "name": "CompV3SubProxy",
@@ -4631,14 +4642,14 @@
     },
     {
         "name": "CompV3PriceTrigger",
-        "address": "0xc7F3bc2E90957f7A64275b03f01EE72c6C11afD3",
+        "address": "0x96457C38123b5fFa9c5d389C56d14826ee1b9636",
         "id": "0xb67d04b5",
         "path": "contracts/actions/compV3/CompV3PriceTrigger.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xc7F3bc2E90957f7A64275b03f01EE72c6C11afD3"]
     },
     {
         "name": "CompV3PriceRangeTrigger",
@@ -4836,14 +4847,17 @@
     },
     {
         "name": "SparkTargetRatioCheck",
-        "address": "0xb43405A165b6827c665dAE8Da5b81773D9c09F94",
+        "address": "0xcC677Ae3fDBb938D4B67548BE878d4444E9a86C7",
         "id": "0x66d60c1e",
         "path": "contracts/actions/checkers/SparkTargetRatioCheck.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x4E5044F622C0FcAb587106847F4889d3AB065c79"]
+        "history": [
+            "0xb43405A165b6827c665dAE8Da5b81773D9c09F94",
+            "0x4E5044F622C0FcAb587106847F4889d3AB065c79"
+        ]
     },
     {
         "name": "SFProxyEntryPoint",

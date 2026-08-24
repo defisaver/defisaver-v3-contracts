@@ -1185,14 +1185,14 @@
     },
     {
         "name": "CompV3RatioTrigger",
-        "address": "0x321639cc7492D97294ADA6B6Ad867d93673316D4",
+        "address": "0x904BA4140ECB9583aE729d4BDBCa8B9FBD2694B4",
         "id": "0x506812d0",
         "path": "contracts/triggers/CompV3RatioTrigger.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x321639cc7492D97294ADA6B6Ad867d93673316D4"]
     },
     {
         "name": "MerklClaim",
@@ -1367,6 +1367,28 @@
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CompV3PriceTrigger",
+        "address": "0x485fB3e0b7cC42d8535A32D8284317510541E629",
+        "id": "0xb67d04b5",
+        "path": "contracts/triggers/CompV3PriceTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CompV3RatioCheck",
+        "address": "0x9a2806bbAed273C40D0BF2767251f97742E451e5",
+        "id": "0x2ce67bb9",
+        "path": "contracts/actions/checkers/CompV3RatioCheck.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     }

@@ -1070,25 +1070,29 @@
     },
     {
         "name": "CompV3RatioTrigger",
-        "address": "0x378CeAD89a5452C325Ad1131AA66f3ddc1D5Da5b",
+        "address": "0x8E82Bc59fB6f1CD9fE4203F51463E6Ee55FdC1F2",
         "id": "0x506812d0",
         "path": "contracts/triggers/CompV3RatioTrigger.sol",
-        "version": "1.0.1",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": ["0x3ee4A07722C8Df4A3259Eba90644F30f4A0caeed"]
-    },
-    {
-        "name": "CompV3RatioCheck",
-        "address": "0x854E7099E98693Cb7c10870E0aB6EDCb9281E98C",
-        "id": "0x2ce67bb9",
-        "path": "contracts/actions/checkers/CompV3RatioCheck.sol",
         "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x378CeAD89a5452C325Ad1131AA66f3ddc1D5Da5b",
+            "0x3ee4A07722C8Df4A3259Eba90644F30f4A0caeed"
+        ]
+    },
+    {
+        "name": "CompV3RatioCheck",
+        "address": "0xC6E4095246d2163b4F7868Ad5Fe7FBdB67d42861",
+        "id": "0x2ce67bb9",
+        "path": "contracts/actions/checkers/CompV3RatioCheck.sol",
+        "version": "1.0.3",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": [
+            "0x854E7099E98693Cb7c10870E0aB6EDCb9281E98C",
             "0xDB0b878b3A496E18F8a77dA47Ac76b07153f0899",
             "0x9A481a33d27dE100de7Eb12d7c35028c1aCedDEa"
         ]
@@ -1578,14 +1582,14 @@
     },
     {
         "name": "CompV3PriceTrigger",
-        "address": "0x5fc60E4746b25Dc70bb82A190623373c6a66abEB",
+        "address": "0xd855f1fD424fE7e658C4684cfE497dEdaeA7de49",
         "id": "0xb67d04b5",
         "path": "contracts/actions/compV3/CompV3PriceTrigger.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x5fc60E4746b25Dc70bb82A190623373c6a66abEB"]
     },
     {
         "name": "CompV3PriceRangeTrigger",
