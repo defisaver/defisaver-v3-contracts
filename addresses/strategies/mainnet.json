@@ -1850,7 +1850,7 @@
             ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&7"],
             ["&1", "&2", "&3", "&4", "&5", "&7", "&6"]
         ],
-        "bundleId": 38
+        "bundleId": 85
     },
     {
         "name": "MorphoBlueFLBoostOnTargetPriceStrategy",
@@ -1873,7 +1873,7 @@
             ["&1", "&2", "&3", "&4", "&5", "$1", "&7", 0],
             ["&1", "&2", "&3", "&4", "&5", "&7", "&6"]
         ],
-        "bundleId": 38
+        "bundleId": 85
     },
     {
         "name": "LiquityV2RepayStrategy",
@@ -2680,7 +2680,7 @@
             ["&3", 0, "$1"],
             ["&3", "&eoa", 0]
         ],
-        "bundleId": 57
+        "bundleId": 92
     },
     {
         "name": "SparkGenericFLCloseToCollStrategy",
@@ -2707,7 +2707,7 @@
             ["&1", 0, "$1"],
             ["&1", "&3", "&eoa", "&eoa", 0, 0]
         ],
-        "bundleId": 57
+        "bundleId": 92
     },
     {
         "name": "MorphoBlueFLCloseToDebtStrategy",
@@ -2732,7 +2732,7 @@
             ["&1", 0, "$1"],
             ["&1", "&eoa", 0]
         ],
-        "bundleId": 58
+        "bundleId": 87
     },
     {
         "name": "MorphoBlueFLCloseToCollStrategy",
@@ -2757,7 +2757,7 @@
             ["&2", 0, "$1"],
             ["&2", "&1", "&eoa", "&eoa", 0, 0]
         ],
-        "bundleId": 58
+        "bundleId": 87
     },
     {
         "name": "SparkRepayOnPriceStrategy",
@@ -3166,7 +3166,7 @@
             ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&7"],
             ["&1", "&2", "&3", "&4", "&5", "&7", "&6"]
         ],
-        "bundleId": 84
+        "bundleId": 86
     },
     {
         "name": "MorphoBlueFLRepayOnPriceStrategy",
@@ -3189,6 +3189,210 @@
             ["&1", "&2", "&3", "&4", "&5", "$1", "&7", 0],
             ["&1", "&2", "&3", "&4", "&5", "&7", "&6"]
         ],
-        "bundleId": 84
+        "bundleId": 86
+    },
+    {
+        "name": "SparkGenericRepayStrategy",
+        "id": 159,
+        "isContinuous": true,
+        "triggerIds": ["SparkRatioTrigger"],
+        "actionIds": [
+            "PullToken",
+            "SparkWithdraw",
+            "DFSSell",
+            "GasFeeTaker",
+            "SparkPayback",
+            "SparkRatioCheck"
+        ],
+        "paramMapping": [
+            [0, "&4", 0],
+            [0, 0, "$1", "&proxy", "&3"],
+            [0, 0, "$2", "&proxy", "&proxy"],
+            [0, "$3", 0],
+            ["$4", "&proxy", 0, 0, 0, 0, "&3", "&4"],
+            ["&2", "&1", "&3", "&4"]
+        ],
+        "bundleId": 93
+    },
+    {
+        "name": "SparkGenericFLRepayStrategy",
+        "id": 160,
+        "isContinuous": true,
+        "triggerIds": ["SparkRatioTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTaker",
+            "SparkPayback",
+            "PullToken",
+            "SparkWithdraw",
+            "SparkRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            [0, 0, 0, "&proxy", "&proxy"],
+            [0, "$2", 0],
+            ["$3", "&proxy", 0, 0, 0, 0, "&3", "&4"],
+            [0, "&4", "$1"],
+            [0, 0, "$5", 0, "&3"],
+            ["&2", "&1", "&3", "&4"]
+        ],
+        "bundleId": 93
+    },
+    {
+        "name": "SparkGenericBoostStrategy",
+        "id": 161,
+        "isContinuous": true,
+        "triggerIds": ["SparkRatioTrigger"],
+        "actionIds": ["SparkBorrow", "DFSSell", "GasFeeTaker", "SparkSupply", "SparkRatioCheck"],
+        "paramMapping": [
+            [0, "&proxy", 0, 0, 0, 0, "&3", "&4"],
+            [0, 0, "$1", "&proxy", "&proxy"],
+            [0, "$2", 0],
+            ["$3", "&proxy", 0, 0, 0, 0, "&3", "&4"],
+            ["&2", "&1", "&3", "&4"]
+        ],
+        "bundleId": 89
+    },
+    {
+        "name": "SparkGenericFLBoostStrategy",
+        "id": 162,
+        "isContinuous": true,
+        "triggerIds": ["SparkRatioTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTaker",
+            "SparkSupply",
+            "SparkBorrow",
+            "SparkRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            [0, 0, 0, "&proxy", "&proxy"],
+            [0, "$2", 0],
+            ["$3", "&proxy", 0, 0, 0, 0, "&3", "&4"],
+            ["$1", 0, 0, 0, 0, 0, "&3", "&4"],
+            ["&2", "&1", "&3", "&4"]
+        ],
+        "bundleId": 89
+    },
+    {
+        "name": "SparkGenericRepayOnPriceStrategy",
+        "id": 163,
+        "isContinuous": false,
+        "triggerIds": ["SparkQuotePriceTrigger"],
+        "actionIds": [
+            "PullToken",
+            "SparkWithdraw",
+            "DFSSell",
+            "GasFeeTaker",
+            "SparkPayback",
+            "SparkTargetRatioCheck"
+        ],
+        "paramMapping": [
+            [0, "&7", 0],
+            ["&2", 0, "$1", "&proxy", "&5"],
+            ["&1", "&3", "$2", "&proxy", "&proxy"],
+            ["&3", "$3", 0],
+            ["$4", "&proxy", 0, "&4", 0, 0, "&5", "&7"],
+            ["&6", "&5", "&7"]
+        ],
+        "bundleId": 90
+    },
+    {
+        "name": "SparkGenericFLRepayOnPriceStrategy",
+        "id": 164,
+        "isContinuous": false,
+        "triggerIds": ["SparkQuotePriceTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTaker",
+            "SparkPayback",
+            "PullToken",
+            "SparkWithdraw",
+            "SparkTargetRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", "&3", 0, "&proxy", "&proxy"],
+            ["&3", "$2", 0],
+            ["$3", "&proxy", 0, "&4", 0, 0, "&5", "&7"],
+            [0, "&7", "$1"],
+            ["&2", 0, "$5", 0, "&5"],
+            ["&6", "&5", "&7"]
+        ],
+        "bundleId": 90
+    },
+    {
+        "name": "SparkGenericBoostOnPriceStrategy",
+        "id": 165,
+        "isContinuous": false,
+        "triggerIds": ["SparkQuotePriceTrigger"],
+        "actionIds": [
+            "SparkBorrow",
+            "DFSSell",
+            "GasFeeTaker",
+            "SparkSupply",
+            "SparkTargetRatioCheck"
+        ],
+        "paramMapping": [
+            [0, "&proxy", 0, "&4", 0, 0, "&5", "&7"],
+            ["&3", "&1", "$1", "&proxy", "&proxy"],
+            ["&1", "$2", 0],
+            ["$3", "&proxy", "&2", 0, 0, 0, "&5", "&7"],
+            ["&6", "&5", "&7"]
+        ],
+        "bundleId": 91
+    },
+    {
+        "name": "SparkGenericFLBoostOnPriceStrategy",
+        "id": 166,
+        "isContinuous": false,
+        "triggerIds": ["SparkQuotePriceTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTaker",
+            "SparkSupply",
+            "SparkBorrow",
+            "SparkTargetRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&3", "&1", 0, "&proxy", "&proxy"],
+            ["&1", "$2", 0],
+            ["$3", "&proxy", "&2", 0, 0, 0, "&5", "&7"],
+            ["$1", 0, 0, "&4", 0, 0, "&5", "&7"],
+            ["&6", "&5", "&7"]
+        ],
+        "bundleId": 91
+    },
+    {
+        "name": "SparkGenericFLCollateralSwitchStrategy",
+        "id": 167,
+        "isContinuous": false,
+        "triggerIds": ["SparkQuotePriceTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTaker",
+            "SparkSupply",
+            "PullToken",
+            "SparkWithdraw",
+            "SendToken",
+            "SendTokenAndUnwrap"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", "&3", 0, "&proxy", "&proxy"],
+            ["&3", "$2", 0],
+            ["$3", "&proxy", "&4", 0, 0, 0, "&5", "&7"],
+            [0, "&7", "&6"],
+            ["&2", 0, "$5", "&proxy", "&5"],
+            ["&1", 0, "$1"],
+            ["&1", "&eoa", 0]
+        ]
     }
 ]
