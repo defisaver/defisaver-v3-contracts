@@ -132,11 +132,10 @@ const exportAllStrategies = async (options) => {
     });
     const columns = ['strategyId', 'name', 'bundles'];
 
-    if (bundleNames) {
-        columns.push('bundleNames');
-    }
-
     if (!options.simple) {
+        if (bundleNames) {
+            columns.push('bundleNames');
+        }
         columns.push('triggerIds', 'actionIds', 'paramMapping');
     }
 
