@@ -12,7 +12,28 @@ const strategyStorageAbi =
 const bundleStorageAbi =
     require('../artifacts/contracts/core/strategy/BundleStorage.sol/BundleStorage.json').abi;
 
+let sdkBundleEnums;
+
+try {
+    // eslint-disable-next-line global-require
+    const { enums } = require('@defisaver/automation-sdk');
+    sdkBundleEnums = enums.Bundles;
+} catch {
+    sdkBundleEnums = undefined;
+}
+
 let network = 'mainnet';
+
+const getBundleNamesForNetwork = () => {
+    const enumName = {
+        mainnet: 'MainnetIds',
+        optimism: 'OptimismIds',
+        arbitrum: 'ArbitrumIds',
+        base: 'BaseIds',
+    }[network];
+
+    return sdkBundleEnums?.[enumName];
+};
 
 const setStrategyAndBundleContracts = async (options) => {
     network = options.network.length === 0 ? 'mainnet' : options.network;
@@ -42,6 +63,122 @@ const getStrategy = async (id, options) => {
     const strategy = await strategyStorage.getStrategy(id);
 
     console.log(strategy);
+};
+
+const writeCsv = (rows, columns, outputFile) => {
+    const escapeCsvValue = (value) => {
+        const stringValue = String(value);
+
+        if (/[",\n]/.test(stringValue)) {
+            return `"${stringValue.replace(/"/g, '""')}"`;
+        }
+
+        return stringValue;
+    };
+
+    const csv = [
+        columns.join(','),
+        ...rows.map((row) => columns.map((column) => escapeCsvValue(row[column])).join(',')),
+    ].join('\n');
+    const filePath = path.resolve(outputFile);
+
+    fs.writeFileSync(filePath, `${csv}\n`);
+    console.log(`Export written to ${filePath}`);
+};
+
+const getAllBundles = async (bundleStorage) => {
+    const bundleCount = await bundleStorage.getBundleCount();
+
+    return bundleStorage.getPaginatedBundles(0, bundleCount.toString());
+};
+
+const exportAllStrategies = async (options) => {
+    const { strategyStorage, bundleStorage } = await setStrategyAndBundleContracts(options);
+    const strategyCount = await strategyStorage.getStrategyCount();
+    const [strategies, bundles] = await Promise.all([
+        strategyStorage.getPaginatedStrategies(0, strategyCount.toString()),
+        getAllBundles(bundleStorage),
+    ]);
+    const strategyBundles = {};
+
+    bundles.forEach((bundle, bundleId) => {
+        bundle.strategyIds.forEach((strategyId) => {
+            const id = strategyId.toString();
+
+            strategyBundles[id] = strategyBundles[id] || [];
+            strategyBundles[id].push(bundleId);
+        });
+    });
+
+    const bundleNames = getBundleNamesForNetwork();
+    const rows = strategies.map((strategy, strategyId) => {
+        const bundleIds = strategyBundles[strategyId] || [];
+        const row = {
+            strategyId,
+            name: strategy.name,
+            bundles: JSON.stringify(bundleIds),
+            triggerIds: JSON.stringify(strategy.triggerIds),
+            actionIds: JSON.stringify(strategy.actionIds),
+            paramMapping: JSON.stringify(strategy.paramMapping),
+        };
+
+        if (bundleNames) {
+            row.bundleNames = JSON.stringify(
+                bundleIds.map((bundleId) => bundleNames[bundleId] || ''),
+            );
+        }
+
+        return row;
+    });
+    const columns = ['strategyId', 'name', 'bundles'];
+
+    if (bundleNames) {
+        columns.push('bundleNames');
+    }
+
+    if (!options.simple) {
+        columns.push('triggerIds', 'actionIds', 'paramMapping');
+    }
+
+    console.table(rows, columns);
+    writeCsv(rows, columns, options.output);
+};
+
+const exportAllBundles = async (options) => {
+    const { strategyStorage, bundleStorage } = await setStrategyAndBundleContracts(options);
+    const strategyCount = await strategyStorage.getStrategyCount();
+    const [strategies, bundles] = await Promise.all([
+        strategyStorage.getPaginatedStrategies(0, strategyCount.toString()),
+        getAllBundles(bundleStorage),
+    ]);
+    const bundleNames = getBundleNamesForNetwork();
+    const rows = bundles.map((bundle, bundleId) => {
+        const row = {
+            bundleId,
+            strategyIds: JSON.stringify(
+                bundle.strategyIds.map((strategyId) => strategyId.toString()),
+            ),
+            strategyNames: JSON.stringify(
+                bundle.strategyIds.map((strategyId) => strategies[strategyId.toString()].name),
+            ),
+        };
+
+        if (bundleNames) {
+            row.bundleName = bundleNames[bundleId] || '';
+        }
+
+        return row;
+    });
+    const columns = ['bundleId'];
+
+    if (bundleNames) {
+        columns.push('bundleName');
+    }
+
+    columns.push('strategyIds', 'strategyNames');
+
+    console.table(rows, columns);
+    writeCsv(rows, columns, options.output);
 };
 
 const getAllStrategies = async (options) => {
@@ -121,6 +258,27 @@ const getAllStrategies = async (options) => {
         )
         .action(async (options) => {
             await getAllStrategies(options);
+            process.exit(0);
+        });
+
+    program
+        .command('export-all-strategies')
+        .option('-n, --network <network>', 'Specify network we are calling (defaults to L1)', [])
+        .option('-o, --output <file>', 'CSV output file', 'out.csv')
+        .option('--simple', 'Only export strategy ID, name and bundles')
+        .description('Prints all strategies and exports them to CSV')
+        .action(async (options) => {
+            await exportAllStrategies(options);
+            process.exit(0);
+        });
+
+    program
+        .command('export-all-bundles')
+        .option('-n, --network <network>', 'Specify network we are calling (defaults to L1)', [])
+        .option('-o, --output <file>', 'CSV output file', 'out.csv')
+        .description('Prints all bundles and exports them to CSV')
+        .action(async (options) => {
+            await exportAllBundles(options);
             process.exit(0);
         });
 
