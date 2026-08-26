@@ -51,10 +51,7 @@ interface IKyberNetworkProxy {
         payable
         returns (uint256);
 
-    function swapTokenToToken(
-        IERC20 src,
-        uint256 srcAmount,
-        IERC20 dest,
-        uint256 minConversionRate
-    ) external returns (uint256);
+    function swapTokenToToken(IERC20 src, uint256 srcAmount, IERC20 dest, uint256 minConversionRate)
+        external
+        returns (uint256);
 }

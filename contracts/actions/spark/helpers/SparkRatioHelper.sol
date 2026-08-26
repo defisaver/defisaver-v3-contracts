@@ -27,7 +27,7 @@ contract SparkRatioHelper is DSMath, MainnetSparkAddresses {
 
     struct CalculateUserAccountDataVars {
         uint256 i;
-        address[] reserveList;
+        uint256 reservesCount;
         address currentReserveAddress;
         uint256 ltv;
         uint256 liquidationThreshold;
@@ -115,7 +115,7 @@ contract SparkRatioHelper is DSMath, MainnetSparkAddresses {
 
         CalculateUserAccountDataVars memory vars;
 
-        vars.reserveList = lendingPool.getReservesList();
+        vars.reservesCount = lendingPool.getReservesCount();
         vars.oracle = ISparkV3Oracle(ISparkPoolAddressesProvider(_market).getPriceOracle());
         vars.userEModeCategory = lendingPool.getUserEMode(_user);
 
@@ -129,13 +129,13 @@ contract SparkRatioHelper is DSMath, MainnetSparkAddresses {
             }
         }
 
-        while (vars.i < vars.reserveList.length) {
+        while (vars.i < vars.reservesCount) {
             if (!userCfg.isUsingAsCollateralOrBorrowing(vars.i)) {
                 vars.i++;
                 continue;
             }
 
-            vars.currentReserveAddress = vars.reserveList[vars.i];
+            vars.currentReserveAddress = lendingPool.getReserveAddressById(uint16(vars.i));
 
             if (vars.currentReserveAddress == address(0)) {
                 vars.i++;
@@ -150,7 +150,7 @@ contract SparkRatioHelper is DSMath, MainnetSparkAddresses {
 
             vars.assetUnit = 10 ** vars.decimals;
             vars.assetPrice = (vars.eModeAssetPrice != 0
-                        && vars.userEModeCategory == vars.eModeAssetCategory)
+                    && vars.userEModeCategory == vars.eModeAssetCategory)
                 ? vars.eModeAssetPrice
                 : vars.oracle.getAssetPrice(vars.currentReserveAddress);
 
@@ -164,7 +164,8 @@ contract SparkRatioHelper is DSMath, MainnetSparkAddresses {
                     avgLtv += vars.userBalanceInBaseCurrency
                     * (vars.isInEModeCategory ? vars.eModeLtv : vars.ltv);
                 } else {
-                    uint256 lltv = (vars.isInEModeCategory
+                    uint256 lltv =
+                        (vars.isInEModeCategory
                             ? vars.eModeLiqThreshold
                             : vars.liquidationThreshold);
                     if (lltv > LTV_ZERO_OFFSET) {

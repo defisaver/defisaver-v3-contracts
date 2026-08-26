@@ -1185,14 +1185,14 @@
     },
     {
         "name": "CompV3RatioTrigger",
-        "address": "0x321639cc7492D97294ADA6B6Ad867d93673316D4",
+        "address": "0x904BA4140ECB9583aE729d4BDBCa8B9FBD2694B4",
         "id": "0x506812d0",
         "path": "contracts/triggers/CompV3RatioTrigger.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x321639cc7492D97294ADA6B6Ad867d93673316D4"]
     },
     {
         "name": "MerklClaim",
@@ -1305,6 +1305,28 @@
         "history": []
     },
     {
+        "name": "FLAaveV3CarryDebt",
+        "address": "0x4ab7a392aF23215A9049A64F3B2d44726aD2D6fe",
+        "id": "0x66258f8a",
+        "path": "contracts/actions/flashloan/FLAaveV3CarryDebt.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV3DelegateCredit",
+        "address": "0x11E7B19195a76D2E5A4863cf6cbE8030443c729A",
+        "id": "0xf57df0e7",
+        "path": "contracts/actions/aaveV3/AaveV3DelegateCredit.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "FeeReceiver",
         "address": "0x5894Ef2cB79802F60ecB749Ea0FDe80f5016B4f1",
         "id": "0x6a17809a",
@@ -1312,6 +1334,61 @@
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV3MinDebtTrigger",
+        "address": "0x8F521d036b395E2dd4B3A10348d323ec75A375e6",
+        "id": "0xb3fa1599",
+        "path": "contracts/triggers-additional/AaveV3MinDebtTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "RequiredAmountAndAllowanceTrigger",
+        "address": "0x6CF5c0daBD33FD24258936eb90cE5d1b4D5FF974",
+        "id": "0xbd30ff8e",
+        "path": "contracts/triggers-additional/RequiredAmountAndAllowanceTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "TriggerView",
+        "address": "0x4e30a875883187F6Af8E3493127d11a322E52379",
+        "id": "0x628ee7ee",
+        "path": "contracts/views/strategy/TriggerView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CompV3PriceTrigger",
+        "address": "0x485fB3e0b7cC42d8535A32D8284317510541E629",
+        "id": "0xb67d04b5",
+        "path": "contracts/triggers/CompV3PriceTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CompV3RatioCheck",
+        "address": "0x9a2806bbAed273C40D0BF2767251f97742E451e5",
+        "id": "0x2ce67bb9",
+        "path": "contracts/actions/checkers/CompV3RatioCheck.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     }

@@ -52,11 +52,8 @@ interface IConfigPositionManager {
     /// @param spoke The address of the spoke.
     /// @param delegatee The address of the delegatee.
     /// @param permission The new permission status.
-    function setCanSetUsingAsCollateralPermission(
-        address spoke,
-        address delegatee,
-        bool permission
-    ) external;
+    function setCanSetUsingAsCollateralPermission(address spoke, address delegatee, bool permission)
+        external;
 
     /// @notice Sets the using as collateral status on behalf of a user for a specified reserve.
     /// @dev The `msg.sender` must be the delegatee to perform this action on behalf of the user.

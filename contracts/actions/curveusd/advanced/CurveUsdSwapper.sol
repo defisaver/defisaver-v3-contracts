@@ -95,13 +95,10 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
         IERC20(collToken).safeApprove(controllerAddr, cb.collateral);
     }
 
-    function callback_liquidate(
-        address _user,
-        uint256,
-        uint256,
-        uint256,
-        uint256[] memory swapData
-    ) external returns (CallbackData memory cb) {
+    function callback_liquidate(address _user, uint256, uint256, uint256, uint256[] memory swapData)
+        external
+        returns (CallbackData memory cb)
+    {
         address controllerAddr = msg.sender;
 
         // check if controller is valid
@@ -270,11 +267,11 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
     }
 
     /// @dev Encode swapParams in 1 uint256 as the values are small
-    function encodeSwapParams(
-        uint256[5][5] memory swapParams,
-        uint32 gasUsed,
-        uint24 dfsFeeDivider
-    ) public pure returns (uint256 encoded) {
+    function encodeSwapParams(uint256[5][5] memory swapParams, uint32 gasUsed, uint24 dfsFeeDivider)
+        public
+        pure
+        returns (uint256 encoded)
+    {
         uint256 maskOffset;
 
         for (uint256 i; i < 5; i++) {

@@ -4,6 +4,7 @@ pragma solidity =0.8.24;
 import { EtherFiStake } from "../../../contracts/actions/etherfi/EtherFiStake.sol";
 import { EtherFiWrap } from "../../../contracts/actions/etherfi/EtherFiWrap.sol";
 import { EtherFiUnwrap } from "../../../contracts/actions/etherfi/EtherFiUnwrap.sol";
+import { EtherFiStakeFromLido } from "../../../contracts/actions/etherfi/EtherFiStakeFromLido.sol";
 
 library EtherFiEncode {
     function stake(uint256 _amount, address _from, address _to, bool _shouldWrap)
@@ -30,5 +31,17 @@ library EtherFiEncode {
         returns (bytes memory params)
     {
         params = abi.encode(EtherFiUnwrap.Params({ amount: _amount, from: _from, to: _to }));
+    }
+
+    function stakeFromLido(uint256 _amount, uint256 _minAmountOut, address _from, address _to)
+        public
+        pure
+        returns (bytes memory params)
+    {
+        params = abi.encode(
+            EtherFiStakeFromLido.Params({
+                amount: _amount, minAmountOut: _minAmountOut, from: _from, to: _to
+            })
+        );
     }
 }

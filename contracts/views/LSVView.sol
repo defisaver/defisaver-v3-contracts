@@ -317,11 +317,11 @@ contract LSVView is
         }
     }
 
-    function getInfoForLSVPosition(
-        uint8 _protocol,
-        address _lsvProxy,
-        address[] memory _collTokens
-    ) public view returns (uint256 netWorth, int256 unrealisedProfit) {
+    function getInfoForLSVPosition(uint8 _protocol, address _lsvProxy, address[] memory _collTokens)
+        public
+        view
+        returns (uint256 netWorth, int256 unrealisedProfit)
+    {
         unrealisedProfit =
             LSVProfitTracker(LSV_PROFIT_TRACKER_ADDRESS).unrealisedProfit(_protocol, _lsvProxy);
         (uint256 collBalance, uint256 ethDebtBalance, address collToken) =

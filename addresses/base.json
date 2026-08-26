@@ -505,14 +505,17 @@
     },
     {
         "name": "CompV3RatioTrigger",
-        "address": "0xb33Ce7D2E0E06bb069c59ffEd361226B05292fBa",
+        "address": "0x222d14c3FEF2df064974f1302Ee265819803cc90",
         "id": "0x506812d0",
         "path": "contracts/triggers/CompV3RatioTrigger.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x7d84DCC2a1f547A8D267c85eed791fd3663562b8"]
+        "history": [
+            "0xb33Ce7D2E0E06bb069c59ffEd361226B05292fBa",
+            "0x7d84DCC2a1f547A8D267c85eed791fd3663562b8"
+        ]
     },
     {
         "name": "AaveV3RatioCheck",
@@ -1072,14 +1075,15 @@
     },
     {
         "name": "CompV3RatioCheck",
-        "address": "0xCa6e079A94e60f8a594492f2ceEa68930b5Bf6FE",
+        "address": "0x5f133B83AF1CbFCc7412080c05c42710611054F5",
         "id": "0x2ce67bb9",
         "path": "contracts/actions/checkers/CompV3RatioCheck.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xCa6e079A94e60f8a594492f2ceEa68930b5Bf6FE",
             "0x243022bBE8A6E52AFCbD4f21362a7B4124B9013C",
             "0xC1ff2500790150c4a1c77B9e702e9984A252b60c"
         ]
@@ -1379,28 +1383,32 @@
     },
     {
         "name": "FluidVaultT1Payback",
-        "address": "0x85Bfa7695e7FD1a14884797c9E80E1D7180f3755",
+        "address": "0xD4cEe5755e4f713B69f5Fc73068505ec6B9ee2a2",
         "id": "0x101b4845",
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Payback",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x85Bfa7695e7FD1a14884797c9E80E1D7180f3755",
             "0xA65daAa4FB4Fe9feaDF25bf2C062c3Faa2b02e5D",
             "0x56ca4b24D85c33F3A4Be918b7f2ce2831a723704"
         ]
     },
     {
         "name": "FluidVaultT1Adjust",
-        "address": "0x4405A81c25Be495325f76Aa4d82176f9ae3275bc",
+        "address": "0x2f7839a733B93641aa6a6AF0b593202335c351D3",
         "id": "0xce25def6",
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Adjust",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x93bFBf44b87be48D46b25Fe0C7F549A79Ca05167"]
+        "history": [
+            "0x4405A81c25Be495325f76Aa4d82176f9ae3275bc",
+            "0x93bFBf44b87be48D46b25Fe0C7F549A79Ca05167"
+        ]
     },
     {
         "name": "FluidRatioTrigger",
@@ -1470,14 +1478,14 @@
     },
     {
         "name": "CompV3PriceTrigger",
-        "address": "0x96798aC76397f511CB0938e8E5C629b4be6F7Eaf",
+        "address": "0x7B781baFB32eb2D5944a0Cd1208F5Ffce957BDC4",
         "id": "0xb67d04b5",
         "path": "contracts/actions/compV3/CompV3PriceTrigger.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x96798aC76397f511CB0938e8E5C629b4be6F7Eaf"]
     },
     {
         "name": "CompV3PriceRangeTrigger",
@@ -1547,14 +1555,14 @@
     },
     {
         "name": "FluidDexPayback",
-        "address": "0xc177c885872592EDA598276bD3FAe5B6d27F80Bf",
+        "address": "0xcaa8877aD3847B428135653AcA5fAd13a2811483",
         "id": "0x1de2c822",
         "path": "contracts/actions/fluid/dex/FluidDexPayback.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xc177c885872592EDA598276bD3FAe5B6d27F80Bf"]
     },
     {
         "name": "AaveV3QuotePriceRangeTrigger",
@@ -1623,10 +1631,98 @@
         "history": []
     },
     {
+        "name": "FLAaveV3CarryDebt",
+        "address": "0x760e97862DD8652e5BB8b4D8ad9C99a74BBe7E7A",
+        "id": "0x66258f8a",
+        "path": "contracts/actions/flashloan/FLAaveV3CarryDebt.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV3DelegateCredit",
+        "address": "0xF85aD63c513A76a1dc05B2AddC4777F17336c7e9",
+        "id": "0xf57df0e7",
+        "path": "contracts/actions/aaveV3/AaveV3DelegateCredit.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "FeeReceiver",
         "address": "0x0909201d8bc9906C95B248c1A4476C07a7769983",
         "id": "0x6a17809a",
         "path": "contracts/utils/fee/FeeReceiver.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV3MinDebtTrigger",
+        "address": "0xE889613BD7Ed413c05f5b85118f1bFC3FC673ADA",
+        "id": "0xb3fa1599",
+        "path": "contracts/triggers-additional/AaveV3MinDebtTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CompV3MinDebtTrigger",
+        "address": "0xc1741aeE158668A66506C839ce8c48F922e7488a",
+        "id": "0xc71e2aae",
+        "path": "contracts/triggers-additional/CompV3MinDebtTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidMinDebtTrigger",
+        "address": "0x5B6EECda29f2FA1e58F116fA5bf79E02028F8095",
+        "id": "0xf5ec34f5",
+        "path": "contracts/triggers-additional/FluidMinDebtTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueMinDebtTrigger",
+        "address": "0xF5B14FE04ed187c2207b73b64a6bab7008BeEbe4",
+        "id": "0xfb4bc110",
+        "path": "contracts/triggers-additional/MorphoBlueMinDebtTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "RequiredAmountAndAllowanceTrigger",
+        "address": "0xFF4D5164E7E82EDDC46909eDf8Ce071BEB9596BF",
+        "id": "0xbd30ff8e",
+        "path": "contracts/triggers-additional/RequiredAmountAndAllowanceTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "TriggerView",
+        "address": "0x92A00108Fd8B8a7F10c244D0c0c9076b99b17857",
+        "id": "0x628ee7ee",
+        "path": "contracts/views/strategy/TriggerView.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,

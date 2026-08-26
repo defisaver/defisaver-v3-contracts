@@ -179,6 +179,7 @@
   * [DyDxWithdraw](actions/dydx/dydxwithdraw.md)
 * [Ether.Fi](actions/ether.fi/README.md)
   * [EtherFiStake](actions/ether.fi/etherfistake.md)
+  * [EtherFiStakeFromLido](actions/ether.fi/etherfistakefromlido.md)
   * [EtherFiUnwrap](actions/ether.fi/etherfiunwrap.md)
   * [EtherFiWrap](actions/ether.fi/etherfiwrap.md)
 * [EulerV2](actions/eulerv2/README.md)
