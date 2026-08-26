@@ -248,18 +248,18 @@ const flyTestData = [
 const getFlyQuote = async (sellAssetInfo, buyAssetInfo, amount, flyWrapper) => {
     const options = {
         method: 'GET',
-        baseURL: 'https://api.fly.trade/aggregator/quote/transaction',
+        baseURL: 'https://api.magpiefi.xyz/aggregator/quote/transaction',
         params: {
             network: 'ethereum',
             fromTokenAddress: sellAssetInfo.address,
             toTokenAddress: buyAssetInfo.address,
             sellAmount: amount.toString(),
-            slippage: 0.01,
+            slippage: 0.005,
             fromAddress: flyWrapper.address,
             toAddress: flyWrapper.address,
             gasless: false,
         },
-        headers: { Origin: 'https://fly.trade' },
+        headers: { apikey: `${process.env.FLY_API_KEY}` },
     };
     const response = await axios(options);
     return response.data;
@@ -274,6 +274,7 @@ const flyTest = async () => {
         let proxy;
         let feeReceiverAddr;
         let tokenGroupRegistry;
+        let snapshot;
         const chainId = chainIds[network];
 
         const isFork = isNetworkFork();
@@ -304,6 +305,14 @@ const flyTest = async () => {
             );
         });
 
+        beforeEach(async () => {
+            snapshot = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshot);
+        });
+
         flyTestData.forEach(({ sellToken, buyToken, rawAmount }) => {
             describe(`${sellToken} -> ${buyToken} | Amount: ${rawAmount}`, () => {
                 let exchangeObject;
@@ -314,9 +323,8 @@ const flyTest = async () => {
                 let amountOutMin;
                 let feeBalanceBefore;
 
-                /// @dev nothing is rolled back between tests so every transaction stays on the
-                /// vnet to be inspected later. That means each test funds itself and fetches its
-                /// own order, a fly order is only good for the state it was quoted against
+                /// @dev each test funds itself and fetches its own order, a fly order is only
+                /// good for the state it was quoted against and is single use
                 beforeEach(async () => {
                     sellAssetInfo = getAssetInfo(sellToken, chainId);
                     buyAssetInfo = getAssetInfo(buyToken, chainId);
