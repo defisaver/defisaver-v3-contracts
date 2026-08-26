@@ -52,10 +52,9 @@ contract AaveV3DelegateCredit is ActionBase, AaveV3Helper {
         params.rateMode = uint8(
             _parseParamUint(uint8(params.rateMode), _paramMapping[3], _subData, _returnValues)
         );
-        params.useDefaultMarket =
-            _parseParamUint(
-                    params.useDefaultMarket ? 1 : 0, _paramMapping[4], _subData, _returnValues
-                ) == 1;
+        params.useDefaultMarket = _parseParamUint(
+            params.useDefaultMarket ? 1 : 0, _paramMapping[4], _subData, _returnValues
+        ) == 1;
         params.market = _parseParamAddr(params.market, _paramMapping[5], _subData, _returnValues);
 
         (bytes memory logData) = _delegate(params);

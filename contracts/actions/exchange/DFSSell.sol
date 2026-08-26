@@ -69,12 +69,10 @@ contract DFSSell is ActionBase, DFSExchangeWithTxSaver {
     /// @param _from Address from which we'll pull the srcTokens
     /// @param _to Address where we'll send the _to token
     /// @param _isDirect True if it's just one sell action, false if part of recipe
-    function _dfsSell(
-        ExchangeData memory _exchangeData,
-        address _from,
-        address _to,
-        bool _isDirect
-    ) internal returns (uint256, bytes memory) {
+    function _dfsSell(ExchangeData memory _exchangeData, address _from, address _to, bool _isDirect)
+        internal
+        returns (uint256, bytes memory)
+    {
         // if we set srcAmount to max, take the whole user's wallet balance
         if (_exchangeData.srcAmount == type(uint256).max) {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));

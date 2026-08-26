@@ -37,10 +37,9 @@ contract SparkWithdraw is ActionBase, SparkHelper {
         params.assetId = uint16(
             _parseParamUint(uint16(params.assetId), _paramMapping[0], _subData, _returnValues)
         );
-        params.useDefaultMarket =
-            _parseParamUint(
-                    params.useDefaultMarket ? 1 : 0, _paramMapping[1], _subData, _returnValues
-                ) == 1;
+        params.useDefaultMarket = _parseParamUint(
+            params.useDefaultMarket ? 1 : 0, _paramMapping[1], _subData, _returnValues
+        ) == 1;
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
         params.market = _parseParamAddr(params.market, _paramMapping[4], _subData, _returnValues);

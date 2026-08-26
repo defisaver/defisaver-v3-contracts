@@ -45,9 +45,9 @@ contract UmbrellaStake is ActionBase, AaveV3Helper {
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
-        params.useATokens =
-            _parseParamUint(params.useATokens ? 1 : 0, _paramMapping[4], _subData, _returnValues)
-                == 1;
+        params.useATokens = _parseParamUint(
+            params.useATokens ? 1 : 0, _paramMapping[4], _subData, _returnValues
+        ) == 1;
         params.minSharesOut =
             _parseParamUint(params.minSharesOut, _paramMapping[5], _subData, _returnValues);
 
