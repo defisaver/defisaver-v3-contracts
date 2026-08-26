@@ -672,16 +672,16 @@ contract SparkView is SparkHelper, SparkRatioHelper {
                 )
                 .calculateInterestRates(
                     SparkDataTypes.CalculateInterestRatesParams({
-                    unbacked: reserve.unbacked,
-                    liquidityAdded: _reserveParams[i].liquidityAdded,
-                    liquidityTaken: _reserveParams[i].liquidityTaken,
-                    totalStableDebt: currTotalStableDebt,
-                    totalVariableDebt: totalVarDebt,
-                    averageStableBorrowRate: currAvgStableBorrowRate,
-                    reserveFactor: getReserveFactor(reserve.configuration),
-                    reserve: _reserveParams[i].reserveAddress,
-                    aToken: reserve.aTokenAddress
-                })
+                        unbacked: reserve.unbacked,
+                        liquidityAdded: _reserveParams[i].liquidityAdded,
+                        liquidityTaken: _reserveParams[i].liquidityTaken,
+                        totalStableDebt: currTotalStableDebt,
+                        totalVariableDebt: totalVarDebt,
+                        averageStableBorrowRate: currAvgStableBorrowRate,
+                        reserveFactor: getReserveFactor(reserve.configuration),
+                        reserve: _reserveParams[i].reserveAddress,
+                        aToken: reserve.aTokenAddress
+                    })
                 );
 
             estimatedRates[i] = estimatedRate;
