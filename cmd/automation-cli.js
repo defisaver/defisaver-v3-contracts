@@ -189,11 +189,14 @@ const getAllStrategies = async (options) => {
     const numBundles = await bundleStorage.getBundleCount();
     const bundles = await bundleStorage.getPaginatedBundles(0, numBundles.toString());
 
-    const strategyInBundleMap = {};
+    const strategyBundleIds = {};
 
     bundles.forEach((bundle, i) => {
         bundle.strategyIds.forEach((strategyId) => {
-            strategyInBundleMap[strategyId.toString()] = i;
+            const id = strategyId.toString();
+
+            strategyBundleIds[id] = strategyBundleIds[id] || [];
+            strategyBundleIds[id].push(i);
         });
     });
 
@@ -226,8 +229,8 @@ const getAllStrategies = async (options) => {
             ),
         };
 
-        if (strategyInBundleMap[index] !== undefined) {
-            strategyInfo.bundleId = strategyInBundleMap[index];
+        if (strategyBundleIds[index] !== undefined) {
+            strategyInfo.bundleIds = strategyBundleIds[index];
         }
         return strategyInfo;
     });
