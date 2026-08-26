@@ -150,7 +150,7 @@ contract SparkRatioHelper is DSMath, MainnetSparkAddresses {
 
             vars.assetUnit = 10 ** vars.decimals;
             vars.assetPrice = (vars.eModeAssetPrice != 0
-                        && vars.userEModeCategory == vars.eModeAssetCategory)
+                    && vars.userEModeCategory == vars.eModeAssetCategory)
                 ? vars.eModeAssetPrice
                 : vars.oracle.getAssetPrice(vars.currentReserveAddress);
 
@@ -164,7 +164,8 @@ contract SparkRatioHelper is DSMath, MainnetSparkAddresses {
                     avgLtv += vars.userBalanceInBaseCurrency
                     * (vars.isInEModeCategory ? vars.eModeLtv : vars.ltv);
                 } else {
-                    uint256 lltv = (vars.isInEModeCategory
+                    uint256 lltv =
+                        (vars.isInEModeCategory
                             ? vars.eModeLiqThreshold
                             : vars.liquidationThreshold);
                     if (lltv > LTV_ZERO_OFFSET) {
