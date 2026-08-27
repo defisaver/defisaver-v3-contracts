@@ -1,14 +1,44 @@
 const hre = require('hardhat');
+const { markets } = require('@defisaver/positions-sdk');
+
+const { addrs, chainIds } = require('./utils');
 
 const MIDNIGHT_API_URL = 'https://api.morpho.org/v0/midnight/books';
 const TENOR_API_URL = 'https://router.tenor.finance/v1/quote';
-const MIDNIGHT_ADDRESS = '0xAdedD8ab6dE832766Fedf0FaC4992E5C4D3EA18A';
-const BASE_CHAIN_ID = 8453;
 const DEFAULT_SLIPPAGE = '0.5';
 const MAX_QUOTE_ATTEMPTS = 10;
+const API_DELAY_MS = 500;
 const BPS = hre.ethers.BigNumber.from(10_000);
 const WAD = hre.ethers.constants.WeiPerEther;
 const MAX_UINT128 = hre.ethers.BigNumber.from(2).pow(128).sub(1);
+
+const delay = () => new Promise((resolve) => setTimeout(resolve, API_DELAY_MS));
+
+const getMidnightMarkets = (network) => {
+    const chainId = chainIds[network];
+    if (!chainId || !addrs[network]?.MIDNIGHT_ADDRESS) return [];
+
+    const activeMarkets = Object.values(markets.MorphoMidnightMarkets(chainId))
+        .filter(
+            (market) => market.chainIds.includes(chainId) && market.maturity > Date.now() / 1000,
+        )
+        .sort((a, b) => a.maturity - b.maturity);
+    const uniqueMarkets = new Map();
+
+    // Remove duplicate markets with different maturity dates to speed up testing
+    activeMarkets.forEach((market) => {
+        const key = `${market.curator}-${market.loanToken}-${market.collaterals[0].token}`;
+        if (!uniqueMarkets.has(key)) {
+            uniqueMarkets.set(key, {
+                ...market,
+                chainId,
+                quoteProvider: market.curator.toLowerCase(),
+            });
+        }
+    });
+
+    return [...uniqueMarkets.values()];
+};
 
 const parseTenorSlippageBps = (slippagePercentString) => {
     if (typeof slippagePercentString !== 'string') {
@@ -72,10 +102,10 @@ const formatOfferFill = (offerFill) => [
     offerFill.units,
 ];
 
-const formatTenorOffer = (offer) => [
+const formatTenorOffer = (offer, midnightAddress) => [
     [
         offer.chain_id,
-        MIDNIGHT_ADDRESS,
+        midnightAddress,
         offer.loan_token_address,
         offer.collaterals.map(formatCollateralParams),
         offer.maturity,
@@ -99,8 +129,8 @@ const formatTenorOffer = (offer) => [
     offer.continuous_fee_cap,
 ];
 
-const formatTenorOfferFill = (offerFill) => [
-    formatTenorOffer(offerFill.offer),
+const formatTenorOfferFill = (offerFill, midnightAddress) => [
+    formatTenorOffer(offerFill.offer, midnightAddress),
     offerFill.offer.ratifier_data ?? '0x',
     offerFill.units,
 ];
@@ -122,10 +152,13 @@ const fetchMidnightQuote = async ({
     const quoteType = hasAssets ? 'assets' : 'units';
     const quoteAmount = hasAssets ? assets : units;
     const url = `${MIDNIGHT_API_URL}/${marketId}/${side}/quote?${quoteType}=${quoteAmount.toString()}&slippage=${slippage}`;
+    await delay();
     const response = await fetch(url);
 
     if (!response.ok) {
-        throw new Error(`Midnight quote request failed with status ${response.status}`);
+        const error = new Error(`Midnight quote request failed with status ${response.status}`);
+        error.status = response.status;
+        throw error;
     }
 
     const result = await response.json();
@@ -140,7 +173,15 @@ const fetchMidnightQuote = async ({
     };
 };
 
-const fetchTenorQuote = async ({ marketId, side, assets, units, taker }) => {
+const fetchTenorQuote = async ({
+    marketId,
+    side,
+    assets,
+    units,
+    taker,
+    chainId,
+    midnightAddress,
+}) => {
     const hasAssets = assets !== undefined && assets !== null;
     const hasUnits = units !== undefined && units !== null;
 
@@ -152,11 +193,12 @@ const fetchTenorQuote = async ({ marketId, side, assets, units, taker }) => {
     }
 
     const isBuy = side === 'asks';
+    await delay();
     const response = await fetch(TENOR_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            chain_id: BASE_CHAIN_ID,
+            chain_id: chainId,
             market_hash: marketId,
             amount: (hasAssets ? assets : units).toString(),
             is_buy: isBuy,
@@ -168,13 +210,17 @@ const fetchTenorQuote = async ({ marketId, side, assets, units, taker }) => {
     });
 
     if (!response.ok) {
-        throw new Error(`Tenor quote request failed with status ${response.status}`);
+        const error = new Error(`Tenor quote request failed with status ${response.status}`);
+        error.status = response.status;
+        throw error;
     }
 
     const result = await response.json();
     const quotedUnits = hre.ethers.BigNumber.from(result.units ?? 0);
     if (quotedUnits.isZero() || !Array.isArray(result.offers) || result.offers.length === 0) {
-        throw new Error('Tenor quote returned no offers');
+        const error = new Error('Tenor quote returned no offers');
+        error.code = 'NO_OFFERS';
+        throw error;
     }
 
     return {
@@ -183,7 +229,9 @@ const fetchTenorQuote = async ({ marketId, side, assets, units, taker }) => {
         rateQuoted: hre.ethers.BigNumber.from(result.rate_quoted),
         buyerAssets: hre.ethers.BigNumber.from(result.buyer_assets),
         sellerAssets: hre.ethers.BigNumber.from(result.seller_assets),
-        offerFills: result.offers.map(formatTenorOfferFill),
+        offerFills: result.offers.map((offerFill) =>
+            formatTenorOfferFill(offerFill, midnightAddress),
+        ),
     };
 };
 
@@ -195,12 +243,22 @@ const fetchQuote = ({
     units,
     slippage = DEFAULT_SLIPPAGE,
     taker,
+    chainId,
+    midnightAddress,
 }) => {
     if (quoteProvider === 'morpho') {
         return fetchMidnightQuote({ marketId, side, assets, units, slippage });
     }
     if (quoteProvider === 'tenor') {
-        return fetchTenorQuote({ marketId, side, assets, units, taker });
+        return fetchTenorQuote({
+            marketId,
+            side,
+            assets,
+            units,
+            taker,
+            chainId,
+            midnightAddress,
+        });
     }
 
     throw new Error(`Unsupported Midnight quote provider: ${quoteProvider}`);
@@ -309,5 +367,7 @@ module.exports = {
     fetchQuote,
     fetchMidnightQuote,
     fetchMidnightQuoteForMinFills,
+    getMidnightMarkets,
     seedMidnightDebt,
+    DEFAULT_SLIPPAGE,
 };
