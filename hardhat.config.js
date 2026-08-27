@@ -121,18 +121,19 @@ module.exports = {
                 },
                 8453: {
                     hardforkHistory: {
-                        london: 1,
+                        osaka: 1,
                     },
                 },
             },
             forking: {
-                url: process.env.ETHEREUM_NODE,
+                url: process.env.BASE_NODE,
                 timeout: 1000000,
                 gasPrice: 50000000000,
                 // blockNumber: 12068716
             },
             name: 'mainnet',
-            hardfork: 'cancun',
+            hardfork: 'osaka',
+            blockGasLimit: 0x1fffffffffffff,
             accounts: {
                 balance: '10000000000000000000000000000',
                 privateKey: process.env.PRIV_KEY_MAINNET,
