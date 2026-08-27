@@ -131,14 +131,14 @@ module.exports = {
                 gasPrice: 50000000000,
                 // blockNumber: 12068716
             },
-            name: 'base',
+            name: 'mainnet',
             hardfork: 'osaka',
             blockGasLimit: 0x1fffffffffffff,
             accounts: {
                 balance: '10000000000000000000000000000',
                 privateKey: process.env.PRIV_KEY_MAINNET,
             },
-            chainId: 8453,
+            chainId: 1,
         },
         // NETWORKS FOR DEPLOYING
         mainnet: {
