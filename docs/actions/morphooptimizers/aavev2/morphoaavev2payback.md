@@ -1,5 +1,5 @@
 ---
-icon: bluesky
+icon: square-bluesky
 ---
 
 # MorphoAaveV2Payback
