@@ -12,6 +12,7 @@ import { SemiContinuousTracker } from "../../../contracts/core/strategy/SemiCont
 import { SubActionsBase } from "../../utils/SubActionsBase.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { stdError } from "forge-std/StdError.sol";
+import { Vm } from "forge-std/Vm.sol";
 
 contract TestUpdateSub is SubActionsBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -293,6 +294,134 @@ contract TestUpdateSub is SubActionsBase {
     }
 
     /*//////////////////////////////////////////////////////////////////////////
+                        TESTS - TWO SUBS, TRACKER ISOLATION
+    //////////////////////////////////////////////////////////////////////////*/
+    /// @dev finishExecution is keyed by subId, so updating one sub must leave every other
+    ///      sub of the same owner in execution.
+    function test_should_clear_only_the_updated_sub_when_both_are_in_execution() public {
+        uint256 secondSubId = _subscribe(wallet);
+        _startExecution(subId);
+        _startExecution(secondSubId);
+
+        bytes32 secondHashBefore = subStorage.getSub(secondSubId).strategySubHash;
+        StrategyModel.StrategySub memory newSub = _bundleSub(123);
+
+        vm.expectEmit(true, true, true, true, address(tracker));
+        emit SemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        vm.expectEmit(true, true, true, true, address(subStorage));
+        emit SubStorage.UpdateData(subId, keccak256(abi.encode(newSub)), newSub);
+        _update(wallet, subId, newSub, false);
+
+        _assertNotInExecution(subId);
+        assertEq(subStorage.getSub(subId).strategySubHash, keccak256(abi.encode(newSub)));
+
+        _assertInExecution(secondSubId, walletAddr);
+        assertEq(
+            subStorage.getSub(secondSubId).strategySubHash,
+            secondHashBefore,
+            "other sub's data must stay untouched"
+        );
+    }
+
+    /// @dev Stronger form of the above: exactly one ExecutionFinished is emitted, for the
+    ///      updated sub, so the second sub is not silently finished too.
+    function test_should_emit_execution_finished_only_for_the_updated_sub() public {
+        uint256 secondSubId = _subscribe(wallet);
+        _startExecution(subId);
+        _startExecution(secondSubId);
+
+        vm.recordLogs();
+        _update(wallet, subId, _bundleSub(123), false);
+
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        uint256 finishedCount;
+        for (uint256 i = 0; i < logs.length; ++i) {
+            if (logs[i].emitter != address(tracker)) continue;
+            if (logs[i].topics[0] != SemiContinuousTracker.ExecutionFinished.selector) continue;
+
+            finishedCount++;
+            assertEq(uint256(logs[i].topics[1]), subId, "only the updated sub may be finished");
+        }
+
+        assertEq(finishedCount, 1, "exactly one ExecutionFinished must be emitted");
+    }
+
+    /// @dev Updating a sub that was never in execution hits finishExecution's early return
+    ///      and must not reach into the other sub's entry.
+    function test_should_not_touch_in_execution_sub_when_updating_an_idle_sub() public {
+        uint256 secondSubId = _subscribe(wallet);
+        _startExecution(secondSubId);
+
+        _assertNotInExecution(subId);
+
+        bytes32 secondHashBefore = subStorage.getSub(secondSubId).strategySubHash;
+        StrategyModel.StrategySub memory newSub = _bundleSub(123);
+
+        vm.expectEmit(true, true, true, true, address(subStorage));
+        emit SubStorage.UpdateData(subId, keccak256(abi.encode(newSub)), newSub);
+        _update(wallet, subId, newSub, false);
+
+        _assertNotInExecution(subId);
+        _assertInExecution(secondSubId, walletAddr);
+        assertEq(
+            subStorage.getSub(secondSubId).strategySubHash,
+            secondHashBefore,
+            "other sub's data must stay untouched"
+        );
+    }
+
+    /// @dev Isolation also holds across owners: bob updating his sub cannot clear the entry
+    ///      of alice's sub, which is tracked against a different wallet.
+    function test_should_not_touch_in_execution_sub_of_another_owner() public {
+        SmartWallet otherWallet = new SmartWallet(alice);
+        address otherWalletAddr = otherWallet.walletAddr();
+        uint256 otherSubId = _subscribe(otherWallet);
+
+        _startExecution(subId);
+        _startExecution(otherSubId);
+
+        bytes32 otherHashBefore = subStorage.getSub(otherSubId).strategySubHash;
+
+        vm.expectEmit(true, true, true, true, address(tracker));
+        emit SemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        _update(wallet, subId, _bundleSub(123), false);
+
+        _assertNotInExecution(subId);
+        _assertInExecution(otherSubId, otherWalletAddr);
+        assertEq(
+            subStorage.getSub(otherSubId).strategySubHash,
+            otherHashBefore,
+            "other owner's sub must stay untouched"
+        );
+    }
+
+    /// @dev A reverted update of someone else's sub leaves both tracker entries as they were.
+    function test_should_not_clear_any_tracker_entry_when_updating_another_owners_sub_reverts()
+        public
+    {
+        SmartWallet otherWallet = new SmartWallet(alice);
+        address otherWalletAddr = otherWallet.walletAddr();
+        uint256 otherSubId = _subscribe(otherWallet);
+
+        _startExecution(subId);
+        _startExecution(otherSubId);
+
+        bytes32 otherHashBefore = subStorage.getSub(otherSubId).strategySubHash;
+
+        // SemiContinuousTracker::NotAuthorized
+        vm.expectRevert();
+        _update(wallet, otherSubId, _bundleSub(123), false);
+
+        _assertInExecution(subId, walletAddr);
+        _assertInExecution(otherSubId, otherWalletAddr);
+        assertEq(
+            subStorage.getSub(otherSubId).strategySubHash,
+            otherHashBefore,
+            "sub must stay untouched"
+        );
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
                                 TESTS - RETURN VALUE
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_return_sub_id() public {
@@ -324,5 +453,15 @@ contract TestUpdateSub is SubActionsBase {
         _wallet.execute(
             address(cut), executeActionCalldata(updateSubEncode(_subId, _sub), _isDirect), 0
         );
+    }
+
+    function _assertInExecution(uint256 _subId, address _wallet) internal view {
+        assertTrue(tracker.isInExecution(_subId), "sub must be in execution");
+        assertEq(tracker.executionWalletOf(_subId), _wallet, "wrong execution wallet");
+    }
+
+    function _assertNotInExecution(uint256 _subId) internal view {
+        assertFalse(tracker.isInExecution(_subId), "sub must not be in execution");
+        assertEq(tracker.executionWalletOf(_subId), address(0), "execution wallet must be cleared");
     }
 }

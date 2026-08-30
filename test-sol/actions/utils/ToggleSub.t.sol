@@ -12,6 +12,7 @@ import { IDSProxy } from "../../../contracts/interfaces/DS/IDSProxy.sol";
 import { SubActionsBase } from "../../utils/SubActionsBase.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { stdError } from "forge-std/StdError.sol";
+import { Vm } from "forge-std/Vm.sol";
 
 contract TestToggleSub is SubActionsBase {
     /*//////////////////////////////////////////////////////////////////////////
@@ -378,11 +379,142 @@ contract TestToggleSub is SubActionsBase {
     }
 
     /*//////////////////////////////////////////////////////////////////////////
+                        TESTS - TWO SUBS, TRACKER ISOLATION
+    //////////////////////////////////////////////////////////////////////////*/
+    /// @dev finishExecution is keyed by subId, so toggling one sub must leave every other
+    ///      sub of the same owner in execution.
+    function test_should_clear_only_the_deactivated_sub_when_both_are_in_execution() public {
+        uint256 secondSubId = _subscribe(wallet);
+        _startExecution(subId);
+        _startExecution(secondSubId);
+
+        vm.expectEmit(true, true, true, true, address(tracker));
+        emit SemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        vm.expectEmit(true, true, true, true, address(subStorage));
+        emit SubStorage.DeactivateSub(subId);
+        _toggle(wallet, subId, false, false);
+
+        _assertNotInExecution(subId);
+        assertFalse(subStorage.getSub(subId).isEnabled);
+
+        _assertInExecution(secondSubId, walletAddr);
+        assertTrue(subStorage.getSub(secondSubId).isEnabled, "other sub must stay enabled");
+    }
+
+    /// @dev Stronger form of the above: exactly one ExecutionFinished is emitted, for the
+    ///      toggled sub, so the second sub is not silently finished too.
+    function test_should_emit_execution_finished_only_for_the_deactivated_sub() public {
+        uint256 secondSubId = _subscribe(wallet);
+        _startExecution(subId);
+        _startExecution(secondSubId);
+
+        vm.recordLogs();
+        _toggle(wallet, subId, false, false);
+
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        uint256 finishedCount;
+        for (uint256 i = 0; i < logs.length; ++i) {
+            if (logs[i].emitter != address(tracker)) continue;
+            if (logs[i].topics[0] != SemiContinuousTracker.ExecutionFinished.selector) continue;
+
+            finishedCount++;
+            assertEq(uint256(logs[i].topics[1]), subId, "only the toggled sub may be finished");
+        }
+
+        assertEq(finishedCount, 1, "exactly one ExecutionFinished must be emitted");
+    }
+
+    /// @dev Deactivating a sub that was never in execution hits finishExecution's early return
+    ///      and must not reach into the other sub's entry.
+    function test_should_not_touch_in_execution_sub_when_deactivating_an_idle_sub() public {
+        uint256 secondSubId = _subscribe(wallet);
+        _startExecution(secondSubId);
+
+        _assertNotInExecution(subId);
+
+        vm.expectEmit(true, true, true, true, address(subStorage));
+        emit SubStorage.DeactivateSub(subId);
+        _toggle(wallet, subId, false, false);
+
+        _assertNotInExecution(subId);
+        _assertInExecution(secondSubId, walletAddr);
+        assertTrue(subStorage.getSub(secondSubId).isEnabled, "other sub must stay enabled");
+    }
+
+    /// @dev A full deactivate/activate cycle on the idle sub leaves the other sub's entry alone.
+    function test_should_not_touch_in_execution_sub_through_a_toggle_cycle_of_another_sub() public {
+        uint256 secondSubId = _subscribe(wallet);
+        _startExecution(secondSubId);
+
+        _toggle(wallet, subId, false, false);
+        _assertInExecution(secondSubId, walletAddr);
+
+        vm.expectEmit(true, true, true, true, address(subStorage));
+        emit SubStorage.ActivateSub(subId);
+        _toggle(wallet, subId, true, false);
+
+        assertTrue(subStorage.getSub(subId).isEnabled);
+        _assertNotInExecution(subId);
+        _assertInExecution(secondSubId, walletAddr);
+        assertTrue(subStorage.getSub(secondSubId).isEnabled, "other sub must stay enabled");
+    }
+
+    /// @dev Isolation also holds across owners: bob deactivating his sub cannot clear the entry
+    ///      of alice's sub, which is tracked against a different wallet.
+    function test_should_not_touch_in_execution_sub_of_another_owner() public {
+        SmartWallet otherWallet = new SmartWallet(alice);
+        address otherWalletAddr = otherWallet.walletAddr();
+        uint256 otherSubId = _subscribe(otherWallet);
+
+        _startExecution(subId);
+        _startExecution(otherSubId);
+
+        vm.expectEmit(true, true, true, true, address(tracker));
+        emit SemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        _toggle(wallet, subId, false, false);
+
+        _assertNotInExecution(subId);
+        _assertInExecution(otherSubId, otherWalletAddr);
+        assertTrue(subStorage.getSub(otherSubId).isEnabled, "other owner's sub must stay enabled");
+    }
+
+    /// @dev A reverted toggle of someone else's sub leaves both tracker entries as they were.
+    function test_should_not_clear_any_tracker_entry_when_toggling_another_owners_sub_reverts()
+        public
+    {
+        SmartWallet otherWallet = new SmartWallet(alice);
+        address otherWalletAddr = otherWallet.walletAddr();
+        uint256 otherSubId = _subscribe(otherWallet);
+
+        _startExecution(subId);
+        _startExecution(otherSubId);
+
+        // SemiContinuousTracker::NotAuthorized
+        vm.expectRevert();
+        _toggle(wallet, otherSubId, false, false);
+
+        _assertInExecution(subId, walletAddr);
+        _assertInExecution(otherSubId, otherWalletAddr);
+        assertTrue(subStorage.getSub(subId).isEnabled, "sub must stay untouched");
+        assertTrue(subStorage.getSub(otherSubId).isEnabled, "sub must stay untouched");
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
     function _toggle(SmartWallet _wallet, uint256 _subId, bool _active, bool _isDirect) internal {
         _wallet.execute(
             address(cut), executeActionCalldata(toggleSubEncode(_subId, _active), _isDirect), 0
         );
+    }
+
+    function _assertInExecution(uint256 _subId, address _wallet) internal view {
+        assertTrue(tracker.isInExecution(_subId), "sub must be in execution");
+        assertEq(tracker.executionWalletOf(_subId), _wallet, "wrong execution wallet");
+    }
+
+    function _assertNotInExecution(uint256 _subId) internal view {
+        assertFalse(tracker.isInExecution(_subId), "sub must not be in execution");
+        assertEq(tracker.executionWalletOf(_subId), address(0), "execution wallet must be cleared");
     }
 }
