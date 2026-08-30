@@ -45,6 +45,7 @@ abstract contract StrategyExecutorCommon is StrategyModel, AdminAuth, CoreHelper
     ) internal {
         address authAddr = _isDSProxy(_userWallet) ? PROXY_AUTH_ADDR : MODULE_AUTH_ADDR;
 
+        // TODO -> add check if last actions calldata has flag instead of approving every time?
         // always approve and let RecipeExecutor decide if the execution should be started or not
         ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER))
             .approveStartOfExecution(_subId);
