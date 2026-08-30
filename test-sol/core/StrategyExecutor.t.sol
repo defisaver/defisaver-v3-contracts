@@ -141,7 +141,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
                 StrategyExecutorCommon.BotNotApproved.selector, address(this), f.subId
             )
         );
-        cut.executeStrategy(f.subId, 0, _triggers(f.subData), _actions(f.subData, 1), f.sub);
+        _execute(f);
     }
 
     /// @dev Auth is checked before the sub is read, so a bogus subId still reports BotNotApproved
@@ -242,7 +242,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         assertFalse(success, "executeStrategy must not be payable");
 
         /// @dev Same call without value goes through, so the failure above is the payability.
-        cut.executeStrategy(f.subId, 0, _triggers(f.subData), _actions(f.subData, 1), f.sub);
+        _execute(f);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -273,9 +273,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
     function test_should_skip_triggers_while_sub_is_in_execution() public {
         Fixture memory f = _fixture(false, 0);
 
-        cut.executeStrategy(
-            f.subId, 0, _triggers(f.subData), _withFlag(_actions(f.subData, 1)), f.sub
-        );
+        _executeWithFlag(f);
         assertEq(tracker.executionWalletOf(f.subId), walletAddr, "must be in execution");
 
         /// @dev maxGasPrice is 0, so from here on the trigger would evaluate to false.
@@ -283,9 +281,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
 
         uint256 balanceBefore = balanceOf(f.subData.token, sender);
 
-        cut.executeStrategy(
-            f.subId, 0, _triggers(f.subData), _withFlag(_actions(f.subData, 1)), f.sub
-        );
+        _executeWithFlag(f);
 
         assertEq(
             balanceOf(f.subData.token, sender),
@@ -306,7 +302,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
             abi.encodeCall(SemiContinuousTracker.approveStartOfExecution, (f.subId)),
             1
         );
-        cut.executeStrategy(f.subId, 0, _triggers(f.subData), _actions(f.subData, 1), f.sub);
+        _execute(f);
     }
 
     /// @dev Same for the DSProxy branch of _callActions, which routes through ProxyAuth.
@@ -322,14 +318,14 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
             abi.encodeCall(SemiContinuousTracker.approveStartOfExecution, (f.subId)),
             1
         );
-        cut.executeStrategy(f.subId, 0, _triggers(f.subData), _actions(f.subData, 1), f.sub);
+        _execute(f);
     }
 
     /// @dev Approval alone starts nothing: without the flag the tracker stays empty.
     function test_should_not_start_execution_when_no_flag_is_passed() public {
         Fixture memory f = _fixture(true, type(uint256).max);
 
-        cut.executeStrategy(f.subId, 0, _triggers(f.subData), _actions(f.subData, 1), f.sub);
+        _execute(f);
 
         assertFalse(tracker.isInExecution(f.subId), "approval must not start an execution");
         assertEq(tracker.executionWalletOf(f.subId), address(0));
@@ -347,7 +343,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
 
         // call to non-contract address 0x0000000000000000000000000000000000000000
         vm.expectRevert();
-        cut.executeStrategy(f.subId, 0, _triggers(f.subData), _actions(f.subData, 1), f.sub);
+        _execute(f);
 
         assertEq(balanceOf(f.subData.token, sender), balanceBefore, "no action must have run");
         assertTrue(subStorage.getSub(f.subId).isEnabled, "sub must stay untouched");
@@ -399,7 +395,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
     function test_approval_does_not_survive_the_transaction() public {
         Fixture memory f = _fixture(true, type(uint256).max);
 
-        cut.executeStrategy(f.subId, 0, _triggers(f.subData), _actions(f.subData, 1), f.sub);
+        _execute(f);
 
         vm.expectRevert(
             abi.encodeWithSelector(SemiContinuousTracker.NotApproved.selector, f.subId, walletAddr)
@@ -419,9 +415,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
 
         vm.expectEmit(true, true, true, true, address(tracker));
         emit SemiContinuousTracker.ExecutionStarted(f.subId, walletAddr);
-        cut.executeStrategy(
-            f.subId, 0, _triggers(f.subData), _withFlag(_actions(f.subData, 1)), f.sub
-        );
+        _executeWithFlag(f);
 
         assertEq(tracker.executionWalletOf(f.subId), walletAddr);
         assertTrue(subStorage.getSub(f.subId).isEnabled, "sub must stay enabled");
@@ -436,14 +430,12 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
     function test_should_finish_semi_continuous_execution_when_flag_is_omitted() public {
         Fixture memory f = _fixture(false, type(uint256).max);
 
-        cut.executeStrategy(
-            f.subId, 0, _triggers(f.subData), _withFlag(_actions(f.subData, 1)), f.sub
-        );
+        _executeWithFlag(f);
         assertTrue(tracker.isInExecution(f.subId));
 
         vm.expectEmit(true, true, true, true, address(tracker));
         emit SemiContinuousTracker.ExecutionFinished(f.subId, walletAddr, walletAddr);
-        cut.executeStrategy(f.subId, 0, _triggers(f.subData), _actions(f.subData, 1), f.sub);
+        _execute(f);
 
         assertFalse(tracker.isInExecution(f.subId), "tracker must be cleared");
         assertFalse(subStorage.getSub(f.subId).isEnabled, "one-time sub must be deactivated");
@@ -453,7 +445,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
     function test_should_deactivate_one_time_sub_when_no_flag_is_passed() public {
         Fixture memory f = _fixture(false, type(uint256).max);
 
-        cut.executeStrategy(f.subId, 0, _triggers(f.subData), _actions(f.subData, 1), f.sub);
+        _execute(f);
 
         assertFalse(subStorage.getSub(f.subId).isEnabled, "one-time sub must be deactivated");
         assertFalse(tracker.isInExecution(f.subId));
@@ -461,7 +453,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         vm.expectRevert(
             abi.encodeWithSelector(StrategyExecutorCommon.SubNotEnabled.selector, f.subId)
         );
-        cut.executeStrategy(f.subId, 0, _triggers(f.subData), _actions(f.subData, 1), f.sub);
+        _execute(f);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -508,9 +500,27 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
 
         uint256 senderBalanceBefore = balanceOf(f.subData.token, sender);
 
-        cut.executeStrategy(f.subId, 0, _triggers(f.subData), _actions(f.subData, 1), f.sub);
+        _execute(f);
 
         assertEq(balanceOf(f.subData.token, sender), senderBalanceBefore - f.subData.amount);
+    }
+
+    /// @dev The suite's default execution: strategy index 0, one action, no flag.
+    function _execute(Fixture memory _fixt) internal {
+        cut.executeStrategy(
+            _fixt.subId, 0, _triggers(_fixt.subData), _actions(_fixt.subData, 1), _fixt.sub
+        );
+    }
+
+    /// @dev Same, with the semi-continuous marker appended the way the bot does it.
+    function _executeWithFlag(Fixture memory _fixt) internal {
+        cut.executeStrategy(
+            _fixt.subId,
+            0,
+            _triggers(_fixt.subData),
+            _withFlag(_actions(_fixt.subData, 1)),
+            _fixt.sub
+        );
     }
 
     /// @dev Subscribes the wallet to a fresh PullToken strategy, authorizes this contract as the
@@ -568,10 +578,6 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
             DummySubData({ token: Addresses.WETH_ADDR, amount: 0, maxGasPrice: type(uint256).max });
     }
 
-    function _add_placeholder_strategy() internal returns (uint256) {
-        return _add_placeholder_strategy(true, 1);
-    }
-
     function _add_placeholder_strategy(bool _continuous, uint256 _numActions)
         internal
         returns (uint256)
@@ -598,7 +604,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         internal
         returns (uint256 subId, StrategyModel.StrategySub memory sub)
     {
-        return _sub_to_strategy(_add_placeholder_strategy(), false, _subData);
+        return _sub_to_strategy(_add_placeholder_strategy(true, 1), false, _subData);
     }
 
     function _sub_to_strategy(
