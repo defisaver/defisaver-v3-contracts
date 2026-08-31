@@ -107,6 +107,7 @@ import {
 import { IStrategyStorage } from "../interfaces/core/IStrategyStorage.sol";
 import { IBundleStorage } from "../interfaces/core/IBundleStorage.sol";
 import { ISubStorage } from "../interfaces/core/ISubStorage.sol";
+import { ISemiContinuousTracker } from "../interfaces/core/ISemiContinuousTracker.sol";
 import { Permission } from "../auth/Permission.sol";
 import { SmartWalletUtils } from "../utils/SmartWalletUtils.sol";
 import { ActionBase } from "../actions/ActionBase.sol";
@@ -135,6 +136,8 @@ contract RecipeExecutor is
                                 CONST
     //////////////////////////////////////////////////////////////*/
     IDFSRegistry private constant registry = IDFSRegistry(REGISTRY_ADDR);
+    /// @dev Marker passed as the extra last element of _actionCallData to request semi-continuous execution
+    bytes32 internal constant SEMI_CONTINUOUS_FLAG = keccak256("SEMI_CONTINUOUS_FLAG");
 
     /*//////////////////////////////////////////////////////////////
                                 ERRORS
@@ -148,6 +151,12 @@ contract RecipeExecutor is
 
     /// When calling TxSaver functions, caller has to be TxSaverExecutor
     error TxSaverAuthorizationError(address caller);
+
+    // Lengths must match, or actionsCallData must be one longer with the last element being SEMI_CONTINUOUS_FLAG
+    error InvalidActionCallDataLength(uint256 actionCallDataLength, uint256 strategyActionLength);
+
+    // When executing a strategy with semi-continuous execution, the last element of actionsCallData must be SEMI_CONTINUOUS_FLAG
+    error InvalidSemiContinuousFlag(bytes actionCallDataFlag, bytes32 semiContinuousFlag);
 
     /*//////////////////////////////////////////////////////////////
                                 EXTERNAL
@@ -244,17 +253,51 @@ contract RecipeExecutor is
             strategy = IStrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
         }
 
-        // check if all the triggers are true
-        (bool triggered, uint256 errIndex) =
-            _checkTriggers(strategy, _sub, _triggerCallData, _subId, SUB_STORAGE_ADDR);
+        // skip triggers check if the sub is already in semi-continuous execution
+        // deliberately skips updating sub data too
+        if (
+            ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER))
+                    .executionWalletOf(_subId) != address(this)
+        ) {
+            // check if all the triggers are true
+            (bool triggered, uint256 errIndex) =
+                _checkTriggers(strategy, _sub, _triggerCallData, _subId, SUB_STORAGE_ADDR);
 
-        if (!triggered) {
-            revert TriggerNotActiveError(errIndex);
+            if (!triggered) {
+                revert TriggerNotActiveError(errIndex);
+            }
         }
 
-        // if this is a one time strategy
-        if (!strategy.continuous) {
-            ISubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId);
+        // reading from registry
+        ISemiContinuousTracker semiContinuousTracker =
+            ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER));
+
+        // must be either same length as strategy actions or one more with the last element being SEMI_CONTINUOUS_FLAG
+        if (
+            _actionCallData.length < strategy.actionIds.length
+                || _actionCallData.length > strategy.actionIds.length + 1
+        ) {
+            revert InvalidActionCallDataLength(_actionCallData.length, strategy.actionIds.length);
+        }
+
+        // if length is one more, the last actionCalldata must be SEMI_CONTINUOUS_FLAG
+        if (_actionCallData.length == strategy.actionIds.length + 1) {
+            bytes calldata flagData = _actionCallData[_actionCallData.length - 1];
+
+            if (flagData.length != 32 || bytes32(flagData) != SEMI_CONTINUOUS_FLAG) {
+                revert InvalidSemiContinuousFlag(flagData, SEMI_CONTINUOUS_FLAG);
+            }
+
+            // don't disable sub and start semi-continuous execution
+            if (!strategy.continuous) {
+                ISemiContinuousTracker(semiContinuousTracker).startExecution(_subId);
+            }
+        } else {
+            // if this is a one time strategy
+            if (!strategy.continuous) {
+                ISemiContinuousTracker(semiContinuousTracker).finishExecution(_subId);
+                ISubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId);
+            }
         }
 
         // format recipe from strategy
