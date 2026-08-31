@@ -254,6 +254,7 @@ contract RecipeExecutor is
         }
 
         // skip triggers check if the sub is already in semi-continuous execution
+        // deliberately skips updating sub data too
         if (
             ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER))
                     .executionWalletOf(_subId) != address(this)
