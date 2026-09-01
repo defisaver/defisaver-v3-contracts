@@ -461,11 +461,10 @@ const OPEN_OCEAN_REFERRER_ADDR = '0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479';
 const openOceanChainNames = {
     1: 'eth',
     10: 'optimism',
-    56: 'bsc',
-    137: 'polygon',
     8453: 'base',
     42161: 'arbitrum',
     59144: 'linea',
+    9745: 'plasma',
 };
 
 /// @dev hashflow, native v2/v4 and bebop fill from maker orders signed off chain. Rewriting the
