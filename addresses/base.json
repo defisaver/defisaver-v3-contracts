@@ -1724,5 +1724,16 @@
         "changeTime": 0,
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "FlyWrapper",
+        "address": "0x29982FB379E517de35ccFCD447950f6B026b03C0",
+        "id": "0x92b2d9f8",
+        "path": "contracts/exchangeV3/offchainWrappersV3/FlyWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
     }
 ]
