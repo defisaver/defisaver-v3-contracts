@@ -1369,5 +1369,16 @@
         "changeTime": 0,
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "OpenOceanWrapper",
+        "address": "0x9Cfb942ED7C438D5257dA4266277Cb454ab5d02b",
+        "id": "0x9e3c90cd",
+        "path": "contracts/exchangeV3/offchainWrappersV3/OpenOceanWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
     }
 ]
