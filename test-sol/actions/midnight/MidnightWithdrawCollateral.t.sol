@@ -30,38 +30,50 @@ contract TestMidnightWithdrawCollateral is MidnightTestBase {
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_withdraw_direct() public {
-        _supplyCollateralToWallet(WALLET_COLLATERAL);
-        _withdraw(address(0), WALLET_COLLATERAL / 2, WALLET_COLLATERAL / 2, true);
+        bytes32[] memory marketIds = _getMarketIds();
+        for (uint256 i = 0; i < marketIds.length; ++i) {
+            marketId = marketIds[i];
+            _supplyCollateralToWallet(WALLET_COLLATERAL);
+            _withdraw(address(0), WALLET_COLLATERAL / 2, WALLET_COLLATERAL / 2, true);
+        }
     }
 
     function test_withdraw_recipe_wallet_max() public {
-        _supplyCollateralToWallet(WALLET_COLLATERAL);
-        _withdraw(walletAddr, type(uint256).max, WALLET_COLLATERAL, false);
+        bytes32[] memory marketIds = _getMarketIds();
+        for (uint256 i = 0; i < marketIds.length; ++i) {
+            marketId = marketIds[i];
+            _supplyCollateralToWallet(WALLET_COLLATERAL);
+            _withdraw(walletAddr, type(uint256).max, WALLET_COLLATERAL, false);
+        }
     }
 
     function test_withdraw_recipe_wallet_partial() public {
-        _supplyCollateralToWallet(WALLET_COLLATERAL);
-        _withdraw(walletAddr, WALLET_COLLATERAL / 2, WALLET_COLLATERAL / 2, false);
+        bytes32[] memory marketIds = _getMarketIds();
+        for (uint256 i = 0; i < marketIds.length; ++i) {
+            marketId = marketIds[i];
+            _supplyCollateralToWallet(WALLET_COLLATERAL);
+            _withdraw(walletAddr, WALLET_COLLATERAL / 2, WALLET_COLLATERAL / 2, false);
+        }
     }
 
     function test_withdraw_recipe_eoa_max() public {
-        _clearDebt(TEST_USER);
-        _authorizeWalletFor(TEST_USER);
-
-        uint256 collateral = MIDNIGHT.collateral(MARKET_ID, TEST_USER, COLLATERAL_INDEX);
-        assertGt(collateral, 0);
-
-        _withdraw(TEST_USER, type(uint256).max, collateral, false);
+        _authorizeWalletFor(testUser);
+        bytes32[] memory marketIds = _getMarketIds();
+        for (uint256 i = 0; i < marketIds.length; ++i) {
+            marketId = marketIds[i];
+            _supplyCollateral(testUser, WALLET_COLLATERAL);
+            _withdraw(testUser, type(uint256).max, WALLET_COLLATERAL, false);
+        }
     }
 
     function test_withdraw_recipe_eoa_partial() public {
-        _clearDebt(TEST_USER);
-        _authorizeWalletFor(TEST_USER);
-
-        uint256 collateral = MIDNIGHT.collateral(MARKET_ID, TEST_USER, COLLATERAL_INDEX);
-        assertGt(collateral, 1);
-
-        _withdraw(TEST_USER, collateral / 2, collateral / 2, false);
+        _authorizeWalletFor(testUser);
+        bytes32[] memory marketIds = _getMarketIds();
+        for (uint256 i = 0; i < marketIds.length; ++i) {
+            marketId = marketIds[i];
+            _supplyCollateral(testUser, WALLET_COLLATERAL);
+            _withdraw(testUser, WALLET_COLLATERAL / 2, WALLET_COLLATERAL / 2, false);
+        }
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -77,10 +89,10 @@ contract TestMidnightWithdrawCollateral is MidnightTestBase {
         address positionOwner = _onBehalf == address(0) ? walletAddr : _onBehalf;
 
         uint256 receiverBalanceBefore = balanceOf(collateralToken, sender);
-        uint256 collateralBefore = MIDNIGHT.collateral(MARKET_ID, positionOwner, COLLATERAL_INDEX);
+        uint256 collateralBefore = MIDNIGHT.collateral(marketId, positionOwner, COLLATERAL_INDEX);
 
         MidnightWithdrawCollateral.Params memory params = MidnightWithdrawCollateral.Params({
-            marketId: MARKET_ID,
+            marketId: marketId,
             onBehalf: _onBehalf,
             to: sender,
             amount: _inputAmount,
@@ -90,7 +102,7 @@ contract TestMidnightWithdrawCollateral is MidnightTestBase {
         wallet.execute(address(cut), executeActionCalldata(abi.encode(params), _isDirect), 0);
 
         assertEq(
-            MIDNIGHT.collateral(MARKET_ID, positionOwner, COLLATERAL_INDEX),
+            MIDNIGHT.collateral(marketId, positionOwner, COLLATERAL_INDEX),
             collateralBefore - _expectedAmount
         );
         assertEq(balanceOf(collateralToken, sender), receiverBalanceBefore + _expectedAmount);

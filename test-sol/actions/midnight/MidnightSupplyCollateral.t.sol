@@ -30,16 +30,28 @@ contract TestMidnightSupplyCollateral is MidnightTestBase {
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_supply_direct() public {
-        _supply(address(0), true);
+        bytes32[] memory marketIds = _getMarketIds();
+        for (uint256 i = 0; i < marketIds.length; ++i) {
+            marketId = marketIds[i];
+            _supply(address(0), true);
+        }
     }
 
     function test_supply_recipe_wallet() public {
-        _supply(walletAddr, false);
+        bytes32[] memory marketIds = _getMarketIds();
+        for (uint256 i = 0; i < marketIds.length; ++i) {
+            marketId = marketIds[i];
+            _supply(walletAddr, false);
+        }
     }
 
     function test_supply_recipe_eoa() public {
         _authorizeWalletFor(sender);
-        _supply(sender, false);
+        bytes32[] memory marketIds = _getMarketIds();
+        for (uint256 i = 0; i < marketIds.length; ++i) {
+            marketId = marketIds[i];
+            _supply(sender, false);
+        }
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -52,10 +64,10 @@ contract TestMidnightSupplyCollateral is MidnightTestBase {
         _fundSenderAndApproveWallet(collateralToken, SUPPLY_AMOUNT);
 
         uint256 senderBalanceBefore = balanceOf(collateralToken, sender);
-        uint256 collateralBefore = MIDNIGHT.collateral(MARKET_ID, positionOwner, COLLATERAL_INDEX);
+        uint256 collateralBefore = MIDNIGHT.collateral(marketId, positionOwner, COLLATERAL_INDEX);
 
         MidnightSupplyCollateral.Params memory params = MidnightSupplyCollateral.Params({
-            marketId: MARKET_ID,
+            marketId: marketId,
             onBehalf: _onBehalf,
             from: sender,
             amount: SUPPLY_AMOUNT,
@@ -66,7 +78,7 @@ contract TestMidnightSupplyCollateral is MidnightTestBase {
 
         assertEq(balanceOf(collateralToken, sender), senderBalanceBefore - SUPPLY_AMOUNT);
         assertEq(
-            MIDNIGHT.collateral(MARKET_ID, positionOwner, COLLATERAL_INDEX),
+            MIDNIGHT.collateral(marketId, positionOwner, COLLATERAL_INDEX),
             collateralBefore + SUPPLY_AMOUNT
         );
         _assertNoWalletResidue(collateralToken);
