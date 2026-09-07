@@ -126,7 +126,7 @@ module.exports = {
                 },
             },
             forking: {
-                url: process.env.BASE_NODE,
+                url: process.env.ETHEREUM_NODE,
                 timeout: 1000000,
                 gasPrice: 50000000000,
                 // blockNumber: 12068716
