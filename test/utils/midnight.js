@@ -12,13 +12,93 @@ const BPS = hre.ethers.BigNumber.from(10_000);
 const WAD = hre.ethers.constants.WeiPerEther;
 const MAX_UINT128 = hre.ethers.BigNumber.from(2).pow(128).sub(1);
 
+const MAINNET_MARKETS = [
+    {
+        chainIds: [1],
+        label: 'Morpho Midnight cbBTC/USDC',
+        marketId: '0x2a9ae59053a64e409e819d3b76750948e06065b3164278915eb80cb1b7474b65',
+        loanToken: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        collateralIndex: 1,
+        collaterals: [
+            {
+                token: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+                lltv: 0.98,
+                liquidationCursor: '300000000000000000',
+                oracle: '0x8d1A84515B54C58bAc3b18315B6b1f17dA5cf6ca',
+            },
+            {
+                token: '0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf',
+                lltv: 0.86,
+                liquidationCursor: '300000000000000000',
+                oracle: '0xA6D6950c9F177F1De7f7757FB33539e3Ec60182a',
+            },
+        ],
+        maturity: 1790348400,
+        rcfThreshold: '300000000000',
+        enterGate: hre.ethers.constants.AddressZero,
+        liquidatorGate: hre.ethers.constants.AddressZero,
+        curator: 'Morpho',
+    },
+    {
+        chainIds: [1],
+        label: 'Morpho Midnight WBTC/USDC',
+        marketId: '0x6dae37424723dd8cef0da2db84fd2819f7dfa4e3a98e602ccc3c65ee1fac61c2',
+        loanToken: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        collateralIndex: 0,
+        collaterals: [
+            {
+                token: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
+                lltv: 0.86,
+                liquidationCursor: '300000000000000000',
+                oracle: '0xDddd770BADd886dF3864029e4B377B5F6a2B6b83',
+            },
+            {
+                token: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+                lltv: 0.98,
+                liquidationCursor: '300000000000000000',
+                oracle: '0x8d1A84515B54C58bAc3b18315B6b1f17dA5cf6ca',
+            },
+        ],
+        maturity: 1790348400,
+        rcfThreshold: '300000000000',
+        enterGate: hre.ethers.constants.AddressZero,
+        liquidatorGate: hre.ethers.constants.AddressZero,
+        curator: 'Morpho',
+    },
+];
+
 const delay = () => new Promise((resolve) => setTimeout(resolve, API_DELAY_MS));
+
+const expectCustomError = async (promise, errorName) => {
+    let caughtError;
+    try {
+        await promise;
+    } catch (error) {
+        caughtError = error;
+    }
+
+    if (!caughtError) throw new Error(`Expected ${errorName} custom error`);
+
+    const selector = hre.ethers.utils.id(`${errorName}()`).slice(0, 10);
+    if (
+        !caughtError.message.includes(`${errorName}()`) &&
+        !caughtError.message.includes(selector)
+    ) {
+        throw caughtError;
+    }
+};
 
 const getMidnightMarkets = (network) => {
     const chainId = chainIds[network];
     if (!chainId || !addrs[network]?.MIDNIGHT_ADDRESS) return [];
 
-    const activeMarkets = Object.values(markets.MorphoMidnightMarkets(chainId))
+    let configuredMarkets = [];
+    if (network === 'mainnet') configuredMarkets = MAINNET_MARKETS;
+    if (network === 'base') {
+        configuredMarkets = Object.values(markets.MorphoMidnightMarkets(chainId));
+    }
+
+    const activeMarkets = configuredMarkets
         .filter(
             (market) => market.chainIds.includes(chainId) && market.maturity > Date.now() / 1000,
         )
@@ -27,11 +107,13 @@ const getMidnightMarkets = (network) => {
 
     // Remove duplicate markets with different maturity dates to speed up testing
     activeMarkets.forEach((market) => {
-        const key = `${market.curator}-${market.loanToken}-${market.collaterals[0].token}`;
+        const collateralIndex = market.collateralIndex ?? 0;
+        const key = `${market.curator}-${market.loanToken}-${market.collaterals[collateralIndex].token}`;
         if (!uniqueMarkets.has(key)) {
             uniqueMarkets.set(key, {
                 ...market,
                 chainId,
+                collateralIndex,
                 quoteProvider: market.curator.toLowerCase(),
             });
         }
@@ -364,6 +446,7 @@ module.exports = {
     calculateMinUnits,
     calculateTenorMaxUnits,
     calculateTenorMinUnits,
+    expectCustomError,
     fetchQuote,
     fetchMidnightQuote,
     fetchMidnightQuoteForMinFills,

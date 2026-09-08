@@ -25,6 +25,10 @@ contract TestMidnightView is BaseTest {
     function setUp() public override {
         forkFromEnv("");
 
+        if (!isBaseSelected()) {
+            vm.skip(true, "MidnightView test is base only");
+        }
+
         cut = new MidnightView();
     }
 

@@ -23,6 +23,7 @@ const {
 const {
     calculateMinUnits,
     calculateTenorMinUnits,
+    expectCustomError,
     fetchMidnightQuote,
     fetchMidnightQuoteForMinFills,
     fetchQuote,
@@ -394,13 +395,14 @@ describe('Midnight-Payback-From-Orders', function () {
     });
 
     it('should revert when no orders are provided', async () => {
-        await expect(
+        await expectCustomError(
             executePaybackDirect(
                 hre.ethers.utils.parseUnits('2', morphoMarket.loanTokenDecimals),
                 hre.ethers.constants.Zero,
                 [],
             ),
-        ).to.be.revertedWith('NoOrdersProvided');
+            'NoOrdersProvided',
+        );
     });
 
     it('should revert when zero amount is requested', async function () {
@@ -409,9 +411,10 @@ describe('Midnight-Payback-From-Orders', function () {
             hre.ethers.utils.parseUnits('2', morphoMarket.loanTokenDecimals),
         );
 
-        await expect(
+        await expectCustomError(
             executePaybackDirect(0, hre.ethers.constants.Zero, quote.offerFills),
-        ).to.be.revertedWith('ZeroAmountRequested');
+            'ZeroAmountRequested',
+        );
     });
 
     it('should revert when a buy offer is provided', async function () {
@@ -421,7 +424,8 @@ describe('Midnight-Payback-From-Orders', function () {
         const seededDebt = sumOfferFillUnits(quote.offerFills);
         const stateBefore = await prepareDirectPayback(seededDebt, paybackAmount);
 
-        await expect(executePaybackDirect(paybackAmount, 0, quote.offerFills)).to.be.revertedWith(
+        await expectCustomError(
+            executePaybackDirect(paybackAmount, 0, quote.offerFills),
             'InvalidOfferType',
         );
         await assertDirectStateUnchanged(stateBefore);
@@ -434,7 +438,8 @@ describe('Midnight-Payback-From-Orders', function () {
         const seededDebt = sumOfferFillUnits(quote.offerFills);
         const stateBefore = await prepareDirectPayback(seededDebt, paybackAmount);
 
-        await expect(executePaybackDirect(paybackAmount, 0, quote.offerFills)).to.be.revertedWith(
+        await expectCustomError(
+            executePaybackDirect(paybackAmount, 0, quote.offerFills),
             'InvalidOfferMarketId',
         );
         await assertDirectStateUnchanged(stateBefore);
@@ -449,7 +454,8 @@ describe('Midnight-Payback-From-Orders', function () {
         });
         const stateBefore = await prepareDirectPayback(seededDebt, paybackAmount);
 
-        await expect(executePaybackDirect(paybackAmount, 0, quote.offerFills)).to.be.revertedWith(
+        await expectCustomError(
+            executePaybackDirect(paybackAmount, 0, quote.offerFills),
             'CannotFulfillPayback',
         );
         await assertDirectStateUnchanged(stateBefore);
@@ -461,9 +467,10 @@ describe('Midnight-Payback-From-Orders', function () {
         const seededDebt = sumOfferFillUnits(quote.offerFills);
         const stateBefore = await prepareDirectPayback(seededDebt, paybackAmount);
 
-        await expect(
+        await expectCustomError(
             executePaybackDirect(paybackAmount, hre.ethers.constants.MaxUint256, quote.offerFills),
-        ).to.be.revertedWith('MinUnitsSlippage');
+            'MinUnitsSlippage',
+        );
         await assertDirectStateUnchanged(stateBefore);
     });
 });

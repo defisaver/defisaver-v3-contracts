@@ -33,7 +33,7 @@ contract TestMidnightPaybackDirect is MidnightTestBase {
         _authorizeWalletFor(testUser);
         bytes32[] memory marketIds = _getMarketIds();
         for (uint256 i = 0; i < marketIds.length; ++i) {
-            marketId = marketIds[i];
+            _setMarket(marketIds[i]);
             _seedDebt(testUser, WALLET_DEBT);
             _payback(testUser, WALLET_DEBT / 2, WALLET_DEBT / 2, true);
         }
@@ -42,7 +42,7 @@ contract TestMidnightPaybackDirect is MidnightTestBase {
     function test_payback_recipe_wallet_max() public {
         bytes32[] memory marketIds = _getMarketIds();
         for (uint256 i = 0; i < marketIds.length; ++i) {
-            marketId = marketIds[i];
+            _setMarket(marketIds[i]);
             _seedDebt(walletAddr, WALLET_DEBT);
             _payback(address(0), type(uint256).max, WALLET_DEBT, false);
         }
@@ -51,7 +51,7 @@ contract TestMidnightPaybackDirect is MidnightTestBase {
     function test_payback_recipe_wallet_partial() public {
         bytes32[] memory marketIds = _getMarketIds();
         for (uint256 i = 0; i < marketIds.length; ++i) {
-            marketId = marketIds[i];
+            _setMarket(marketIds[i]);
             _seedDebt(walletAddr, WALLET_DEBT);
             _payback(walletAddr, WALLET_DEBT / 2, WALLET_DEBT / 2, false);
         }
@@ -61,7 +61,7 @@ contract TestMidnightPaybackDirect is MidnightTestBase {
         _authorizeWalletFor(testUser);
         bytes32[] memory marketIds = _getMarketIds();
         for (uint256 i = 0; i < marketIds.length; ++i) {
-            marketId = marketIds[i];
+            _setMarket(marketIds[i]);
             _seedDebt(testUser, WALLET_DEBT);
             _payback(testUser, type(uint256).max, WALLET_DEBT, false);
         }
@@ -71,7 +71,7 @@ contract TestMidnightPaybackDirect is MidnightTestBase {
         _authorizeWalletFor(testUser);
         bytes32[] memory marketIds = _getMarketIds();
         for (uint256 i = 0; i < marketIds.length; ++i) {
-            marketId = marketIds[i];
+            _setMarket(marketIds[i]);
             _seedDebt(testUser, WALLET_DEBT);
             _payback(testUser, WALLET_DEBT / 2, WALLET_DEBT / 2, false);
         }

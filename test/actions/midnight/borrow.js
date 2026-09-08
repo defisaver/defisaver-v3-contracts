@@ -24,6 +24,7 @@ const {
 const {
     calculateMaxUnits,
     calculateTenorMaxUnits,
+    expectCustomError,
     fetchMidnightQuote,
     fetchMidnightQuoteForMinFills,
     fetchQuote,
@@ -48,15 +49,16 @@ describe('Midnight-Borrow-From-Orders', function () {
 
     const supplyCollateral = async (market) => {
         const collateralAmount = hre.ethers.utils.parseUnits('1000', market.collateralDecimals);
-        await setBalance(market.collaterals[0].token, senderAcc.address, collateralAmount);
-        await approve(market.collaterals[0].token, proxy.address, senderAcc);
+        const collateralToken = market.collaterals[market.collateralIndex].token;
+        await setBalance(collateralToken, senderAcc.address, collateralAmount);
+        await approve(collateralToken, proxy.address, senderAcc);
         await midnightSupplyCollateral(
             proxy,
             market.marketId,
             nullAddress,
             senderAcc.address,
             collateralAmount,
-            0,
+            market.collateralIndex,
         );
     };
 
@@ -75,9 +77,9 @@ describe('Midnight-Borrow-From-Orders', function () {
 
         const tokens = [
             ...new Set(
-                borrowMarkets.flatMap(({ loanToken, collaterals }) => [
+                borrowMarkets.flatMap(({ loanToken, collaterals, collateralIndex }) => [
                     loanToken,
-                    collaterals[0].token,
+                    collaterals[collateralIndex].token,
                 ]),
             ),
         ];
@@ -94,7 +96,9 @@ describe('Midnight-Borrow-From-Orders', function () {
 
         for (const market of borrowMarkets) {
             market.loanTokenDecimals = tokenDecimals.get(market.loanToken);
-            market.collateralDecimals = tokenDecimals.get(market.collaterals[0].token);
+            market.collateralDecimals = tokenDecimals.get(
+                market.collaterals[market.collateralIndex].token,
+            );
         }
     });
 
@@ -175,13 +179,22 @@ describe('Midnight-Borrow-From-Orders', function () {
 
     it('should borrow using at least three orders', async function () {
         await supplyCollateral(morphoMarket);
-        const quote = await fetchMidnightQuoteForMinFills({
-            marketId: morphoMarket.marketId,
-            side: 'bids',
-            initialAssets: hre.ethers.utils.parseUnits('10000', morphoMarket.loanTokenDecimals),
-            minFills: 3,
-            slippage: DEFAULT_SLIPPAGE,
-        });
+        let quote;
+        try {
+            quote = await fetchMidnightQuoteForMinFills({
+                marketId: morphoMarket.marketId,
+                side: 'bids',
+                initialAssets: hre.ethers.utils.parseUnits('10000', morphoMarket.loanTokenDecimals),
+                minFills: 3,
+                slippage: DEFAULT_SLIPPAGE,
+            });
+        } catch (error) {
+            if (error.status === 422) {
+                console.log('Skipping test: not enough bids available for three orders');
+                this.skip();
+            }
+            throw error;
+        }
         const maxUnits = calculateMaxUnits(quote.assets, quote.averageWorstPrice);
         const uniqueOffers = new Map();
         quote.offerFills.forEach(([offer]) => {
@@ -234,9 +247,10 @@ describe('Midnight-Borrow-From-Orders', function () {
             [],
         );
 
-        await expect(
+        await expectCustomError(
             senderAcc.sendTransaction({ to: borrowAction.address, data: functionData }),
-        ).to.be.revertedWith('NoOrdersProvided');
+            'NoOrdersProvided',
+        );
     });
 
     it('should revert when a sell offer is provided', async () => {
@@ -258,8 +272,9 @@ describe('Midnight-Borrow-From-Orders', function () {
             offerFills,
         );
 
-        await expect(
+        await expectCustomError(
             senderAcc.sendTransaction({ to: borrowAction.address, data: functionData }),
-        ).to.be.revertedWith('InvalidOfferType');
+            'InvalidOfferType',
+        );
     });
 });

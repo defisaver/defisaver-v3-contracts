@@ -32,7 +32,7 @@ contract TestMidnightWithdrawCollateral is MidnightTestBase {
     function test_withdraw_direct() public {
         bytes32[] memory marketIds = _getMarketIds();
         for (uint256 i = 0; i < marketIds.length; ++i) {
-            marketId = marketIds[i];
+            _setMarket(marketIds[i]);
             _supplyCollateralToWallet(WALLET_COLLATERAL);
             _withdraw(address(0), WALLET_COLLATERAL / 2, WALLET_COLLATERAL / 2, true);
         }
@@ -41,7 +41,7 @@ contract TestMidnightWithdrawCollateral is MidnightTestBase {
     function test_withdraw_recipe_wallet_max() public {
         bytes32[] memory marketIds = _getMarketIds();
         for (uint256 i = 0; i < marketIds.length; ++i) {
-            marketId = marketIds[i];
+            _setMarket(marketIds[i]);
             _supplyCollateralToWallet(WALLET_COLLATERAL);
             _withdraw(walletAddr, type(uint256).max, WALLET_COLLATERAL, false);
         }
@@ -50,7 +50,7 @@ contract TestMidnightWithdrawCollateral is MidnightTestBase {
     function test_withdraw_recipe_wallet_partial() public {
         bytes32[] memory marketIds = _getMarketIds();
         for (uint256 i = 0; i < marketIds.length; ++i) {
-            marketId = marketIds[i];
+            _setMarket(marketIds[i]);
             _supplyCollateralToWallet(WALLET_COLLATERAL);
             _withdraw(walletAddr, WALLET_COLLATERAL / 2, WALLET_COLLATERAL / 2, false);
         }
@@ -60,7 +60,7 @@ contract TestMidnightWithdrawCollateral is MidnightTestBase {
         _authorizeWalletFor(testUser);
         bytes32[] memory marketIds = _getMarketIds();
         for (uint256 i = 0; i < marketIds.length; ++i) {
-            marketId = marketIds[i];
+            _setMarket(marketIds[i]);
             _supplyCollateral(testUser, WALLET_COLLATERAL);
             _withdraw(testUser, type(uint256).max, WALLET_COLLATERAL, false);
         }
@@ -70,7 +70,7 @@ contract TestMidnightWithdrawCollateral is MidnightTestBase {
         _authorizeWalletFor(testUser);
         bytes32[] memory marketIds = _getMarketIds();
         for (uint256 i = 0; i < marketIds.length; ++i) {
-            marketId = marketIds[i];
+            _setMarket(marketIds[i]);
             _supplyCollateral(testUser, WALLET_COLLATERAL);
             _withdraw(testUser, WALLET_COLLATERAL / 2, WALLET_COLLATERAL / 2, false);
         }
@@ -89,20 +89,20 @@ contract TestMidnightWithdrawCollateral is MidnightTestBase {
         address positionOwner = _onBehalf == address(0) ? walletAddr : _onBehalf;
 
         uint256 receiverBalanceBefore = balanceOf(collateralToken, sender);
-        uint256 collateralBefore = MIDNIGHT.collateral(marketId, positionOwner, COLLATERAL_INDEX);
+        uint256 collateralBefore = MIDNIGHT.collateral(marketId, positionOwner, collateralIndex);
 
         MidnightWithdrawCollateral.Params memory params = MidnightWithdrawCollateral.Params({
             marketId: marketId,
             onBehalf: _onBehalf,
             to: sender,
             amount: _inputAmount,
-            collateralIndex: COLLATERAL_INDEX
+            collateralIndex: collateralIndex
         });
 
         wallet.execute(address(cut), executeActionCalldata(abi.encode(params), _isDirect), 0);
 
         assertEq(
-            MIDNIGHT.collateral(marketId, positionOwner, COLLATERAL_INDEX),
+            MIDNIGHT.collateral(marketId, positionOwner, collateralIndex),
             collateralBefore - _expectedAmount
         );
         assertEq(balanceOf(collateralToken, sender), receiverBalanceBefore + _expectedAmount);

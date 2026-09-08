@@ -6,9 +6,9 @@ import { Market, CollateralParams } from "../../../interfaces/protocols/midnight
 import { IOracle } from "../../../interfaces/protocols/midnight/IOracle.sol";
 import { IdLib } from "../../../_vendor/midnight/IdLib.sol";
 import { UtilsLib } from "../../../_vendor/midnight/UtilsLib.sol";
-import { BaseMidnightAddresses } from "./BaseMidnightAddresses.sol";
+import { MainnetMidnightAddresses } from "./MainnetMidnightAddresses.sol";
 
-contract MidnightHelper is BaseMidnightAddresses {
+contract MidnightHelper is MainnetMidnightAddresses {
     error InvalidCollateralIndex();
     error InvalidOfferType();
     error InvalidOfferMarketId();
