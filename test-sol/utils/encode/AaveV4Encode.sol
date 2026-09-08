@@ -30,6 +30,13 @@ import {
 import {
     AaveV4DelegateSetUsingAsCollateralWithSig
 } from "../../../contracts/actions/aaveV4/AaveV4DelegateSetUsingAsCollateralWithSig.sol";
+import { AaveV4DelegateBorrow } from "../../../contracts/actions/aaveV4/AaveV4DelegateBorrow.sol";
+import {
+    AaveV4DelegateWithdraw
+} from "../../../contracts/actions/aaveV4/AaveV4DelegateWithdraw.sol";
+import {
+    AaveV4DelegateSetUsingAsCollateral
+} from "../../../contracts/actions/aaveV4/AaveV4DelegateSetUsingAsCollateral.sol";
 
 library AaveV4Encode {
     function supply(
@@ -176,12 +183,36 @@ library AaveV4Encode {
         );
     }
 
+    function delegateBorrow(address _spoke, uint256 _reserveId, address _spender, uint256 _amount)
+        public
+        pure
+        returns (bytes memory params)
+    {
+        params = abi.encode(
+            AaveV4DelegateBorrow.Params({
+                spoke: _spoke, reserveId: _reserveId, spender: _spender, amount: _amount
+            })
+        );
+    }
+
     function delegateWithdrawWithSig(
         ITakerPositionManager.WithdrawPermit memory _permit,
         bytes memory _signature
     ) public pure returns (bytes memory params) {
         params = abi.encode(
             AaveV4DelegateWithdrawWithSig.Params({ permit: _permit, signature: _signature })
+        );
+    }
+
+    function delegateWithdraw(address _spoke, uint256 _reserveId, address _spender, uint256 _amount)
+        public
+        pure
+        returns (bytes memory params)
+    {
+        params = abi.encode(
+            AaveV4DelegateWithdraw.Params({
+                spoke: _spoke, reserveId: _reserveId, spender: _spender, amount: _amount
+            })
         );
     }
 
@@ -192,6 +223,18 @@ library AaveV4Encode {
         params = abi.encode(
             AaveV4DelegateSetUsingAsCollateralWithSig.Params({
                 permit: _permit, signature: _signature
+            })
+        );
+    }
+
+    function delegateSetUsingAsCollateral(address _spoke, address _delegatee, bool _permission)
+        public
+        pure
+        returns (bytes memory params)
+    {
+        params = abi.encode(
+            AaveV4DelegateSetUsingAsCollateral.Params({
+                spoke: _spoke, delegatee: _delegatee, permission: _permission
             })
         );
     }
