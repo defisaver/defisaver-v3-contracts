@@ -21,6 +21,7 @@ import { AaveV4RatioCheck } from "../../../contracts/actions/checkers/AaveV4Rati
 import {
     AaveV4SetUserManagersWithSig
 } from "../../../contracts/actions/aaveV4/AaveV4SetUserManagersWithSig.sol";
+import { AaveV4SetUserManagers } from "../../../contracts/actions/aaveV4/AaveV4SetUserManagers.sol";
 import {
     AaveV4DelegateBorrowWithSig
 } from "../../../contracts/actions/aaveV4/AaveV4DelegateBorrowWithSig.sol";
@@ -172,6 +173,14 @@ library AaveV4Encode {
                 updates: _updates
             })
         );
+    }
+
+    function setUserManagers(address _spoke, ISpoke.PositionManagerUpdate[] memory _updates)
+        public
+        pure
+        returns (bytes memory params)
+    {
+        params = abi.encode(AaveV4SetUserManagers.Params({ spoke: _spoke, updates: _updates }));
     }
 
     function delegateBorrowWithSig(
