@@ -5199,5 +5199,71 @@
         "changeTime": 0,
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "MidnightView",
+        "address": "0xB64FBf011343961D9AC4A04b714414E35ebE6BE0",
+        "id": "0xecc0f913",
+        "path": "contracts/views/MidnightView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MidnightBorrowFromOrders",
+        "address": "0xB37fB30b93e1D5b0E870312997426c4a04Cff8Ce",
+        "id": "0x493c5822",
+        "path": "contracts/actions/midnight/MidnightBorrowFromOrders.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MidnightPaybackDirect",
+        "address": "0x2911FFF5C567Ac71d653AAf5919410A3e078D186",
+        "id": "0x410d1066",
+        "path": "contracts/actions/midnight/MidnightPaybackDirect.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MidnightPaybackFromOrders",
+        "address": "0x55cd72fB914A60587a88962Efa680117aE900729",
+        "id": "0x190b0b43",
+        "path": "contracts/actions/midnight/MidnightPaybackFromOrders.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MidnightSupplyCollateral",
+        "address": "0x32e25a420cF132832173AFfF7e74a7A0F9EC7430",
+        "id": "0xbb30ee9a",
+        "path": "contracts/actions/midnight/MidnightSupplyCollateral.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MidnightWithdrawCollateral",
+        "address": "0x4791Ffa530757AC56Cab7857291557ad3ef8b370",
+        "id": "0xa1f04e15",
+        "path": "contracts/actions/midnight/MidnightWithdrawCollateral.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     }
 ]
