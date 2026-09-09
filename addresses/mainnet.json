@@ -5199,5 +5199,38 @@
         "changeTime": 0,
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "AaveV4DelegateBorrow",
+        "address": "0x4284B4e09c46Ee2b4E703dB8e5A2F892d12638e1",
+        "id": "0xaa70a0b5",
+        "path": "contracts/actions/aaveV4/AaveV4DelegateBorrow.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV4DelegateWithdraw",
+        "address": "0x5e7c404d46971E7BD3a95570A80Bc37F38bf9E29",
+        "id": "0xf3a0510b",
+        "path": "contracts/actions/aaveV4/AaveV4DelegateWithdraw.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV4DelegateSetUsingAsCollateral",
+        "address": "0xa97f8E483C147f27aE7370DeaC4E6585A37884A2",
+        "id": "0xe4860f02",
+        "path": "contracts/actions/aaveV4/AaveV4DelegateSetUsingAsCollateral.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     }
 ]
