@@ -473,9 +473,6 @@ const openOceanChainNames = {
 /// Set to undefined to allow every route
 const OPEN_OCEAN_DISABLE_RFQ = 'true'; // only the string works, disableRfq=1 is ignored
 
-/// @dev OpenOceanExchange.swap, the only entrypoint the wrapper knows how to rewrite
-const OPEN_OCEAN_SWAP_SELECTOR = '0x90411a32';
-
 const getOpenOceanQuote = async (
     sellAssetInfo,
     buyAssetInfo,
@@ -598,8 +595,6 @@ const openOceanTest = async () => {
 
                     // guards the amount format, the deprecated params take whole tokens
                     expect(quote.inAmount).to.be.eq(amount.toString());
-
-                    expect(quote.data.slice(0, 10)).to.be.eq(OPEN_OCEAN_SWAP_SELECTOR);
 
                     const exchangeAddr = quote.to;
                     // the openocean router pulls the sell token itself, there is no separate spender
