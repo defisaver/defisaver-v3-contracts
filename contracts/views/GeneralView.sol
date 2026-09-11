@@ -10,6 +10,26 @@ import { SmartWalletUtils } from "../utils/SmartWalletUtils.sol";
 import { WalletType } from "../utils/DFSTypes.sol";
 
 contract GeneralView is SmartWalletUtils {
+    error NotSmartWallet();
+
+    /// @notice Retrieves information about a smart wallet and handles the reverts with custom NotSmartWallet error
+    /// @param _smartWalletAddress Address of the smart wallet
+    /// @return smartWalletType Type of the smart wallet
+    /// @return owner Address of the owner of the smart wallet
+    function getSmartWalletInfoWithCatch(address _smartWalletAddress)
+        public
+        view
+        returns (WalletType smartWalletType, address owner)
+    {
+        try this.getSmartWalletInfo(_smartWalletAddress) returns (
+            WalletType _smartWalletType, address _owner
+        ) {
+            return (_smartWalletType, _owner);
+        } catch {
+            revert NotSmartWallet();
+        }
+    }
+
     /// @notice Retrieves information about a smart wallet
     /// @param _smartWalletAddress Address of the smart wallet
     /// @return smartWalletType Type of the smart wallet
