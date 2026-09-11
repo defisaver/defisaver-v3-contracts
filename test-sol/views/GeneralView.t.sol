@@ -96,46 +96,39 @@ contract TestGeneralView is BaseTest {
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                            TESTS - EOA HANDLING
+                          TESTS - NOT SMART WALLET REVERT
     //////////////////////////////////////////////////////////////////////////*/
-    function test_should_flag_eoa() public view {
-        (WalletType walletType, address owner, bool isEOA) = cut.getSmartWalletInfoWithCatch(bob);
-
-        assertTrue(isEOA);
-        assertEq(owner, bob);
-        // SAFE is returned as a placeholder for EOAs, backend relies on the `isEOA` flag.
-        assertTrue(walletType == WalletType.SAFE);
+    function test_should_revert_with_typed_error_for_eoa() public {
+        vm.expectRevert(GeneralView.NotSmartWallet.selector);
+        cut.getSmartWalletInfoWithCatch(bob);
     }
 
-    function test_should_flag_zero_address_as_eoa() public view {
-        (WalletType walletType, address owner, bool isEOA) =
-            cut.getSmartWalletInfoWithCatch(address(0));
-
-        assertTrue(isEOA);
-        assertEq(owner, address(0));
-        assertTrue(walletType == WalletType.SAFE);
+    function test_should_revert_with_typed_error_for_zero_address() public {
+        vm.expectRevert(GeneralView.NotSmartWallet.selector);
+        cut.getSmartWalletInfoWithCatch(address(0));
     }
 
-    function test_should_flag_eoa_with_delegated_code() public {
+    function test_should_revert_with_typed_error_for_eoa_with_delegated_code() public {
         vm.etch(bob, abi.encodePacked(bytes3(0xef0100), address(cut)));
 
-        (WalletType walletType, address owner, bool isEOA) = cut.getSmartWalletInfoWithCatch(bob);
-
-        assertTrue(isEOA);
-        assertEq(owner, bob);
-        assertTrue(walletType == WalletType.SAFE);
+        vm.expectRevert(GeneralView.NotSmartWallet.selector);
+        cut.getSmartWalletInfoWithCatch(bob);
     }
 
-    /// @dev Known trade-off: `isEOA` really means "owner lookup reverted", so a contract that is
-    ///      neither a known wallet type nor a Safe is reported as an EOA instead of reverting.
-    ///      Backend only passes smart wallets and EOAs, so this case is not expected in practice.
-    function test_should_flag_contract_that_is_not_a_wallet_as_eoa() public view {
-        (WalletType walletType, address owner, bool isEOA) =
-            cut.getSmartWalletInfoWithCatch(address(cut));
+    /// @dev A contract that is neither a known wallet type nor a Safe fails the owner lookup
+    ///      and is reported as not being a smart wallet.
+    function test_should_revert_with_typed_error_for_contract_that_is_not_a_wallet() public {
+        vm.expectRevert(GeneralView.NotSmartWallet.selector);
+        cut.getSmartWalletInfoWithCatch(address(cut));
+    }
 
-        assertTrue(isEOA);
-        assertEq(owner, address(cut));
-        assertTrue(walletType == WalletType.SAFE);
+    /// @dev The plain call reverts without any data, the wrapper turns that into a typed error.
+    function test_should_replace_bare_revert_with_typed_error() public {
+        vm.expectRevert(bytes(""));
+        cut.getSmartWalletInfo(bob);
+
+        vm.expectRevert(GeneralView.NotSmartWallet.selector);
+        cut.getSmartWalletInfoWithCatch(bob);
     }
 
     function test_should_match_plain_call_for_smart_wallets() public {
@@ -149,33 +142,11 @@ contract TestGeneralView is BaseTest {
 
         for (uint256 i = 0; i < wallets.length; ++i) {
             (WalletType walletType, address owner) = cut.getSmartWalletInfo(wallets[i]);
-            (WalletType eoaAwareType, address eoaAwareOwner, bool isEOA) =
+            (WalletType wrappedType, address wrappedOwner) =
                 cut.getSmartWalletInfoWithCatch(wallets[i]);
 
-            assertFalse(isEOA);
-            assertTrue(walletType == eoaAwareType);
-            assertEq(owner, eoaAwareOwner);
-        }
-    }
-
-    function testFuzz_should_never_revert(address _addr) public view {
-        // Precompiles and the cheatcode address are not realistic inputs.
-        vm.assume(uint160(_addr) > 20);
-        vm.assume(_addr != address(vm));
-
-        (WalletType walletType, address owner, bool isEOA) = cut.getSmartWalletInfoWithCatch(_addr);
-
-        // A codeless account can never resolve an owner, so it always ends up flagged.
-        if (_addr.code.length == 0) assertTrue(isEOA);
-
-        if (isEOA) {
-            assertEq(owner, _addr);
-            assertTrue(walletType == WalletType.SAFE);
-        } else {
-            // Anything not flagged as an EOA must be reproducible through the plain call.
-            (WalletType directType, address directOwner) = cut.getSmartWalletInfo(_addr);
-            assertTrue(walletType == directType);
-            assertEq(owner, directOwner);
+            assertTrue(walletType == wrappedType);
+            assertEq(owner, wrappedOwner);
         }
     }
 
