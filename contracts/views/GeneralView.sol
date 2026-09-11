@@ -10,6 +10,30 @@ import { SmartWalletUtils } from "../utils/SmartWalletUtils.sol";
 import { WalletType } from "../utils/DFSTypes.sol";
 
 contract GeneralView is SmartWalletUtils {
+    /// @notice Retrieves information about a smart wallet and handles the EOA case. Only used by backend.
+    /// @param _smartWalletAddress Address of the smart wallet
+    /// @return smartWalletType Type of the smart wallet
+    /// @return owner Address of the owner of the smart wallet
+    /// @return isEOA Boolean indicating if the address is an EOA
+    function getSmartWalletInfoWithCatch(address _smartWalletAddress)
+        public
+        view
+        returns (WalletType smartWalletType, address owner, bool isEOA)
+    {
+        try this.getSmartWalletInfo(_smartWalletAddress) returns (
+            WalletType _smartWalletType, address _owner
+        ) {
+            smartWalletType = _smartWalletType;
+            owner = _owner;
+            isEOA = false;
+        } catch {
+            // Returning SAFE for code simplicity, this is only used by backend and it is handled there.
+            smartWalletType = WalletType.SAFE;
+            owner = _smartWalletAddress;
+            isEOA = true;
+        }
+    }
+
     /// @notice Retrieves information about a smart wallet
     /// @param _smartWalletAddress Address of the smart wallet
     /// @return smartWalletType Type of the smart wallet
