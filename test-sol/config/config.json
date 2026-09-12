@@ -48,6 +48,15 @@
             { "supplyAsset": "WBTC", "borrowAsset": "USDT" }
         ]
     },
+    "FtDnmm": {
+        "lightTesting": false,
+        "lightPairs": [{ "supplyAsset": "WETH", "borrowAsset": "USDC" }],
+        "fullPairs": [
+            { "supplyAsset": "WETH", "borrowAsset": "USDC" },
+            { "supplyAsset": "WBTC", "borrowAsset": "USDC" },
+            { "supplyAsset": "WSTETH", "borrowAsset": "USDT" }
+        ]
+    },
     "AaveV3": {
         "lightTesting": false,
         "lightPairs": [{ "supplyAsset": "WETH", "borrowAsset": "DAI" }],

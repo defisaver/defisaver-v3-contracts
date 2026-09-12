@@ -141,7 +141,11 @@ async function changeTestAddressesImport(newNetwork) {
             .map((f) => path.basename(f)),
     );
 
-    const files = getAllFiles('./test-sol').filter((f) => f.endsWith('.sol'));
+    // Address definitions belong to their named chain. Rewriting their contract names
+    // on the return trip corrupts twins that were never switched on the outward trip.
+    const files = getAllFiles('./test-sol').filter(
+        (f) => f.endsWith('.sol') && !f.endsWith('Addresses.sol'),
+    );
     for (const file of files) {
         const content = fs.readFileSync(file).toString();
         const updated = content.replace(
