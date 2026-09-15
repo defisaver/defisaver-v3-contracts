@@ -49,6 +49,10 @@ contract MidnightView is MidnightHelper {
         info.continuousFee = MIDNIGHT.continuousFee(_id);
         info.tickSpacing = MIDNIGHT.tickSpacing(_id);
 
+        // Midnight treats tickSpacing == 0 as not created, toMarket() reverts for such markets
+        // https://github.com/morpho-org/midnight/blob/55995f27dd4afb8a61e99cd160c7b3a4afc67e54/src/Midnight.sol#L945
+        if (info.tickSpacing == 0) return info;
+
         Market memory market = toMarket(_id);
         info.prices = new uint256[](market.collateralParams.length);
         for (uint256 i = 0; i < market.collateralParams.length; ++i) {
@@ -61,6 +65,10 @@ contract MidnightView is MidnightHelper {
         view
         returns (PositionInfo memory pos)
     {
+        // Midnight treats tickSpacing == 0 as not created, toMarket() reverts for such markets
+        // https://github.com/morpho-org/midnight/blob/55995f27dd4afb8a61e99cd160c7b3a4afc67e54/src/Midnight.sol#L945
+        if (MIDNIGHT.tickSpacing(_id) == 0) return pos;
+
         (pos.credit, pos.pendingFee,,, pos.debt, pos.collateralBitmap) =
             MIDNIGHT.position(_id, _user);
 

@@ -18,6 +18,8 @@ contract TestMidnightView is BaseTest {
     address TEST_USER = 0x2e3Cc8Cd22812eaa229CbE85f3de7c9a39A8f4f7;
     // cbBTC/USDC Aug 28th 2026.
     bytes32 MARKET_ID = 0x05959752fdeff325962b9d263edb421efc6e2186a49360dba6c32e86ebf6c84c;
+    // Market that was never touched, so Midnight.toMarket reverts for it.
+    bytes32 UNTOUCHED_MARKET_ID = keccak256("MidnightView.untouchedMarket");
 
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
@@ -72,5 +74,31 @@ contract TestMidnightView is BaseTest {
         uint256 ratio = cut.getRatio(MARKET_ID, TEST_USER);
 
         console2.log("Ratio:", ratio);
+    }
+
+    function test_get_market_info_untouched_market() public {
+        vm.expectRevert();
+        cut.toMarket(UNTOUCHED_MARKET_ID);
+
+        MidnightView.MarketInfo memory marketInfo = cut.getMarketInfo(UNTOUCHED_MARKET_ID);
+
+        assertEq(marketInfo.id, UNTOUCHED_MARKET_ID);
+        assertEq(marketInfo.tickSpacing, 0);
+        assertEq(marketInfo.prices.length, 0);
+    }
+
+    function test_get_position_info_untouched_market() public {
+        vm.expectRevert();
+        cut.toMarket(UNTOUCHED_MARKET_ID);
+
+        MidnightView.PositionInfo memory positionInfo =
+            cut.getPositionInfo(UNTOUCHED_MARKET_ID, TEST_USER);
+
+        assertEq(positionInfo.credit, 0);
+        assertEq(positionInfo.pendingFee, 0);
+        assertEq(positionInfo.debt, 0);
+        assertEq(positionInfo.collateralBitmap, 0);
+        assertEq(positionInfo.collateral.length, 0);
+        assertEq(positionInfo.ratio, 0);
     }
 }
