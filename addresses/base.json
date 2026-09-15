@@ -1731,14 +1731,14 @@
     },
     {
         "name": "MidnightView",
-        "address": "0x3aa272f329E8B562A3bA56Bb6979a44D23A28839",
+        "address": "0xdEab43eb1519bD4314bc99c4019866734103D3Ae",
         "id": "0xecc0f913",
         "path": "contracts/views/MidnightView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x3aa272f329E8B562A3bA56Bb6979a44D23A28839"]
     },
     {
         "name": "MidnightPaybackDirect",
