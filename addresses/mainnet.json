@@ -5202,14 +5202,14 @@
     },
     {
         "name": "MidnightView",
-        "address": "0xB64FBf011343961D9AC4A04b714414E35ebE6BE0",
+        "address": "0xb8e1dAAd42e18203cfCED7193FE0e2E19d713A56",
         "id": "0xecc0f913",
         "path": "contracts/views/MidnightView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xB64FBf011343961D9AC4A04b714414E35ebE6BE0"]
     },
     {
         "name": "MidnightBorrowFromOrders",
