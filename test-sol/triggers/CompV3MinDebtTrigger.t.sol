@@ -75,9 +75,8 @@ contract TestCompV3MinDebtTrigger is BaseTest {
         _baseTestAllMarkets(0);
     }
 
-    /// @notice When the base token has no usable price (Chainlink returns 0), the trigger
-    ///         should always return true, even if the user has no debt.
-    function test_should_trigger_when_price_is_zero_even_with_no_debt() public {
+    /// @notice An empty position must be filtered out even when the base token has no usable price.
+    function test_should_not_trigger_when_price_is_zero_and_no_debt() public {
         (address market, bool found) = _firstMarketWithPricedBaseToken();
         if (!found) {
             vm.skip(true, "No Comet with a Chainlink priced base token on the selected network");
@@ -93,7 +92,7 @@ contract TestCompV3MinDebtTrigger is BaseTest {
         // Force the base token's USD price to 0 on every price source PriceLib uses.
         mockZeroTokenPrices();
 
-        assertTrue(_isTriggered(market, user, MIN_DEBT), "zero price must return true");
+        assertFalse(_isTriggered(market, user, MIN_DEBT), "empty debt must return false");
 
         vm.clearMockedCalls();
     }
