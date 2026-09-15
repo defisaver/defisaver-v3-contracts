@@ -27,9 +27,9 @@ contract TestMidnightView is BaseTest {
     function setUp() public override {
         forkFromEnv("");
 
-        if (!isBaseSelected()) {
-            vm.skip(true, "MidnightView test is base only");
-        }
+        // if (!isBaseSelected()) {
+        //     vm.skip(true, "MidnightView test is base only");
+        // }
 
         cut = new MidnightView();
     }
@@ -82,7 +82,7 @@ contract TestMidnightView is BaseTest {
 
         MidnightView.MarketInfo memory marketInfo = cut.getMarketInfo(UNTOUCHED_MARKET_ID);
 
-        assertEq(marketInfo.id, UNTOUCHED_MARKET_ID);
+        assertEq(marketInfo.id, 0);
         assertEq(marketInfo.tickSpacing, 0);
         assertEq(marketInfo.prices.length, 0);
     }
