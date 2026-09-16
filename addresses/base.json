@@ -1222,14 +1222,14 @@
     },
     {
         "name": "GeneralView",
-        "address": "0xdff2b1bB068f5549e43DAC75C66fED555DE565fB",
+        "address": "0xc889ae7E98B97a330d7053691b13a3602510fff3",
         "id": "0xc5831ea6",
         "path": "contracts/views/GeneralView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xdff2b1bB068f5549e43DAC75C66fED555DE565fB"]
     },
     {
         "name": "AaveV3SubProxy",

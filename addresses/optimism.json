@@ -1391,5 +1391,16 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "GeneralView",
+        "address": "0xAA0e3be14C27d7497aE58b4A700ba3885Cfd519b",
+        "id": "0xc5831ea6",
+        "path": "contracts/views/GeneralView.sol",
+        "version": "1.0.1",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": ["0x51faDAD47Df16E59De6203Ab0559Fe6FFAE9aC9B"]
     }
 ]

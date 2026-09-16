@@ -563,14 +563,14 @@
     },
     {
         "name": "GeneralView",
-        "address": "0xaa82EC29f0C9A939B29C6135e93E3080ed6669e5",
+        "address": "0x9eBc20f0415B7Fe50F3F77d8158bC6b2d8d6b14a",
         "id": "0xc5831ea6",
         "path": "contracts/views/GeneralView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xaa82EC29f0C9A939B29C6135e93E3080ed6669e5"]
     },
     {
         "name": "CBChickenIn",
