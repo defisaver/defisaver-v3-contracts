@@ -3954,14 +3954,14 @@
     },
     {
         "name": "CurveUsdSwapperTransient",
-        "address": "0xcF0298592b8FCB3823d31Bb257b65afFCAcCb8b6",
+        "address": "0xeF470FeC8670c6f4923Fa77732406d5d40AB8075",
         "id": "0x2ed1d3be",
         "path": "contracts/actions/curveusd/advanced/CurveUsdSwapperTransient.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xcF0298592b8FCB3823d31Bb257b65afFCAcCb8b6"]
     },
     {
         "name": "RenzoStake",

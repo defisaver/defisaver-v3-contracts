@@ -53,7 +53,7 @@ contract CurveUsdSwapperTransient is
         uint256,
         uint256,
         uint256[] memory _callbackArgs
-    ) external onlyValidCrvUsdController(msg.sender) returns (CallbackData memory cb) {
+    ) external nonReentrant onlyValidCrvUsdController(msg.sender) returns (CallbackData memory cb) {
         uint256 gasUsed = _callbackArgs[0];
 
         ExchangeData memory exData =
@@ -84,7 +84,7 @@ contract CurveUsdSwapperTransient is
         uint256,
         uint256,
         uint256[] memory _callbackArgs
-    ) external onlyValidCrvUsdController(msg.sender) returns (CallbackData memory cb) {
+    ) external nonReentrant onlyValidCrvUsdController(msg.sender) returns (CallbackData memory cb) {
         uint256 gasUsed = _callbackArgs[0];
 
         ExchangeData memory exData =
@@ -107,7 +107,7 @@ contract CurveUsdSwapperTransient is
         uint256,
         uint256,
         uint256[] memory _callbackArgs
-    ) external onlyValidCrvUsdController(msg.sender) returns (CallbackData memory cb) {
+    ) external nonReentrant onlyValidCrvUsdController(msg.sender) returns (CallbackData memory cb) {
         uint256 gasUsed = _callbackArgs[0];
         bool sellAllCollateral = _callbackArgs[1] == 1 ? true : false;
 
