@@ -4,7 +4,6 @@ pragma solidity =0.8.24;
 
 import { BaseTest } from "../utils/BaseTest.sol";
 import { MidnightView } from "../../contracts/views/MidnightView.sol";
-import { Market } from "../../contracts/interfaces/protocols/midnight/IMidnight.sol";
 import { console2 } from "forge-std/console2.sol";
 
 contract TestMidnightView is BaseTest {
@@ -15,9 +14,8 @@ contract TestMidnightView is BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                     VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
-    address TEST_USER = 0x2e3Cc8Cd22812eaa229CbE85f3de7c9a39A8f4f7;
-    // cbBTC/USDC Aug 28th 2026.
-    bytes32 MARKET_ID = 0x05959752fdeff325962b9d263edb421efc6e2186a49360dba6c32e86ebf6c84c;
+    address TEST_USER;
+    bytes32 MARKET_ID;
     // Market that was never touched, so Midnight.toMarket reverts for it.
     bytes32 UNTOUCHED_MARKET_ID = keccak256("MidnightView.untouchedMarket");
 
@@ -25,12 +23,22 @@ contract TestMidnightView is BaseTest {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkFromEnv("");
+        string memory chain = _chainFromProfile();
+        uint256 forkBlock;
 
-        if (!isBaseSelected()) {
-            vm.skip(true, "MidnightView test is base only");
+        if (keccak256(bytes(chain)) == keccak256("base")) {
+            forkBlock = 51_432_696;
+            TEST_USER = 0xC6877a65349B0fA45cC61a267eE682c7AbF2B369;
+            MARKET_ID = 0x549cd072daf99328554f3a6d2d4d6f4a07f1c59369e891e6391946f9cf75f221;
+        } else if (keccak256(bytes(chain)) == keccak256("mainnet")) {
+            forkBlock = 25_997_769;
+            TEST_USER = 0x26997a22A1a37952a8AfD55897d4Dd6b1f25db57;
+            MARKET_ID = 0x6dae37424723dd8cef0da2db84fd2819f7dfa4e3a98e602ccc3c65ee1fac61c2;
+        } else {
+            vm.skip(true, "MidnightView test is only for base and mainnet");
         }
 
+        _fork(_getRpcForChain(chain), forkBlock);
         cut = new MidnightView();
     }
 
