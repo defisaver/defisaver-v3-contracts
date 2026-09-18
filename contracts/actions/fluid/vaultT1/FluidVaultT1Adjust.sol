@@ -87,10 +87,9 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
             _parseParamUint(params.debtAmount, _paramMapping[3], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[4], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[5], _subData, _returnValues);
-        params.sendWrappedEth =
-            _parseParamUint(
-                    params.sendWrappedEth ? 1 : 0, _paramMapping[6], _subData, _returnValues
-                ) == 1;
+        params.sendWrappedEth = _parseParamUint(
+            params.sendWrappedEth ? 1 : 0, _paramMapping[6], _subData, _returnValues
+        ) == 1;
         params.collAction = CollActionType(
             _parseParamUint(uint8(params.collAction), _paramMapping[7], _subData, _returnValues)
         );
@@ -153,9 +152,8 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
             ? address(this)
             : _params.to;
 
-        (, int256 exactCollAmt, int256 exactDebtAmt) = IFluidVaultT1(_params.vault).operate{
-            value: vars.msgValue
-        }(
+        (, int256 exactCollAmt, int256 exactDebtAmt) = IFluidVaultT1(_params.vault)
+        .operate{ value: vars.msgValue }(
             _params.nftId, vars.supplyTokenAmount, vars.borrowTokenAmount, vars.sendTokensTo
         );
 

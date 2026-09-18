@@ -196,4 +196,11 @@ interface ISparkPool {
      * @return The eMode id
      */
     function getUserEMode(address user) external view returns (uint256);
+
+    /**
+     * @notice Returns the number of initialized reserves
+     * @dev It includes dropped reserves
+     * @return The count
+     */
+    function getReservesCount() external view returns (uint256);
 }

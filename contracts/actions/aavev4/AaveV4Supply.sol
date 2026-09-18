@@ -50,10 +50,9 @@ contract AaveV4Supply is ActionBase, AaveV4Helper {
         params.reserveId =
             _parseParamUint(params.reserveId, _paramMapping[3], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[4], _subData, _returnValues);
-        params.useAsCollateral =
-            _parseParamUint(
-                    params.useAsCollateral ? 1 : 0, _paramMapping[5], _subData, _returnValues
-                ) == 1;
+        params.useAsCollateral = _parseParamUint(
+            params.useAsCollateral ? 1 : 0, _paramMapping[5], _subData, _returnValues
+        ) == 1;
 
         (uint256 amount, bytes memory logData) = _supply(params);
         emit ActionEvent("AaveV4Supply", logData);
