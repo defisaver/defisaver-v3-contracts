@@ -5,35 +5,42 @@ import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { LiquityHelper } from "../actions/liquity/helpers/LiquityHelper.sol";
 
-/// @title Liquity V1 minimum-debt trigger
-/// @notice Filters empty or undersized Liquity V1 troves before automation execution.
-/// @dev Mainnet only. Uses stored debt including gas compensation, valuing LUSD at par.
 contract LiquityMinDebtTrigger is ITrigger, AdminAuth, LiquityHelper {
     /// @param user Owner of the Liquity V1 trove.
-    /// @param minDebt Minimum debt in whole USD (e.g. 5000), with LUSD valued at par.
+    /// @param minDebt minimum debt in whole USD (no decimals, e.g. 5000 for 5000 USD) that the user must have for the trigger to return true
     struct CalldataParams {
         address user;
-        uint256 minDebt; // Whole USD, matching the backend's LUSD-at-par debt threshold.
+        uint256 minDebt;
     }
 
-    /// @notice Returns true only for nonzero debt at or above the supplied minimum.
-    /// @param _calldata ABI-encoded CalldataParams; subscription data is unused.
-    /// @return Whether the trove meets the minimum-debt condition.
+    /// @dev Liquity debt is always denominated in LUSD, which has 18 decimals. We assume 1 LUSD == 1 USD.
+    uint256 constant PRECISION = 1e18;
+
     function isTriggered(bytes memory _calldata, bytes memory)
         external
         view
         override
         returns (bool)
     {
-        CalldataParams memory params = abi.decode(_calldata, (CalldataParams));
-        // Match LiquityView.getTroveInfo, used by automation, including gas compensation.
+        CalldataParams memory params = parseCallInputs(_calldata);
+
         uint256 debt = TroveManager.getTroveDebt(params.user);
-        return debt != 0 && debt >= params.minDebt * 1e18;
+
+        return debt >= params.minDebt * PRECISION;
     }
 
-    function changedSubData(bytes memory) public pure override returns (bytes memory) { }
+    //solhint-disable-next-line no-empty-blocks
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
 
     function isChangeable() public pure override returns (bool) {
         return false;
+    }
+
+    function parseCallInputs(bytes memory _callData)
+        public
+        pure
+        returns (CalldataParams memory params)
+    {
+        params = abi.decode(_callData, (CalldataParams));
     }
 }

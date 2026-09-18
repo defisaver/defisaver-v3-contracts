@@ -2,8 +2,9 @@
 pragma solidity =0.8.24;
 
 import { Test } from "forge-std/Test.sol";
-import { LiquityMinDebtTrigger } from
-    "../../contracts/triggers-additional/LiquityMinDebtTrigger.sol";
+import {
+    LiquityMinDebtTrigger
+} from "../../contracts/triggers-additional/LiquityMinDebtTrigger.sol";
 import { ITroveManager } from "../../contracts/interfaces/protocols/liquity/ITroveManager.sol";
 
 contract LiquityMinDebtTriggerUnitTest is Test {
@@ -25,7 +26,7 @@ contract LiquityMinDebtTriggerUnitTest is Test {
 
     function test_empty() public {
         assertFalse(check(0, 5000));
-        assertFalse(check(0, 0));
+        assertTrue(check(0, 0));
     }
 
     function test_boundary() public {
@@ -38,9 +39,9 @@ contract LiquityMinDebtTriggerUnitTest is Test {
         assertEq(check(debt, 5000), debt >= 5000e18);
     }
 
-    function test_zeroMinimumAllowsOnlyNonzeroDebt() public {
+    function test_zeroMinimumAllowsAnyDebt() public {
         assertTrue(check(1, 0));
-        assertFalse(check(0, 0));
+        assertTrue(check(0, 0));
     }
 
     function test_notChangeable() public view {
