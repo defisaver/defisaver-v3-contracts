@@ -11,19 +11,15 @@ import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.s
 
 /// @title Aave V3 boost collateral eligibility trigger
 /// @notice Boost-only filter: at least one supplied, enabled collateral must have positive LTV.
-/// @dev Does not replace execution-time liquidity, borrow-cap or account-capacity checks.
-///      Must not be attached to repay strategies. Uses the market's current eMode configuration.
 contract AaveV3BoostCollateralTrigger is ITrigger, AdminAuth, AaveV3RatioHelper {
     /// @param user Account holding the Aave position (smart wallet or EOA).
     /// @param market Aave V3 PoolAddressesProvider for the position's market.
     struct CalldataParams {
         address user;
-        address market; // PoolAddressesProvider
+        address market;
     }
 
     /// @notice Returns whether the position has supplied collateral with positive effective LTV.
-    /// @param _calldata ABI-encoded CalldataParams.
-    /// @dev Subscription data is unused; all checker parameters are supplied through calldata.
     /// @return True if at least one eligible collateral asset has a nonzero aToken balance.
     function isTriggered(bytes memory _calldata, bytes memory)
         external
@@ -31,7 +27,7 @@ contract AaveV3BoostCollateralTrigger is ITrigger, AdminAuth, AaveV3RatioHelper 
         override
         returns (bool)
     {
-        CalldataParams memory params = abi.decode(_calldata, (CalldataParams));
+        CalldataParams memory params = parseCallInputs(_calldata);
         IPoolV3 pool = IPoolV3(IPoolAddressesProvider(params.market).getPool());
         uint256 collateral = (pool.getUserConfiguration(params.user).data >> 1)
             & 0x5555555555555555555555555555555555555555555555555555555555555555;
@@ -54,11 +50,18 @@ contract AaveV3BoostCollateralTrigger is ITrigger, AdminAuth, AaveV3RatioHelper 
         return false;
     }
 
-    /// @notice This checker does not update subscription data.
-    function changedSubData(bytes memory) public pure override returns (bytes memory) { }
+    //solhint-disable-next-line no-empty-blocks
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
 
-    /// @notice Checker parameters do not change after evaluation.
     function isChangeable() public pure override returns (bool) {
         return false;
+    }
+
+    function parseCallInputs(bytes memory _callData)
+        public
+        pure
+        returns (CalldataParams memory params)
+    {
+        params = abi.decode(_callData, (CalldataParams));
     }
 }
