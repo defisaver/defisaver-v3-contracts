@@ -2,17 +2,17 @@
 
 pragma solidity =0.8.24;
 
-import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 import { IERC20 } from "../../interfaces/token/IERC20.sol";
+import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 
-/// @title Helper contract where we can retrieve the 2 wei Dydx fee
-contract FLFeeFaucet {
+/// @title Helper contract where we can retrieve the 2 wei of token to cover the fees
+contract FeeFaucet {
     using SafeERC20 for IERC20;
 
     /// @notice Sends 2 wei to msg.sender
     /// @dev Anyone can call this method but it's not economically feasible to drain
     /// @param _tokenAddr Address of the token we want 2 wei
-    function my2Wei(address _tokenAddr) public {
+    function my2Wei(address _tokenAddr) external {
         IERC20(_tokenAddr).safeTransfer(msg.sender, 2);
     }
 }
