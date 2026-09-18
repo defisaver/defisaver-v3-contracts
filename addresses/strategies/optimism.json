@@ -18,7 +18,7 @@
             ["$3", "&proxy", 0, 0, "&3", "&4", 0, 0],
             ["&2", "&1"]
         ],
-        "bundleId": 0
+        "bundleIds": [0]
     },
     {
         "name": "AaveFLV3RepayL2",
@@ -41,7 +41,7 @@
             [0, "&3", "$1", 0, 0],
             ["&2", "&1"]
         ],
-        "bundleId": 0
+        "bundleIds": [0]
     },
     {
         "name": "AaveV3BoostL2",
@@ -62,7 +62,7 @@
             ["$3", "&proxy", 0, "&5", "&3", "&4", 0, 0],
             ["&2", "&1"]
         ],
-        "bundleId": 1
+        "bundleIds": [1]
     },
     {
         "name": "AaveFLV3BoostL2",
@@ -85,7 +85,7 @@
             ["$1", 0, 0, 0, "&3", "&4", 0, 0],
             ["&2", "&1"]
         ],
-        "bundleId": 1
+        "bundleIds": [1]
     },
     {
         "name": "AaveV3CloseToDebtL2",
@@ -106,7 +106,7 @@
             [0, "&proxy", 0, "&4", 0, 0, "&5", "&5"],
             ["&3", "&eoa", 0]
         ],
-        "bundleId": 2
+        "bundleIds": [2]
     },
     {
         "name": "AaveV3FLCloseToDebtL2",
@@ -131,7 +131,7 @@
             ["&3", 0, "$1"],
             ["&3", "&eoa", 0]
         ],
-        "bundleId": 2
+        "bundleIds": [2]
     },
     {
         "name": "AaveV3CloseToCollL2",
@@ -154,7 +154,7 @@
             ["&3", "&eoa", 0],
             ["&1", "&eoa", 0]
         ],
-        "bundleId": 3
+        "bundleIds": [3]
     },
     {
         "name": "AaveV3FLCloseToCollL2",
@@ -181,7 +181,7 @@
             ["&3", "&eoa", 0],
             ["&1", "&eoa", 0]
         ],
-        "bundleId": 3
+        "bundleIds": [3]
     },
     {
         "name": "DCAL2Strategy",
@@ -222,7 +222,7 @@
             ["$3", "&proxy", "&2", 0, 0, "&7", "&5", 0],
             ["&6", "&5"]
         ],
-        "bundleId": 4
+        "bundleIds": [4]
     },
     {
         "name": "AaveV3FLOpenOrderFromCollL2Strategy",
@@ -245,7 +245,7 @@
             ["$1", 0, 0, "&4", 0, "&7", "&5", 0],
             ["&6", "&5"]
         ],
-        "bundleId": 4
+        "bundleIds": [4]
     },
     {
         "name": "AaveV3RepayOnPriceL2",
@@ -266,7 +266,7 @@
             ["$3", "&proxy", 0, "&4", 0, "&7", "&5", 0],
             ["&6", "&5"]
         ],
-        "bundleId": 5
+        "bundleIds": [5]
     },
     {
         "name": "AaveV3FlRepayOnPriceL2",
@@ -289,7 +289,7 @@
             ["&2", 0, "$1", 0, "&5"],
             ["&6", "&5"]
         ],
-        "bundleId": 5
+        "bundleIds": [5]
     },
     {
         "name": "AaveV3GenericRepayL2Strategy",
@@ -312,7 +312,7 @@
             ["$4", "&proxy", 0, 0, 0, 0, "&3", "&4"],
             ["&2", "&1", "&3", "&4"]
         ],
-        "bundleId": 12
+        "bundleIds": [6, 11, 12]
     },
     {
         "name": "AaveV3GenericFLRepayL2Strategy",
@@ -337,7 +337,7 @@
             [0, 0, "$5", 0, "&3"],
             ["&2", "&1", "&3", "&4"]
         ],
-        "bundleId": 12
+        "bundleIds": [6, 11, 12]
     },
     {
         "name": "AaveV3GenericBoostL2Strategy",
@@ -358,7 +358,7 @@
             ["$3", "&proxy", 0, 0, 0, 0, "&3", "&4"],
             ["&2", "&1", "&3", "&4"]
         ],
-        "bundleId": 7
+        "bundleIds": [7]
     },
     {
         "name": "AaveV3GenericFLBoostL2Strategy",
@@ -381,7 +381,7 @@
             ["$1", 0, 0, 0, 0, 0, "&3", "&4"],
             ["&2", "&1", "&3", "&4"]
         ],
-        "bundleId": 7
+        "bundleIds": [7]
     },
     {
         "name": "AaveV3GenericRepayOnPriceL2Strategy",
@@ -404,7 +404,7 @@
             ["$4", "&proxy", 0, "&4", 0, 0, "&5", "&7"],
             ["&6", "&5", "&7"]
         ],
-        "bundleId": 8
+        "bundleIds": [8]
     },
     {
         "name": "AaveV3GenericFLRepayOnPriceL2Strategy",
@@ -429,7 +429,7 @@
             ["&2", 0, "$5", 0, "&5"],
             ["&6", "&5", "&7"]
         ],
-        "bundleId": 8
+        "bundleIds": [8]
     },
     {
         "name": "AaveV3GenericBoostOnPriceL2Strategy",
@@ -450,7 +450,7 @@
             ["$3", "&proxy", "&2", 0, 0, 0, "&5", "&7"],
             ["&6", "&5", "&7"]
         ],
-        "bundleId": 9
+        "bundleIds": [9]
     },
     {
         "name": "AaveV3GenericFLBoostOnPriceL2Strategy",
@@ -473,7 +473,7 @@
             ["$1", 0, 0, "&4", 0, 0, "&5", "&7"],
             ["&6", "&5", "&7"]
         ],
-        "bundleId": 9
+        "bundleIds": [9]
     },
     {
         "name": "AaveV3GenericFLCloseToDebtL2Strategy",
@@ -500,7 +500,7 @@
             ["&3", 0, "$1"],
             ["&3", "&eoa", 0]
         ],
-        "bundleId": 10
+        "bundleIds": [10]
     },
     {
         "name": "AaveV3GenericFLCloseToCollL2Strategy",
@@ -527,7 +527,7 @@
             ["&1", 0, "$1"],
             ["&1", "&3", "&eoa", "&eoa", 0, 0]
         ],
-        "bundleId": 10
+        "bundleIds": [10]
     },
     {
         "name": "AaveV3FLCollateralSwitchL2Strategy",

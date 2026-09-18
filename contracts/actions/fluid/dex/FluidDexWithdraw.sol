@@ -59,10 +59,9 @@ contract FluidDexWithdraw is ActionBase, FluidHelper {
         params.withdrawVariableData.minCollToWithdraw = _parseParamUint(
             params.withdrawVariableData.minCollToWithdraw, _paramMapping[7], _subData, _returnValues
         );
-        params.wrapWithdrawnEth =
-            _parseParamUint(
-                    params.wrapWithdrawnEth ? 1 : 0, _paramMapping[8], _subData, _returnValues
-                ) == 1;
+        params.wrapWithdrawnEth = _parseParamUint(
+            params.wrapWithdrawnEth ? 1 : 0, _paramMapping[8], _subData, _returnValues
+        ) == 1;
 
         (uint256 sharesBurnedOrTokenWithdrawn, bytes memory logData) = _withdraw(params);
         emit ActionEvent("FluidDexWithdraw", logData);

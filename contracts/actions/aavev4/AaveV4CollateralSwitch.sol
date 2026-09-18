@@ -39,10 +39,9 @@ contract AaveV4CollateralSwitch is ActionBase, AaveV4Helper {
             _parseParamAddr(params.onBehalf, _paramMapping[1], _subData, _returnValues);
         params.reserveId =
             _parseParamUint(params.reserveId, _paramMapping[2], _subData, _returnValues);
-        params.useAsCollateral =
-            _parseParamUint(
-                    params.useAsCollateral ? 1 : 0, _paramMapping[3], _subData, _returnValues
-                ) == 1;
+        params.useAsCollateral = _parseParamUint(
+            params.useAsCollateral ? 1 : 0, _paramMapping[3], _subData, _returnValues
+        ) == 1;
 
         bytes memory logData = _collateralSwitch(params);
         emit ActionEvent("AaveV4CollateralSwitch", logData);

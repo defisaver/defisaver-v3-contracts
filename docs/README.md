@@ -12,7 +12,7 @@ The following documentation will go over the Solidity architecture that powers D
 
 With DeFi Saver you can manage and interact between decentralized finance protocols. By creating strategies you can create advanced actions that will be executed automatically when certain conditions are met. The code is [open source](https://github.com/DecenterApps/defisaver-v3-contracts) and runs on the Ethereum blockchain and other L2 networks.
 
-<figure><img src=".gitbook/assets/strategy-execution (1).png" alt=""><figcaption><p>Overview of main system components for executing strategy</p></figcaption></figure>
+<figure><img src=".gitbook/assets/strategy-execution.png" alt=""><figcaption><p>Overview of main system components for executing strategy</p></figcaption></figure>
 
 ### Main concepts
 

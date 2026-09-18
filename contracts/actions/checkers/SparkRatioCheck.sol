@@ -22,9 +22,13 @@ contract SparkRatioCheck is ActionBase, SparkRatioHelper {
 
     /// @param ratioState State of the ratio (IN_BOOST or IN_REPAY)
     /// @param targetRatio Target ratio.
+    /// @param market Spark market address parameter that was added later in order to add support for different markets in strategies
+    /// @param user EOA or Smart Wallet address parameter that was added later in order to add support for EOA strategies
     struct Params {
         RatioState ratioState;
         uint256 targetRatio;
+        address market;
+        address user;
     }
 
     /// @inheritdoc ActionBase
@@ -43,7 +47,16 @@ contract SparkRatioCheck is ActionBase, SparkRatioHelper {
             uint256(inputData.targetRatio), _paramMapping[1], _subData, _returnValues
         );
 
-        uint256 currRatio = getSafetyRatioWithLtvZeroFallback(DEFAULT_SPARK_MARKET, address(this));
+        address market;
+        address user;
+        if (_paramMapping.length == 4) {
+            market = _parseParamAddr(inputData.market, _paramMapping[2], _subData, _returnValues);
+            user = _parseParamAddr(inputData.user, _paramMapping[3], _subData, _returnValues);
+        }
+        if (market == address(0)) market = DEFAULT_SPARK_MARKET;
+        if (user == address(0)) user = address(this);
+
+        uint256 currRatio = getSafetyRatioWithLtvZeroFallback(market, user);
 
         uint256 startRatio = uint256(tempStorage.getBytes32("SPARK_RATIO"));
 
