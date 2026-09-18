@@ -20,9 +20,12 @@ const {
     network,
     addToRegistry,
     DAI_ADDR,
+    isNetworkFork,
+    getOwnerAddr,
 } = require('../../utils/utils');
 
 const { executeAction } = require('../../utils/actions');
+const { topUp } = require('../../../scripts/utils/fork');
 
 const trades = [
     {
@@ -229,6 +232,479 @@ const bebopTest = async () => {
                     );
                     expect(buyBalanceAfter).to.be.gt(buyBalanceBefore);
                     expect(sellBalanceAfter).to.be.lt(sellBalanceBefore);
+                });
+            });
+        });
+    });
+};
+
+const flyTestData = [
+    { sellToken: 'WETH', buyToken: 'USDC', rawAmount: '100' },
+    { sellToken: 'USDC', buyToken: 'WETH', rawAmount: '500000' },
+    { sellToken: 'DAI', buyToken: 'WBTC', rawAmount: '1000000' },
+    { sellToken: 'WBTC', buyToken: 'USDT', rawAmount: '10' },
+];
+
+const getFlyQuote = async (sellAssetInfo, buyAssetInfo, amount, flyWrapper) => {
+    const options = {
+        method: 'GET',
+        baseURL: 'https://api.magpiefi.xyz/aggregator/quote/transaction',
+        params: {
+            network: 'ethereum',
+            fromTokenAddress: sellAssetInfo.address,
+            toTokenAddress: buyAssetInfo.address,
+            sellAmount: amount.toString(),
+            slippage: 0.005,
+            fromAddress: flyWrapper.address,
+            toAddress: flyWrapper.address,
+            gasless: false,
+        },
+        headers: { apikey: `${process.env.FLY_API_KEY}` },
+    };
+    const response = await axios(options);
+    return response.data;
+};
+
+const flyTest = async () => {
+    describe('Dfs-Sell-via-Fly-Aggregator', function () {
+        this.timeout(400000);
+
+        let senderAcc;
+        let flyWrapper;
+        let proxy;
+        let feeReceiverAddr;
+        let tokenGroupRegistry;
+        let snapshot;
+        const chainId = chainIds[network];
+
+        const isFork = isNetworkFork();
+
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+
+            if (isFork) {
+                await topUp(senderAcc.address);
+                await topUp(getOwnerAddr());
+            }
+
+            flyWrapper = await redeploy('FlyWrapper', isFork);
+
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
+            await setNewExchangeWrapper(senderAcc, flyWrapper.address, isFork);
+
+            /// @dev the dfs fee is taken off srcAmount and paid in the sell token, so both the
+            /// receiver and the per pair divider are needed to say exactly how much should move
+            const feeRecipient = await hre.ethers.getContractAt(
+                'FeeRecipient',
+                addrs[network].FEE_RECIPIENT_ADDR,
+            );
+            feeReceiverAddr = await feeRecipient.getFeeAddr();
+            tokenGroupRegistry = await hre.ethers.getContractAt(
+                'TokenGroupRegistry',
+                addrs[network].TOKEN_GROUP_REGISTRY,
+            );
+        });
+
+        beforeEach(async () => {
+            snapshot = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshot);
+        });
+
+        flyTestData.forEach(({ sellToken, buyToken, rawAmount }) => {
+            describe(`${sellToken} -> ${buyToken} | Amount: ${rawAmount}`, () => {
+                let exchangeObject;
+                let amount;
+                let sellAssetInfo;
+                let buyAssetInfo;
+                let buyBalanceBefore;
+                let amountOutMin;
+                let feeBalanceBefore;
+
+                /// @dev each test funds itself and fetches its own order, a fly order is only
+                /// good for the state it was quoted against and is single use
+                beforeEach(async () => {
+                    sellAssetInfo = getAssetInfo(sellToken, chainId);
+                    buyAssetInfo = getAssetInfo(buyToken, chainId);
+                    amount = hre.ethers.utils.parseUnits(rawAmount, sellAssetInfo.decimals);
+
+                    await setBalance(sellAssetInfo.address, senderAcc.address, amount);
+                    await approve(sellAssetInfo.address, proxy.address);
+
+                    buyBalanceBefore = await balanceOf(buyAssetInfo.address, senderAcc.address);
+                    feeBalanceBefore = await balanceOf(sellAssetInfo.address, feeReceiverAddr);
+
+                    const { quote, transaction } = await getFlyQuote(
+                        sellAssetInfo,
+                        buyAssetInfo,
+                        amount,
+                        flyWrapper,
+                    );
+
+                    const exchangeAddr = transaction.to;
+                    const allowanceTarget = quote.targetAddress;
+                    const price = 1; // anything bigger than 0 triggers the offchain if
+                    const protocolFee = 0;
+                    // fly calldata goes in raw, the router owns the layout so no offsets are needed
+                    const callData = transaction.data;
+
+                    /// @dev the floor is baked into the order and is never rewritten, so it stays
+                    /// sized for the full quoted amount even when the fee shrinks srcAmount
+                    amountOutMin = hre.ethers.BigNumber.from(quote.typedData.message.amountOutMin);
+
+                    exchangeObject = formatExchangeObjForOffchain(
+                        sellAssetInfo.address,
+                        buyAssetInfo.address,
+                        amount,
+                        flyWrapper.address,
+                        exchangeAddr,
+                        allowanceTarget,
+                        price,
+                        protocolFee,
+                        callData,
+                    );
+
+                    // DFSExchangeCore refuses to call an exchangeAddr that isn't whitelisted
+                    await addToExchangeAggregatorRegistry(senderAcc, exchangeAddr, isFork);
+                });
+
+                const expectSwapSettled = async (expectedFee) => {
+                    const buyBalanceAfter = await balanceOf(
+                        buyAssetInfo.address,
+                        senderAcc.address,
+                    );
+                    const sellBalanceAfter = await balanceOf(
+                        sellAssetInfo.address,
+                        senderAcc.address,
+                    );
+                    const received = buyBalanceAfter.sub(buyBalanceBefore);
+
+                    // the eoa was funded with exactly amount and the whole of it went in
+                    expect(sellBalanceAfter).to.be.eq(0);
+
+                    // the router enforces the quoted floor, clearing it is the real success signal
+                    expect(received).to.be.gte(amountOutMin);
+
+                    // the fee is taken off the sell side, so it is exact rather than approximate
+                    const feeBalanceAfter = await balanceOf(sellAssetInfo.address, feeReceiverAddr);
+                    expect(feeBalanceAfter.sub(feeBalanceBefore)).to.be.eq(expectedFee);
+
+                    /// @dev sendLeftover has to hand everything back
+                    expect(await balanceOf(sellAssetInfo.address, flyWrapper.address)).to.be.eq(0);
+                    expect(await balanceOf(buyAssetInfo.address, flyWrapper.address)).to.be.eq(0);
+                    expect(await balanceOf(sellAssetInfo.address, proxy.address)).to.be.eq(0);
+                    expect(await balanceOf(buyAssetInfo.address, proxy.address)).to.be.eq(0);
+                };
+
+                /// @dev no dfs fee is taken on a standalone sell, so srcAmount still equals the
+                /// quoted amount and the router writes back the value the order already carries
+                it(`... should sell ${sellToken} for ${buyToken} (fly), no fee`, async () => {
+                    const sellAction = new dfs.actions.basic.SellAction(
+                        exchangeObject,
+                        senderAcc.address,
+                        senderAcc.address,
+                    );
+                    const functionData = sellAction.encodeForDsProxyCall()[1];
+
+                    await executeAction('DFSSell', functionData, proxy);
+
+                    // DFSSell zeroes dfsFeeDivider when it runs as a direct action
+                    await expectSwapSettled(0);
+                });
+
+                /// @dev the dfs fee is taken in the recipe, so srcAmount reaches the wrapper
+                /// smaller than the quoted amount and updateAmountIn has to rewrite the order
+                it(`... should sell ${sellToken} for ${buyToken} (fly), dfs fee taken`, async () => {
+                    const sellRecipe = new dfs.Recipe('SellRecipe', [
+                        new dfs.actions.basic.PullTokenAction(
+                            sellAssetInfo.address,
+                            senderAcc.address,
+                            amount.toString(),
+                        ),
+                        new dfs.actions.basic.SellAction(
+                            exchangeObject,
+                            proxy.address,
+                            senderAcc.address,
+                        ),
+                    ]);
+                    const functionData = sellRecipe.encodeForDsProxyCall()[1];
+
+                    await executeAction('RecipeExecutor', functionData, proxy);
+
+                    // in a recipe the divider is looked up per token pair, fee is srcAmount / divider
+                    const feeDivider = await tokenGroupRegistry.getFeeForTokens(
+                        sellAssetInfo.address,
+                        buyAssetInfo.address,
+                    );
+                    expect(feeDivider).to.be.gt(0);
+
+                    await expectSwapSettled(amount.div(feeDivider));
+                });
+            });
+        });
+    });
+};
+
+const openOceanTestData = [
+    { sellToken: 'WETH', buyToken: 'USDC', rawAmount: '100' },
+    { sellToken: 'USDC', buyToken: 'WETH', rawAmount: '500000' },
+    { sellToken: 'DAI', buyToken: 'USDT', rawAmount: '1000000' },
+    { sellToken: 'USDT', buyToken: 'USDC', rawAmount: '10000000' },
+];
+
+/// @dev the dfs referrer
+const OPEN_OCEAN_REFERRER_ADDR = '0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479';
+
+/// @dev openocean takes a chain slug in the path, not a chain id
+const openOceanChainNames = {
+    1: 'eth',
+    10: 'optimism',
+    8453: 'base',
+    42161: 'arbitrum',
+    59144: 'linea',
+    9745: 'plasma',
+};
+
+/// @dev hashflow, native v2/v4 and bebop fill from maker orders signed off chain. Rewriting the
+/// sell amount invalidates those signatures and reverts the swap, so the router is told to route
+/// around them. Prefer this over disabledDexIds, whose indexes differ per chain.
+/// Set to undefined to allow every route
+const OPEN_OCEAN_DISABLE_RFQ = 'true'; // only the string works, disableRfq=1 is ignored
+
+const getOpenOceanQuote = async (
+    sellAssetInfo,
+    buyAssetInfo,
+    amount,
+    openOceanWrapper,
+    chainId,
+) => {
+    const chainName = openOceanChainNames[chainId];
+    if (!chainName) {
+        throw new Error(`openocean swap api has no chain slug for chainId ${chainId}`);
+    }
+
+    const options = {
+        method: 'GET',
+        baseURL: 'https://open-api-pro.de1.exchange',
+        url: `/v4/${chainName}/swap`,
+        params: {
+            inTokenAddress: sellAssetInfo.address,
+            outTokenAddress: buyAssetInfo.address,
+            /// @dev amountDecimals/gasPriceDecimals are the raw units, the older amount/gasPrice
+            /// params are whole tokens and gwei and are deprecated
+            amountDecimals: amount.toString(),
+            gasPriceDecimals: hre.ethers.utils.parseUnits('1', 'gwei').toString(),
+            slippage: 1, // in percent
+            disableRfq: OPEN_OCEAN_DISABLE_RFQ,
+            account: openOceanWrapper.address,
+            referrer: OPEN_OCEAN_REFERRER_ADDR,
+        },
+        headers: {
+            apikey: process.env.OPEN_OCEAN_API_KEY,
+            'Content-Type': 'application/json',
+        },
+    };
+    const response = await axios(options);
+
+    // openocean answers 200 on the wire and carries the real status in the body
+    if (response.data.code !== 200) {
+        throw new Error(`openocean swap api returned code ${response.data.code}`);
+    }
+
+    return response.data.data;
+};
+
+const getOpenOceanAmountOffsets = (callData, amount) => {
+    const amountHex = hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [amount]).slice(2);
+
+    return [...callData.matchAll(new RegExp(amountHex, 'gi'))].map((match) => match.index / 2 - 1);
+};
+
+const openOceanTest = async () => {
+    describe('Dfs-Sell-via-OpenOcean-Aggregator', function () {
+        this.timeout(400000);
+
+        let senderAcc;
+        let openOceanWrapper;
+        let proxy;
+        let feeReceiverAddr;
+        let tokenGroupRegistry;
+        const chainId = chainIds[network];
+
+        const isFork = isNetworkFork();
+
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+
+            if (isFork) {
+                await topUp(senderAcc.address);
+                await topUp(getOwnerAddr());
+            }
+
+            openOceanWrapper = await redeploy('OpenOceanWrapper', isFork);
+
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
+            await setNewExchangeWrapper(senderAcc, openOceanWrapper.address, isFork);
+
+            /// @dev the dfs fee is taken off srcAmount and paid in the sell token, so both the
+            /// receiver and the per pair divider are needed to say exactly how much should move
+            const feeRecipient = await hre.ethers.getContractAt(
+                'FeeRecipient',
+                addrs[network].FEE_RECIPIENT_ADDR,
+            );
+            feeReceiverAddr = await feeRecipient.getFeeAddr();
+            tokenGroupRegistry = await hre.ethers.getContractAt(
+                'TokenGroupRegistry',
+                addrs[network].TOKEN_GROUP_REGISTRY,
+            );
+        });
+
+        openOceanTestData.forEach(({ sellToken, buyToken, rawAmount }) => {
+            describe(`${sellToken} -> ${buyToken} | Amount: ${rawAmount}`, () => {
+                let exchangeObject;
+                let amount;
+                let sellAssetInfo;
+                let buyAssetInfo;
+                let buyBalanceBefore;
+                let amountOutMin;
+                let feeBalanceBefore;
+
+                /// @dev nothing is rolled back between tests so every transaction stays on the
+                /// vnet to be inspected later. That means each test funds itself and fetches its
+                /// own order, a openocean order is only good for the state it was quoted against
+                beforeEach(async () => {
+                    sellAssetInfo = getAssetInfo(sellToken, chainId);
+                    buyAssetInfo = getAssetInfo(buyToken, chainId);
+                    amount = hre.ethers.utils.parseUnits(rawAmount, sellAssetInfo.decimals);
+
+                    await setBalance(sellAssetInfo.address, senderAcc.address, amount);
+                    await approve(sellAssetInfo.address, proxy.address);
+
+                    buyBalanceBefore = await balanceOf(buyAssetInfo.address, senderAcc.address);
+                    feeBalanceBefore = await balanceOf(sellAssetInfo.address, feeReceiverAddr);
+
+                    const quote = await getOpenOceanQuote(
+                        sellAssetInfo,
+                        buyAssetInfo,
+                        amount,
+                        openOceanWrapper,
+                        chainId,
+                    );
+
+                    // guards the amount format, the deprecated params take whole tokens
+                    expect(quote.inAmount).to.be.eq(amount.toString());
+
+                    const exchangeAddr = quote.to;
+                    // the openocean router pulls the sell token itself, there is no separate spender
+                    const allowanceTarget = quote.to;
+                    const price = 1; // anything bigger than 0 triggers the offchain if
+                    const protocolFee = 0;
+
+                    const offsets = getOpenOceanAmountOffsets(quote.data, amount);
+
+                    /// @dev the wrapper takes a single offset, so anything other than one hit
+                    /// means the order no longer looks the way it is being rewritten
+                    expect(offsets.length).to.be.eq(1);
+
+                    const callData = hre.ethers.utils.defaultAbiCoder.encode(
+                        ['(bytes,uint256)'],
+                        [[quote.data, offsets[0]]],
+                    );
+
+                    amountOutMin = hre.ethers.BigNumber.from(quote.minOutAmount);
+
+                    exchangeObject = formatExchangeObjForOffchain(
+                        sellAssetInfo.address,
+                        buyAssetInfo.address,
+                        amount,
+                        openOceanWrapper.address,
+                        exchangeAddr,
+                        allowanceTarget,
+                        price,
+                        protocolFee,
+                        callData,
+                    );
+
+                    // DFSExchangeCore refuses to call an exchangeAddr that isn't whitelisted
+                    await addToExchangeAggregatorRegistry(senderAcc, exchangeAddr, isFork);
+                });
+
+                const expectSwapSettled = async (expectedFee) => {
+                    const buyBalanceAfter = await balanceOf(
+                        buyAssetInfo.address,
+                        senderAcc.address,
+                    );
+                    const sellBalanceAfter = await balanceOf(
+                        sellAssetInfo.address,
+                        senderAcc.address,
+                    );
+                    const received = buyBalanceAfter.sub(buyBalanceBefore);
+
+                    // the eoa was funded with exactly amount and the whole of it went in
+                    expect(sellBalanceAfter).to.be.eq(0);
+
+                    expect(received).to.be.gte(amountOutMin);
+
+                    // the fee is taken off the sell side, so it is exact rather than approximate
+                    const feeBalanceAfter = await balanceOf(sellAssetInfo.address, feeReceiverAddr);
+                    expect(feeBalanceAfter.sub(feeBalanceBefore)).to.be.eq(expectedFee);
+
+                    /// @dev sendLeftover has to hand everything back
+                    expect(
+                        await balanceOf(sellAssetInfo.address, openOceanWrapper.address),
+                    ).to.be.eq(0);
+                    expect(
+                        await balanceOf(buyAssetInfo.address, openOceanWrapper.address),
+                    ).to.be.eq(0);
+                    expect(await balanceOf(sellAssetInfo.address, proxy.address)).to.be.eq(0);
+                    expect(await balanceOf(buyAssetInfo.address, proxy.address)).to.be.eq(0);
+                };
+
+                /// @dev no dfs fee is taken on a standalone sell, so srcAmount still equals the
+                /// quoted amount and the wrapper writes back the value the order already carries
+                it(`... should sell ${sellToken} for ${buyToken} (openocean), no fee`, async () => {
+                    const sellAction = new dfs.actions.basic.SellAction(
+                        exchangeObject,
+                        senderAcc.address,
+                        senderAcc.address,
+                    );
+                    const functionData = sellAction.encodeForDsProxyCall()[1];
+
+                    await executeAction('DFSSell', functionData, proxy);
+
+                    // DFSSell zeroes dfsFeeDivider when it runs as a direct action
+                    await expectSwapSettled(0);
+                });
+
+                /// @dev the dfs fee is taken in the recipe, so srcAmount reaches the wrapper
+                /// smaller than the quoted amount and the offsets have to rewrite the order
+                it(`... should sell ${sellToken} for ${buyToken} (openocean), dfs fee taken`, async () => {
+                    const sellRecipe = new dfs.Recipe('SellRecipe', [
+                        new dfs.actions.basic.PullTokenAction(
+                            sellAssetInfo.address,
+                            senderAcc.address,
+                            amount.toString(),
+                        ),
+                        new dfs.actions.basic.SellAction(
+                            exchangeObject,
+                            proxy.address,
+                            senderAcc.address,
+                        ),
+                    ]);
+                    const functionData = sellRecipe.encodeForDsProxyCall()[1];
+
+                    await executeAction('RecipeExecutor', functionData, proxy);
+
+                    // in a recipe the divider is looked up per token pair, fee is srcAmount / divider
+                    const feeDivider = await tokenGroupRegistry.getFeeForTokens(
+                        sellAssetInfo.address,
+                        buyAssetInfo.address,
+                    );
+                    expect(feeDivider).to.be.gt(0);
+
+                    await expectSwapSettled(amount.div(feeDivider));
                 });
             });
         });
@@ -1135,6 +1611,8 @@ const offchainExchangeFullTest = async () => {
     await odosTest();
     await pendleRouterTest();
     await bebopTest();
+    await flyTest();
+    await openOceanTest();
 };
 
 module.exports = {
@@ -1146,4 +1624,6 @@ module.exports = {
     odosTest,
     pendleRouterTest,
     bebopTest,
+    flyTest,
+    openOceanTest,
 };
