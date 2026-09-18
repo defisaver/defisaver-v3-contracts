@@ -75,6 +75,46 @@ contract TestCompV3MinDebtTrigger is BaseTest {
         _baseTestAllMarkets(0);
     }
 
+    function test_should_not_trigger_when_there_is_no_debt() public {
+        (address market, bool found) = _firstMarketWithPricedBaseToken();
+        if (!found) {
+            vm.skip(true, "No Comet with a Chainlink priced base token on the selected network");
+        }
+
+        address user = address(0xBEEF); // fresh address, no position -> 0 debt
+
+        assertFalse(_isTriggered(market, user, MIN_DEBT), "no debt should not trigger");
+
+        vm.clearMockedCalls();
+    }
+
+    function test_should_trigger_for_non_zero_debt_position_with_no_price() public {
+        (address market, bool found) = _firstMarketWithPricedBaseToken();
+        if (!found) {
+            vm.skip(true, "No Comet with a Chainlink priced base token on the selected network");
+        }
+
+        CompUser user = new CompUser();
+        address position = user.proxyAddr();
+        if (!_openDebtPosition(market, user, 1000)) {
+            vm.skip(true, "No usable collateral or base price for the selected Comet");
+        }
+
+        uint256 debtUsd = _getDebtUsd(market, position);
+        assertGt(debtUsd, 0, "position must have debt");
+        assertLt(debtUsd, MIN_DEBT * PRECISION, "debt must be below the threshold");
+        assertFalse(
+            _isTriggered(market, position, MIN_DEBT), "priced debt below min must not trigger"
+        );
+
+        // Force the base token's USD price to 0 on every price source PriceLib uses.
+        mockZeroTokenPrices();
+        assertEq(IComet(market).baseToken().getPriceInUSD(), 0, "base price must be zero");
+        assertTrue(_isTriggered(market, position, MIN_DEBT), "unpriced non-zero debt must trigger");
+
+        vm.clearMockedCalls();
+    }
+
     /// @notice An empty position must be filtered out even when the base token has no usable price.
     function test_should_not_trigger_when_price_is_zero_and_no_debt() public {
         (address market, bool found) = _firstMarketWithPricedBaseToken();
@@ -119,31 +159,17 @@ contract TestCompV3MinDebtTrigger is BaseTest {
         CompUser user = new CompUser();
         address position = user.proxyAddr();
 
-        /// @dev The trigger short-circuits to true when the base token has no Chainlink price,
-        ///      so for those markets that branch is all there is to assert.
+        /// @dev A debt position cannot be sized without a base price. An empty position
+        ///      must still return false even when the base token is unpriced.
         if (baseToken.getPriceInUSD() == 0) {
             console.log("SKIPPED debt math, base token has no chainlink price:", _market);
-            assertTrue(_isTriggered(_market, position, MIN_DEBT), "unpriced base must return true");
+            assertFalse(_isTriggered(_market, position, MIN_DEBT), "empty debt must return false");
             return;
         }
 
-        if (_targetDebtUsd > 0) {
-            address collateral = _collateralFor(_market);
-
-            /// @dev Sizing the position needs a price for both sides, so a market without a usable
-            ///      collateral asset or an unpriceable base token has to be skipped.
-            if (collateral == address(0) || getTokenPriceInUSD(baseToken) == 0) {
-                console.log("SKIPPED, no usable collateral or base price:", _market);
-                return;
-            }
-
-            // Over-collateralize 3x so the borrow always goes through.
-            uint256 collateralAmount = amountInUSDPrice(collateral, _targetDebtUsd * 3);
-            gibTokens(position, collateral, collateralAmount);
-            user.supply(false, _market, collateral, collateralAmount);
-
-            uint256 borrowAmount = amountInUSDPrice(baseToken, _targetDebtUsd);
-            user.borrow(false, _market, borrowAmount);
+        if (_targetDebtUsd > 0 && !_openDebtPosition(_market, user, _targetDebtUsd)) {
+            console.log("SKIPPED, no usable collateral or base price:", _market);
+            return;
         }
 
         uint256 actualDebtUsd = _getDebtUsd(_market, position);
@@ -170,6 +196,23 @@ contract TestCompV3MinDebtTrigger is BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
+    function _openDebtPosition(address _market, CompUser _user, uint256 _targetDebtUsd)
+        internal
+        returns (bool)
+    {
+        address collateral = _collateralFor(_market);
+        address baseToken = IComet(_market).baseToken();
+        if (collateral == address(0) || getTokenPriceInUSD(baseToken) == 0) return false;
+
+        uint256 collateralAmount = amountInUSDPrice(collateral, _targetDebtUsd * 3);
+        gibTokens(_user.proxyAddr(), collateral, collateralAmount);
+        _user.supply(false, _market, collateral, collateralAmount);
+
+        uint256 borrowAmount = amountInUSDPrice(baseToken, _targetDebtUsd);
+        _user.borrow(false, _market, borrowAmount);
+        return true;
+    }
+
     function _isTriggered(address _market, address _user, uint256 _minDebt)
         internal
         view
