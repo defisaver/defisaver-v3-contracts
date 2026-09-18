@@ -1424,5 +1424,16 @@
         "changeTime": 0,
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "AaveV3BoostCollateralTrigger",
+        "address": "0xad36b6c8463DfE76eB6E5Ddd561E058b4D591317",
+        "id": "0xb03dd233",
+        "path": "contracts/triggers-additional/AaveV3BoostCollateralTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
     }
 ]

@@ -5331,5 +5331,27 @@
         "changeTime": 0,
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "AaveV3BoostCollateralTrigger",
+        "address": "0x638714927378D2F79F7251A011121fFA5be7aD54",
+        "id": "0xb03dd233",
+        "path": "contracts/triggers-additional/AaveV3BoostCollateralTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LiquityMinDebtTrigger",
+        "address": "0x7C58f017A0596e885D560Fb09f35C4B011C0180a",
+        "id": "0x15cb8c0f",
+        "path": "contracts/triggers-additional/LiquityMinDebtTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
     }
 ]
