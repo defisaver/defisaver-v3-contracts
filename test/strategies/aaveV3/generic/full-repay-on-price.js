@@ -2,49 +2,36 @@
 // Almost identical to ./repay-on-price.js, but uses targetRatio = 0 for everything.
 // With targetRatio 0 the strategy must fully repay the debt and leave the extra collateral
 // in the position (AaveV3OpenRatioCheck requires the resulting ratio to be exactly 0).
-const hre = require('hardhat');
 const { expect } = require('chai');
-const { getAssetInfo } = require('@defisaver/tokens');
-const automationSdk = require('@defisaver/automation-sdk');
 
 const {
-    getProxy,
     network,
     addrs,
-    takeSnapshot,
-    revertToSnapshot,
     chainIds,
-    getContractFromRegistry,
-    getStrategyExecutorContract,
-    getAndSetMockExchangeWrapper,
     formatMockExchangeObjUsdFeed,
     fetchAmountInUSDPrice,
-    isNetworkFork,
-    redeploy,
-    sendEther,
     addBalancerFlLiquidity,
     balanceOf,
 } = require('../../../utils/utils');
 
-const { addBotCaller } = require('../../utils/utils-strategies');
 const { subAaveV3LeverageManagementOnPriceGeneric } = require('../../utils/strategy-subs');
 const {
     callAaveV3GenericRepayOnPriceStrategy,
     callAaveV3GenericFLRepayOnPriceStrategy,
 } = require('../../utils/strategy-calls');
 const {
-    openAaveV3ProxyPosition,
-    openAaveV3EOAPosition,
     getAaveV3PositionRatio,
     deployAaveV3RepayOnPriceGenericBundle,
-    setupAaveV3EOAPermissions,
     getAaveV3ReserveData,
 } = require('../../../utils/aave');
-
-const TRIGGER_PRICE_UNDER = 999_999;
-const TRIGGER_PRICE_OVER = 0;
-const PRICE_STATE_UNDER = automationSdk.enums.RatioState.UNDER;
-const PRICE_STATE_OVER = automationSdk.enums.RatioState.OVER;
+const {
+    WALLET_TYPES,
+    PASSING_PRICE_TRIGGERS,
+    setupGenericTestEnv,
+    useSnapshots,
+    openAaveV3TestPosition,
+    getTestPairInfo,
+} = require('./common');
 
 // Full repay => target ratio is 0 (leave position with no debt).
 const FULL_REPAY_TARGET_RATIO = 0;
@@ -95,133 +82,56 @@ const FULL_REPAY_TEST_PAIRS = {
 
 const runFullRepayOnPriceTests = () => {
     describe('AaveV3 Full Repay On Price Strategies Tests', () => {
-        let snapshotId;
-        let senderAcc;
-        let proxy;
-        let botAcc;
-        let strategyExecutor;
-        let mockWrapper;
-        let flAddr;
-        let bundleId;
+        let env;
 
         before(async () => {
-            // Setup
-            const isFork = isNetworkFork();
-            await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', ['0x0']);
-
-            senderAcc = (await hre.ethers.getSigners())[0];
-            botAcc = (await hre.ethers.getSigners())[1];
-            await sendEther(senderAcc, addrs[network].OWNER_ACC, '10');
-            proxy = await getProxy(senderAcc.address);
-            await addBotCaller(botAcc.address, isFork);
-            strategyExecutor = (await getStrategyExecutorContract()).connect(botAcc);
-            mockWrapper = await getAndSetMockExchangeWrapper(senderAcc);
-
-            const flContract = await getContractFromRegistry('FLAction', isFork);
-            flAddr = flContract.address;
-
-            // Redeploys
-            await redeploy('AaveV3QuotePriceTrigger', isFork);
-            await redeploy('AaveV3Borrow', isFork);
-            await redeploy('AaveV3Payback', isFork);
-            await redeploy('AaveV3Supply', isFork);
-            await redeploy('AaveV3Withdraw', isFork);
-            await redeploy('AaveV3RatioCheck', isFork);
-            await redeploy('AaveV3OpenRatioCheck', isFork);
-            await redeploy('AaveV3View', isFork);
-            await redeploy('SubProxy', isFork);
-
-            bundleId = await deployAaveV3RepayOnPriceGenericBundle();
+            env = await setupGenericTestEnv({
+                // trigger reads SemiContinuousTracker from registry, so it has to be deployed
+                extraRedeploys: ['SemiContinuousTracker', 'AaveV3QuotePriceTrigger'],
+                deployBundleFn: deployAaveV3RepayOnPriceGenericBundle,
+            });
         });
 
-        beforeEach(async () => {
-            snapshotId = await takeSnapshot();
-        });
+        useSnapshots();
 
-        afterEach(async () => {
-            await revertToSnapshot(snapshotId);
-        });
-
-        const baseTest = async (
-            collAsset,
-            debtAsset,
-            targetRatio,
-            collAmountInUSD,
-            debtAmountInUSD,
-            repayAmountInUSD,
-            isEOA,
-            isFLStrategy,
-            triggerPrice,
-            priceState,
-            marketAddress,
-        ) => {
+        const baseTest = async ({ collAsset, debtAsset, pair, isEOA, isFLStrategy, trigger }) => {
+            const { senderAcc, proxy, strategyExecutor, mockWrapper, flAddr, bundleId } = env;
+            const { collAmountInUSD, debtAmountInUSD, marketAddr } = pair;
+            const repayAmountInUSD = fullRepayAmountInUSD(debtAmountInUSD);
             const positionOwner = isEOA ? senderAcc.address : proxy.address;
 
-            // Open position
-            if (isEOA) {
-                await openAaveV3EOAPosition(
-                    senderAcc.address,
-                    proxy,
-                    collAsset.symbol,
-                    debtAsset.symbol,
-                    collAmountInUSD,
-                    debtAmountInUSD,
-                    marketAddress,
-                );
+            await openAaveV3TestPosition({
+                isEOA,
+                senderAcc,
+                proxy,
+                collAsset,
+                debtAsset,
+                collAmountInUSD,
+                debtAmountInUSD,
+                marketAddress: marketAddr,
+            });
 
-                // EOA delegates to the actual Smart Wallet address that executes the strategy
-                await setupAaveV3EOAPermissions(
-                    senderAcc.address,
-                    proxy.address, // The actual Smart Wallet executing address
-                    collAsset.address,
-                    debtAsset.address,
-                    marketAddress,
-                );
-            } else {
-                await openAaveV3ProxyPosition(
-                    senderAcc.address,
-                    proxy,
-                    collAsset.symbol,
-                    debtAsset.symbol,
-                    collAmountInUSD,
-                    debtAmountInUSD,
-                    marketAddress,
-                );
-            }
-
-            // Check ratioBefore
-            const ratioBefore = await getAaveV3PositionRatio(positionOwner, null, marketAddress);
+            const ratioBefore = await getAaveV3PositionRatio(positionOwner, null, marketAddr);
             console.log('ratioBefore', ratioBefore);
 
-            // Get asset IDs
-            const collAssetId = (await getAaveV3ReserveData(collAsset.address, marketAddress)).id;
-            const debtAssetId = (await getAaveV3ReserveData(debtAsset.address, marketAddress)).id;
+            const collReserve = await getAaveV3ReserveData(collAsset.address, marketAddr);
+            const debtReserve = await getAaveV3ReserveData(debtAsset.address, marketAddr);
 
-            const user = isEOA ? senderAcc.address : proxy.address;
-
-            // Create subscription based on whether it's EOA or proxy
-            const result = await subAaveV3LeverageManagementOnPriceGeneric(
+            const { subId, strategySub } = await subAaveV3LeverageManagementOnPriceGeneric(
                 proxy,
-                user,
+                positionOwner,
                 collAsset.address,
-                collAssetId,
+                collReserve.id,
                 debtAsset.address,
-                debtAssetId,
-                marketAddress,
-                targetRatio,
-                triggerPrice,
-                priceState,
+                debtReserve.id,
+                marketAddr,
+                FULL_REPAY_TARGET_RATIO,
+                trigger.triggerPrice,
+                trigger.priceState,
                 bundleId,
             );
-            const repaySubId = result.subId;
-            const strategySub = result.strategySub;
-
-            console.log('SUBBED !!!!');
-            // console.log(repaySubId, strategySub);
 
             const repayAmount = await fetchAmountInUSDPrice(collAsset.symbol, repayAmountInUSD);
-            console.log(repayAmount);
-
             const exchangeObject = await formatMockExchangeObjUsdFeed(
                 collAsset,
                 debtAsset,
@@ -231,43 +141,39 @@ const runFullRepayOnPriceTests = () => {
 
             // Execute strategy
             if (isFLStrategy) {
-                console.log('Executing FL Full Repay On Price strategy !!!!');
                 await addBalancerFlLiquidity(debtAsset.address);
                 await addBalancerFlLiquidity(collAsset.address);
 
                 await callAaveV3GenericFLRepayOnPriceStrategy(
                     strategyExecutor,
                     1,
-                    repaySubId,
+                    subId,
                     strategySub,
                     exchangeObject,
                     repayAmount,
                     flAddr,
-                    marketAddress,
+                    marketAddr,
                 );
             } else {
                 await callAaveV3GenericRepayOnPriceStrategy(
                     strategyExecutor,
                     0,
-                    repaySubId,
+                    subId,
                     strategySub,
                     exchangeObject,
                     repayAmount,
-                    marketAddress,
+                    marketAddr,
                 );
             }
 
-            const ratioAfter = await getAaveV3PositionRatio(positionOwner, null, marketAddress);
+            const ratioAfter = await getAaveV3PositionRatio(positionOwner, null, marketAddr);
             console.log('ratioAfter', ratioAfter);
-            console.log('ratioBefore', ratioBefore);
 
             // Full repay: the strategy must leave the position with no debt, so the safety
             // ratio is exactly 0 (AaveV3OpenRatioCheck enforces this for targetRatio == 0).
             expect(ratioAfter).to.be.eq(0);
 
             // No debt should remain, while the leftover collateral stays in the position.
-            const collReserve = await getAaveV3ReserveData(collAsset.address, marketAddress);
-            const debtReserve = await getAaveV3ReserveData(debtAsset.address, marketAddress);
             const debtBalanceAfter = await balanceOf(
                 debtReserve.variableDebtTokenAddress,
                 positionOwner,
@@ -278,177 +184,27 @@ const runFullRepayOnPriceTests = () => {
         };
 
         const testPairs = FULL_REPAY_TEST_PAIRS[chainIds[network]] || [];
-        for (let i = 0; i < testPairs.length; ++i) {
-            const pair = testPairs[i];
-            const collAsset = getAssetInfo(
-                pair.collSymbol === 'ETH' ? 'WETH' : pair.collSymbol,
-                chainIds[network],
-            );
-            const debtAsset = getAssetInfo(
-                pair.debtSymbol === 'ETH' ? 'WETH' : pair.debtSymbol,
-                chainIds[network],
-            );
+        testPairs.forEach((pair) => {
+            const { collAsset, debtAsset, marketName } = getTestPairInfo(pair);
 
-            // Determine market name for test description
-            const marketName =
-                pair.marketAddr === addrs[network].AAVE_MARKET ? 'Core Market' : 'Prime Market';
-
-            it(`... should execute aaveV3 SW Full Repay on price strategy (UNDER) for ${pair.collSymbol} /
-            ${pair.debtSymbol} pair on Aave V3 ${marketName}`, async () => {
-                const isEOA = false;
-                const isFLStrategy = false;
-
-                await baseTest(
-                    collAsset,
-                    debtAsset,
-                    FULL_REPAY_TARGET_RATIO,
-                    pair.collAmountInUSD,
-                    pair.debtAmountInUSD,
-                    fullRepayAmountInUSD(pair.debtAmountInUSD),
-                    isEOA,
-                    isFLStrategy,
-                    TRIGGER_PRICE_UNDER,
-                    PRICE_STATE_UNDER,
-                    pair.marketAddr,
-                );
+            WALLET_TYPES.forEach(({ isEOA, label }) => {
+                [false, true].forEach((isFLStrategy) => {
+                    PASSING_PRICE_TRIGGERS.forEach((trigger) => {
+                        const name = `${label}${isFLStrategy ? ' FL' : ''} Full Repay on price`;
+                        it(`... should execute aaveV3 ${name} strategy (${trigger.state}) for ${pair.collSymbol} / ${pair.debtSymbol} pair on Aave V3 ${marketName}`, async () => {
+                            await baseTest({
+                                collAsset,
+                                debtAsset,
+                                pair,
+                                isEOA,
+                                isFLStrategy,
+                                trigger,
+                            });
+                        });
+                    });
+                });
             });
-
-            it(`... should execute aaveV3 SW Full Repay on price strategy (OVER) for ${pair.collSymbol} /
-            ${pair.debtSymbol} pair on Aave V3 ${marketName}`, async () => {
-                const isEOA = false;
-                const isFLStrategy = false;
-
-                await baseTest(
-                    collAsset,
-                    debtAsset,
-                    FULL_REPAY_TARGET_RATIO,
-                    pair.collAmountInUSD,
-                    pair.debtAmountInUSD,
-                    fullRepayAmountInUSD(pair.debtAmountInUSD),
-                    isEOA,
-                    isFLStrategy,
-                    TRIGGER_PRICE_OVER,
-                    PRICE_STATE_OVER,
-                    pair.marketAddr,
-                );
-            });
-
-            it(`... should execute aaveV3 SW FL Full Repay on price strategy (UNDER) for ${pair.collSymbol} /
-            ${pair.debtSymbol} pair on Aave V3 ${marketName}`, async () => {
-                const isEOA = false;
-                const isFLStrategy = true;
-
-                await baseTest(
-                    collAsset,
-                    debtAsset,
-                    FULL_REPAY_TARGET_RATIO,
-                    pair.collAmountInUSD,
-                    pair.debtAmountInUSD,
-                    fullRepayAmountInUSD(pair.debtAmountInUSD),
-                    isEOA,
-                    isFLStrategy,
-                    TRIGGER_PRICE_UNDER,
-                    PRICE_STATE_UNDER,
-                    pair.marketAddr,
-                );
-            });
-
-            it(`... should execute aaveV3 SW FL Full Repay on price strategy (OVER) for ${pair.collSymbol} /
-            ${pair.debtSymbol} pair on Aave V3 ${marketName}`, async () => {
-                const isEOA = false;
-                const isFLStrategy = true;
-
-                await baseTest(
-                    collAsset,
-                    debtAsset,
-                    FULL_REPAY_TARGET_RATIO,
-                    pair.collAmountInUSD,
-                    pair.debtAmountInUSD,
-                    fullRepayAmountInUSD(pair.debtAmountInUSD),
-                    isEOA,
-                    isFLStrategy,
-                    TRIGGER_PRICE_OVER,
-                    PRICE_STATE_OVER,
-                    pair.marketAddr,
-                );
-            });
-
-            it(`... should execute aaveV3 EOA Full Repay on price strategy (UNDER) for ${pair.collSymbol} / ${pair.debtSymbol} pair on Aave V3 ${marketName}`, async () => {
-                const isEOA = true;
-                const isFLStrategy = false;
-
-                await baseTest(
-                    collAsset,
-                    debtAsset,
-                    FULL_REPAY_TARGET_RATIO,
-                    pair.collAmountInUSD,
-                    pair.debtAmountInUSD,
-                    fullRepayAmountInUSD(pair.debtAmountInUSD),
-                    isEOA,
-                    isFLStrategy,
-                    TRIGGER_PRICE_UNDER,
-                    PRICE_STATE_UNDER,
-                    pair.marketAddr,
-                );
-            });
-
-            it(`... should execute aaveV3 EOA Full Repay on price strategy (OVER) for ${pair.collSymbol} / ${pair.debtSymbol} pair on Aave V3 ${marketName}`, async () => {
-                const isEOA = true;
-                const isFLStrategy = false;
-
-                await baseTest(
-                    collAsset,
-                    debtAsset,
-                    FULL_REPAY_TARGET_RATIO,
-                    pair.collAmountInUSD,
-                    pair.debtAmountInUSD,
-                    fullRepayAmountInUSD(pair.debtAmountInUSD),
-                    isEOA,
-                    isFLStrategy,
-                    TRIGGER_PRICE_OVER,
-                    PRICE_STATE_OVER,
-                    pair.marketAddr,
-                );
-            });
-
-            it(`... should execute aaveV3 EOA FL Full Repay on price strategy (UNDER) for ${pair.collSymbol} / ${pair.debtSymbol} pair on Aave V3 ${marketName}`, async () => {
-                const isEOA = true;
-                const isFLStrategy = true;
-
-                await baseTest(
-                    collAsset,
-                    debtAsset,
-                    FULL_REPAY_TARGET_RATIO,
-                    pair.collAmountInUSD,
-                    pair.debtAmountInUSD,
-                    fullRepayAmountInUSD(pair.debtAmountInUSD),
-                    isEOA,
-                    isFLStrategy,
-                    TRIGGER_PRICE_UNDER,
-                    PRICE_STATE_UNDER,
-                    pair.marketAddr,
-                );
-            });
-
-            it(`... should execute aaveV3 EOA FL Full Repay on price strategy (OVER) for ${pair.collSymbol} / ${pair.debtSymbol} pair on Aave V3 ${marketName}`, async () => {
-                const isEOA = true;
-                const isFLStrategy = true;
-
-                await baseTest(
-                    collAsset,
-                    debtAsset,
-                    FULL_REPAY_TARGET_RATIO,
-                    pair.collAmountInUSD,
-                    pair.debtAmountInUSD,
-                    fullRepayAmountInUSD(pair.debtAmountInUSD),
-                    isEOA,
-                    isFLStrategy,
-                    TRIGGER_PRICE_OVER,
-                    PRICE_STATE_OVER,
-                    pair.marketAddr,
-                );
-            });
-        }
+        });
     });
 };
 
