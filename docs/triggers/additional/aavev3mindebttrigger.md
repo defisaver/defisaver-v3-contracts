@@ -2,9 +2,7 @@
 
 ### Description
 
-> **Notes**
->
-> Total variable debt of `_user` in `_market`, in USD with 8 decimals.
+Additional trigger that triggers only if the debt of the user's Aave V3 position is above the defined limit set by the backend automation system.
 
 ### Trigger ID
 

@@ -2,6 +2,8 @@
 
 ### Description
 
+Additional trigger that triggers only if the debt of the user's Compound V3 position is above the defined limit set by the backend automation system.
+
 ### Trigger ID
 
 `0xc71e2aae`

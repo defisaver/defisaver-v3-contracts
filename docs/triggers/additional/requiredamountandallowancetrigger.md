@@ -2,9 +2,7 @@
 
 ### Description
 
-> **Notes**
->
-> Checks if the user has enough balance and allowance of the token to trigger the strategy execution.
+Additional trigger that checks if the user has sufficient token balance and allowance to trigger strategy execution.
 
 ### Trigger ID
 

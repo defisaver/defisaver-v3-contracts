@@ -372,6 +372,8 @@
   * [MorphoBlueMinDebtTrigger](triggers/additional/morphobluemindebttrigger.md)
   * [FluidMinDebtTrigger](triggers/additional/fluidmindebttrigger.md)
   * [RequiredAmountAndAllowanceTrigger](triggers/additional/requiredamountandallowancetrigger.md)
+  * [LiquityMinDebtTrigger](triggers/additional/liquitymindebttrigger.md)
+  * [AaveV3BoostCollateralTrigger](triggers/additional/aavev3boostcollateraltrigger.md)
 * [Utils](triggers/utils/README.md)
   * [ChainlinkPriceTrigger](triggers/utils/chainlinkpricetrigger.md)
   * [ClosePriceTrigger](triggers/utils/closepricetrigger.md)
