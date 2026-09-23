@@ -763,6 +763,20 @@
         "history": []
     },
     {
+        "name": "BytesTransientStorage",
+        "address": "0x424e4819A1C33F2D8FDe70CD3c4801c03dB62C72",
+        "id": "0xcfee1903",
+        "path": "contracts/utils/transient/BytesTransientStorage.sol",
+        "version": "1.0.2",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": [
+            "0xd3FaFe60A64CFb4a136Cbb778e3D82e1725c4740",
+            "0xB3FE6f712c8B8c64CD2780ce714A36e7640DDf0f"
+        ]
+    },
+    {
         "name": "CurveView",
         "address": "0x79fdec1d39f6282a92e5e087d10ba0b0cef89a84",
         "id": "0x7da42156",
