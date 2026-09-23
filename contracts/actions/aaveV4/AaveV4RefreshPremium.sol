@@ -35,13 +35,9 @@ contract AaveV4RefreshPremium is ActionBase, AaveV4Helper {
         params.spoke = _parseParamAddr(params.spoke, _paramMapping[0], _subData, _returnValues);
         params.onBehalf =
             _parseParamAddr(params.onBehalf, _paramMapping[1], _subData, _returnValues);
-        params.refreshDynamicReserveConfig =
-            _parseParamUint(
-                    params.refreshDynamicReserveConfig ? 1 : 0,
-                    _paramMapping[2],
-                    _subData,
-                    _returnValues
-                ) == 1;
+        params.refreshDynamicReserveConfig = _parseParamUint(
+            params.refreshDynamicReserveConfig ? 1 : 0, _paramMapping[2], _subData, _returnValues
+        ) == 1;
 
         bytes memory logData = _refreshPremium(params);
         emit ActionEvent("AaveV4RefreshPremium", logData);

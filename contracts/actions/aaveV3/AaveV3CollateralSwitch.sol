@@ -116,8 +116,8 @@ contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
         } else {
             params.market = address(
                 bytes20(
-                    _encodedInput[
-                        (5 + (params.arrayLength - 1) * 3):(25 + (params.arrayLength - 1) * 3)
+                    _encodedInput[(5 + (params.arrayLength - 1)
+                                * 3):(25 + (params.arrayLength - 1) * 3)
                     ]
                 )
             );

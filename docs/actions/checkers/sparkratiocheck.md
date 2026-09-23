@@ -21,7 +21,9 @@ Action to check the ratio of the Spark position after strategy execution.
 ```ts
 const sparkRatioCheckAction = new dfs.actions.checkers.SparkRatioCheckAction(
     ratioState,
-    targetRatio
+    targetRatio,
+    market,
+    user
 );
 ```
 
@@ -34,9 +36,13 @@ const sparkRatioCheckAction = new dfs.actions.checkers.SparkRatioCheckAction(
 ```solidity
     /// @param ratioState State of the ratio (IN_BOOST or IN_REPAY)
     /// @param targetRatio Target ratio.
+    /// @param market Spark market address parameter that was added later in order to add support for different markets in strategies
+    /// @param user EOA or Smart Wallet address parameter that was added later in order to add support for EOA strategies
     struct Params {
         RatioState ratioState;
         uint256 targetRatio;
+        address market;
+        address user;
     }
 ```
 

@@ -31,9 +31,14 @@ contract CompV3MinDebtTrigger is ITrigger, AdminAuth {
         CalldataParams memory triggerData = parseCallInputs(_calldata);
 
         IComet comet = IComet(triggerData.market);
-        address baseToken = comet.baseToken();
+
         uint256 totalDebt = comet.borrowBalanceOf(triggerData.user);
+        // Return early if the user has no debt
+        if (totalDebt == 0) return false;
+
+        address baseToken = comet.baseToken();
         uint256 baseTokenPrice = baseToken.getPriceInUSD();
+        // If we can't get the price, we skip the min debt check and return true
         if (baseTokenPrice == 0) return true;
 
         /// @dev totalDebt is denominated in baseToken with baseScale decimals, and baseTokenPrice is denominated in USD with 8 decimals.

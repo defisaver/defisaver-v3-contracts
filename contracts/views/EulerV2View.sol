@@ -430,11 +430,11 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
         }
     }
 
-    function _getOraclePriceInUnitOfAccount(
-        address _oracle,
-        address _token,
-        address _unitOfAccount
-    ) internal view returns (uint256 price) {
+    function _getOraclePriceInUnitOfAccount(address _oracle, address _token, address _unitOfAccount)
+        internal
+        view
+        returns (uint256 price)
+    {
         uint256 decimals = IEVault(_token).decimals();
         uint256 inAmount = 10 ** decimals;
 

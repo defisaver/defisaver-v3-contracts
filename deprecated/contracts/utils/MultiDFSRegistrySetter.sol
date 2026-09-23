@@ -38,10 +38,10 @@ contract MultiDFSRegistrySetter is CoreHelper {
     /// @notice Starts multiple entries changes to DFSRegistry
     /// @param _ids Ids used to fetch contract addresses
     /// @param _contractAddrs Array of contract addresses matching the ids
-    function startMultipleContractChanges(
-        bytes4[] calldata _ids,
-        address[] calldata _contractAddrs
-    ) external onlyOwner {
+    function startMultipleContractChanges(bytes4[] calldata _ids, address[] calldata _contractAddrs)
+        external
+        onlyOwner
+    {
         require(_ids.length == _contractAddrs.length, "Arr length not eq");
 
         for (uint256 i = 0; i < _ids.length; ++i) {

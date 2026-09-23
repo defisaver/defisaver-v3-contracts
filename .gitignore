@@ -130,3 +130,5 @@ lib/
 yarn.lock
 
 gen/
+
+forge-cache/
