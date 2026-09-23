@@ -1,20 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
+import { ITokenGroupRegistry } from "../../interfaces/exchange/ITokenGroupRegistry.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 
-/// @title TokenGroupRegistry - Keeps track of tokens that are in a same group for diff. fee models
-contract TokenGroupRegistry is AdminAuth {
-    /// @dev 0.25% fee as we divide the amount with this number
+/// @title TokenGroupRegistry
+/// @notice Keeps track of tokens that are in a same group for different fee models
+contract TokenGroupRegistry is AdminAuth, ITokenGroupRegistry {
+    /// @notice 0.25% fee as we divide the amount with this number
     uint256 public constant STANDARD_FEE_DIVIDER = 400;
 
+    /// @notice 0.1% fee as we divide the amount with this number
     uint256 public constant STABLE_FEE_DIVIDER = 1000;
+
+    /// @notice Maximum fee divider, which means max fee is 2%
     uint256 public constant MAX_FEE_DIVIDER = 50;
 
-    /// @dev maps token address to a registered group it belongs to
+    /// @notice Maps token address to a registered group it belongs to
     mapping(address => uint256) public groupIds;
 
-    /// @dev Array of groups where the index is the grouped id and the value is the fee
+    /// @notice Array of groups where the index is the grouped id and the value is the fee
     uint256[] public feesPerGroup;
 
     enum Groups {
@@ -37,15 +42,19 @@ contract TokenGroupRegistry is AdminAuth {
     }
 
     /// @notice Checks if 2 tokens are in the same group and returns the correct exchange fee for the pair
+    /// @param _sellToken Sell token address
+    /// @param _buyToken Buy token address
+    /// @return fee Divider for the fee
     function getFeeForTokens(address _sellToken, address _buyToken) public view returns (uint256) {
         uint256 firstId = groupIds[_sellToken];
         uint256 secondId = groupIds[_buyToken];
 
-        // check if in the ban list, can just check the first token as we take fee from it
+        // Check if in the ban list, can just check the first token as we take fee from it.
         if (firstId == uint8(Groups.BANNED)) {
             return 0;
         }
 
+        // If the tokens are in the same group, return the fee for the group.
         if (firstId == secondId) {
             return feesPerGroup[secondId];
         }
