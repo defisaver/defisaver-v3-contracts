@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
+/// @title DFSExchangeData
+/// @notice Contract containing the data structs for performing swaps
 contract DFSExchangeData {
     struct OffchainData {
         address wrapper; // dfs wrapper address for the aggregator (must be in WrapperExchangeRegistry)

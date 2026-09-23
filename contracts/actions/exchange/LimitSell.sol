@@ -3,19 +3,35 @@
 pragma solidity =0.8.24;
 
 import { DFSExchangeCore } from "../../exchangeV3/DFSExchangeCore.sol";
-import { TransientStorage } from "../../utils/transient/TransientStorage.sol";
+import { TransientStorageCancun } from "../../utils/transient/TransientStorageCancun.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
-import { GasFeeHelper } from "../fee/helpers/GasFeeHelper.sol";
+import { SellActionHelper } from "./helpers/SellActionHelper.sol";
+import { GasFeeHelper } from "../../utils/fee/GasFeeHelper.sol";
 
 /// @title A special Limit Sell action used as a part of the limit order strategy
+/// @dev Adds additional gas fee calculation on top of regular sell.
 contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
     using TokenUtils for address;
+    using SellActionHelper for ExchangeData;
 
-    TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
+    /// @notice Used for validating the price that is set in the trigger
+    TransientStorageCancun public constant tempStorage =
+        TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
 
+    /// @notice Error thrown when the price is not the expected price
+    /// @param expected Expected price
+    /// @param actual Actual price
     error WrongPriceFromTrigger(uint256 expected, uint256 actual);
 
+    /// @notice Error thrown when the price is not set
+    error PriceNotSetError();
+
+    /// @notice Parameters for the LimitSell action
+    /// @param exchangeData Exchange data
+    /// @param from Address from which we'll pull the srcTokens
+    /// @param to Address where we'll send the dest token
+    /// @param gasUsed Gas used for this strategy so we can take the fee
     struct Params {
         ExchangeData exchangeData;
         address from;
@@ -37,17 +53,15 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
         params.exchangeData.destAddr = _parseParamAddr(
             params.exchangeData.destAddr, _paramMapping[1], _subData, _returnValues
         );
-
         params.exchangeData.srcAmount = _parseParamUint(
             params.exchangeData.srcAmount, _paramMapping[2], _subData, _returnValues
         );
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
-        (uint256 exchangedAmount, bytes memory logData) =
-            _dfsSell(params.exchangeData, params.from, params.to, params.gasUsed);
+        (uint256 exchangedAmountAfterFee, bytes memory logData) = _dfsSell(params);
         emit ActionEvent("LimitSell", logData);
-        return bytes32(exchangedAmount);
+        return bytes32(exchangedAmountAfterFee);
     }
 
     /// @inheritdoc ActionBase
@@ -62,76 +76,49 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Sells a specified srcAmount for the dest token
-    /// @param _exchangeData DFS Exchange data struct
-    /// @param _from Address from which we'll pull the srcTokens
-    /// @param _to Address where we'll send the _to token
-    /// @param _gasUsed Gas used for this strategy so we can take the fee
-    function _dfsSell(
-        ExchangeData memory _exchangeData,
-        address _from,
-        address _to,
-        uint256 _gasUsed
-    ) internal returns (uint256, bytes memory) {
-        // if we set srcAmount to max, take the whole user's wallet balance
-        if (_exchangeData.srcAmount == type(uint256).max) {
-            _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
+    /// @param _params Parameters for the LimitSell action
+    /// @return exchangedAmountAfterFee Amount of tokens after the fee is taken
+    /// @return logData Log data for the LimitSell action
+    function _dfsSell(Params memory _params)
+        internal
+        returns (uint256 exchangedAmountAfterFee, bytes memory logData)
+    {
+        ExchangeData memory exchangeData = _params.exchangeData;
+
+        // If we set srcAmount to max, take the whole balance of the source token.
+        // Limit sell only works with ERC20 tokens, for ETH token, WETH is used as source token.
+        if (exchangeData.srcAmount == type(uint256).max) {
+            exchangeData.srcAmount = exchangeData.srcAddr.getBalance(_params.from);
         }
 
-        // Validate price that is set in the trigger
+        // Validate price that is set in the trigger.
         uint256 currPrice = uint256(tempStorage.getBytes32("CURR_PRICE"));
-        require(currPrice > 0, "LimitSell: Price not set");
+        if (currPrice == 0) revert PriceNotSetError();
 
-        // no fee for limit sell strategies
-        _exchangeData.dfsFeeDivider = 0;
+        // No sell fee for limit sell strategies.
+        exchangeData.dfsFeeDivider = 0;
 
-        if (_exchangeData.minPrice != currPrice) {
-            revert WrongPriceFromTrigger(currPrice, _exchangeData.minPrice);
+        // If the price is not the expected price, revert.
+        if (exchangeData.minPrice != currPrice) {
+            revert WrongPriceFromTrigger(currPrice, exchangeData.minPrice);
         }
 
-        _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
+        // Pull the source tokens for selling.
+        exchangeData.srcAddr.pullTokensIfNeeded(_params.from, exchangeData.srcAmount);
 
-        (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
+        // Execute the sell.
+        (address wrapper, uint256 exchangedAmount) = _sell(exchangeData);
 
-        {
-            uint256 amountAfterFee = _takeGasFee(_gasUsed, exchangedAmount, _exchangeData.destAddr);
+        exchangedAmountAfterFee =
+            exchangedAmount - takeGasFee(_params.gasUsed, exchangeData.destAddr, exchangedAmount);
 
-            address tokenAddr = _exchangeData.destAddr;
-            if (tokenAddr == WETH_ADDR) {
-                TokenUtils.withdrawWeth(amountAfterFee);
-                tokenAddr = ETH_ADDR;
-            }
+        bool unwrapEth = exchangeData.destAddr == TokenUtils.WETH_ADDR;
+        exchangeData.sendTokensAfterSell(_params.to, exchangedAmountAfterFee, unwrapEth);
 
-            tokenAddr.withdrawTokens(_to, amountAfterFee);
-        }
-
-        bytes memory logData = abi.encode(
-            wrapper,
-            _exchangeData.srcAddr,
-            _exchangeData.destAddr,
-            _exchangeData.srcAmount,
-            exchangedAmount,
-            _exchangeData.dfsFeeDivider
-        );
-        return (exchangedAmount, logData);
+        logData = exchangeData.encodeSellLogData(wrapper, exchangedAmount);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
-    }
-
-    function _takeGasFee(uint256 _gasUsed, uint256 _soldAmount, address _feeToken)
-        internal
-        returns (uint256 amountAfterFee)
-    {
-        uint256 txCost = calcGasCost(_gasUsed, _feeToken, 0);
-
-        // cap at 20% of the max amount
-        if (txCost >= (_soldAmount / 5)) {
-            txCost = _soldAmount / 5;
-        }
-
-        _feeToken.withdrawTokens(feeRecipient.getFeeAddr(), txCost);
-
-        return _soldAmount - txCost;
     }
 }
