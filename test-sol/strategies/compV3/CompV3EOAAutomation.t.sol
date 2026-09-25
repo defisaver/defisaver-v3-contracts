@@ -18,6 +18,7 @@ import { CompV3Supply } from "../../../contracts/actions/compoundV3/CompV3Supply
 import { CompV3Withdraw } from "../../../contracts/actions/compoundV3/CompV3Withdraw.sol";
 import { CompV3Borrow } from "../../../contracts/actions/compoundV3/CompV3Borrow.sol";
 import { CompV3Payback } from "../../../contracts/actions/compoundV3/CompV3Payback.sol";
+import { SemiContinuousTracker } from "../../../contracts/core/strategy/SemiContinuousTracker.sol";
 import { CompV3Encode } from "../../utils/encode/CompV3Encode.sol";
 import {
     WrapperExchangeRegistry
@@ -91,6 +92,7 @@ contract TestCompV3EOAAutomation is BaseTest, RegistryUtils, ActionsUtils {
         redeploy("FLAction", address(flAction));
         redeploy("RecipeExecutor", address(new RecipeExecutor()));
         redeploy("SafeModuleAuth", address(new SafeModuleAuth()));
+        redeploy("SemiContinuousTracker", address(new SemiContinuousTracker()));
     }
 
     function _setUpExchangeWrapper() internal {
