@@ -4,19 +4,15 @@ pragma solidity =0.8.24;
 
 import { IDSAuth } from "../../interfaces/DS/IDSAuth.sol";
 import { ActionBase } from "../ActionBase.sol";
-import {
-    DFSProxyRegistryController
-} from "../../utils/proxyRegistry/DFSProxyRegistryController.sol";
+import { DFSIds } from "../../utils/DFSIds.sol";
+import { DFSProxyRegistryV2 } from "../../utils/proxyRegistry/DFSProxyRegistryV2.sol";
 
-/// @title Changes the owner of the DSProxy and updated the DFSRegistry
+/// @title Changes the owner of the DSProxy and updates DFSProxyRegistryV2
 contract ChangeProxyOwner is ActionBase {
     /// @param newOwner Address of the new owner
     struct Params {
         address newOwner;
     }
-
-    DFSProxyRegistryController constant dfsRegController =
-        DFSProxyRegistryController(DFS_REG_CONTROLLER_ADDR);
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -53,7 +49,8 @@ contract ChangeProxyOwner is ActionBase {
 
         IDSAuth(address(this)).setOwner(_newOwner);
 
-        dfsRegController.changeOwnerInDFSRegistry(_newOwner);
+        address dfsProxyRegistry = registry.getAddr(DFSIds.DFS_PROXY_REGISTRY_V2);
+        DFSProxyRegistryV2(dfsProxyRegistry).syncProxy(address(this));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
