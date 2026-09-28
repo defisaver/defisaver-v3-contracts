@@ -6582,7 +6582,7 @@ const createAaveV3FLDebtSwitchStrategy = () => {
     aaveV3FLDebtSwitchStrategy.addSubSlot('&toAssetId', 'uint16');
     aaveV3FLDebtSwitchStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3FLDebtSwitchStrategy.addSubSlot('&amountToSwitch', 'uint256');
-    aaveV3FLDebtSwitchStrategy.addSubSlot('&useOnBehalf', 'bool');
+    aaveV3FLDebtSwitchStrategy.addSubSlot('&user', 'address');
 
     const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
     aaveV3FLDebtSwitchStrategy.addTrigger(trigger);
@@ -6619,8 +6619,8 @@ const createAaveV3FLDebtSwitchStrategy = () => {
         '%rateMode', // variable type of debt - Sent by backend
         '&fromAsset',
         '&fromAssetId',
-        '&useOnBehalf',
-        '%address(0)', // onBehalf - Sent by backend
+        '%true', // useOnBehalf - hardcoded to true - Sent by backend
+        '&user', // onBehalf
     );
 
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
@@ -6630,8 +6630,8 @@ const createAaveV3FLDebtSwitchStrategy = () => {
         '%flAddress', // Sent by backend
         '%rateMode', // variable type of debt - Sent by backend
         '&toAssetId',
-        '&useOnBehalf',
-        '%address(0)', // onBehalf - Sent by backend
+        '%true', // useOnBehalf - hardcoded to true - Sent by backend
+        '&user', // onBehalf
     );
 
     const returnAnyDust = new dfs.actions.basic.SendTokenAndUnwrapAction(
