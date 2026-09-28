@@ -1,5 +1,5 @@
 ---
-icon: bluesky
+icon: square-bluesky
 ---
 
 # MorphoAaveV3SetManager

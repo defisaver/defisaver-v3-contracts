@@ -12,6 +12,9 @@ import {
 import {
     SkyStakingEngineSelectFarm
 } from "../../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
+import { SkyStake } from "../../../contracts/actions/sky/SkyStake.sol";
+import { SkyUnstake } from "../../../contracts/actions/sky/SkyUnstake.sol";
+import { SkyClaimRewards } from "../../../contracts/actions/sky/SkyClaimRewards.sol";
 
 library SkyStakingEncode {
     function open(address _stakingContract) public pure returns (bytes memory params) {
@@ -62,6 +65,50 @@ library SkyStakingEncode {
         params = abi.encode(
             SkyStakingEngineSelectFarm.Params({
                 stakingContract: _stakingContract, index: _index, farm: _farm
+            })
+        );
+    }
+
+    function skyStake(
+        address _stakingContract,
+        address _stakingToken,
+        uint256 _amount,
+        address _from
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            SkyStake.Params({
+                stakingContract: _stakingContract,
+                stakingToken: _stakingToken,
+                amount: _amount,
+                from: _from
+            })
+        );
+    }
+
+    function skyUnstake(
+        address _stakingContract,
+        address _stakingToken,
+        uint256 _amount,
+        address _to
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            SkyUnstake.Params({
+                stakingContract: _stakingContract,
+                stakingToken: _stakingToken,
+                amount: _amount,
+                to: _to
+            })
+        );
+    }
+
+    function skyClaimRewards(address _stakingContract, address _rewardToken, address _to)
+        public
+        pure
+        returns (bytes memory params)
+    {
+        params = abi.encode(
+            SkyClaimRewards.Params({
+                stakingContract: _stakingContract, rewardToken: _rewardToken, to: _to
             })
         );
     }

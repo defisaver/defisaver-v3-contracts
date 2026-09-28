@@ -50,6 +50,12 @@ contract TestCompV3RatioCheck is BaseTest, ActionsUtils {
     function setUp() public override {
         forkFromEnv("");
 
+        // CompV3 automation is not deployed on Optimism, so there is nothing to check there.
+        if (isOptimismSelected()) {
+            vm.skip(true, "CompV3 strategies not supported on Optimism");
+            return;
+        }
+
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
         walletAddr = wallet.walletAddr();

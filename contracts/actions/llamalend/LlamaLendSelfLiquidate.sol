@@ -7,7 +7,6 @@ import { LlamaLendHelper } from "./helpers/LlamaLendHelper.sol";
 import {
     ILlamaLendController
 } from "../../interfaces/protocols/llamalend/ILlamaLendController.sol";
-import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 /// @title LlamaLendSelfLiquidate Closes the users position while he's in soft liquidation
 contract LlamaLendSelfLiquidate is ActionBase, LlamaLendHelper {
@@ -109,7 +108,7 @@ contract LlamaLendSelfLiquidate is ActionBase, LlamaLendHelper {
             debtAsset.withdrawTokens(
                 _params.from, amountToPull - (debtAssetBalancePreLiq - debtAssetBalanceAfterLiq)
             );
-            IERC20(debtAsset).approve(_params.controllerAddress, 0);
+            debtAsset.removeAllowance(_params.controllerAddress);
         }
 
         return (

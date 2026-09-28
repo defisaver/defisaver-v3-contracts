@@ -28,9 +28,9 @@ contract CompV3Allow is ActionBase, CompV3Helper {
 
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
         params.manager = _parseParamAddr(params.manager, _paramMapping[1], _subData, _returnValues);
-        params.isAllowed =
-            _parseParamUint(params.isAllowed ? 1 : 0, _paramMapping[2], _subData, _returnValues)
-                == 1;
+        params.isAllowed = _parseParamUint(
+            params.isAllowed ? 1 : 0, _paramMapping[2], _subData, _returnValues
+        ) == 1;
 
         (bool isAllowed, bytes memory logData) =
             _allow(params.market, params.manager, params.isAllowed);

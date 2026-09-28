@@ -10,6 +10,7 @@ import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
 /// @title AaveV4QuotePriceTrigger
 /// @notice Verifies if current token price ratio for aaveV4 spoke is over/under a subbed price ratio.
+/// @dev The trigger expects the price input to be scaled by 1e18.
 contract AaveV4QuotePriceTrigger is ITrigger, AdminAuth, TriggerHelper {
     /// @dev Expected subbed price scale.
     uint256 public constant PRICE_SCALE = 1e18;

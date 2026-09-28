@@ -33,9 +33,9 @@ contract CompV3Claim is ActionBase, CompV3Helper {
         params.onBehalf =
             _parseParamAddr(params.onBehalf, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
-        params.shouldAccrue =
-            _parseParamUint(params.shouldAccrue ? 1 : 0, _paramMapping[3], _subData, _returnValues)
-                == 1;
+        params.shouldAccrue = _parseParamUint(
+            params.shouldAccrue ? 1 : 0, _paramMapping[3], _subData, _returnValues
+        ) == 1;
 
         (uint256 compClaimed, bytes memory logData) =
             _claim(params.market, params.onBehalf, params.to, params.shouldAccrue);

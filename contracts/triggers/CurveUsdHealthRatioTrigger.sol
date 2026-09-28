@@ -29,6 +29,10 @@ contract CurveUsdHealthRatioTrigger is ITrigger, AdminAuth, TriggerHelper {
 
         int256 currentHealth = controller.health(triggerSubData.user, true);
 
+        /// @dev Highly unlikely to occur, as automation has a buffer above the liquidation point.
+        /// Adding an explicit sanity check to avoid unsafe casting warnings.
+        if (currentHealth < 0) return true;
+
         return uint256(currentHealth) < triggerSubData.ratio;
     }
 

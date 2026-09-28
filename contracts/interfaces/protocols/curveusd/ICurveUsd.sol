@@ -118,11 +118,10 @@ interface IPegKeeper {
 }
 
 interface ICurveUsdSwapper {
-    function encodeSwapParams(
-        uint256[5][5] memory swapParams,
-        uint32 gasUsed,
-        uint24 dfsFeeDivider
-    ) external pure returns (uint256 encoded);
+    function encodeSwapParams(uint256[5][5] memory swapParams, uint32 gasUsed, uint24 dfsFeeDivider)
+        external
+        pure
+        returns (uint256 encoded);
     function setAdditionalRoutes(
         address[8] memory _additionalRoutes,
         address[5] memory _swapZapPools

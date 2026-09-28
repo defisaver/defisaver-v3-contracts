@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
+import { IWrapperExchangeRegistry } from "../../interfaces/exchange/IWrapperExchangeRegistry.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 
-contract WrapperExchangeRegistry is AdminAuth {
-    mapping(address => bool) private wrappers;
-
+contract WrapperExchangeRegistry is AdminAuth, IWrapperExchangeRegistry {
     error EmptyAddrError();
 
-    function addWrapper(address _wrapper) public onlyOwner {
+    mapping(address => bool) private wrappers;
+
+    function addWrapper(address _wrapper) external onlyOwner {
         if (_wrapper == address(0)) {
             revert EmptyAddrError();
         }
@@ -16,11 +17,11 @@ contract WrapperExchangeRegistry is AdminAuth {
         wrappers[_wrapper] = true;
     }
 
-    function removeWrapper(address _wrapper) public onlyOwner {
+    function removeWrapper(address _wrapper) external onlyOwner {
         wrappers[_wrapper] = false;
     }
 
-    function isWrapper(address _wrapper) public view returns (bool) {
+    function isWrapper(address _wrapper) external view returns (bool) {
         return wrappers[_wrapper];
     }
 }

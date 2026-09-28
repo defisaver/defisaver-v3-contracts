@@ -16,9 +16,11 @@ contract SparkTargetRatioCheck is ActionBase, SparkRatioHelper {
 
     /// @param targetRatio Target ratio.
     /// @param market Market address.
+    /// @param user EOA or Smart Wallet address parameter that was added later in order to add support for EOA strategies
     struct Params {
         uint256 targetRatio;
         address market;
+        address user;
     }
 
     /// @inheritdoc ActionBase
@@ -36,7 +38,15 @@ contract SparkTargetRatioCheck is ActionBase, SparkRatioHelper {
         address market =
             _parseParamAddr(inputData.market, _paramMapping[1], _subData, _returnValues);
 
-        uint256 currRatio = getRatio(market, address(this));
+        address user;
+        /// @dev User param is added later, hence the check
+        if (_paramMapping.length == 3) {
+            user = _parseParamAddr(inputData.user, _paramMapping[2], _subData, _returnValues);
+        }
+
+        if (user == address(0)) user = address(this); // default to proxy
+
+        uint256 currRatio = getRatio(market, user);
 
         /// @notice If `targetRatio` is 999% or more then skip `RATIO_OFFSET` check because it is very hard to be precise under 5%.
         if (targetRatio < RATIO_LIMIT) {

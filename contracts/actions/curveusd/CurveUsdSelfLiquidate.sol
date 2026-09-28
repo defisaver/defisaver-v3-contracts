@@ -106,7 +106,7 @@ contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
             uint256 crvUsdPulledForLiq = crvUsdBalancePreLiq - crvUsdBalanceAfterLiq;
             uint256 leftoverPulledCrvUsd = amountToPull - crvUsdPulledForLiq;
             CRVUSD_TOKEN_ADDR.withdrawTokens(_params.from, leftoverPulledCrvUsd);
-            CRVUSD_TOKEN_ADDR.approveToken(_params.controllerAddress, 0);
+            CRVUSD_TOKEN_ADDR.removeAllowance(_params.controllerAddress);
         }
 
         return (

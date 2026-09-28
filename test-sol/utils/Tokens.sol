@@ -106,6 +106,15 @@ contract Tokens is Test {
         }
     }
 
+    /// @dev Token price in USD with 8 decimals, from the same source amountInUSDPrice uses.
+    ///      Returns 0 when no feed exists, so callers can skip tokens that can't be priced.
+    function getTokenPriceInUSD(address _tokenAddr) internal returns (uint256) {
+        if (block.chainid == 1) {
+            return (new TokenPriceHelper()).getPriceInUSD(_tokenAddr);
+        }
+        return (new TokenPriceHelperL2()).getPriceInUSD(_tokenAddr);
+    }
+
     function amountInUSDPrice(address _tokenAddr, uint256 _amountUSD) internal returns (uint256) {
         TokenPriceHelper t;
         TokenPriceHelperL2 tL2;

@@ -1,5 +1,5 @@
 ---
-icon: bluesky
+icon: butterfly
 ---
 
 # MorphoBlueSetAuth

@@ -30,6 +30,9 @@ contract TestTokenizedVaultAdapter is BaseTest, ActionsUtils {
     function setUp() public override {
         forkFromEnv("");
 
+        // TODO adapt tests for L2s
+        if (isL2NetworkSelected()) vm.skip(true, "MorphoTokenWrap not available on L2s");
+
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
         walletAddr = wallet.walletAddr();

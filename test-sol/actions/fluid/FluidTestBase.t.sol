@@ -202,11 +202,10 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         shares = shares * 100 / 101;
     }
 
-    function estimateDexPositionDebtInOneToken(
-        uint256 _nftId,
-        bool _inToken0,
-        FluidView _fluidView
-    ) internal returns (uint256 debt) {
+    function estimateDexPositionDebtInOneToken(uint256 _nftId, bool _inToken0, FluidView _fluidView)
+        internal
+        returns (uint256 debt)
+    {
         uint256 maxToken0AmountToPayback = _inToken0 ? uint256(type(int256).max) : 0;
         uint256 maxToken1AmountToPayback = _inToken0 ? 0 : uint256(type(int256).max);
 

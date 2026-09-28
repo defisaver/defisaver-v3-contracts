@@ -8,6 +8,7 @@ import {
 import {
     IFluidVaultResolver
 } from "../../../../contracts/interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
+import { IERC20 } from "../../../../contracts/interfaces/token/IERC20.sol";
 import { FluidVaultT1Open } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Open.sol";
 import {
     FluidVaultT1Adjust
@@ -564,6 +565,13 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
             assertEq(vars.walletBorrowTokenBalanceAfter, vars.walletBorrowTokenBalanceBefore);
             assertEq(vars.walletEthTokenBalanceAfter, vars.walletEthTokenBalanceBefore);
             assertEq(vars.walletWethTokenBalanceAfter, vars.walletWethTokenBalanceBefore);
+
+            if (
+                _config.borrowActionType == FluidVaultT1Adjust.DebtActionType.PAYBACK
+                    && _config.isMaxBorrowAmount && !vars.isNativeBorrow
+            ) {
+                assertEq(IERC20(constants.borrowToken).allowance(walletAddr, vaults[i]), 0);
+            }
 
             // .--------- SUPPLY ----------.
             if (
