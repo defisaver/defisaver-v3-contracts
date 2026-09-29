@@ -8,8 +8,13 @@ async function main() {
     await topUp(senderAcc.address, network);
     await topUp(getOwnerAddr(), network);
 
-    const strategyId = await deployAaveV3GenericFLDebtSwitchStrategy();
-    console.log('Strategy ID:', strategyId);
+    // Same generic strategy serves both wallet types, but it's registered under two ids.
+    // Order matches automation-sdk: AAVE_V3_DEBT_SWITCH (SW) first, then AAVE_V3_DEBT_SWITCH_EOA.
+    const swStrategyId = await deployAaveV3GenericFLDebtSwitchStrategy();
+    const eoaStrategyId = await deployAaveV3GenericFLDebtSwitchStrategy();
+
+    console.log('SW Strategy ID:', swStrategyId);
+    console.log('EOA Strategy ID:', eoaStrategyId);
 }
 
 main().catch((error) => {
