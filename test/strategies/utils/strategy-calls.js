@@ -7888,7 +7888,7 @@ const callAaveV3FLCollateralSwitchStrategy = async (
     );
 };
 
-const callAaveV3FLDebtSwitchStrategy = async (
+const callAaveV3GenericFLDebtSwitchStrategy = async (
     strategyExecutor,
     strategyIndex,
     subId,
@@ -7927,7 +7927,7 @@ const callAaveV3FLDebtSwitchStrategy = async (
         2, // rateMode (VARIABLE)
         placeHolderAddr, // tokenAddr
         0, // assetId
-        false, // useOnBehalf
+        true, // useOnBehalf - hardcoded to true in strategy
         placeHolderAddr, // onBehalfAddr
     );
     // Borrow the new debt (toAsset) and send it straight to the FL contract to repay the loan.
@@ -7938,7 +7938,7 @@ const callAaveV3FLDebtSwitchStrategy = async (
         flAddr, // to (repay FL)
         2, // rateMode (VARIABLE)
         0, // assetId
-        false, // useOnBehalf
+        true, // useOnBehalf - hardcoded to true in strategy
         placeHolderAddr, // onBehalfAddr
     );
     // Return any leftover fromAsset dust to the EOA.
@@ -7974,7 +7974,7 @@ const callAaveV3FLDebtSwitchStrategy = async (
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasCost, 0, callData);
     console.log(
-        `GasUsed callAaveV3FLDebtSwitchStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+        `GasUsed callAaveV3GenericFLDebtSwitchStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
     );
 };
 
@@ -10455,7 +10455,7 @@ module.exports = {
     callAaveV3BoostStrategy,
     callAaveV3FLBoostStrategy,
     callAaveV3FLCollateralSwitchStrategy,
-    callAaveV3FLDebtSwitchStrategy,
+    callAaveV3GenericFLDebtSwitchStrategy,
     callSparkGenericFLCloseToCollStrategy,
     callSparkGenericFLCloseToDebtStrategy,
     callMorphoBlueFLCloseToCollStrategy,

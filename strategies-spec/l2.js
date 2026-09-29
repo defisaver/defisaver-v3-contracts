@@ -3454,19 +3454,21 @@ const createAaveV3FLCollateralSwitchL2Strategy = () => {
     return aaveV3FLCollateralSwitchL2Strategy.encodeForDsProxyCall();
 };
 
-const createAaveV3FLDebtSwitchL2Strategy = () => {
-    const aaveV3FLDebtSwitchL2Strategy = new dfs.Strategy('AaveV3FLDebtSwitchL2Strategy');
+const createAaveV3GenericFLDebtSwitchL2Strategy = () => {
+    const aaveV3GenericFLDebtSwitchL2Strategy = new dfs.Strategy(
+        'AaveV3GenericFLDebtSwitchL2Strategy',
+    );
 
-    aaveV3FLDebtSwitchL2Strategy.addSubSlot('&fromAsset', 'address');
-    aaveV3FLDebtSwitchL2Strategy.addSubSlot('&fromAssetId', 'uint16');
-    aaveV3FLDebtSwitchL2Strategy.addSubSlot('&toAsset', 'address');
-    aaveV3FLDebtSwitchL2Strategy.addSubSlot('&toAssetId', 'uint16');
-    aaveV3FLDebtSwitchL2Strategy.addSubSlot('&marketAddr', 'address');
-    aaveV3FLDebtSwitchL2Strategy.addSubSlot('&amountToSwitch', 'uint256');
-    aaveV3FLDebtSwitchL2Strategy.addSubSlot('&user', 'address');
+    aaveV3GenericFLDebtSwitchL2Strategy.addSubSlot('&fromAsset', 'address');
+    aaveV3GenericFLDebtSwitchL2Strategy.addSubSlot('&fromAssetId', 'uint16');
+    aaveV3GenericFLDebtSwitchL2Strategy.addSubSlot('&toAsset', 'address');
+    aaveV3GenericFLDebtSwitchL2Strategy.addSubSlot('&toAssetId', 'uint16');
+    aaveV3GenericFLDebtSwitchL2Strategy.addSubSlot('&marketAddr', 'address');
+    aaveV3GenericFLDebtSwitchL2Strategy.addSubSlot('&amountToSwitch', 'uint256');
+    aaveV3GenericFLDebtSwitchL2Strategy.addSubSlot('&user', 'address');
 
     const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
-    aaveV3FLDebtSwitchL2Strategy.addTrigger(trigger);
+    aaveV3GenericFLDebtSwitchL2Strategy.addTrigger(trigger);
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
@@ -3523,14 +3525,14 @@ const createAaveV3FLDebtSwitchL2Strategy = () => {
         '%max(uint)', // Sent by backend,
     );
 
-    aaveV3FLDebtSwitchL2Strategy.addAction(flAction);
-    aaveV3FLDebtSwitchL2Strategy.addAction(sellAction);
-    aaveV3FLDebtSwitchL2Strategy.addAction(feeTakingAction);
-    aaveV3FLDebtSwitchL2Strategy.addAction(paybackAction);
-    aaveV3FLDebtSwitchL2Strategy.addAction(borrowAction);
-    aaveV3FLDebtSwitchL2Strategy.addAction(returnAnyDust);
+    aaveV3GenericFLDebtSwitchL2Strategy.addAction(flAction);
+    aaveV3GenericFLDebtSwitchL2Strategy.addAction(sellAction);
+    aaveV3GenericFLDebtSwitchL2Strategy.addAction(feeTakingAction);
+    aaveV3GenericFLDebtSwitchL2Strategy.addAction(paybackAction);
+    aaveV3GenericFLDebtSwitchL2Strategy.addAction(borrowAction);
+    aaveV3GenericFLDebtSwitchL2Strategy.addAction(returnAnyDust);
 
-    return aaveV3FLDebtSwitchL2Strategy.encodeForDsProxyCall();
+    return aaveV3GenericFLDebtSwitchL2Strategy.encodeForDsProxyCall();
 };
 
 const createMorphoBlueFLCloseToCollL2Strategy = () => {
@@ -3922,7 +3924,7 @@ module.exports = {
     createAaveV3GenericFLCloseToCollL2Strategy,
     createAaveV3GenericFLCloseToDebtL2Strategy,
     createAaveV3FLCollateralSwitchL2Strategy,
-    createAaveV3FLDebtSwitchL2Strategy,
+    createAaveV3GenericFLDebtSwitchL2Strategy,
     createMorphoBlueFLCloseToCollL2Strategy,
     createMorphoBlueFLCloseToDebtL2Strategy,
     createMorphoBlueRepayOnPriceL2Strategy,

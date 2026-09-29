@@ -840,7 +840,7 @@ const subAaveV3FLCollateralSwitchStrategy = async (
     const subId = await subToStrategy(proxy, strategySub);
     return { subId, strategySub };
 };
-const subAaveV3FLDebtSwitchStrategy = async (
+const subAaveV3GenericFLDebtSwitchStrategy = async (
     proxy,
     strategyId,
     fromAsset,
@@ -849,7 +849,7 @@ const subAaveV3FLDebtSwitchStrategy = async (
     toAssetId,
     marketAddr,
     amountToSwitch,
-    // ! Check what is base and what is quote trigger? Should be related to debt/coll or from & to or usd always or what?
+    user,
     baseTokenAddress,
     quoteTokenAddress,
     triggerPrice,
@@ -863,6 +863,7 @@ const subAaveV3FLDebtSwitchStrategy = async (
         toAssetId,
         marketAddr,
         amountToSwitch,
+        user,
         baseTokenAddress,
         quoteTokenAddress,
         triggerPrice,
@@ -1631,7 +1632,7 @@ module.exports = {
     subCompV3BoostOnPriceBundle,
     subCompV3CloseOnPriceBundle,
     subAaveV3FLCollateralSwitchStrategy,
-    subAaveV3FLDebtSwitchStrategy,
+    subAaveV3GenericFLDebtSwitchStrategy,
     subSparkCloseGeneric,
     subMorphoBlueClose,
     subSparkRepayOnPriceBundle,
