@@ -666,48 +666,48 @@ const AAVE_V3_DEBT_SWITCH_TEST_PAIRS = {
         {
             collAsset: 'WETH',
             fromAsset: 'USDC',
-            toAsset: 'DAI',
+            toAsset: 'USDT',
             marketAddr: addrs[network].AAVE_MARKET,
             collAmountInUSD: 50_000,
             debtAmountInUSD: 20_000,
             amountToSwitchInUSD: 10_000, // partial
             priceState: 1, // UNDER
-            price: 1_000, // Trigger when 1 USDC < 1_000 DAI
+            price: 1_000, // Trigger when 1 USDC < 1_000 USDT
         },
         {
             collAsset: 'WETH',
-            fromAsset: 'DAI',
+            fromAsset: 'USDT',
             toAsset: 'USDC',
             marketAddr: addrs[network].AAVE_MARKET,
             collAmountInUSD: 50_000,
             debtAmountInUSD: 25_000,
             amountToSwitchInUSD: hre.ethers.constants.MaxUint256, // full
             priceState: 0, // OVER
-            price: 0.001, // Trigger when 1 DAI > 0.001 USDC
+            price: 0.001, // Trigger when 1 USDT > 0.001 USDC
         },
     ],
     10: [
         {
             collAsset: 'WETH',
             fromAsset: 'USDC',
-            toAsset: 'DAI',
+            toAsset: 'USDT',
             marketAddr: addrs[network].AAVE_MARKET,
             collAmountInUSD: 50_000,
             debtAmountInUSD: 20_000,
             amountToSwitchInUSD: 10_000, // partial
             priceState: 1, // UNDER
-            price: 1_000, // Trigger when 1 USDC < 1_000 DAI
+            price: 1_000, // Trigger when 1 USDC < 1_000 USDT
         },
         {
             collAsset: 'WETH',
-            fromAsset: 'DAI',
+            fromAsset: 'USDT',
             toAsset: 'USDC',
             marketAddr: addrs[network].AAVE_MARKET,
             collAmountInUSD: 50_000,
             debtAmountInUSD: 25_000,
             amountToSwitchInUSD: hre.ethers.constants.MaxUint256, // full
             priceState: 0, // OVER
-            price: 0.001, // Trigger when 1 DAI > 0.001 USDC
+            price: 0.001, // Trigger when 1 USDT > 0.001 USDC
         },
     ],
     8453: [
