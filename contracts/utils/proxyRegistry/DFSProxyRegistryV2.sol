@@ -2,6 +2,7 @@
 
 pragma solidity =0.8.24;
 
+import { IDFSProxyRegistryV2 } from "../../interfaces/utils/IDFSProxyRegistryV2.sol";
 import { IDSProxy } from "../../interfaces/DS/IDSProxy.sol";
 import { IDSProxyFactory } from "../../interfaces/DS/IDSProxyFactory.sol";
 import { IDSProxyRegistry } from "../../interfaces/DS/IDSProxyRegistry.sol";
@@ -12,7 +13,7 @@ import { DSProxyFactoryHelper } from "../addresses/dsProxyFactory/DSProxyFactory
 
 /// @title DFSProxyRegistryV2
 /// @notice Registry of additional DSProxies related to a user
-contract DFSProxyRegistryV2 is AdminAuth, UtilAddresses, DSProxyFactoryHelper {
+contract DFSProxyRegistryV2 is AdminAuth, UtilAddresses, DSProxyFactoryHelper, IDFSProxyRegistryV2 {
     /*//////////////////////////////////////////////////////////////
                            CONSTANTS
     //////////////////////////////////////////////////////////////*/
