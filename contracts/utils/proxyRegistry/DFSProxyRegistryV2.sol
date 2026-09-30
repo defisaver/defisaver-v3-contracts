@@ -12,7 +12,14 @@ import { UtilAddresses } from "../addresses/UtilAddresses.sol";
 import { DSProxyFactoryHelper } from "../addresses/dsProxyFactory/DSProxyFactoryHelper.sol";
 
 /// @title DFSProxyRegistryV2
-/// @notice Registry of additional DSProxies related to a user
+/// @notice Registry of additional DSProxies related to a user.
+/// @notice Builds on top of the official Maker proxy registry.
+/// @dev Security and assumptions:
+/// - This is an on-chain helper, not a full indexer of every DSProxy ever created for a user.
+/// - Additional-proxy entries and trackedOwner can become stale.
+/// - Syncing is permissionless: anyone can register an additional proxy if the user currently owns it.
+/// - Returned proxies are not guaranteed to be trusted by the owner and should be verified by the caller and user.
+/// - User/Admin can always remove additional proxies, or simply ignore and untrust them off-chain.
 contract DFSProxyRegistryV2 is AdminAuth, UtilAddresses, DSProxyFactoryHelper, IDFSProxyRegistryV2 {
     /*//////////////////////////////////////////////////////////////
                            CONSTANTS
