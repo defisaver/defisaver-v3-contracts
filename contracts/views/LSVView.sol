@@ -5,7 +5,7 @@ pragma solidity =0.8.24;
 // GENERAL IMPORTS
 import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 import { IDFSProxyRegistryV2 } from "../interfaces/utils/IDFSProxyRegistryV2.sol";
-import { LSVProxyRegistry } from "../utils/lsv/LSVProxyRegistry.sol";
+import { ILSVProxyRegistry } from "../interfaces/utils/ILSVProxyRegistry.sol";
 import { TokenUtils } from "../utils/token/TokenUtils.sol";
 import { DFSIds } from "../utils/DFSIds.sol";
 import { ActionsUtilHelper } from "../actions/utils/helpers/ActionsUtilHelper.sol";
@@ -78,7 +78,7 @@ contract LSVView is
         view
         returns (address[] memory proxies, Position[] memory positions)
     {
-        proxies = LSVProxyRegistry(LSV_PROXY_REGISTRY_ADDRESS).getProxies(_user);
+        proxies = ILSVProxyRegistry(LSV_PROXY_REGISTRY_ADDRESS).getProxies(_user);
         positions = _getPositions(_collTokens, proxies);
     }
 
