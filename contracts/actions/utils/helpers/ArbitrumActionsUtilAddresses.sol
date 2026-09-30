@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 contract ArbitrumActionsUtilAddresses {
-    address internal constant DFS_REG_CONTROLLER_ADDR = 0x6F6DaE1bCB60F67B2Cb939dBE565e8fD03F6F002;
     address internal constant SUB_STORAGE_ADDR = 0x24ab68395660b910BfBF1cc88BaA316BA06354eE;
     address internal constant TRANSIENT_STORAGE = 0x48cdE7c1f67fF11A62F6b4272166AB60EFB48C1F;
     address internal constant TRANSIENT_STORAGE_CANCUN = 0x3d5133490db663c6f8F856DA56a8F8F3Dc02768c;
