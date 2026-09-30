@@ -3,9 +3,11 @@
 pragma solidity =0.8.24;
 
 // GENERAL IMPORTS
+import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
+import { IDFSProxyRegistryV2 } from "../interfaces/utils/IDFSProxyRegistryV2.sol";
 import { LSVProxyRegistry } from "../utils/lsv/LSVProxyRegistry.sol";
 import { TokenUtils } from "../utils/token/TokenUtils.sol";
-import { DFSProxyRegistry } from "../utils/proxyRegistry/DFSProxyRegistry.sol";
+import { DFSIds } from "../utils/DFSIds.sol";
 import { ActionsUtilHelper } from "../actions/utils/helpers/ActionsUtilHelper.sol";
 import { UtilAddresses } from "../utils/addresses/UtilAddresses.sol";
 import { LSVUtilHelper } from "../actions/lsv/helpers/LSVUtilHelper.sol";
@@ -85,8 +87,12 @@ contract LSVView is
         view
         returns (address[] memory proxies, Position[] memory positions)
     {
+        address dfsProxyRegistry = IDFSRegistry(REGISTRY_ADDR).getAddr(DFSIds.DFS_PROXY_REGISTRY_V2);
+
+        /// @dev A large number of synced additional proxies can cause an out-of-gas error.
+        /// Unlikely to happen, but can be regulated by admin/user removal.
         (address mcdProxy, address[] memory additionalProxies) =
-            DFSProxyRegistry(DFS_PROXY_REGISTRY_ADDR).getAllProxies(_user);
+            IDFSProxyRegistryV2(dfsProxyRegistry).getAllProxies(_user);
 
         if (mcdProxy == address(0)) {
             proxies = new address[](additionalProxies.length);
