@@ -22,6 +22,17 @@
         "history": []
     },
     {
+        "name": "DFSProxyRegistryV2",
+        "address": "0x0cCB1F91beb8590949880D2a61C26C11d6280319",
+        "id": "0x0fcbdb1a",
+        "path": "contracts/utils/proxyRegistry/DFSProxyRegistryV2.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "DFSProxyRegistryController",
         "address": "0xF8f8B3C98Cf2E63Df3041b73f80F362a4cf3A576",
         "id": "0xcbbb53f2",
@@ -1105,14 +1116,14 @@
     },
     {
         "name": "ChangeProxyOwner",
-        "address": "0x81cA52CfE66421d0ceF82d5F33230e43b5F23D2B",
+        "address": "0x1cc4A7f6B17a4C900F2afe4A0718A73714AC33f2",
         "id": "0x67314f12",
         "path": "contracts/actions/utils/ChangeProxyOwner.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x81cA52CfE66421d0ceF82d5F33230e43b5F23D2B"]
     },
     {
         "name": "TokenBalance",
