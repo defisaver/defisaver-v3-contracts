@@ -7,7 +7,9 @@ import { IDSAuth } from "../../interfaces/DS/IDSAuth.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { DFSIds } from "../../utils/DFSIds.sol";
 
-/// @title Changes the owner of the DSProxy and updates DFSProxyRegistryV2
+/// @title ChangeProxyOwner
+/// @notice Action used to change the owner of the DSProxy and update the DFSProxyRegistryV2.
+/// @dev If proxy is already synced, this will perform a no-op.
 contract ChangeProxyOwner is ActionBase {
     /// @notice Error thrown when the new owner address is the zero address
     error ZeroOwnerAddress();
