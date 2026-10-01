@@ -243,7 +243,7 @@ contract DFSProxyRegistryV2 is AdminAuth, UtilAddresses, DSProxyFactoryHelper, I
         view
         returns (bool)
     {
-        return _proxy != _mcdProxy && _isDSProxyOwner(_proxy, _user);
+        return _proxy != _mcdProxy && _isValidDSProxy(_proxy) && _isDSProxyOwner(_proxy, _user);
     }
 
     /// @dev Checks the proxy's current owner
@@ -253,6 +253,7 @@ contract DFSProxyRegistryV2 is AdminAuth, UtilAddresses, DSProxyFactoryHelper, I
 
     /// @dev Checks for a nonzero proxy registered by the configured DSProxy factory
     function _isValidDSProxy(address _proxy) internal view returns (bool) {
-        return _proxy != address(0) && IDSProxyFactory(PROXY_FACTORY_ADDR).isProxy(_proxy);
+        return _proxy != address(0) && _proxy.code.length > 0
+            && IDSProxyFactory(PROXY_FACTORY_ADDR).isProxy(_proxy);
     }
 }
