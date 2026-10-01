@@ -3753,14 +3753,15 @@
     },
     {
         "name": "LSVView",
-        "address": "0x8eb872563368b2a8ff6d9a4842f923067f08497a",
+        "address": "0xbe99281e4e26b1d3D9a30A8D8A762d92Fd25f6A9",
         "id": "0x373e1531",
         "path": "contracts/views/LSVView.sol",
-        "version": "1.0.6",
+        "version": "1.0.7",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x8eb872563368b2a8ff6d9a4842f923067f08497a",
             "0xF3da52d6e45A967cB6835112B2A0BC34347952e6",
             "0x096fd98653681dcf07687d2c21beb67807e0c8e6",
             "0x2bf0643b4d7e3e63d0a859048af980fb3333b478",
