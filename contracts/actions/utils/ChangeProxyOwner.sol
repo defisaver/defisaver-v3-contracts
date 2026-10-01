@@ -9,6 +9,9 @@ import { DFSIds } from "../../utils/DFSIds.sol";
 
 /// @title Changes the owner of the DSProxy and updates DFSProxyRegistryV2
 contract ChangeProxyOwner is ActionBase {
+    /// @notice Error thrown when the new owner address is the zero address
+    error ZeroOwnerAddress();
+
     /// @param newOwner Address of the new owner
     struct Params {
         address newOwner;
@@ -31,6 +34,7 @@ contract ChangeProxyOwner is ActionBase {
         return bytes32(bytes20(inputData.newOwner));
     }
 
+    /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
 
@@ -42,10 +46,11 @@ contract ChangeProxyOwner is ActionBase {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    //////////////////////////// ACTION LOGIC ////////////////////////////
-
+    /*//////////////////////////////////////////////////////////////
+                            ACTION LOGIC
+    //////////////////////////////////////////////////////////////*/
     function _changeOwner(address _newOwner) internal {
-        require(_newOwner != address(0), "Owner is empty address");
+        if (_newOwner == address(0)) revert ZeroOwnerAddress();
 
         IDSAuth(address(this)).setOwner(_newOwner);
 
