@@ -3454,6 +3454,95 @@ const createAaveV3FLCollateralSwitchL2Strategy = () => {
     return aaveV3FLCollateralSwitchL2Strategy.encodeForDsProxyCall();
 };
 
+const createAaveV3GenericFLCollateralSwitchL2Strategy = () => {
+    const aaveV3GenericFLCollateralSwitchL2Strategy = new dfs.Strategy(
+        'AaveV3GenericFLCollateralSwitchL2Strategy',
+    );
+
+    aaveV3GenericFLCollateralSwitchL2Strategy.addSubSlot('&fromAsset', 'address');
+    aaveV3GenericFLCollateralSwitchL2Strategy.addSubSlot('&fromAssetId', 'uint16');
+    aaveV3GenericFLCollateralSwitchL2Strategy.addSubSlot('&toAsset', 'address');
+    aaveV3GenericFLCollateralSwitchL2Strategy.addSubSlot('&toAssetId', 'uint16');
+    aaveV3GenericFLCollateralSwitchL2Strategy.addSubSlot('&marketAddr', 'address');
+    aaveV3GenericFLCollateralSwitchL2Strategy.addSubSlot('&amountToSwitch', 'uint256');
+    aaveV3GenericFLCollateralSwitchL2Strategy.addSubSlot('&user', 'address');
+
+    const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
+    aaveV3GenericFLCollateralSwitchL2Strategy.addTrigger(trigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%fromAsset'], // Sent by backend.
+            ['%flAmount'], // Sent by backend.
+        ),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&fromAsset',
+            '&toAsset',
+            '%flAmount', // Sent by backend.
+            '%exchangeWrapper', // Sent by backend.
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '%gasStart', // Sent by backend.
+        '&toAsset',
+        '$2',
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
+        '%l1GasCostInEth', // send custom amount for Optimism
+    );
+    const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
+        '%false', // useDefaultMarket - Sent by backend.
+        '&marketAddr',
+        '$3',
+        '&proxy',
+        '&toAsset',
+        '&toAssetId',
+        '%true', // enableAsColl - Sent by backend.
+        '%true', // useOnBehalf - Sent by backend.
+        '&user',
+    );
+    /// @dev No effect for proxy positions where aTokens are already on the proxy.
+    /// Required for EOA positions so withdraw can burn pulled aTokens.
+    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+        '%aFromTokenAddr', // aToken for fromAsset - Sent by backend.
+        '&user',
+        '&amountToSwitch',
+    );
+    const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        '%false', // useDefaultMarket - Sent by backend.
+        '&marketAddr',
+        '$5',
+        '&proxy',
+        '&fromAssetId',
+    );
+    const returnFLAction = new dfs.actions.basic.SendTokenAction(
+        '&fromAsset',
+        '%flAddress', // Sent by backend.
+        '$1',
+    );
+    const returnAnyDust = new dfs.actions.basic.SendTokenAndUnwrapAction(
+        '&fromAsset',
+        '&eoa',
+        '%max(uint)', // Sent by backend.
+    );
+
+    aaveV3GenericFLCollateralSwitchL2Strategy.addActions([
+        flAction,
+        sellAction,
+        feeTakingAction,
+        supplyAction,
+        pullTokenAction,
+        withdrawAction,
+        returnFLAction,
+        returnAnyDust,
+    ]);
+
+    return aaveV3GenericFLCollateralSwitchL2Strategy.encodeForDsProxyCall();
+};
+
 const createAaveV3GenericFLDebtSwitchL2Strategy = () => {
     const aaveV3GenericFLDebtSwitchL2Strategy = new dfs.Strategy(
         'AaveV3GenericFLDebtSwitchL2Strategy',
@@ -3924,6 +4013,7 @@ module.exports = {
     createAaveV3GenericFLCloseToCollL2Strategy,
     createAaveV3GenericFLCloseToDebtL2Strategy,
     createAaveV3FLCollateralSwitchL2Strategy,
+    createAaveV3GenericFLCollateralSwitchL2Strategy,
     createAaveV3GenericFLDebtSwitchL2Strategy,
     createMorphoBlueFLCloseToCollL2Strategy,
     createMorphoBlueFLCloseToDebtL2Strategy,
