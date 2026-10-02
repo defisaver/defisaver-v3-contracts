@@ -6573,6 +6573,93 @@ const createAaveV3FLCollateralSwitchStrategy = () => {
     return aaveV3FLCollateralSwitchStrategy.encodeForDsProxyCall();
 };
 
+const createAaveV3GenericFLCollateralSwitchStrategy = () => {
+    const aaveV3GenericFLCollateralSwitchStrategy = new dfs.Strategy(
+        'AaveV3GenericFLCollateralSwitchStrategy',
+    );
+
+    aaveV3GenericFLCollateralSwitchStrategy.addSubSlot('&fromAsset', 'address');
+    aaveV3GenericFLCollateralSwitchStrategy.addSubSlot('&fromAssetId', 'uint16');
+    aaveV3GenericFLCollateralSwitchStrategy.addSubSlot('&toAsset', 'address');
+    aaveV3GenericFLCollateralSwitchStrategy.addSubSlot('&toAssetId', 'uint16');
+    aaveV3GenericFLCollateralSwitchStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3GenericFLCollateralSwitchStrategy.addSubSlot('&amountToSwitch', 'uint256');
+    aaveV3GenericFLCollateralSwitchStrategy.addSubSlot('&user', 'address');
+
+    const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
+    aaveV3GenericFLCollateralSwitchStrategy.addTrigger(trigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%fromAsset'], // Sent by backend.
+            ['%flAmount'], // Sent by backend.
+        ),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&fromAsset',
+            '&toAsset',
+            '%flAmount', // Sent by backend.
+            '%exchangeWrapper', // Sent by backend.
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // Sent by backend.
+        '&toAsset',
+        '$2',
+    );
+    const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
+        '%false', // useDefaultMarket - Sent by backend.
+        '&marketAddr',
+        '$3',
+        '&proxy',
+        '&toAsset',
+        '&toAssetId',
+        '%true', // enableAsColl - Sent by backend.
+        '%true', // useOnBehalf - Sent by backend.
+        '&user',
+    );
+    /// @dev No effect for proxy positions where aTokens are already on the proxy.
+    /// Required for EOA positions so withdraw can burn pulled aTokens.
+    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+        '%aFromTokenAddr', // aToken for fromAsset - Sent by backend.
+        '&user',
+        '&amountToSwitch',
+    );
+    const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        '%false', // useDefaultMarket - Sent by backend.
+        '&marketAddr',
+        '$5',
+        '&proxy',
+        '&fromAssetId',
+    );
+    const returnFLAction = new dfs.actions.basic.SendTokenAction(
+        '&fromAsset',
+        '%flAddress', // Sent by backend.
+        '$1',
+    );
+    const returnAnyDust = new dfs.actions.basic.SendTokenAndUnwrapAction(
+        '&fromAsset',
+        '&eoa',
+        '%max(uint)', // Sent by backend.
+    );
+
+    aaveV3GenericFLCollateralSwitchStrategy.addActions([
+        flAction,
+        sellAction,
+        feeTakingAction,
+        supplyAction,
+        pullTokenAction,
+        withdrawAction,
+        returnFLAction,
+        returnAnyDust,
+    ]);
+
+    return aaveV3GenericFLCollateralSwitchStrategy.encodeForDsProxyCall();
+};
+
 const createAaveV3GenericFLDebtSwitchStrategy = () => {
     const aaveV3GenericFLDebtSwitchStrategy = new dfs.Strategy('AaveV3GenericFLDebtSwitchStrategy');
 
@@ -9043,6 +9130,7 @@ module.exports = {
     createAaveV3GenericFLCloseToCollStrategy,
     createAaveV3GenericFLCloseToDebtStrategy,
     createAaveV3FLCollateralSwitchStrategy,
+    createAaveV3GenericFLCollateralSwitchStrategy,
     createAaveV3GenericFLDebtSwitchStrategy,
     createSparkGenericFLCloseToCollStrategy,
     createSparkGenericFLCloseToDebtStrategy,

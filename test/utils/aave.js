@@ -29,6 +29,7 @@ const {
     createAaveV3GenericFLCloseToDebtStrategy,
     createAaveV3GenericFLCloseToCollStrategy,
     createAaveV3FLCollateralSwitchStrategy,
+    createAaveV3GenericFLCollateralSwitchStrategy,
     createAaveV3GenericFLDebtSwitchStrategy,
 } = require('../../strategies-spec/mainnet');
 
@@ -44,6 +45,7 @@ const {
     createAaveV3GenericFLCloseToDebtL2Strategy,
     createAaveV3GenericFLCloseToCollL2Strategy,
     createAaveV3FLCollateralSwitchL2Strategy,
+    createAaveV3GenericFLCollateralSwitchL2Strategy,
     createAaveV3GenericFLDebtSwitchL2Strategy,
 } = require('../../strategies-spec/l2');
 
@@ -557,6 +559,140 @@ const AAVE_V3_COLL_SWITCH_TEST_PAIRS = [
         amountToSwitchInUSD: 40_000,
         priceState: 1, // UNDER
         price: 1, // Trigger when 1 WETH < 1 WBTC
+    },
+];
+
+// For generic collateral switch we open a position with collateral in `fromAsset` and debt in `toAsset`,
+// then switch the collateral from `fromAsset` to `toAsset`.
+// Every direction (WETH<->USDC, WETH<->WBTC, USDC<->WBTC) is covered with both trigger states
+// OVER (0) and UNDER (1), and with both a partial `amountToSwitch` and a full switch (MaxUint256).
+// priceState: 0 = OVER (fires when current price > `price`), 1 = UNDER (fires when current price < `price`).
+const AAVE_V3_GENERIC_COLL_SWITCH_TEST_PAIRS = [
+    // WETH -> USDC
+    {
+        fromAsset: 'WETH',
+        toAsset: 'USDC',
+        marketAddr: addrs[network].AAVE_MARKET,
+        collAmountInUSD: 40_000,
+        debtAmountInUSD: 15_000,
+        amountToSwitchInUSD: 30_000, // partial
+        priceState: 1, // UNDER
+        price: 100_000, // Trigger when 1 WETH < 100_000 USDC
+    },
+    {
+        fromAsset: 'WETH',
+        toAsset: 'USDC',
+        marketAddr: addrs[network].AAVE_MARKET,
+        collAmountInUSD: 50_000,
+        debtAmountInUSD: 25_000,
+        amountToSwitchInUSD: hre.ethers.constants.MaxUint256, // full
+        priceState: 0, // OVER
+        price: 1, // Trigger when 1 WETH > 1 USDC
+    },
+    // USDC -> WETH
+    {
+        fromAsset: 'USDC',
+        toAsset: 'WETH',
+        marketAddr: addrs[network].AAVE_MARKET,
+        collAmountInUSD: 50_000,
+        debtAmountInUSD: 25_000,
+        amountToSwitchInUSD: 30_000, // partial
+        priceState: 1, // UNDER
+        price: 1, // Trigger when 1 USDC < 1 WETH
+    },
+    {
+        fromAsset: 'USDC',
+        toAsset: 'WETH',
+        marketAddr: addrs[network].AAVE_MARKET,
+        collAmountInUSD: 50_000,
+        debtAmountInUSD: 25_000,
+        amountToSwitchInUSD: hre.ethers.constants.MaxUint256, // full
+        priceState: 0, // OVER
+        price: 0.00001, // Trigger when 1 USDC > 0.00001 WETH <=> 1 WETH < 100_000 USDC
+    },
+    // WETH -> WBTC
+    {
+        fromAsset: 'WETH',
+        toAsset: 'WBTC',
+        marketAddr: addrs[network].AAVE_MARKET,
+        collAmountInUSD: 50_000,
+        debtAmountInUSD: 25_000,
+        amountToSwitchInUSD: 40_000, // partial
+        priceState: 1, // UNDER
+        price: 1, // Trigger when 1 WETH < 1 WBTC
+    },
+    {
+        fromAsset: 'WETH',
+        toAsset: 'WBTC',
+        marketAddr: addrs[network].AAVE_MARKET,
+        collAmountInUSD: 50_000,
+        debtAmountInUSD: 25_000,
+        amountToSwitchInUSD: hre.ethers.constants.MaxUint256, // full
+        priceState: 0, // OVER
+        price: 0.0001, // Trigger when 1 WETH > 0.0001 WBTC
+    },
+    // WBTC -> WETH
+    {
+        fromAsset: 'WBTC',
+        toAsset: 'WETH',
+        marketAddr: addrs[network].AAVE_MARKET,
+        collAmountInUSD: 50_000,
+        debtAmountInUSD: 25_000,
+        amountToSwitchInUSD: 30_000, // partial
+        priceState: 0, // OVER
+        price: 0.001, // Trigger when 1 WBTC > 0.001 WETH
+    },
+    {
+        fromAsset: 'WBTC',
+        toAsset: 'WETH',
+        marketAddr: addrs[network].AAVE_MARKET,
+        collAmountInUSD: 50_000,
+        debtAmountInUSD: 25_000,
+        amountToSwitchInUSD: hre.ethers.constants.MaxUint256, // full
+        priceState: 1, // UNDER
+        price: 1_000, // Trigger when 1 WBTC < 1_000 WETH
+    },
+    // USDC -> WBTC
+    {
+        fromAsset: 'USDC',
+        toAsset: 'WBTC',
+        marketAddr: addrs[network].AAVE_MARKET,
+        collAmountInUSD: 50_000,
+        debtAmountInUSD: 25_000,
+        amountToSwitchInUSD: 30_000, // partial
+        priceState: 0, // OVER
+        price: 0.000001, // Trigger when 1 USDC > 0.000001 WBTC
+    },
+    {
+        fromAsset: 'USDC',
+        toAsset: 'WBTC',
+        marketAddr: addrs[network].AAVE_MARKET,
+        collAmountInUSD: 50_000,
+        debtAmountInUSD: 25_000,
+        amountToSwitchInUSD: hre.ethers.constants.MaxUint256, // full
+        priceState: 1, // UNDER
+        price: 1, // Trigger when 1 USDC < 1 WBTC
+    },
+    // WBTC -> USDC
+    {
+        fromAsset: 'WBTC',
+        toAsset: 'USDC',
+        marketAddr: addrs[network].AAVE_MARKET,
+        collAmountInUSD: 50_000,
+        debtAmountInUSD: 25_000,
+        amountToSwitchInUSD: 30_000, // partial
+        priceState: 0, // OVER
+        price: 1, // Trigger when 1 WBTC > 1 USDC
+    },
+    {
+        fromAsset: 'WBTC',
+        toAsset: 'USDC',
+        marketAddr: addrs[network].AAVE_MARKET,
+        collAmountInUSD: 50_000,
+        debtAmountInUSD: 25_000,
+        amountToSwitchInUSD: hre.ethers.constants.MaxUint256, // full
+        priceState: 1, // UNDER
+        price: 10_000_000, // Trigger when 1 WBTC < 10_000_000 USDC
     },
 ];
 
@@ -1279,6 +1415,21 @@ const deployAaveV3FLCollateralSwitchStrategy = async () => {
     return flCollateralSwitchStrategyId;
 };
 
+const deployAaveV3GenericFLCollateralSwitchStrategy = async () => {
+    const isL2 = network !== 'mainnet';
+    const isFork = isNetworkFork();
+    await openStrategyAndBundleStorage(isFork);
+    const flCollateralSwitchStrategy = isL2
+        ? createAaveV3GenericFLCollateralSwitchL2Strategy()
+        : createAaveV3GenericFLCollateralSwitchStrategy();
+    const continuous = false;
+    const flCollateralSwitchStrategyId = await createStrategy(
+        ...flCollateralSwitchStrategy,
+        continuous,
+    );
+    return flCollateralSwitchStrategyId;
+};
+
 const deployAaveV3GenericFLDebtSwitchStrategy = async () => {
     const isL2 = network !== 'mainnet';
     const isFork = isNetworkFork();
@@ -1313,6 +1464,7 @@ module.exports = {
     setupAaveV3EOAPermissions,
     getAaveV3ReserveData,
     deployAaveV3FLCollateralSwitchStrategy,
+    deployAaveV3GenericFLCollateralSwitchStrategy,
     deployAaveV3GenericFLDebtSwitchStrategy,
     AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST,
     AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY,
@@ -1325,5 +1477,6 @@ module.exports = {
     WSETH_ASSET_ID_IN_AAVE_V3_MARKET,
     A_WETH_ADDRESS_V3,
     AAVE_V3_COLL_SWITCH_TEST_PAIRS,
+    AAVE_V3_GENERIC_COLL_SWITCH_TEST_PAIRS,
     AAVE_V3_DEBT_SWITCH_TEST_PAIRS,
 };
