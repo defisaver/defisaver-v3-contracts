@@ -290,7 +290,8 @@ contract RecipeExecutor is
 
             // don't disable sub and start semi-continuous execution
             if (!strategy.continuous) {
-                ISemiContinuousTracker(semiContinuousTracker).startExecution(_subId);
+                ISemiContinuousTracker(semiContinuousTracker)
+                    .startExecution(_subId, _sub.isBundle ? _strategyIndex : 0);
             }
         } else {
             // if this is a one time strategy
