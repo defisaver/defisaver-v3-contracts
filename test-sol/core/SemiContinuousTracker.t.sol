@@ -21,6 +21,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
                                     VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
     uint256 internal constant SUB_ID = 3113;
+    uint256 internal constant STRATEGY_INDEX = 1;
 
     address subOwnerWallet;
     address adminVaultOwner;
@@ -87,10 +88,50 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
         emit ExecutionStarted(SUB_ID, subOwnerWallet);
 
         prank(subOwnerWallet);
-        cut.startExecution(SUB_ID);
+        cut.startExecution(SUB_ID, STRATEGY_INDEX);
 
         assertTrue(cut.isInExecution(SUB_ID));
         assertEq(cut.executionWalletOf(SUB_ID), subOwnerWallet);
+        _assertExecution(subOwnerWallet, STRATEGY_INDEX);
+    }
+
+    function test_should_return_empty_execution_for_unstarted_sub() public view {
+        _assertExecution(address(0), 0);
+    }
+
+    function test_should_start_execution_with_strategy_index_zero() public {
+        _approveStart(SUB_ID);
+        prank(subOwnerWallet);
+        cut.startExecution(SUB_ID, 0);
+
+        assertTrue(cut.isInExecution(SUB_ID));
+        _assertExecution(subOwnerWallet, 0);
+    }
+
+    function testFuzz_should_preserve_full_strategy_index(uint256 strategyIndex) public {
+        _approveStart(SUB_ID);
+        prank(subOwnerWallet);
+        cut.startExecution(SUB_ID, strategyIndex);
+
+        _assertExecution(subOwnerWallet, strategyIndex);
+    }
+
+    function test_should_preserve_initial_index_on_repeated_start() public {
+        _startExecution();
+
+        prank(subOwnerWallet);
+        cut.startExecution(SUB_ID, STRATEGY_INDEX + 1);
+
+        _assertExecution(subOwnerWallet, STRATEGY_INDEX);
+    }
+
+    function test_should_preserve_initial_index_on_repeated_start_by_non_owner() public {
+        _startExecution();
+
+        prank(bob);
+        cut.startExecution(SUB_ID, STRATEGY_INDEX + 1);
+
+        _assertExecution(subOwnerWallet, STRATEGY_INDEX);
     }
 
     /// @dev The approval gate runs before the ownership check, so an unapproved sub owner
@@ -98,7 +139,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
     function test_should_revert_when_starting_execution_without_approval() public {
         vm.expectRevert(abi.encodeWithSelector(NotApproved.selector, SUB_ID, subOwnerWallet));
         prank(subOwnerWallet);
-        cut.startExecution(SUB_ID);
+        cut.startExecution(SUB_ID, STRATEGY_INDEX);
 
         assertFalse(cut.isInExecution(SUB_ID));
     }
@@ -106,7 +147,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
     function test_should_revert_when_starting_execution_without_approval_for_non_owner() public {
         vm.expectRevert(abi.encodeWithSelector(NotApproved.selector, SUB_ID, bob));
         prank(bob);
-        cut.startExecution(SUB_ID);
+        cut.startExecution(SUB_ID, STRATEGY_INDEX);
 
         assertFalse(cut.isInExecution(SUB_ID));
     }
@@ -116,7 +157,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
     {
         vm.expectRevert(abi.encodeWithSelector(NotApproved.selector, SUB_ID, adminVaultOwner));
         prank(adminVaultOwner);
-        cut.startExecution(SUB_ID);
+        cut.startExecution(SUB_ID, STRATEGY_INDEX);
 
         assertFalse(cut.isInExecution(SUB_ID));
     }
@@ -128,7 +169,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
 
         vm.expectRevert(abi.encodeWithSelector(NotApproved.selector, otherSubId, subOwnerWallet));
         prank(subOwnerWallet);
-        cut.startExecution(otherSubId);
+        cut.startExecution(otherSubId, STRATEGY_INDEX);
 
         assertFalse(cut.isInExecution(otherSubId));
     }
@@ -138,7 +179,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
 
         vm.recordLogs();
         prank(subOwnerWallet);
-        cut.startExecution(SUB_ID);
+        cut.startExecution(SUB_ID, STRATEGY_INDEX);
 
         Vm.Log[] memory logs = vm.getRecordedLogs();
         assertEq(logs.length, 0);
@@ -150,7 +191,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
 
         vm.recordLogs();
         prank(bob);
-        cut.startExecution(SUB_ID);
+        cut.startExecution(SUB_ID, STRATEGY_INDEX);
 
         Vm.Log[] memory logs = vm.getRecordedLogs();
         assertEq(logs.length, 0);
@@ -162,7 +203,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
 
         vm.expectRevert(abi.encodeWithSelector(NotSubOwner.selector, SUB_ID, adminVaultOwner));
         prank(adminVaultOwner);
-        cut.startExecution(SUB_ID);
+        cut.startExecution(SUB_ID, STRATEGY_INDEX);
 
         assertFalse(cut.isInExecution(SUB_ID));
     }
@@ -172,7 +213,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
 
         vm.expectRevert(abi.encodeWithSelector(NotSubOwner.selector, SUB_ID, bob));
         prank(bob);
-        cut.startExecution(SUB_ID);
+        cut.startExecution(SUB_ID, STRATEGY_INDEX);
 
         assertFalse(cut.isInExecution(SUB_ID));
     }
@@ -191,6 +232,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
 
         assertFalse(cut.isInExecution(SUB_ID));
         assertEq(cut.executionWalletOf(SUB_ID), address(0));
+        _assertExecution(address(0), 0);
     }
 
     function test_should_return_early_when_finishing_execution_that_is_not_started() public {
@@ -225,6 +267,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
 
         assertFalse(cut.isInExecution(SUB_ID));
         assertEq(cut.executionWalletOf(SUB_ID), address(0));
+        _assertExecution(address(0), 0);
     }
 
     function test_should_revert_when_admin_vault_admin_finishes_execution() public {
@@ -292,6 +335,32 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
         assertEq(cut.executionWalletOf(SUB_ID), subOwnerWallet);
     }
 
+    function test_should_record_new_index_after_finish() public {
+        _startExecution();
+        prank(subOwnerWallet);
+        cut.finishExecution(SUB_ID);
+        _assertExecution(address(0), 0);
+
+        _approveStart(SUB_ID);
+        prank(subOwnerWallet);
+        cut.startExecution(SUB_ID, STRATEGY_INDEX + 1);
+
+        _assertExecution(subOwnerWallet, STRATEGY_INDEX + 1);
+    }
+
+    function test_should_record_new_index_after_admin_finish() public {
+        _startExecution();
+        prank(adminVaultOwner);
+        cut.finishExecution(SUB_ID);
+        _assertExecution(address(0), 0);
+
+        _approveStart(SUB_ID);
+        prank(subOwnerWallet);
+        cut.startExecution(SUB_ID, 0);
+
+        _assertExecution(subOwnerWallet, 0);
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
@@ -306,6 +375,12 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
         _approveStart(SUB_ID);
 
         prank(subOwnerWallet);
-        cut.startExecution(SUB_ID);
+        cut.startExecution(SUB_ID, STRATEGY_INDEX);
+    }
+
+    function _assertExecution(address wallet, uint256 strategyIndex) internal view {
+        (address actualWallet, uint256 actualIndex) = cut.getExecution(SUB_ID);
+        assertEq(actualWallet, wallet);
+        assertEq(actualIndex, strategyIndex);
     }
 }

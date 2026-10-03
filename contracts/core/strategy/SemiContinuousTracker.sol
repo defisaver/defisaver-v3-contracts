@@ -29,7 +29,12 @@ contract SemiContinuousTracker is CoreHelper, AdminAuth {
 
     bytes32 private constant START_APPROVAL_SLOT = keccak256("START_APPROVAL_SLOT");
 
-    mapping(uint256 => address) public executionWalletOf;
+    struct ExecutionState {
+        address wallet;
+        uint256 strategyIndex;
+    }
+
+    mapping(uint256 => ExecutionState) private executions;
 
     /// @notice checks if the caller is StrategyExecutor and approves starting semi-continuous execution for a given subId
     function approveStartOfExecution(uint256 _subId) external {
@@ -45,8 +50,8 @@ contract SemiContinuousTracker is CoreHelper, AdminAuth {
         }
     }
 
-    /// @notice only sub owner can start execution
-    function startExecution(uint256 _subId) external {
+    /// @notice Only the sub owner can start execution; the initial strategy index is preserved until finish.
+    function startExecution(uint256 _subId, uint256 _strategyIndex) external {
         if (isInExecution(_subId)) return;
 
         if (!isApprovedToStartExecution(_subId)) {
@@ -58,7 +63,7 @@ contract SemiContinuousTracker is CoreHelper, AdminAuth {
             revert NotSubOwner(_subId, msg.sender);
         }
 
-        executionWalletOf[_subId] = msg.sender;
+        executions[_subId] = ExecutionState({ wallet: msg.sender, strategyIndex: _strategyIndex });
         emit ExecutionStarted(_subId, msg.sender);
     }
 
@@ -71,12 +76,28 @@ contract SemiContinuousTracker is CoreHelper, AdminAuth {
             revert NotAuthorized(_subId, msg.sender);
         }
 
-        delete executionWalletOf[_subId];
+        delete executions[_subId];
         emit ExecutionFinished(_subId, address(subData.walletAddr), msg.sender);
     }
 
+    /// @notice Returns the active wallet and the strategy index selected by the first partial execution.
+    /// @dev A zero wallet means inactive; strategy index zero is valid for an active execution.
+    ///      RecipeExecutor records zero for standalone strategies.
+    function getExecution(uint256 _subId)
+        external
+        view
+        returns (address wallet, uint256 strategyIndex)
+    {
+        ExecutionState memory execution = executions[_subId];
+        return (execution.wallet, execution.strategyIndex);
+    }
+
+    function executionWalletOf(uint256 _subId) public view returns (address) {
+        return executions[_subId].wallet;
+    }
+
     function isInExecution(uint256 _subId) public view returns (bool) {
-        return executionWalletOf[_subId] != address(0);
+        return executionWalletOf(_subId) != address(0);
     }
 
     function isApprovedToStartExecution(uint256 _subId) internal view returns (bool approved) {

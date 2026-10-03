@@ -229,6 +229,7 @@ contract TestUpdateSub is SubActionsBase {
 
         assertFalse(tracker.isInExecution(subId), "update must clear the tracker");
         assertEq(tracker.executionWalletOf(subId), address(0));
+        _assertExecutionCleared(subId);
     }
 
     function test_should_clear_semi_continuous_execution_on_update_direct() public {
@@ -246,6 +247,7 @@ contract TestUpdateSub is SubActionsBase {
 
         assertFalse(tracker.isInExecution(subId), "update must clear the tracker");
         assertEq(tracker.executionWalletOf(subId), address(0));
+        _assertExecutionCleared(subId);
     }
 
     /// @dev Updating again in the same state hits the finishExecution early-return, the first

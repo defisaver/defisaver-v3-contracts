@@ -64,7 +64,7 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
     /// @dev Mirrors RecipeExecutor.SEMI_CONTINUOUS_FLAG.
     bytes32 internal constant SEMI_CONTINUOUS_FLAG = keccak256("SEMI_CONTINUOUS_FLAG");
 
-    /// @dev executionWalletOf is the only storage slot of SemiContinuousTracker.
+    /// @dev The executions mapping is at slot zero; its first field is the wallet.
     uint256 internal constant EXECUTION_WALLET_SLOT = 0;
 
     uint256 internal constant PULL_AMOUNT = 1 ether;
@@ -191,6 +191,24 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         assertTrue(subStorage.getSub(subId).isEnabled, "sub must stay enabled");
     }
 
+    function test_should_record_zero_and_clear_execution_for_standalone_strategy() public {
+        (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(false, 1, 1));
+        _fund(3);
+
+        // Standalone resolution ignores the supplied bundle index; tracker metadata must too.
+        _execute(subId, type(uint256).max, _withFlag(_actions(1)), sub);
+        _assertTrackedExecution(subId, walletAddr, 0);
+        assertTrue(subStorage.getSub(subId).isEnabled);
+
+        trigger.setTriggered(false);
+        _execute(subId, 1, _withFlag(_actions(1)), sub);
+        _assertTrackedExecution(subId, walletAddr, 0);
+
+        _execute(subId, 0, _actions(1), sub);
+        _assertTrackedExecution(subId, address(0), 0);
+        assertFalse(subStorage.getSub(subId).isEnabled);
+    }
+
     /// @dev The extra flag element must not shift param mapping or return values: the recipe's
     ///      second action still consumes the first action's return value as $1. The FL test below
     ///      covers the same ground on a harder path, but is skipped on chains without Balancer.
@@ -245,7 +263,7 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
 
         // The tracker is not called
         vm.expectCall(
-            address(tracker), abi.encodeCall(SemiContinuousTracker.startExecution, (subId)), 0
+            address(tracker), abi.encodeCall(SemiContinuousTracker.startExecution, (subId, 0)), 0
         );
         _execute(subId, 0, _withFlag(_actions(1)), sub);
 
@@ -368,6 +386,55 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         assertTrue(subStorage.getSub(subId).isEnabled);
     }
 
+    function test_should_record_and_clear_initial_bundle_index() public {
+        (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribeToBundle(false);
+        _fund(6);
+
+        _execute(subId, 1, _withFlag(_actions(2)), sub);
+        _assertTrackedExecution(subId, walletAddr, 1);
+
+        _execute(subId, 1, _withFlag(_actions(2)), sub);
+        _assertTrackedExecution(subId, walletAddr, 1);
+
+        _execute(subId, 1, _actions(2), sub);
+        _assertTrackedExecution(subId, address(0), 0);
+        assertFalse(subStorage.getSub(subId).isEnabled);
+    }
+
+    function test_should_not_replace_initial_bundle_index_on_later_partial() public {
+        (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribeToBundle(false);
+        _fund(3);
+
+        _execute(subId, 1, _withFlag(_actions(2)), sub);
+        _execute(subId, 0, _withFlag(_actions(1)), sub);
+
+        _assertTrackedExecution(subId, walletAddr, 1);
+    }
+
+    function test_should_revert_initial_index_write_when_actions_fail() public {
+        (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribeToBundle(false);
+
+        // No token approval: the tracker start runs, then PullToken reverts.
+        vm.expectRevert();
+        _execute(subId, 1, _withFlag(_actions(2)), sub);
+
+        _assertTrackedExecution(subId, address(0), 0);
+        assertTrue(subStorage.getSub(subId).isEnabled);
+    }
+
+    function test_should_restore_initial_index_when_final_actions_fail() public {
+        (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribeToBundle(false);
+        _fund(2);
+        _execute(subId, 1, _withFlag(_actions(2)), sub);
+
+        // The successful partial consumed the allowance; the final actions fail.
+        vm.expectRevert();
+        _execute(subId, 1, _actions(2), sub);
+
+        _assertTrackedExecution(subId, walletAddr, 1);
+        assertTrue(subStorage.getSub(subId).isEnabled);
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
@@ -401,7 +468,7 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         cut.executeRecipeFromStrategy(subId, actionsCalldata, _triggerCallData(1), 0, sub);
     }
 
-    /// @dev Writes executionWalletOf[_subId] directly. Only used for the defensive branch above,
+    /// @dev Writes the wallet field of executions[_subId] directly. Only used for the defensive branch above,
     ///      which no legitimate sequence of calls can produce.
     function _forceExecutionWallet(uint256 _subId, address _walletAddr) internal {
         vm.store(
@@ -473,11 +540,27 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         internal
         returns (uint256 subId, StrategyModel.StrategySub memory sub)
     {
+        return _subscribeToBundle(true);
+    }
+
+    function _subscribeToBundle(bool _continuous)
+        internal
+        returns (uint256 subId, StrategyModel.StrategySub memory sub)
+    {
         uint64[] memory strategyIds = new uint64[](2);
-        strategyIds[0] = uint64(_strategy(true, 1, 1));
-        strategyIds[1] = uint64(_strategy(true, 2, 1));
+        strategyIds[0] = uint64(_strategy(_continuous, 1, 1));
+        strategyIds[1] = uint64(_strategy(_continuous, 2, 1));
 
         return _subscribe(new BundleBuilder().init(strategyIds), true, 1);
+    }
+
+    function _assertTrackedExecution(uint256 _subId, address _wallet, uint256 _strategyIndex)
+        internal
+        view
+    {
+        (address wallet, uint256 strategyIndex) = tracker.getExecution(_subId);
+        assertEq(wallet, _wallet);
+        assertEq(strategyIndex, _strategyIndex);
     }
 
     function _subscribe(uint256 _strategyId)
