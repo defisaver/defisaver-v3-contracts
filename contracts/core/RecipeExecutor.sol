@@ -238,20 +238,15 @@ contract RecipeExecutor is
         uint256 _strategyIndex,
         StrategySub memory _sub
     ) external payable override {
-        Strategy memory strategy;
+        uint256 strategyId = _sub.strategyOrBundleId;
 
-        {
-            // to handle stack too deep
-            uint256 strategyId = _sub.strategyOrBundleId;
-
-            // fetch strategy if inside of bundle
-            if (_sub.isBundle) {
-                strategyId =
-                    IBundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(strategyId, _strategyIndex);
-            }
-
-            strategy = IStrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
+        // fetch strategy if inside of bundle
+        if (_sub.isBundle) {
+            strategyId =
+                IBundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(strategyId, _strategyIndex);
         }
+
+        Strategy memory strategy = IStrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
 
         // skip triggers check if the sub is already in semi-continuous execution
         // deliberately skips updating sub data too
@@ -290,8 +285,7 @@ contract RecipeExecutor is
 
             // don't disable sub and start semi-continuous execution
             if (!strategy.continuous) {
-                ISemiContinuousTracker(semiContinuousTracker)
-                    .startExecution(_subId, _sub.isBundle ? _strategyIndex : 0);
+                ISemiContinuousTracker(semiContinuousTracker).startExecution(_subId, strategyId);
             }
         } else {
             // if this is a one time strategy

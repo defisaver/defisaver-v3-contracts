@@ -13,6 +13,13 @@ import { PullToken } from "../../contracts/actions/utils/PullToken.sol";
 import { SendToken } from "../../contracts/actions/utils/SendToken.sol";
 import { FLAction } from "../../contracts/actions/flashloan/FLAction.sol";
 import { ITrigger } from "../../contracts/interfaces/core/ITrigger.sol";
+import { IBundleStorage } from "../../contracts/interfaces/core/IBundleStorage.sol";
+import { IStrategyStorage } from "../../contracts/interfaces/core/IStrategyStorage.sol";
+import { ISubStorage } from "../../contracts/interfaces/core/ISubStorage.sol";
+import { IDFSRegistry } from "../../contracts/interfaces/core/IDFSRegistry.sol";
+import { ActionBase } from "../../contracts/actions/ActionBase.sol";
+import { CoreHelper } from "../../contracts/core/helpers/CoreHelper.sol";
+import { DFSIds } from "../../contracts/utils/DFSIds.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
 import { ActionsUtils } from "../utils/ActionsUtils.sol";
 import { RegistryUtils } from "../utils/RegistryUtils.sol";
@@ -21,6 +28,7 @@ import { StrategyBuilder } from "../utils/StrategyBuilder.sol";
 import { BundleBuilder } from "../utils/BundleBuilder.sol";
 import { Addresses } from "../utils/helpers/MainnetAddresses.sol";
 import { Vm } from "forge-std/Vm.sol";
+import { Test } from "forge-std/Test.sol";
 
 /// @notice Trigger with settable results, so the trigger-skip paths can be driven deterministically.
 contract MockTrigger is ITrigger {
@@ -49,6 +57,214 @@ contract MockTrigger is ITrigger {
     function setChangeable(bool _changeable, bytes memory _nextSubData) external {
         changeable = _changeable;
         nextSubData = _nextSubData;
+    }
+}
+
+/// @notice Minimal action for testing tracker writes and transaction rollback locally.
+contract StrategyIdTestAction is ActionBase {
+    function executeAction(
+        bytes memory _callData,
+        bytes32[] memory,
+        uint8[] memory,
+        bytes32[] memory
+    ) public payable override returns (bytes32) {
+        require(!abi.decode(_callData, (bool)), "ACTION_FAILED");
+        return bytes32(0);
+    }
+
+    function executeActionDirect(bytes memory) public payable override { }
+
+    function actionType() public pure override returns (uint8) {
+        return uint8(ActionType.STANDARD_ACTION);
+    }
+}
+
+/// @notice Tests resolved strategy IDs without depending on deployed wallets or RPC state.
+/// forge-config: default.isolate = false
+contract TestCore_RecipeExecutorStrategyIdUnit is Test, CoreHelper {
+    uint256 internal constant SUB_ID = 17;
+    uint64 internal constant BUNDLE_ID = 777;
+    uint64 internal constant FIRST_STRATEGY_ID = 41;
+    uint64 internal constant SECOND_STRATEGY_ID = 79;
+    uint64 internal constant STANDALONE_STRATEGY_ID = 149;
+    bytes4 internal constant ACTION_ID = bytes4(keccak256("StrategyIdTestAction"));
+    bytes4 internal constant TRIGGER_ID = bytes4(keccak256("StrategyIdTestTrigger"));
+    bytes32 internal constant SEMI_CONTINUOUS_FLAG = keccak256("SEMI_CONTINUOUS_FLAG");
+
+    RecipeExecutor cut;
+    SemiContinuousTracker tracker;
+    MockTrigger trigger;
+
+    function setUp() public {
+        cut = new RecipeExecutor();
+        tracker = new SemiContinuousTracker();
+        trigger = new MockTrigger();
+
+        vm.etch(REGISTRY_ADDR, hex"00");
+        vm.etch(SUB_STORAGE_ADDR, hex"00");
+        vm.etch(STRATEGY_STORAGE_ADDR, hex"00");
+        vm.etch(BUNDLE_STORAGE_ADDR, hex"00");
+        vm.etch(DEFISAVER_LOGGER, hex"00");
+
+        _mockRegistry(DFSIds.SEMI_CONTINUOUS_TRACKER, address(tracker));
+        _mockRegistry(DFSIds.STRATEGY_EXECUTOR, address(this));
+        _mockRegistry(ACTION_ID, address(new StrategyIdTestAction()));
+        _mockRegistry(TRIGGER_ID, address(trigger));
+
+        vm.mockCall(
+            SUB_STORAGE_ADDR,
+            abi.encodeCall(ISubStorage.getSub, (SUB_ID)),
+            abi.encode(
+                StrategyModel.StoredSubData({
+                    walletAddr: bytes20(address(cut)), isEnabled: true, strategySubHash: bytes32(0)
+                })
+            )
+        );
+        vm.mockCall(
+            SUB_STORAGE_ADDR, abi.encodeCall(ISubStorage.deactivateSub, (SUB_ID)), bytes("")
+        );
+        vm.mockCall(
+            BUNDLE_STORAGE_ADDR,
+            abi.encodeCall(IBundleStorage.getStrategyId, (BUNDLE_ID, 0)),
+            abi.encode(uint256(FIRST_STRATEGY_ID))
+        );
+        vm.mockCall(
+            BUNDLE_STORAGE_ADDR,
+            abi.encodeCall(IBundleStorage.getStrategyId, (BUNDLE_ID, 1)),
+            abi.encode(uint256(SECOND_STRATEGY_ID))
+        );
+
+        _mockStrategy(0, false);
+        _mockStrategy(FIRST_STRATEGY_ID, false);
+        _mockStrategy(SECOND_STRATEGY_ID, false);
+        _mockStrategy(STANDALONE_STRATEGY_ID, false);
+    }
+
+    function test_should_record_resolved_bundle_strategy_id_and_clear_on_finish() public {
+        StrategyModel.StrategySub memory sub = _sub(BUNDLE_ID, true);
+        _execute(sub, 1, true, false);
+        _assertExecution(address(cut), SECOND_STRATEGY_ID);
+
+        _execute(sub, 1, true, false);
+        _assertExecution(address(cut), SECOND_STRATEGY_ID);
+
+        _execute(sub, 1, false, false);
+        _assertExecution(address(0), 0);
+    }
+
+    function test_should_record_standalone_id_regardless_of_supplied_index() public {
+        StrategyModel.StrategySub memory sub = _sub(STANDALONE_STRATEGY_ID, false);
+        _execute(sub, type(uint256).max, true, false);
+        _assertExecution(address(cut), STANDALONE_STRATEGY_ID);
+
+        trigger.setTriggered(false);
+        _execute(sub, 1, true, false);
+        _assertExecution(address(cut), STANDALONE_STRATEGY_ID);
+
+        _execute(sub, 0, false, false);
+        _assertExecution(address(0), 0);
+    }
+
+    function test_should_allow_variant_switch_without_replacing_initial_id() public {
+        StrategyModel.StrategySub memory sub = _sub(BUNDLE_ID, true);
+        _execute(sub, 1, true, false);
+
+        trigger.setTriggered(false);
+        _execute(sub, 0, true, false);
+        _assertExecution(address(cut), SECOND_STRATEGY_ID);
+
+        _execute(sub, 0, false, false);
+        _assertExecution(address(0), 0);
+    }
+
+    function test_should_roll_back_initial_id_when_partial_action_reverts() public {
+        _execute(_sub(BUNDLE_ID, true), 1, true, true);
+        _assertExecution(address(0), 0);
+    }
+
+    function test_should_restore_initial_id_when_final_action_reverts() public {
+        StrategyModel.StrategySub memory sub = _sub(BUNDLE_ID, true);
+        _execute(sub, 1, true, false);
+
+        _execute(sub, 0, false, true);
+        _assertExecution(address(cut), SECOND_STRATEGY_ID);
+    }
+
+    function test_should_treat_strategy_zero_as_an_active_execution() public {
+        _execute(_sub(0, false), 10, true, false);
+        _assertExecution(address(cut), 0);
+        assertTrue(tracker.isInExecution(SUB_ID));
+    }
+
+    function test_should_not_track_continuous_strategy() public {
+        _mockStrategy(STANDALONE_STRATEGY_ID, true);
+        _execute(_sub(STANDALONE_STRATEGY_ID, false), 0, true, false);
+        _assertExecution(address(0), 0);
+    }
+
+    function _execute(
+        StrategyModel.StrategySub memory _subscription,
+        uint256 _index,
+        bool _partial,
+        bool _failAction
+    ) internal {
+        tracker.approveStartOfExecution(SUB_ID);
+        bytes[] memory actions = new bytes[](_partial ? 2 : 1);
+        actions[0] = abi.encode(_failAction);
+        if (_partial) actions[1] = abi.encode(SEMI_CONTINUOUS_FLAG);
+
+        // Expect the recipe call to revert, after its start approval has succeeded.
+        if (_failAction) vm.expectRevert();
+        cut.executeRecipeFromStrategy(
+            SUB_ID, actions, _subscription.triggerData, _index, _subscription
+        );
+    }
+
+    function _sub(uint64 _strategyOrBundleId, bool _isBundle)
+        internal
+        pure
+        returns (StrategyModel.StrategySub memory sub)
+    {
+        sub.strategyOrBundleId = _strategyOrBundleId;
+        sub.isBundle = _isBundle;
+        sub.triggerData = new bytes[](1);
+        sub.subData = new bytes32[](0);
+    }
+
+    function _mockRegistry(bytes4 _id, address _address) internal {
+        vm.mockCall(
+            REGISTRY_ADDR, abi.encodeCall(IDFSRegistry.getAddr, (_id)), abi.encode(_address)
+        );
+    }
+
+    function _mockStrategy(uint256 _id, bool _continuous) internal {
+        bytes4[] memory actions = new bytes4[](1);
+        actions[0] = ACTION_ID;
+        bytes4[] memory triggers = new bytes4[](1);
+        triggers[0] = TRIGGER_ID;
+        uint8[][] memory paramMapping = new uint8[][](1);
+        paramMapping[0] = new uint8[](0);
+
+        vm.mockCall(
+            STRATEGY_STORAGE_ADDR,
+            abi.encodeCall(IStrategyStorage.getStrategy, (_id)),
+            abi.encode(
+                StrategyModel.Strategy({
+                    name: "strategy ID test",
+                    creator: address(this),
+                    triggerIds: triggers,
+                    actionIds: actions,
+                    paramMapping: paramMapping,
+                    continuous: _continuous
+                })
+            )
+        );
+    }
+
+    function _assertExecution(address _wallet, uint256 _strategyId) internal view {
+        (address wallet, uint256 initialStrategyId) = tracker.getExecution(SUB_ID);
+        assertEq(wallet, _wallet);
+        assertEq(initialStrategyId, _strategyId);
     }
 }
 
@@ -191,18 +407,18 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         assertTrue(subStorage.getSub(subId).isEnabled, "sub must stay enabled");
     }
 
-    function test_should_record_zero_and_clear_execution_for_standalone_strategy() public {
+    function test_should_record_strategy_id_and_clear_execution_for_standalone_strategy() public {
         (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(false, 1, 1));
         _fund(3);
 
-        // Standalone resolution ignores the supplied bundle index; tracker metadata must too.
+        // The standalone strategy ID is independent of the supplied bundle index.
         _execute(subId, type(uint256).max, _withFlag(_actions(1)), sub);
-        _assertTrackedExecution(subId, walletAddr, 0);
+        _assertTrackedExecution(subId, walletAddr, sub.strategyOrBundleId);
         assertTrue(subStorage.getSub(subId).isEnabled);
 
         trigger.setTriggered(false);
         _execute(subId, 1, _withFlag(_actions(1)), sub);
-        _assertTrackedExecution(subId, walletAddr, 0);
+        _assertTrackedExecution(subId, walletAddr, sub.strategyOrBundleId);
 
         _execute(subId, 0, _actions(1), sub);
         _assertTrackedExecution(subId, address(0), 0);
@@ -263,7 +479,9 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
 
         // The tracker is not called
         vm.expectCall(
-            address(tracker), abi.encodeCall(SemiContinuousTracker.startExecution, (subId, 0)), 0
+            address(tracker),
+            abi.encodeCall(SemiContinuousTracker.startExecution, (subId, sub.strategyOrBundleId)),
+            0
         );
         _execute(subId, 0, _withFlag(_actions(1)), sub);
 
@@ -386,32 +604,36 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         assertTrue(subStorage.getSub(subId).isEnabled);
     }
 
-    function test_should_record_and_clear_initial_bundle_index() public {
+    function test_should_record_and_clear_resolved_bundle_strategy_id() public {
         (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribeToBundle(false);
+        uint256 initialStrategyId =
+            IBundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(sub.strategyOrBundleId, 1);
         _fund(6);
 
         _execute(subId, 1, _withFlag(_actions(2)), sub);
-        _assertTrackedExecution(subId, walletAddr, 1);
+        _assertTrackedExecution(subId, walletAddr, initialStrategyId);
 
         _execute(subId, 1, _withFlag(_actions(2)), sub);
-        _assertTrackedExecution(subId, walletAddr, 1);
+        _assertTrackedExecution(subId, walletAddr, initialStrategyId);
 
         _execute(subId, 1, _actions(2), sub);
         _assertTrackedExecution(subId, address(0), 0);
         assertFalse(subStorage.getSub(subId).isEnabled);
     }
 
-    function test_should_not_replace_initial_bundle_index_on_later_partial() public {
+    function test_should_allow_different_bundle_strategy_without_replacing_initial_id() public {
         (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribeToBundle(false);
+        uint256 initialStrategyId =
+            IBundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(sub.strategyOrBundleId, 1);
         _fund(3);
 
         _execute(subId, 1, _withFlag(_actions(2)), sub);
         _execute(subId, 0, _withFlag(_actions(1)), sub);
 
-        _assertTrackedExecution(subId, walletAddr, 1);
+        _assertTrackedExecution(subId, walletAddr, initialStrategyId);
     }
 
-    function test_should_revert_initial_index_write_when_actions_fail() public {
+    function test_should_revert_initial_strategy_id_write_when_actions_fail() public {
         (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribeToBundle(false);
 
         // No token approval: the tracker start runs, then PullToken reverts.
@@ -422,8 +644,10 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         assertTrue(subStorage.getSub(subId).isEnabled);
     }
 
-    function test_should_restore_initial_index_when_final_actions_fail() public {
+    function test_should_restore_initial_strategy_id_when_final_actions_fail() public {
         (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribeToBundle(false);
+        uint256 initialStrategyId =
+            IBundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(sub.strategyOrBundleId, 1);
         _fund(2);
         _execute(subId, 1, _withFlag(_actions(2)), sub);
 
@@ -431,7 +655,7 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         vm.expectRevert();
         _execute(subId, 1, _actions(2), sub);
 
-        _assertTrackedExecution(subId, walletAddr, 1);
+        _assertTrackedExecution(subId, walletAddr, initialStrategyId);
         assertTrue(subStorage.getSub(subId).isEnabled);
     }
 
@@ -554,13 +778,13 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         return _subscribe(new BundleBuilder().init(strategyIds), true, 1);
     }
 
-    function _assertTrackedExecution(uint256 _subId, address _wallet, uint256 _strategyIndex)
+    function _assertTrackedExecution(uint256 _subId, address _wallet, uint256 _strategyId)
         internal
         view
     {
-        (address wallet, uint256 strategyIndex) = tracker.getExecution(_subId);
+        (address wallet, uint256 initialStrategyId) = tracker.getExecution(_subId);
         assertEq(wallet, _wallet);
-        assertEq(strategyIndex, _strategyIndex);
+        assertEq(initialStrategyId, _strategyId);
     }
 
     function _subscribe(uint256 _strategyId)

@@ -7,6 +7,7 @@ import { IDFSRegistry } from "../../contracts/interfaces/core/IDFSRegistry.sol";
 import { ISubStorage } from "../../contracts/interfaces/core/ISubStorage.sol";
 import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
 import { DFSIds } from "../../contracts/utils/DFSIds.sol";
+import { IAdminVault } from "../../contracts/interfaces/auth/IAdminVault.sol";
 
 import { Vm } from "forge-std/Vm.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
@@ -21,7 +22,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
                                     VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
     uint256 internal constant SUB_ID = 3113;
-    uint256 internal constant STRATEGY_INDEX = 1;
+    uint256 internal constant STRATEGY_ID = 1;
 
     address subOwnerWallet;
     address adminVaultOwner;
@@ -30,7 +31,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
-    function setUp() public override {
+    function setUp() public virtual override {
         forkFromEnv("");
 
         cut = new SemiContinuousTracker();
@@ -88,18 +89,18 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
         emit ExecutionStarted(SUB_ID, subOwnerWallet);
 
         prank(subOwnerWallet);
-        cut.startExecution(SUB_ID, STRATEGY_INDEX);
+        cut.startExecution(SUB_ID, STRATEGY_ID);
 
         assertTrue(cut.isInExecution(SUB_ID));
         assertEq(cut.executionWalletOf(SUB_ID), subOwnerWallet);
-        _assertExecution(subOwnerWallet, STRATEGY_INDEX);
+        _assertExecution(subOwnerWallet, STRATEGY_ID);
     }
 
     function test_should_return_empty_execution_for_unstarted_sub() public view {
         _assertExecution(address(0), 0);
     }
 
-    function test_should_start_execution_with_strategy_index_zero() public {
+    function test_should_start_execution_with_strategy_id_zero() public {
         _approveStart(SUB_ID);
         prank(subOwnerWallet);
         cut.startExecution(SUB_ID, 0);
@@ -108,30 +109,30 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
         _assertExecution(subOwnerWallet, 0);
     }
 
-    function testFuzz_should_preserve_full_strategy_index(uint256 strategyIndex) public {
+    function testFuzz_should_preserve_full_strategy_id(uint256 strategyId) public {
         _approveStart(SUB_ID);
         prank(subOwnerWallet);
-        cut.startExecution(SUB_ID, strategyIndex);
+        cut.startExecution(SUB_ID, strategyId);
 
-        _assertExecution(subOwnerWallet, strategyIndex);
+        _assertExecution(subOwnerWallet, strategyId);
     }
 
-    function test_should_preserve_initial_index_on_repeated_start() public {
+    function test_should_preserve_initial_strategy_id_on_repeated_start() public {
         _startExecution();
 
         prank(subOwnerWallet);
-        cut.startExecution(SUB_ID, STRATEGY_INDEX + 1);
+        cut.startExecution(SUB_ID, STRATEGY_ID + 1);
 
-        _assertExecution(subOwnerWallet, STRATEGY_INDEX);
+        _assertExecution(subOwnerWallet, STRATEGY_ID);
     }
 
-    function test_should_preserve_initial_index_on_repeated_start_by_non_owner() public {
+    function test_should_preserve_initial_strategy_id_on_repeated_start_by_non_owner() public {
         _startExecution();
 
         prank(bob);
-        cut.startExecution(SUB_ID, STRATEGY_INDEX + 1);
+        cut.startExecution(SUB_ID, STRATEGY_ID + 1);
 
-        _assertExecution(subOwnerWallet, STRATEGY_INDEX);
+        _assertExecution(subOwnerWallet, STRATEGY_ID);
     }
 
     /// @dev The approval gate runs before the ownership check, so an unapproved sub owner
@@ -139,7 +140,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
     function test_should_revert_when_starting_execution_without_approval() public {
         vm.expectRevert(abi.encodeWithSelector(NotApproved.selector, SUB_ID, subOwnerWallet));
         prank(subOwnerWallet);
-        cut.startExecution(SUB_ID, STRATEGY_INDEX);
+        cut.startExecution(SUB_ID, STRATEGY_ID);
 
         assertFalse(cut.isInExecution(SUB_ID));
     }
@@ -147,7 +148,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
     function test_should_revert_when_starting_execution_without_approval_for_non_owner() public {
         vm.expectRevert(abi.encodeWithSelector(NotApproved.selector, SUB_ID, bob));
         prank(bob);
-        cut.startExecution(SUB_ID, STRATEGY_INDEX);
+        cut.startExecution(SUB_ID, STRATEGY_ID);
 
         assertFalse(cut.isInExecution(SUB_ID));
     }
@@ -157,7 +158,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
     {
         vm.expectRevert(abi.encodeWithSelector(NotApproved.selector, SUB_ID, adminVaultOwner));
         prank(adminVaultOwner);
-        cut.startExecution(SUB_ID, STRATEGY_INDEX);
+        cut.startExecution(SUB_ID, STRATEGY_ID);
 
         assertFalse(cut.isInExecution(SUB_ID));
     }
@@ -169,7 +170,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
 
         vm.expectRevert(abi.encodeWithSelector(NotApproved.selector, otherSubId, subOwnerWallet));
         prank(subOwnerWallet);
-        cut.startExecution(otherSubId, STRATEGY_INDEX);
+        cut.startExecution(otherSubId, STRATEGY_ID);
 
         assertFalse(cut.isInExecution(otherSubId));
     }
@@ -179,7 +180,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
 
         vm.recordLogs();
         prank(subOwnerWallet);
-        cut.startExecution(SUB_ID, STRATEGY_INDEX);
+        cut.startExecution(SUB_ID, STRATEGY_ID);
 
         Vm.Log[] memory logs = vm.getRecordedLogs();
         assertEq(logs.length, 0);
@@ -191,7 +192,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
 
         vm.recordLogs();
         prank(bob);
-        cut.startExecution(SUB_ID, STRATEGY_INDEX);
+        cut.startExecution(SUB_ID, STRATEGY_ID);
 
         Vm.Log[] memory logs = vm.getRecordedLogs();
         assertEq(logs.length, 0);
@@ -203,7 +204,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
 
         vm.expectRevert(abi.encodeWithSelector(NotSubOwner.selector, SUB_ID, adminVaultOwner));
         prank(adminVaultOwner);
-        cut.startExecution(SUB_ID, STRATEGY_INDEX);
+        cut.startExecution(SUB_ID, STRATEGY_ID);
 
         assertFalse(cut.isInExecution(SUB_ID));
     }
@@ -213,7 +214,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
 
         vm.expectRevert(abi.encodeWithSelector(NotSubOwner.selector, SUB_ID, bob));
         prank(bob);
-        cut.startExecution(SUB_ID, STRATEGY_INDEX);
+        cut.startExecution(SUB_ID, STRATEGY_ID);
 
         assertFalse(cut.isInExecution(SUB_ID));
     }
@@ -335,7 +336,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
         assertEq(cut.executionWalletOf(SUB_ID), subOwnerWallet);
     }
 
-    function test_should_record_new_index_after_finish() public {
+    function test_should_record_new_strategy_id_after_finish() public {
         _startExecution();
         prank(subOwnerWallet);
         cut.finishExecution(SUB_ID);
@@ -343,12 +344,12 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
 
         _approveStart(SUB_ID);
         prank(subOwnerWallet);
-        cut.startExecution(SUB_ID, STRATEGY_INDEX + 1);
+        cut.startExecution(SUB_ID, STRATEGY_ID + 1);
 
-        _assertExecution(subOwnerWallet, STRATEGY_INDEX + 1);
+        _assertExecution(subOwnerWallet, STRATEGY_ID + 1);
     }
 
-    function test_should_record_new_index_after_admin_finish() public {
+    function test_should_record_new_strategy_id_after_admin_finish() public {
         _startExecution();
         prank(adminVaultOwner);
         cut.finishExecution(SUB_ID);
@@ -375,12 +376,50 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
         _approveStart(SUB_ID);
 
         prank(subOwnerWallet);
-        cut.startExecution(SUB_ID, STRATEGY_INDEX);
+        cut.startExecution(SUB_ID, STRATEGY_ID);
     }
 
-    function _assertExecution(address wallet, uint256 strategyIndex) internal view {
-        (address actualWallet, uint256 actualIndex) = cut.getExecution(SUB_ID);
+    function _assertExecution(address wallet, uint256 strategyId) internal view {
+        (address actualWallet, uint256 actualId) = cut.getExecution(SUB_ID);
         assertEq(actualWallet, wallet);
-        assertEq(actualIndex, strategyIndex);
+        assertEq(actualId, strategyId);
+    }
+}
+
+/// @notice Runs the same tracker lifecycle and authorization tests without a fork.
+/// forge-config: default.isolate = false
+contract TestCore_SemiContinuousTrackerUnit is TestCore_SemiContinuousTracker {
+    function setUp() public override {
+        cut = new SemiContinuousTracker();
+        subOwnerWallet = address(0x1234);
+        adminVaultOwner = address(0x5678);
+        strategyExecutor = address(0x9012);
+
+        vm.etch(REGISTRY_ADDR, hex"00");
+        vm.etch(SUB_STORAGE_ADDR, hex"00");
+        vm.etch(address(adminVault), hex"00");
+
+        vm.mockCall(
+            REGISTRY_ADDR,
+            abi.encodeCall(IDFSRegistry.getAddr, (DFSIds.STRATEGY_EXECUTOR)),
+            abi.encode(strategyExecutor)
+        );
+        vm.mockCall(
+            SUB_STORAGE_ADDR,
+            abi.encodeCall(ISubStorage.getSub, (SUB_ID)),
+            abi.encode(
+                StrategyModel.StoredSubData({
+                    walletAddr: bytes20(subOwnerWallet),
+                    isEnabled: true,
+                    strategySubHash: bytes32(0)
+                })
+            )
+        );
+        vm.mockCall(
+            address(adminVault), abi.encodeCall(IAdminVault.owner, ()), abi.encode(adminVaultOwner)
+        );
+        vm.mockCall(
+            address(adminVault), abi.encodeCall(IAdminVault.admin, ()), abi.encode(address(0x3456))
+        );
     }
 }
