@@ -39,7 +39,7 @@ contract StartExecutionAction is ActionBase {
         uint256 subId = abi.decode(_callData, (uint256));
 
         ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER))
-            .startExecution(subId);
+            .startExecution(subId, 0);
 
         return bytes32(subId);
     }
@@ -401,7 +401,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
             abi.encodeWithSelector(SemiContinuousTracker.NotApproved.selector, f.subId, walletAddr)
         );
         prank(walletAddr);
-        tracker.startExecution(f.subId);
+        tracker.startExecution(f.subId, 0);
     }
 
     /*//////////////////////////////////////////////////////////////////////////

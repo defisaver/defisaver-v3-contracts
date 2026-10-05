@@ -259,6 +259,7 @@ contract TestToggleSub is SubActionsBase {
 
         assertFalse(tracker.isInExecution(subId), "deactivate must clear the tracker");
         assertEq(tracker.executionWalletOf(subId), address(0));
+        _assertExecutionCleared(subId);
         assertFalse(subStorage.getSub(subId).isEnabled);
     }
 
@@ -275,6 +276,7 @@ contract TestToggleSub is SubActionsBase {
 
         assertFalse(tracker.isInExecution(subId), "deactivate must clear the tracker");
         assertEq(tracker.executionWalletOf(subId), address(0));
+        _assertExecutionCleared(subId);
         assertFalse(subStorage.getSub(subId).isEnabled);
 
         /// @dev No ExecutionFinished this time, finishExecution early-returns.
@@ -299,6 +301,7 @@ contract TestToggleSub is SubActionsBase {
         _toggle(wallet, subId, false, true);
 
         assertFalse(tracker.isInExecution(subId), "deactivate must clear the tracker");
+        _assertExecutionCleared(subId);
     }
 
     /// @dev Documents current behaviour: only the deactivate branch clears the tracker, so a

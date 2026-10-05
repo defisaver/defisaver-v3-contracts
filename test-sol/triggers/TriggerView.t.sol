@@ -176,7 +176,7 @@ contract TestTriggerView is BaseTest, RegistryUtils, TriggerView {
         tracker.approveStartOfExecution(_subId);
 
         prank(subOwnerWallet);
-        tracker.startExecution(_subId);
+        tracker.startExecution(_subId, 0);
 
         assertEq(tracker.executionWalletOf(_subId), subOwnerWallet);
     }

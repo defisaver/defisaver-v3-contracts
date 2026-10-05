@@ -22,6 +22,9 @@ contract SubActionsBase is ActionsUtils, RegistryUtils, BaseTest {
     /// @dev Seed of the sub created by _subscribe.
     uint256 internal constant INITIAL_SEED = 1;
 
+    /// @dev Use a nonzero strategy ID so reset assertions prove that both fields are cleared.
+    uint256 internal constant EXECUTION_STRATEGY_ID = 1;
+
     SubStorage internal subStorage;
     CreateSub internal createSub;
     SemiContinuousTracker internal tracker;
@@ -79,6 +82,12 @@ contract SubActionsBase is ActionsUtils, RegistryUtils, BaseTest {
         tracker.approveStartOfExecution(_subId);
 
         prank(address(subStorage.getSub(_subId).walletAddr));
-        tracker.startExecution(_subId);
+        tracker.startExecution(_subId, EXECUTION_STRATEGY_ID);
+    }
+
+    function _assertExecutionCleared(uint256 _subId) internal view {
+        (address wallet, uint256 initialStrategyId) = tracker.getExecution(_subId);
+        assertEq(wallet, address(0));
+        assertEq(initialStrategyId, 0);
     }
 }
