@@ -16,6 +16,9 @@ contract LlamaLendHelper is MainnetLlamaLendAddresses, DSMath {
     using TokenUtils for address;
 
     error InvalidLlamaLendController();
+    error LlamaLendZeroAmountError();
+    error LlamaLendInvalidExchangeSrcToken();
+    error LlamaLendInvalidExchangeDestToken();
 
     IBytesTransientStorage constant transientStorage =
         IBytesTransientStorage(BYTES_TRANSIENT_STORAGE);

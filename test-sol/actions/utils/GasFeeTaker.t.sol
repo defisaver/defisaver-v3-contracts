@@ -102,14 +102,14 @@ contract TestGasFeeTaker is BaseTest, GasFeeTaker, AaveV3Helper {
 
         vm.fee(100_000_000_000);
         console.log(tx.gasprice);
-        uint256 gasCost = cut.calcGasCost(1_000_000, Addresses.DAI_ADDR, 0);
+        uint256 gasCost = cut.calcGasCost(1_000_000, Addresses.DAI_ADDR);
         console.log("Gas cost:", gasCost);
 
-        gasCost = cut.calcGasCost(1_000_000, aDAI, 0);
+        gasCost = cut.calcGasCost(1_000_000, aDAI);
         console.log("Gas cost:", gasCost);
         assertEq(gasCost, 0);
 
-        gasCost = cut.calcGasCost(1_000_000, Addresses.WETH_ADDR, 0);
+        gasCost = cut.calcGasCost(1_000_000, Addresses.WETH_ADDR);
         console.log("Gas cost:", gasCost);
         assertEq(gasCost, 1_000_000 * tx.gasprice);
     }

@@ -19,6 +19,7 @@ const {
     formatExchangeObj,
     chainIds,
     network,
+    setNextBlockBaseFeeToOneWei,
 } = require('../utils/utils');
 const { predictSafeAddress, SAFE_MASTER_COPY_VERSIONS, deploySafe } = require('../utils/safe');
 const { topUp } = require('../../scripts/utils/fork');
@@ -149,6 +150,7 @@ describe('TxSaver tests', function () {
         isFork = hre.network.name === 'fork';
 
         [senderAcc, botAcc] = await hre.ethers.getSigners();
+        await setNextBlockBaseFeeToOneWei();
         await setUpSafeWallet(senderAcc.address);
 
         if (isFork) {

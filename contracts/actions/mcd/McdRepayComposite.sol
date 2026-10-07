@@ -2,19 +2,19 @@
 pragma solidity =0.8.24;
 
 import { IDaiJoin } from "../../interfaces/protocols/mcd/IDaiJoin.sol";
+import { IJoin } from "../../interfaces/protocols/mcd/IJoin.sol";
+import { IManager } from "../../interfaces/protocols/mcd/IManager.sol";
 
 import { ActionBase } from "../ActionBase.sol";
 import { DFSSell } from "../exchange/DFSSell.sol";
-import { GasFeeTaker } from "../fee/GasFeeTaker.sol";
-
+import { GasFeeHelper } from "../../utils/fee/GasFeeHelper.sol";
 import { McdHelper } from "./helpers/McdHelper.sol";
 import { McdRatioHelper } from "./helpers/McdRatioHelper.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
-import { IManager } from "../../interfaces/protocols/mcd/IManager.sol";
-import { IJoin } from "../../interfaces/protocols/mcd/IJoin.sol";
+import { DFSFeeLib } from "../../utils/fee/DFSFeeLib.sol";
 
 /// @title Single mcd repay action can use flashloan or not
-contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRatioHelper {
+contract McdRepayComposite is ActionBase, DFSSell, GasFeeHelper, McdHelper, McdRatioHelper {
     using TokenUtils for address;
 
     error RatioNotHigherThanBefore(uint256, uint256);
@@ -49,7 +49,7 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) public payable virtual override(ActionBase, DFSSell, GasFeeTaker) returns (bytes32) {
+    ) public payable virtual override(ActionBase, DFSSell) returns (bytes32) {
         RepayParams memory repayParams = parseCompositeParams(_callData);
 
         repayParams.vaultId =
@@ -83,7 +83,7 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
         public
         payable
         virtual
-        override(ActionBase, DFSSell, GasFeeTaker)
+        override(ActionBase, DFSSell)
     {
         RepayParams memory repayParams = parseCompositeParams(_callData);
         (bytes memory logData,) = _repay(repayParams);
@@ -117,9 +117,13 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
 
         // Take gas fee if part of strategy
         if (_repayParams.gasUsed != 0) {
-            paybackAmount = _takeFee(
-                GasFeeTakerParams(_repayParams.gasUsed, DAI_ADDR, exchangedAmount, MAX_DFS_FEE)
-            );
+            paybackAmount = exchangedAmount
+                - takeGasAndAutomationFee(
+                    _repayParams.gasUsed,
+                    DAI_ADDR,
+                    exchangedAmount,
+                    DFSFeeLib.MAX_AUTOMATION_FEE_DIVIDER
+                );
         } else {
             paybackAmount = exchangedAmount;
         }
@@ -183,13 +187,7 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
     }
 
     /// @inheritdoc ActionBase
-    function actionType()
-        public
-        pure
-        virtual
-        override(ActionBase, DFSSell, GasFeeTaker)
-        returns (uint8)
-    {
+    function actionType() public pure virtual override(ActionBase, DFSSell) returns (uint8) {
         return uint8(ActionType.CUSTOM_ACTION);
     }
 

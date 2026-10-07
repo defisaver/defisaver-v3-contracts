@@ -111,6 +111,7 @@ contract TestLiquityV2SPDeposit is LiquityV2ExecuteActions, LiquityV2Utils {
         );
 
         wallet.execute(address(cut), vars.executeActionCallData, 0);
+        vm.warp(block.timestamp + 30 days);
 
         (vars.compoundedBOLD, vars.collGain, vars.boldGain) =
             viewContract.getDepositorInfo(address(_market), walletAddr);
@@ -145,6 +146,9 @@ contract TestLiquityV2SPDeposit is LiquityV2ExecuteActions, LiquityV2Utils {
                 vars.senderBoldBalanceAfter,
                 vars.senderBoldBalanceBefore - vars.depositAmount + vars.boldGain
             );
+
+            assertEq(balanceOf(BOLD, walletAddr), 0);
+            assertEq(balanceOf(vars.collToken, walletAddr), 0);
             assertEq(vars.compoundedBOLDAfter, vars.compoundedBOLD + vars.depositAmount);
             assertEq(vars.collGainAfter, 0);
             assertEq(vars.boldGainAfter, 0);

@@ -20,7 +20,7 @@ const {
     network,
 } = require('../../utils/utils');
 
-const { sell, executeAction } = require('../../utils/actions');
+const { executeAction } = require('../../utils/actions');
 
 const trades = [
     {
@@ -86,12 +86,19 @@ const curveTrades = [
 
 // @dev If curve route contains some synthetix tokens, curve order may fail because of deadline
 const routeContainsSynthetixTokensThatCanBreakCurveOrder = (exchangeData) => {
+    const route = exchangeData.toString().toLowerCase();
     const tokens = [
         '5e74c9036fb86bd7ecdcb084a0673efc32ea31cb', // sETH
         'fe18be6b3bd88a2d2a7f928d00292e7a9963cfc6', // sBTC
-        '57Ab1ec28D129707052df4dF418D58a2D46d5f51', // sUSD
+        '57ab1ec28d129707052df4df418d58a2d46d5f51', // sUSD
     ];
-    return tokens.some((t) => exchangeData.toString().includes(t));
+    return tokens.some((t) => route.includes(t));
+};
+
+const curveRouteUnavailable = (exchangeData) => {
+    const abiCoder = new hre.ethers.utils.AbiCoder();
+    const [route] = abiCoder.decode(['address[11]', 'uint256[5][5]', 'address[5]'], exchangeData);
+    return route[0] === hre.ethers.constants.AddressZero;
 };
 
 const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve = false) => {
@@ -123,6 +130,10 @@ const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve 
     }
     const exchangeData = exchangeObject.at(-2);
 
+    if (isCurve && curveRouteUnavailable(exchangeData)) {
+        return -1;
+    }
+
     if (routeContainsSynthetixTokensThatCanBreakCurveOrder(exchangeData)) {
         return -1;
     }
@@ -142,20 +153,18 @@ const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve 
         addrs[network].FEE_RECEIVER,
     );
 
-    await sell(
-        proxy,
-        sellAssetInfo.address,
-        buyAssetInfo.address,
-        amount,
-        wrapper.address,
-        senderAcc.address,
-        senderAcc.address,
-        trade.fee,
-        senderAcc,
-        isCurve,
-        false,
-        true, // sell in recipe so we can check the fee
-    );
+    await approve(sellAssetInfo.address, proxy.address, senderAcc);
+
+    const sellRecipe = new dfs.Recipe('Sell', [
+        new dfs.actions.basic.PullTokenAction(
+            sellAssetInfo.address,
+            senderAcc.address,
+            amount.toString(),
+        ),
+        new dfs.actions.basic.SellAction(exchangeObject, proxy.address, senderAcc.address),
+    ]);
+    const functionData = sellRecipe.encodeForDsProxyCall()[1];
+    await executeAction('RecipeExecutor', functionData, proxy);
 
     const feeReceiverAmountAfter = await balanceOf(
         sellAssetInfo.address,
@@ -257,6 +266,7 @@ const dfsSellTest = async () => {
             await resetForkToBlock();
             await redeploy('DFSSell');
             await redeploy('RecipeExecutor');
+            await redeploy('PullToken');
 
             dfsPrices = await redeploy('DFSPricesView');
             uniWrapper = await redeploy('UniswapWrapperV3');

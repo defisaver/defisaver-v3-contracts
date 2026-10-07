@@ -334,64 +334,46 @@ const tokenPriceHelperTest = async () => {
         this.timeout(80000);
 
         let tokenPriceHelper;
-        let tokenPriceHelperAddr;
-        let tokenHelperOld;
         before(async () => {
-            tokenPriceHelperAddr = await getAddrFromRegistry('TokenPriceHelper');
-            tokenPriceHelper = await hre.ethers.getContractAt(
-                'TokenPriceHelper',
-                tokenPriceHelperAddr,
-            );
-            tokenHelperOld = await hre.ethers.getContractAt(
-                'TokenPriceHelper',
-                '0xBa2e5E56A92e93Cc0Cd84626cf762E6B2b30349b',
-            );
+            tokenPriceHelper = await getContractFromRegistry('TokenPriceHelper');
         });
 
         for (let i = 0; i < assets.length; i++) {
             it(`... should get USD and ETH price for ${assets[i].symbol} `, async () => {
-                if (assets[i].symbol === 'OP') return;
-                if (assets[i].symbol === 'SUSHI') return;
-                if (assets[i].symbol === 'USDC.e') return;
-                if (assets[i].symbol === 'ARB') return;
-                if (assets[i].symbol === 'GMX') return;
+                // if (assets[i].symbol === 'OP') return;
+                // if (assets[i].symbol === 'SUSHI') return;
+                // if (assets[i].symbol === 'USDC.e') return;
+                // if (assets[i].symbol === 'ARB') return;
+                // if (assets[i].symbol === 'GMX') return;
                 const assetInfo = getAssetInfo(assets[i].symbol);
                 const tokenAddr = assetInfo.address;
                 const priceInUSD = await tokenPriceHelper.getPriceInUSD(tokenAddr);
-
-                const oldPriceUSD = await tokenHelperOld.getPriceInUSD(assetInfo.address);
-                /*
                 const priceInETH = await tokenPriceHelper.getPriceInETH(tokenAddr);
-
-                const clInUSD = await tokenPriceHelper.getChainlinkPriceInUSD(tokenAddr, false);
-                const clPriceInETH = await tokenPriceHelper.getChainlinkPriceInETH(tokenAddr);
-
-                const aaveInUSD = await tokenPriceHelper.getAaveTokenPriceInUSD(tokenAddr);
-                const aaveInETH = await tokenPriceHelper.getAaveTokenPriceInETH(tokenAddr);
-
-                const aaveV3InUSD = await tokenPriceHelper.getAaveV3TokenPriceInUSD(tokenAddr);
-                const aaveV3InETH = await tokenPriceHelper.getAaveV3TokenPriceInETH(tokenAddr);
-
-                const sparkInUSD = await tokenPriceHelper.getSparkTokenPriceInUSD(tokenAddr);
-                const sparkInETH = await tokenPriceHelper.getSparkTokenPriceInETH(tokenAddr);
+                const chainlinkPriceInUSD = await tokenPriceHelper.getChainlinkPriceInUSD(
+                    tokenAddr,
+                    true,
+                );
+                const chainlinkPriceInETH =
+                    await tokenPriceHelper.getChainlinkPriceInETH(tokenAddr);
+                const aaveV3PriceInUSD = await tokenPriceHelper.getAaveV3TokenPriceInUSD(tokenAddr);
+                const aaveV3PriceInETH = await tokenPriceHelper.getAaveV3TokenPriceInETH(tokenAddr);
+                const sparkPriceInUSD = await tokenPriceHelper.getSparkTokenPriceInUSD(tokenAddr);
+                const sparkPriceInETH = await tokenPriceHelper.getSparkTokenPriceInETH(tokenAddr);
+                const aavePriceInUSD = await tokenPriceHelper.getAaveTokenPriceInUSD(tokenAddr);
+                const aavePriceInETH = await tokenPriceHelper.getAaveTokenPriceInETH(tokenAddr);
 
                 console.log(`-----------------${assets[i].symbol}`);
                 console.log(priceInUSD);
-                console.log(clInUSD);
-                console.log(aaveInUSD);
-                console.log(aaveV3InUSD);
-                console.log(sparkInUSD);
-                console.log('');
                 console.log(priceInETH);
-                console.log(clPriceInETH);
-                console.log(aaveInETH);
-                console.log(aaveV3InETH);
-                console.log(sparkInETH);
+                console.log(chainlinkPriceInUSD);
+                console.log(chainlinkPriceInETH);
+                console.log(aaveV3PriceInUSD);
+                console.log(aaveV3PriceInETH);
+                console.log(sparkPriceInUSD);
+                console.log(sparkPriceInETH);
+                console.log(aavePriceInUSD);
+                console.log(aavePriceInETH);
                 console.log('------------------------');
-                */
-
-                if (oldPriceUSD.toString() !== priceInUSD.toString()) console.log(assets[i].symbol);
-                // await new Promise((r) => setTimeout(r, 3000));
             });
         }
     });
@@ -422,13 +404,13 @@ const tokenPriceHelperL2Test = async () => {
                 const assetInfo = getAssetInfo(assets[i].symbol, chainId);
                 const address = assetInfo.address;
                 const priceInUSD = await tokenPriceHelper.getPriceInUSD(address);
-                const aaveInUSD = await tokenPriceHelper.getAaveTokenPriceInUSD(address);
+                const aaveInUSD = await tokenPriceHelper.getAaveV3TokenPriceInUSD(address);
                 const chainlinkInUSD = await tokenPriceHelper.getChainlinkPriceInUSD(
                     address,
                     false,
                 );
                 const priceInETH = await tokenPriceHelper.getPriceInETH(address);
-                const aaveInETH = await tokenPriceHelper.getAaveTokenPriceInETH(address);
+                const aaveInETH = await tokenPriceHelper.getAaveV3TokenPriceInETH(address);
                 const chainlinkInETH = await tokenPriceHelper.getChainlinkPriceInETH(address);
 
                 console.log(`-----------------${assets[i].symbol}`);

@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { GasFeeHelper } from "./helpers/GasFeeHelper.sol";
+import { GasFeeHelper } from "../../utils/fee/GasFeeHelper.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Helper action to take gas fee from the user's wallet and send it to the fee recipient.
@@ -14,7 +14,7 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
     /// @param feeToken Address of the token to send
     /// @param availableAmount Amount of tokens available to send
     /// @param dfsFeeDivider Divider for the DFS fee
-    struct GasFeeTakerParams {
+    struct Params {
         uint256 gasUsed;
         address feeToken;
         uint256 availableAmount;
@@ -28,7 +28,7 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
-        GasFeeTakerParams memory inputData = parseInputsGasFeeTaker(_callData);
+        Params memory inputData = parseInputs(_callData);
 
         inputData.feeToken =
             _parseParamAddr(inputData.feeToken, _paramMapping[0], _subData, _returnValues);
@@ -43,48 +43,30 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
             inputData.availableAmount = inputData.feeToken.getBalance(address(this));
         }
 
-        uint256 amountLeft = _takeFee(inputData);
+        uint256 feeTaken = takeGasAndAutomationFee(
+            inputData.gasUsed,
+            inputData.feeToken,
+            inputData.availableAmount,
+            inputData.dfsFeeDivider
+        );
+
+        uint256 amountLeft = inputData.availableAmount - feeTaken;
 
         emit ActionEvent("GasFeeTaker", abi.encode(inputData, amountLeft));
+
         return bytes32(amountLeft);
-    }
-
-    function _takeFee(GasFeeTakerParams memory _inputData) internal returns (uint256 amountLeft) {
-        uint256 txCost = calcGasCost(_inputData.gasUsed, _inputData.feeToken, 0);
-
-        // cap at 20% of the max amount
-        if (txCost >= (_inputData.availableAmount / 5)) {
-            txCost = _inputData.availableAmount / 5;
-        }
-
-        if (_inputData.dfsFeeDivider != 0) {
-            /// @notice If divider is lower the fee is greater, should be max 5 bps
-            if (_inputData.dfsFeeDivider < MAX_DFS_FEE) {
-                _inputData.dfsFeeDivider = MAX_DFS_FEE;
-            }
-
-            // add amount we take for dfs fee as well
-            txCost += _inputData.availableAmount / _inputData.dfsFeeDivider;
-        }
-
-        amountLeft = sub(_inputData.availableAmount, txCost);
-        _inputData.feeToken.withdrawTokens(feeRecipient.getFeeAddr(), txCost);
     }
 
     /// @inheritdoc ActionBase
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes memory _callData) public payable virtual override { }
+    function executeActionDirect(bytes memory _callData) public payable override { }
 
     /// @inheritdoc ActionBase
     function actionType() public pure virtual override returns (uint8) {
         return uint8(ActionType.FEE_ACTION);
     }
 
-    function parseInputsGasFeeTaker(bytes memory _callData)
-        public
-        pure
-        returns (GasFeeTakerParams memory inputData)
-    {
-        inputData = abi.decode(_callData, (GasFeeTakerParams));
+    function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {
+        inputData = abi.decode(_callData, (Params));
     }
 }

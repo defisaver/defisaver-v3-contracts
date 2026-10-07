@@ -14,6 +14,7 @@ const {
     setBalance,
     EETH_ADDR,
     ETHER_FI_LIQUIDITY_POOL,
+    setNextBlockBaseFeeToOneWei,
 } = require('../../utils/utils');
 const { executeAction } = require('../../utils/actions');
 
@@ -34,6 +35,7 @@ describe('LsvSell', function () {
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
+        await setNextBlockBaseFeeToOneWei();
         from = senderAcc.address;
         to = senderAcc.address;
         wallet = await getProxy(senderAcc.address, hre.config.isWalletSafe);
@@ -47,8 +49,7 @@ describe('LsvSell', function () {
     });
 
     const expectStakeInsteadOfSell = async (tx, srcToken, destToken) => {
-        const txHash = tx.hash;
-        const receipt = await hre.ethers.provider.getTransactionReceipt(txHash);
+        const receipt = await tx.wait();
         for (let i = 0; i < receipt.logs.length; i++) {
             const log = receipt.logs[i];
             const lsvSellEncoded = hre.ethers.utils.keccak256(
@@ -101,7 +102,7 @@ describe('LsvSell', function () {
         const recipe = new dfs.Recipe('LSVSell-Test-Lido', [sellAction]);
         const functionData = recipe.encodeForDsProxyCall()[1];
         const tx = await executeAction('RecipeExecutor', functionData, wallet);
-        expectStakeInsteadOfSell(tx, srcToken, destToken);
+        await expectStakeInsteadOfSell(tx, srcToken, destToken);
     };
 
     it('... should deposit WETH on lido if it gives better rate', async () => {
