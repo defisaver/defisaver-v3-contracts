@@ -150,15 +150,15 @@
         "history": []
     },
     {
-        "name": "FLFeeFaucet",
-        "address": "0x47f159C90850D5cE09E21F931d504536840f34b4",
-        "id": "0xe6b1b2cb",
-        "path": "contracts/utils/fee/FLFeeFaucet.sol",
-        "version": "1.0.0",
+        "name": "FeeFaucet",
+        "address": "0x59C7C4F78014bFeD92B10da0F7DadB29E7c1751f",
+        "id": "0x065947c3",
+        "path": "contracts/utils/fee/FeeFaucet.sol",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x47f159C90850D5cE09E21F931d504536840f34b4"]
     },
     {
         "name": "Discount",

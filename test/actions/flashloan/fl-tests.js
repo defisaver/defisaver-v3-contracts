@@ -129,7 +129,7 @@ const aaveV3FlTest = async (flActionContract) => {
         let proxy;
         let safe;
         let wallet;
-        const FLASHLOAN_TOKENS = ['WETH', 'DAI', 'USDC', 'USDT'];
+        const FLASHLOAN_TOKENS = ['WETH', 'USDC', 'USDT'];
         const determineActiveWallet = (w) => {
             wallet = isWalletNameDsProxy(w) ? proxy : safe;
         };
