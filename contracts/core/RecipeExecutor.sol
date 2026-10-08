@@ -225,6 +225,48 @@ contract RecipeExecutor is
         _txSaverData.feeToken.withdrawTokens(TX_SAVER_FEE_RECIPIENT, gasCost);
     }
 
+    /// @notice Checks if the length of _actionCallData is valid for the strategy
+    /// @dev For continuous strategies, the length of _actionCallData must be equal to the length of strategy actions
+    /// @dev For one-time strategies, the length of _actionCallData must be equal to the length of strategy actions or one more with the last element being SEMI_CONTINUOUS_FLAG
+    /// @param _actionCallData Actions calldata sent by backend to execute actions
+    /// @param _strategy Strategy to be executed
+    function _validateActionsCalldataLength(
+        bytes[] calldata _actionCallData,
+        Strategy memory _strategy
+    ) internal pure {
+        uint256 actionsLength = _strategy.actionIds.length;
+
+        // only one-time strategies can have the extra SEMI_CONTINUOUS_FLAG element
+        uint256 maxLength = _strategy.continuous ? actionsLength : actionsLength + 1;
+
+        if (_actionCallData.length < actionsLength || _actionCallData.length > maxLength) {
+            revert InvalidActionCallDataLength(_actionCallData.length, actionsLength);
+        }
+    }
+
+    /// @notice Checks if the execution is semi-continuous, which means that the last element of _actionCallData is SEMI_CONTINUOUS_FLAG
+    /// @dev Must be called after _validateActionsCalldataLength, which guarantees that the length is either equal to the length of strategy actions or one more
+    /// @dev Reverts if the extra element is not exactly SEMI_CONTINUOUS_FLAG
+    /// @param _actionCallData Actions calldata sent by backend to execute actions
+    /// @param _strategy Strategy to be executed
+    /// @return isSemiContinuous Returns if the execution is semi-continuous or not
+    function _isSemiContinuousExecution(bytes[] calldata _actionCallData, Strategy memory _strategy)
+        internal
+        pure
+        returns (bool isSemiContinuous)
+    {
+        if (_actionCallData.length == _strategy.actionIds.length + 1) {
+            bytes calldata flagData = _actionCallData[_actionCallData.length - 1];
+
+            if (flagData.length != 32 || bytes32(flagData) != SEMI_CONTINUOUS_FLAG) {
+                revert InvalidSemiContinuousFlag(flagData, SEMI_CONTINUOUS_FLAG);
+            }
+
+            return true;
+        }
+        return false;
+    }
+
     /// @notice Called by user wallet through the auth contract to execute a recipe & check triggers
     /// @param _subId Id of the subscription we want to execute
     /// @param _actionCallData All input data needed to execute actions
@@ -248,49 +290,31 @@ contract RecipeExecutor is
 
         Strategy memory strategy = IStrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
 
+        // reading from registry
+        ISemiContinuousTracker semiContinuousTracker =
+            ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER));
+
         // skip triggers check if the sub is already in semi-continuous execution
         // deliberately skips updating sub data too
-        if (
-            ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER))
-                    .executionWalletOf(_subId) != address(this)
-        ) {
+        if (semiContinuousTracker.executionWalletOf(_subId) != address(this)) {
             // check if all the triggers are true
             (bool triggered, uint256 errIndex) =
-                _checkTriggers(strategy, _sub, _triggerCallData, _subId, SUB_STORAGE_ADDR);
+                _checkTriggers(_subId, strategy, _sub, _triggerCallData);
 
             if (!triggered) {
                 revert TriggerNotActiveError(errIndex);
             }
         }
 
-        // reading from registry
-        ISemiContinuousTracker semiContinuousTracker =
-            ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER));
+        _validateActionsCalldataLength(_actionCallData, strategy);
 
-        // must be either same length as strategy actions or one more with the last element being SEMI_CONTINUOUS_FLAG
-        if (
-            _actionCallData.length < strategy.actionIds.length
-                || _actionCallData.length > strategy.actionIds.length + 1
-        ) {
-            revert InvalidActionCallDataLength(_actionCallData.length, strategy.actionIds.length);
-        }
-
-        // if length is one more, the last actionCalldata must be SEMI_CONTINUOUS_FLAG
-        if (_actionCallData.length == strategy.actionIds.length + 1) {
-            bytes calldata flagData = _actionCallData[_actionCallData.length - 1];
-
-            if (flagData.length != 32 || bytes32(flagData) != SEMI_CONTINUOUS_FLAG) {
-                revert InvalidSemiContinuousFlag(flagData, SEMI_CONTINUOUS_FLAG);
-            }
-
-            // don't disable sub and start semi-continuous execution
-            if (!strategy.continuous) {
-                ISemiContinuousTracker(semiContinuousTracker).startExecution(_subId, strategyId);
-            }
-        } else {
-            // if this is a one time strategy
-            if (!strategy.continuous) {
-                ISemiContinuousTracker(semiContinuousTracker).finishExecution(_subId);
+        // if this is a one time strategy
+        if (!strategy.continuous) {
+            if (_isSemiContinuousExecution(_actionCallData, strategy)) {
+                // don't disable sub and start semi-continuous execution
+                semiContinuousTracker.startExecution(_subId, strategyId);
+            } else {
+                semiContinuousTracker.finishExecution(_subId);
                 ISubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId);
             }
         }
@@ -331,11 +355,10 @@ contract RecipeExecutor is
 
     /// @notice Checks if all the triggers are true
     function _checkTriggers(
+        uint256 _subId,
         Strategy memory strategy,
         StrategySub memory _sub,
-        bytes[] calldata _triggerCallData,
-        uint256 _subId,
-        address _storageAddr
+        bytes[] calldata _triggerCallData
     ) internal returns (bool, uint256) {
         bytes4[] memory triggerIds = strategy.triggerIds;
 
@@ -354,7 +377,7 @@ contract RecipeExecutor is
             // after execution triggers flag-ed changeable can update their value
             if (ITrigger(triggerAddr).isChangeable()) {
                 _sub.triggerData[i] = ITrigger(triggerAddr).changedSubData(_sub.triggerData[i]);
-                ISubStorage(_storageAddr).updateSubData(_subId, _sub);
+                ISubStorage(SUB_STORAGE_ADDR).updateSubData(_subId, _sub);
             }
         }
 

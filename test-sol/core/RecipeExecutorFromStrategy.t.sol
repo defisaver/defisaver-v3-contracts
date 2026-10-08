@@ -145,9 +145,9 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         cut.executeRecipeFromStrategy(subId, _actions(0), _triggerCallData(1), 0, sub);
     }
 
-    /// @dev One extra element is the flag, two is always invalid.
+    /// @dev For a one-time strategy one extra element is the flag, two is always invalid.
     function test_should_revert_when_action_call_data_is_two_elements_too_long() public {
-        (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(true, 1, 1));
+        (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(false, 1, 1));
 
         bytes[] memory actionsCalldata = _withFlag(_withFlag(_actions(1)));
 
@@ -155,6 +155,19 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
             abi.encodeWithSelector(RecipeExecutor.InvalidActionCallDataLength.selector, 3, 1)
         );
         cut.executeRecipeFromStrategy(subId, actionsCalldata, _triggerCallData(1), 0, sub);
+    }
+
+    /// @dev Continuous strategies never use the flag, so even a valid one is an extra element.
+    function test_should_revert_when_flag_is_passed_to_continuous_strategy() public {
+        (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(true, 1, 1));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(RecipeExecutor.InvalidActionCallDataLength.selector, 2, 1)
+        );
+        cut.executeRecipeFromStrategy(subId, _withFlag(_actions(1)), _triggerCallData(1), 0, sub);
+
+        assertFalse(tracker.isInExecution(subId), "tracker must stay untouched");
+        assertTrue(subStorage.getSub(subId).isEnabled, "sub must stay untouched");
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -241,9 +254,8 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         assertTrue(subStorage.getSub(subId).isEnabled, "sub must stay enabled");
     }
 
-    /// @dev A continuous strategy validates the flag but never starts a semi-continuous execution,
-    ///      it is already re-executable.
-    function test_should_validate_flag_but_not_start_execution_for_continuous_strategy() public {
+    /// @dev A continuous strategy is already re-executable, so it never touches the tracker.
+    function test_should_not_start_execution_for_continuous_strategy() public {
         (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(true, 1, 1));
         _fund(1);
 
@@ -253,7 +265,7 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
             abi.encodeWithSelector(SemiContinuousTracker.startExecution.selector),
             0
         );
-        _execute(subId, 0, _withFlag(_actions(1)), sub);
+        _execute(subId, 0, _actions(1), sub);
 
         assertFalse(tracker.isInExecution(subId), "continuous strategy must not be tracked");
         assertTrue(subStorage.getSub(subId).isEnabled);
@@ -363,12 +375,15 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         _execute(subId, 1, _actions(2), sub);
     }
 
-    /// @dev The flag is validated against the resolved strategy's action count as well.
-    function test_should_accept_flag_on_the_resolved_bundle_strategy() public {
+    /// @dev Strategies in this bundle are continuous, so the flag is rejected based on the resolved
+    ///      strategy's action count.
+    function test_should_reject_flag_on_the_resolved_bundle_strategy() public {
         (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribeToBundle();
-        _fund(2);
 
-        _execute(subId, 1, _withFlag(_actions(2)), sub);
+        vm.expectRevert(
+            abi.encodeWithSelector(RecipeExecutor.InvalidActionCallDataLength.selector, 3, 2)
+        );
+        cut.executeRecipeFromStrategy(subId, _withFlag(_actions(2)), _triggerCallData(1), 1, sub);
 
         assertFalse(tracker.isInExecution(subId), "bundle strategies here are continuous");
         assertTrue(subStorage.getSub(subId).isEnabled);
@@ -393,7 +408,7 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
     }
 
     function _expectInvalidFlag(bytes memory _flag) internal {
-        (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(true, 1, 1));
+        (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(false, 1, 1));
 
         bytes[] memory actionsCalldata = new bytes[](2);
         actionsCalldata[0] = _actions(1)[0];
