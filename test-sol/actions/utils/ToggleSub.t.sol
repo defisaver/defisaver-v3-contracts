@@ -5,7 +5,9 @@ pragma solidity =0.8.24;
 import { ToggleSub } from "../../../contracts/actions/utils/ToggleSub.sol";
 import { ActionBase } from "../../../contracts/actions/ActionBase.sol";
 import { SubStorage } from "../../../contracts/core/strategy/SubStorage.sol";
-import { ISemiContinuousTracker } from "../../../contracts/core/strategy/SemiContinuousTracker.sol";
+import {
+    IStrategyPartialExecutionStorage
+} from "../../../contracts/core/strategy/StrategyPartialExecutionStorage.sol";
 import { ISafe } from "../../../contracts/interfaces/protocols/safe/ISafe.sol";
 import { IDSProxy } from "../../../contracts/interfaces/DS/IDSProxy.sol";
 
@@ -48,14 +50,14 @@ contract TestToggleSub is SubActionsBase {
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_deactivate_sub() public {
         assertTrue(subStorage.getSub(subId).isEnabled);
-        assertFalse(tracker.isInExecution(subId));
+        assertFalse(partialExecutionStorage.isInPartialExecution(subId));
 
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.DeactivateSub(subId);
         _toggle(wallet, subId, false, false);
 
         assertFalse(subStorage.getSub(subId).isEnabled);
-        assertFalse(tracker.isInExecution(subId));
+        assertFalse(partialExecutionStorage.isInPartialExecution(subId));
     }
 
     function test_should_deactivate_sub_direct() public {
@@ -140,19 +142,24 @@ contract TestToggleSub is SubActionsBase {
         assertFalse(subStorage.getSub(subId).isEnabled, "sub must stay untouched");
     }
 
-    /// @dev When the sub is in execution the tracker's NotAuthorized check fires first, masking
+    /// @dev When the sub is in partial execution the partial execution storage's NotAuthorized check fires first, masking
     ///      SubStorage's SenderNotSubOwnerError. Same outcome, less obvious error.
-    function test_should_revert_when_deactivating_in_execution_sub_of_another_owner() public {
+    function test_should_revert_when_deactivating_in_partial_execution_sub_of_another_owner()
+        public
+    {
         _startExecution(subId);
 
         SmartWallet otherWallet = new SmartWallet(alice);
 
-        // SemiContinuousTracker::NotAuthorized
+        // StrategyPartialExecutionStorage::NotAuthorized
         vm.expectRevert();
         _toggle(otherWallet, subId, false, false);
 
         assertTrue(subStorage.getSub(subId).isEnabled, "sub must stay untouched");
-        assertTrue(tracker.isInExecution(subId), "tracker must stay untouched");
+        assertTrue(
+            partialExecutionStorage.isInPartialExecution(subId),
+            "partial execution storage must stay untouched"
+        );
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -168,15 +175,15 @@ contract TestToggleSub is SubActionsBase {
         cut.executeActionDirect(toggleSubEncode(subId, false));
     }
 
-    /// @dev Same call on a sub that is in execution: the tracker rejects it before SubStorage does.
-    function test_should_revert_with_not_authorized_when_called_without_a_wallet_in_execution()
+    /// @dev Same call on a sub that is in partial execution: the partial execution storage rejects it before SubStorage does.
+    function test_should_revert_with_not_authorized_when_called_without_a_wallet_in_partial_execution()
         public
     {
         _startExecution(subId);
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                ISemiContinuousTracker.NotAuthorized.selector, subId, address(cut)
+                IStrategyPartialExecutionStorage.NotAuthorized.selector, subId, address(cut)
             )
         );
         cut.executeActionDirect(toggleSubEncode(subId, false));
@@ -244,85 +251,102 @@ contract TestToggleSub is SubActionsBase {
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                          TESTS - SEMI-CONTINUOUS INTERACTION
+                       TESTS - PARTIAL EXECUTION INTERACTION
     //////////////////////////////////////////////////////////////////////////*/
-    function test_should_clear_semi_continuous_execution_on_deactivate() public {
+    function test_should_clear_partial_execution_on_deactivate() public {
         _startExecution(subId);
-        assertTrue(tracker.isInExecution(subId));
+        assertTrue(partialExecutionStorage.isInPartialExecution(subId));
 
-        vm.expectEmit(true, true, true, true, address(tracker));
-        emit ISemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
+        emit IStrategyPartialExecutionStorage.ExecutionEnded(subId, walletAddr, walletAddr);
 
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.DeactivateSub(subId);
         _toggle(wallet, subId, false, false);
 
-        assertFalse(tracker.isInExecution(subId), "deactivate must clear the tracker");
-        assertEq(tracker.executionWalletOf(subId), address(0));
+        assertFalse(
+            partialExecutionStorage.isInPartialExecution(subId),
+            "deactivate must clear the partial execution storage"
+        );
+        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), address(0));
         assertFalse(subStorage.getSub(subId).isEnabled);
     }
 
-    function test_should_deactivate_again_after_semi_continuous_execution_was_cleared() public {
+    function test_should_deactivate_again_after_partial_execution_was_cleared() public {
         _startExecution(subId);
-        assertTrue(tracker.isInExecution(subId));
+        assertTrue(partialExecutionStorage.isInPartialExecution(subId));
 
-        vm.expectEmit(true, true, true, true, address(tracker));
-        emit ISemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
+        emit IStrategyPartialExecutionStorage.ExecutionEnded(subId, walletAddr, walletAddr);
 
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.DeactivateSub(subId);
         _toggle(wallet, subId, false, false);
 
-        assertFalse(tracker.isInExecution(subId), "deactivate must clear the tracker");
-        assertEq(tracker.executionWalletOf(subId), address(0));
+        assertFalse(
+            partialExecutionStorage.isInPartialExecution(subId),
+            "deactivate must clear the partial execution storage"
+        );
+        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), address(0));
         assertFalse(subStorage.getSub(subId).isEnabled);
 
-        /// @dev No ExecutionFinished this time, finishExecution early-returns.
+        /// @dev No ExecutionEnded this time, endExecution early-returns.
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.DeactivateSub(subId);
         _toggle(wallet, subId, false, false);
 
-        assertFalse(tracker.isInExecution(subId), "tracker must stay cleared");
-        assertEq(tracker.executionWalletOf(subId), address(0));
+        assertFalse(
+            partialExecutionStorage.isInPartialExecution(subId),
+            "partial execution storage must stay cleared"
+        );
+        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), address(0));
         assertFalse(subStorage.getSub(subId).isEnabled, "sub must stay disabled");
     }
 
-    function test_should_clear_semi_continuous_execution_on_deactivate_direct() public {
+    function test_should_clear_partial_execution_on_deactivate_direct() public {
         _startExecution(subId);
-        assertTrue(tracker.isInExecution(subId));
+        assertTrue(partialExecutionStorage.isInPartialExecution(subId));
 
-        vm.expectEmit(true, true, true, true, address(tracker));
-        emit ISemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
+        emit IStrategyPartialExecutionStorage.ExecutionEnded(subId, walletAddr, walletAddr);
 
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.DeactivateSub(subId);
         _toggle(wallet, subId, false, true);
 
-        assertFalse(tracker.isInExecution(subId), "deactivate must clear the tracker");
+        assertFalse(
+            partialExecutionStorage.isInPartialExecution(subId),
+            "deactivate must clear the partial execution storage"
+        );
     }
 
-    /// @dev Both branches clear the tracker, so a flag that is still set can't keep bypassing
+    /// @dev Both branches clear the partial execution storage, so a flag that is still set can't keep bypassing
     ///      triggers once the sub is re-enabled.
-    function test_should_clear_semi_continuous_execution_on_activate() public {
+    function test_should_clear_partial_execution_on_activate() public {
         _startExecution(subId);
-        assertTrue(tracker.isInExecution(subId));
+        assertTrue(partialExecutionStorage.isInPartialExecution(subId));
 
-        vm.expectEmit(true, true, true, true, address(tracker));
-        emit ISemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
+        emit IStrategyPartialExecutionStorage.ExecutionEnded(subId, walletAddr, walletAddr);
 
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.ActivateSub(subId);
         _toggle(wallet, subId, true, false);
 
-        assertFalse(tracker.isInExecution(subId), "activate must clear the tracker");
-        assertEq(tracker.executionWalletOf(subId), address(0));
+        assertFalse(
+            partialExecutionStorage.isInPartialExecution(subId),
+            "activate must clear the partial execution storage"
+        );
+        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), address(0));
         assertTrue(subStorage.getSub(subId).isEnabled);
     }
 
-    /// @dev The tracker is a hard dependency of the deactivate path. If it is not registered
+    /// @dev The partial execution storage is a hard dependency of the deactivate path. If it is not registered
     ///      the user cannot disable their subscription at all.
-    function test_should_revert_on_deactivate_when_tracker_is_not_registered() public {
-        redeploy("SemiContinuousTracker", address(0));
+    function test_should_revert_on_deactivate_when_partial_execution_storage_is_not_registered()
+        public
+    {
+        redeploy("StrategyPartialExecutionStorage", address(0));
 
         vm.expectRevert();
         _toggle(wallet, subId, false, false);
@@ -330,10 +354,12 @@ contract TestToggleSub is SubActionsBase {
         assertTrue(subStorage.getSub(subId).isEnabled, "sub could not be disabled");
     }
 
-    /// @dev The activate path calls the tracker too, so it is a hard dependency there as well.
-    function test_should_revert_on_activate_when_tracker_is_not_registered() public {
+    /// @dev The activate path calls the partial execution storage too, so it is a hard dependency there as well.
+    function test_should_revert_on_activate_when_partial_execution_storage_is_not_registered()
+        public
+    {
         _toggle(wallet, subId, false, false);
-        redeploy("SemiContinuousTracker", address(0));
+        redeploy("StrategyPartialExecutionStorage", address(0));
 
         vm.expectRevert();
         _toggle(wallet, subId, true, false);
@@ -380,31 +406,33 @@ contract TestToggleSub is SubActionsBase {
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                        TESTS - TWO SUBS, TRACKER ISOLATION
+               TESTS - TWO SUBS, PARTIAL EXECUTION STORAGE ISOLATION
     //////////////////////////////////////////////////////////////////////////*/
-    /// @dev finishExecution is keyed by subId, so toggling one sub must leave every other
-    ///      sub of the same owner in execution.
-    function test_should_clear_only_the_deactivated_sub_when_both_are_in_execution() public {
+    /// @dev endExecution is keyed by subId, so toggling one sub must leave every other
+    ///      sub of the same owner in partial execution.
+    function test_should_clear_only_the_deactivated_sub_when_both_are_in_partial_execution()
+        public
+    {
         uint256 secondSubId = _subscribe(wallet);
         _startExecution(subId);
         _startExecution(secondSubId);
 
-        vm.expectEmit(true, true, true, true, address(tracker));
-        emit ISemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
+        emit IStrategyPartialExecutionStorage.ExecutionEnded(subId, walletAddr, walletAddr);
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.DeactivateSub(subId);
         _toggle(wallet, subId, false, false);
 
-        _assertNotInExecution(subId);
+        _assertNotInPartialExecution(subId);
         assertFalse(subStorage.getSub(subId).isEnabled);
 
-        _assertInExecution(secondSubId, walletAddr);
+        _assertInPartialExecution(secondSubId, walletAddr);
         assertTrue(subStorage.getSub(secondSubId).isEnabled, "other sub must stay enabled");
     }
 
-    /// @dev Stronger form of the above: exactly one ExecutionFinished is emitted, for the
-    ///      toggled sub, so the second sub is not silently finished too.
-    function test_should_emit_execution_finished_only_for_the_deactivated_sub() public {
+    /// @dev Stronger form of the above: exactly one ExecutionEnded is emitted, for the
+    ///      toggled sub, so the second sub is not silently ended too.
+    function test_should_emit_execution_ended_only_for_the_deactivated_sub() public {
         uint256 secondSubId = _subscribe(wallet);
         _startExecution(subId);
         _startExecution(secondSubId);
@@ -413,56 +441,60 @@ contract TestToggleSub is SubActionsBase {
         _toggle(wallet, subId, false, false);
 
         Vm.Log[] memory logs = vm.getRecordedLogs();
-        uint256 finishedCount;
+        uint256 endedCount;
         for (uint256 i = 0; i < logs.length; ++i) {
-            if (logs[i].emitter != address(tracker)) continue;
-            if (logs[i].topics[0] != ISemiContinuousTracker.ExecutionFinished.selector) continue;
+            if (logs[i].emitter != address(partialExecutionStorage)) continue;
+            if (logs[i].topics[0] != IStrategyPartialExecutionStorage.ExecutionEnded.selector) {
+                continue;
+            }
 
-            finishedCount++;
-            assertEq(uint256(logs[i].topics[1]), subId, "only the toggled sub may be finished");
+            endedCount++;
+            assertEq(uint256(logs[i].topics[1]), subId, "only the toggled sub may be ended");
         }
 
-        assertEq(finishedCount, 1, "exactly one ExecutionFinished must be emitted");
+        assertEq(endedCount, 1, "exactly one ExecutionEnded must be emitted");
     }
 
-    /// @dev Deactivating a sub that was never in execution hits finishExecution's early return
+    /// @dev Deactivating a sub that was never in partial execution hits endExecution's early return
     ///      and must not reach into the other sub's entry.
-    function test_should_not_touch_in_execution_sub_when_deactivating_an_idle_sub() public {
+    function test_should_not_touch_in_partial_execution_sub_when_deactivating_an_idle_sub() public {
         uint256 secondSubId = _subscribe(wallet);
         _startExecution(secondSubId);
 
-        _assertNotInExecution(subId);
+        _assertNotInPartialExecution(subId);
 
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.DeactivateSub(subId);
         _toggle(wallet, subId, false, false);
 
-        _assertNotInExecution(subId);
-        _assertInExecution(secondSubId, walletAddr);
+        _assertNotInPartialExecution(subId);
+        _assertInPartialExecution(secondSubId, walletAddr);
         assertTrue(subStorage.getSub(secondSubId).isEnabled, "other sub must stay enabled");
     }
 
     /// @dev A full deactivate/activate cycle on the idle sub leaves the other sub's entry alone.
-    function test_should_not_touch_in_execution_sub_through_a_toggle_cycle_of_another_sub() public {
+    function test_should_not_touch_in_partial_execution_sub_through_a_toggle_cycle_of_another_sub()
+        public
+    {
         uint256 secondSubId = _subscribe(wallet);
         _startExecution(secondSubId);
 
         _toggle(wallet, subId, false, false);
-        _assertInExecution(secondSubId, walletAddr);
+        _assertInPartialExecution(secondSubId, walletAddr);
 
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.ActivateSub(subId);
         _toggle(wallet, subId, true, false);
 
         assertTrue(subStorage.getSub(subId).isEnabled);
-        _assertNotInExecution(subId);
-        _assertInExecution(secondSubId, walletAddr);
+        _assertNotInPartialExecution(subId);
+        _assertInPartialExecution(secondSubId, walletAddr);
         assertTrue(subStorage.getSub(secondSubId).isEnabled, "other sub must stay enabled");
     }
 
     /// @dev Isolation also holds across owners: bob deactivating his sub cannot clear the entry
-    ///      of alice's sub, which is tracked against a different wallet.
-    function test_should_not_touch_in_execution_sub_of_another_owner() public {
+    ///      of alice's sub, which is in partial execution for a different wallet.
+    function test_should_not_touch_in_partial_execution_sub_of_another_owner() public {
         SmartWallet otherWallet = new SmartWallet(alice);
         address otherWalletAddr = otherWallet.walletAddr();
         uint256 otherSubId = _subscribe(otherWallet);
@@ -470,17 +502,17 @@ contract TestToggleSub is SubActionsBase {
         _startExecution(subId);
         _startExecution(otherSubId);
 
-        vm.expectEmit(true, true, true, true, address(tracker));
-        emit ISemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
+        emit IStrategyPartialExecutionStorage.ExecutionEnded(subId, walletAddr, walletAddr);
         _toggle(wallet, subId, false, false);
 
-        _assertNotInExecution(subId);
-        _assertInExecution(otherSubId, otherWalletAddr);
+        _assertNotInPartialExecution(subId);
+        _assertInPartialExecution(otherSubId, otherWalletAddr);
         assertTrue(subStorage.getSub(otherSubId).isEnabled, "other owner's sub must stay enabled");
     }
 
-    /// @dev A reverted toggle of someone else's sub leaves both tracker entries as they were.
-    function test_should_not_clear_any_tracker_entry_when_toggling_another_owners_sub_reverts()
+    /// @dev A reverted toggle of someone else's sub leaves both partial executions as they were.
+    function test_should_not_clear_any_partial_execution_when_toggling_another_owners_sub_reverts()
         public
     {
         SmartWallet otherWallet = new SmartWallet(alice);
@@ -490,12 +522,12 @@ contract TestToggleSub is SubActionsBase {
         _startExecution(subId);
         _startExecution(otherSubId);
 
-        // SemiContinuousTracker::NotAuthorized
+        // StrategyPartialExecutionStorage::NotAuthorized
         vm.expectRevert();
         _toggle(wallet, otherSubId, false, false);
 
-        _assertInExecution(subId, walletAddr);
-        _assertInExecution(otherSubId, otherWalletAddr);
+        _assertInPartialExecution(subId, walletAddr);
+        _assertInPartialExecution(otherSubId, otherWalletAddr);
         assertTrue(subStorage.getSub(subId).isEnabled, "sub must stay untouched");
         assertTrue(subStorage.getSub(otherSubId).isEnabled, "sub must stay untouched");
     }
@@ -509,13 +541,26 @@ contract TestToggleSub is SubActionsBase {
         );
     }
 
-    function _assertInExecution(uint256 _subId, address _wallet) internal view {
-        assertTrue(tracker.isInExecution(_subId), "sub must be in execution");
-        assertEq(tracker.executionWalletOf(_subId), _wallet, "wrong execution wallet");
+    function _assertInPartialExecution(uint256 _subId, address _wallet) internal view {
+        assertTrue(
+            partialExecutionStorage.isInPartialExecution(_subId), "sub must be in partial execution"
+        );
+        assertEq(
+            partialExecutionStorage.getPartialExecutionWallet(_subId),
+            _wallet,
+            "wrong partial execution wallet"
+        );
     }
 
-    function _assertNotInExecution(uint256 _subId) internal view {
-        assertFalse(tracker.isInExecution(_subId), "sub must not be in execution");
-        assertEq(tracker.executionWalletOf(_subId), address(0), "execution wallet must be cleared");
+    function _assertNotInPartialExecution(uint256 _subId) internal view {
+        assertFalse(
+            partialExecutionStorage.isInPartialExecution(_subId),
+            "sub must not be in partial execution"
+        );
+        assertEq(
+            partialExecutionStorage.getPartialExecutionWallet(_subId),
+            address(0),
+            "partial execution wallet must be cleared"
+        );
     }
 }

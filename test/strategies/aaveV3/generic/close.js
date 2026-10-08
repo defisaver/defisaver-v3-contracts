@@ -39,9 +39,9 @@ const runCloseTests = () => {
 
         before(async () => {
             env = await setupGenericTestEnv({
-                // triggers read SemiContinuousTracker from registry, so it has to be deployed
+                // triggers read StrategyPartialExecutionStorage from registry, so it has to be deployed
                 extraRedeploys: [
-                    'SemiContinuousTracker',
+                    'StrategyPartialExecutionStorage',
                     'AaveV3QuotePriceTrigger',
                     'AaveV3QuotePriceRangeTrigger',
                     'SendTokenAndUnwrap',

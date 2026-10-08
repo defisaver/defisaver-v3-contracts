@@ -8,14 +8,18 @@ import { BotAuth } from "../../contracts/core/strategy/BotAuth.sol";
 import { StrategyExecutor } from "../../contracts/core/strategy/StrategyExecutor.sol";
 import { RecipeExecutor } from "../../contracts/core/RecipeExecutor.sol";
 import { SubStorage } from "../../contracts/core/strategy/SubStorage.sol";
-import { SemiContinuousTracker } from "../../contracts/core/strategy/SemiContinuousTracker.sol";
+import {
+    StrategyPartialExecutionStorage
+} from "../../contracts/core/strategy/StrategyPartialExecutionStorage.sol";
 import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
 import { CreateSub } from "../../contracts/actions/utils/CreateSub.sol";
 import { ToggleSub } from "../../contracts/actions/utils/ToggleSub.sol";
 import { GasPriceTrigger } from "../../contracts/triggers/GasPriceTrigger.sol";
 import { PullToken } from "../../contracts/actions/utils/PullToken.sol";
 import { ActionBase } from "../../contracts/actions/ActionBase.sol";
-import { ISemiContinuousTracker } from "../../contracts/interfaces/core/ISemiContinuousTracker.sol";
+import {
+    IStrategyPartialExecutionStorage
+} from "../../contracts/interfaces/core/IStrategyPartialExecutionStorage.sol";
 import { DFSIds } from "../../contracts/utils/DFSIds.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
 import { ActionsUtils } from "../utils/ActionsUtils.sol";
@@ -26,7 +30,7 @@ import { BundleBuilder } from "../utils/BundleBuilder.sol";
 import { RegistryUtils } from "../utils/RegistryUtils.sol";
 import { stdError } from "forge-std/StdError.sol";
 
-/// @notice Test-only action that calls SemiContinuousTracker.startExecution from inside a recipe,
+/// @notice Test-only action that calls StrategyPartialExecutionStorage.startExecution from inside a recipe,
 ///         i.e. from the user's wallet, to probe what the executor's transient approval allows.
 ///         The subId it starts is taken from the action's call data, so the bot picks it.
 contract StartExecutionAction is ActionBase {
@@ -38,8 +42,9 @@ contract StartExecutionAction is ActionBase {
     ) public payable override returns (bytes32) {
         uint256 subId = abi.decode(_callData, (uint256));
 
-        ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER))
-            .startExecution(subId, 0);
+        IStrategyPartialExecutionStorage(
+                registry.getAddr(DFSIds.STRATEGY_PARTIAL_EXECUTION_STORAGE)
+            ).startExecution(subId, 0);
 
         return bytes32(subId);
     }
@@ -60,9 +65,9 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                      VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
-    /// @dev Mirrors RecipeExecutor.SEMI_CONTINUOUS_FLAG, the marker the bot appends to
+    /// @dev Mirrors RecipeExecutor.PARTIAL_EXECUTION_FLAG, the marker the bot appends to
     ///      _actionsCallData to keep a one-time sub alive after execution.
-    bytes32 internal constant SEMI_CONTINUOUS_FLAG = keccak256("SEMI_CONTINUOUS_FLAG");
+    bytes32 internal constant PARTIAL_EXECUTION_FLAG = keccak256("PARTIAL_EXECUTION_FLAG");
 
     SmartWallet wallet;
     address walletAddr;
@@ -72,7 +77,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
     address recipeExecutorAddr;
 
     SubStorage subStorage;
-    SemiContinuousTracker tracker;
+    StrategyPartialExecutionStorage partialExecutionStorage;
 
     struct DummySubData {
         address token;
@@ -104,7 +109,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         vm.etch(PROXY_AUTH_ADDR, address(new ProxyAuth()).code);
 
         botAuthAddr = address(new BotAuth());
-        tracker = new SemiContinuousTracker();
+        partialExecutionStorage = new StrategyPartialExecutionStorage();
 
         redeploy("StrategyExecutorID", address(cut));
         redeploy("PullToken", address(new PullToken()));
@@ -114,7 +119,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         redeploy("CreateSub", address(new CreateSub()));
         redeploy("ToggleSub", address(new ToggleSub()));
         redeploy("BotAuth", botAuthAddr);
-        redeploy("SemiContinuousTracker", address(tracker));
+        redeploy("StrategyPartialExecutionStorage", address(partialExecutionStorage));
         redeploy("StartExecutionAction", address(new StartExecutionAction()));
     }
 
@@ -268,13 +273,17 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         cut.executeStrategy(subId, 0, _triggers(subData), _actions(subData, 1), sub);
     }
 
-    /// @dev Once the sub is in semi-continuous execution for this wallet, RecipeExecutor skips the
+    /// @dev Once the sub is in partial execution for this wallet, RecipeExecutor skips the
     ///      trigger check entirely, so a trigger that would now be false no longer blocks the bot.
-    function test_should_skip_triggers_while_sub_is_in_execution() public {
+    function test_should_skip_triggers_while_sub_is_in_partial_execution() public {
         Fixture memory f = _fixture(false, 0);
 
         _executeWithFlag(f);
-        assertEq(tracker.executionWalletOf(f.subId), walletAddr, "must be in execution");
+        assertEq(
+            partialExecutionStorage.getPartialExecutionWallet(f.subId),
+            walletAddr,
+            "must be in partial execution"
+        );
 
         /// @dev maxGasPrice is 0, so from here on the trigger would evaluate to false.
         vm.txGasPrice(1);
@@ -291,15 +300,15 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                              TESTS - TRACKER APPROVAL
+                     TESTS - PARTIAL EXECUTION STORAGE APPROVAL
     //////////////////////////////////////////////////////////////////////////*/
     /// @dev _callActions approves start of executionunconditionally, once, and lets RecipeExecutor decide whether to use it.
     function test_should_approve_start_of_execution_exactly_once() public {
         Fixture memory f = _fixture(true, type(uint256).max);
 
         vm.expectCall(
-            address(tracker),
-            abi.encodeCall(SemiContinuousTracker.approveStartOfExecution, (f.subId)),
+            address(partialExecutionStorage),
+            abi.encodeCall(StrategyPartialExecutionStorage.approveStartOfExecution, (f.subId)),
             1
         );
         _execute(f);
@@ -314,30 +323,33 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         Fixture memory f = _fixture(true, type(uint256).max);
 
         vm.expectCall(
-            address(tracker),
-            abi.encodeCall(SemiContinuousTracker.approveStartOfExecution, (f.subId)),
+            address(partialExecutionStorage),
+            abi.encodeCall(StrategyPartialExecutionStorage.approveStartOfExecution, (f.subId)),
             1
         );
         _execute(f);
     }
 
-    /// @dev Approval alone starts nothing: without the flag the tracker stays empty.
+    /// @dev Approval alone starts nothing: without the flag the partial execution storage stays empty.
     function test_should_not_start_execution_when_no_flag_is_passed() public {
         Fixture memory f = _fixture(true, type(uint256).max);
 
         _execute(f);
 
-        assertFalse(tracker.isInExecution(f.subId), "approval must not start an execution");
-        assertEq(tracker.executionWalletOf(f.subId), address(0));
+        assertFalse(
+            partialExecutionStorage.isInPartialExecution(f.subId),
+            "approval must not start an execution"
+        );
+        assertEq(partialExecutionStorage.getPartialExecutionWallet(f.subId), address(0));
         assertTrue(subStorage.getSub(f.subId).isEnabled, "continuous sub must stay enabled");
     }
 
-    /// @dev The tracker is a hard dependency of every execution, semi-continuous or not: the
+    /// @dev The partial execution storage is a hard dependency of every execution, partial or not: the
     ///      approval call reverts before the recipe is reached, so no action runs.
-    function test_should_revert_when_tracker_is_not_registered() public {
+    function test_should_revert_when_partial_execution_storage_is_not_registered() public {
         Fixture memory f = _fixture(false, type(uint256).max);
 
-        redeploy("SemiContinuousTracker", address(0));
+        redeploy("StrategyPartialExecutionStorage", address(0));
 
         uint256 balanceBefore = balanceOf(f.subData.token, sender);
 
@@ -362,15 +374,18 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         bytes[] memory actionsCalldata = new bytes[](1);
         actionsCalldata[0] = abi.encode(otherSubId);
 
-        // SemiContinuousTracker::NotApproved, swallowed by the auth contract
+        // StrategyPartialExecutionStorage::NotApproved, swallowed by the auth contract
         vm.expectRevert();
         cut.executeStrategy(subId, 0, _triggers(_probeSubData()), actionsCalldata, sub);
 
-        assertFalse(tracker.isInExecution(otherSubId), "another sub must not be startable");
+        assertFalse(
+            partialExecutionStorage.isInPartialExecution(otherSubId),
+            "another sub must not be startable"
+        );
     }
 
     /// @dev Documents current behaviour: the approval is granted to the whole transaction, so any
-    ///      action in the recipe can start the semi-continuous execution of the sub being executed,
+    ///      action in the recipe can start the partial execution of the sub being executed,
     ///      even when the bot never passed the flag. The flag is not the only way in.
     function test_approval_leaks_to_any_action_in_the_recipe() public {
         (uint256 subId, StrategyModel.StrategySub memory sub) = _sub_to_probe_strategy();
@@ -379,12 +394,12 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         bytes[] memory actionsCalldata = new bytes[](1);
         actionsCalldata[0] = abi.encode(subId);
 
-        vm.expectEmit(true, true, true, true, address(tracker));
-        emit ISemiContinuousTracker.ExecutionStarted(subId, walletAddr);
+        vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
+        emit IStrategyPartialExecutionStorage.ExecutionStarted(subId, walletAddr);
         cut.executeStrategy(subId, 0, _triggers(_probeSubData()), actionsCalldata, sub);
 
         assertEq(
-            tracker.executionWalletOf(subId),
+            partialExecutionStorage.getPartialExecutionWallet(subId),
             walletAddr,
             "an action started the execution without any flag"
         );
@@ -398,26 +413,28 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         _execute(f);
 
         vm.expectRevert(
-            abi.encodeWithSelector(ISemiContinuousTracker.NotApproved.selector, f.subId, walletAddr)
+            abi.encodeWithSelector(
+                IStrategyPartialExecutionStorage.NotApproved.selector, f.subId, walletAddr
+            )
         );
         prank(walletAddr);
-        tracker.startExecution(f.subId, 0);
+        partialExecutionStorage.startExecution(f.subId, 0);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                          TESTS - SEMI-CONTINUOUS LIFECYCLE
+                        TESTS - PARTIAL EXECUTION LIFECYCLE
     //////////////////////////////////////////////////////////////////////////*/
-    /// @dev A one-time strategy executed with the flag stays subscribed and is marked in execution.
-    function test_should_start_semi_continuous_execution_when_flag_is_passed() public {
+    /// @dev A one-time strategy executed with the flag stays subscribed and is marked in partial execution.
+    function test_should_start_partial_execution_when_flag_is_passed() public {
         Fixture memory f = _fixture(false, type(uint256).max);
 
         uint256 balanceBefore = balanceOf(f.subData.token, sender);
 
-        vm.expectEmit(true, true, true, true, address(tracker));
-        emit ISemiContinuousTracker.ExecutionStarted(f.subId, walletAddr);
+        vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
+        emit IStrategyPartialExecutionStorage.ExecutionStarted(f.subId, walletAddr);
         _executeWithFlag(f);
 
-        assertEq(tracker.executionWalletOf(f.subId), walletAddr);
+        assertEq(partialExecutionStorage.getPartialExecutionWallet(f.subId), walletAddr);
         assertTrue(subStorage.getSub(f.subId).isEnabled, "sub must stay enabled");
         assertEq(
             balanceOf(f.subData.token, sender),
@@ -426,18 +443,21 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         );
     }
 
-    /// @dev Dropping the flag ends the lifecycle: the tracker is cleared and the sub deactivated.
-    function test_should_finish_semi_continuous_execution_when_flag_is_omitted() public {
+    /// @dev Dropping the flag ends the lifecycle: the partial execution storage is cleared and the sub deactivated.
+    function test_should_end_partial_execution_when_flag_is_omitted() public {
         Fixture memory f = _fixture(false, type(uint256).max);
 
         _executeWithFlag(f);
-        assertTrue(tracker.isInExecution(f.subId));
+        assertTrue(partialExecutionStorage.isInPartialExecution(f.subId));
 
-        vm.expectEmit(true, true, true, true, address(tracker));
-        emit ISemiContinuousTracker.ExecutionFinished(f.subId, walletAddr, walletAddr);
+        vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
+        emit IStrategyPartialExecutionStorage.ExecutionEnded(f.subId, walletAddr, walletAddr);
         _execute(f);
 
-        assertFalse(tracker.isInExecution(f.subId), "tracker must be cleared");
+        assertFalse(
+            partialExecutionStorage.isInPartialExecution(f.subId),
+            "partial execution storage must be cleared"
+        );
         assertFalse(subStorage.getSub(f.subId).isEnabled, "one-time sub must be deactivated");
     }
 
@@ -448,7 +468,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         _execute(f);
 
         assertFalse(subStorage.getSub(f.subId).isEnabled, "one-time sub must be deactivated");
-        assertFalse(tracker.isInExecution(f.subId));
+        assertFalse(partialExecutionStorage.isInPartialExecution(f.subId));
 
         vm.expectRevert(
             abi.encodeWithSelector(StrategyExecutorCommon.SubNotEnabled.selector, f.subId)
@@ -512,7 +532,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         );
     }
 
-    /// @dev Same, with the semi-continuous marker appended the way the bot does it.
+    /// @dev Same, with the partial execution marker appended the way the bot does it.
     function _executeWithFlag(Fixture memory _fixt) internal {
         cut.executeStrategy(
             _fixt.subId,
@@ -561,7 +581,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         _fund_sender(subData, 4);
     }
 
-    /// @dev Sub to a strategy whose only action pokes the tracker, used to probe the approval.
+    /// @dev Sub to a strategy whose only action pokes the partial execution storage, used to probe the approval.
     function _sub_to_probe_strategy()
         internal
         returns (uint256 subId, StrategyModel.StrategySub memory sub)
@@ -702,7 +722,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         }
     }
 
-    /// @dev Appends the semi-continuous marker the bot uses to keep a one-time sub alive.
+    /// @dev Appends the partial execution marker the bot uses to keep a one-time sub alive.
     function _withFlag(bytes[] memory _actionsCalldata)
         internal
         pure
@@ -714,6 +734,6 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
             withFlag[i] = _actionsCalldata[i];
         }
 
-        withFlag[_actionsCalldata.length] = abi.encode(SEMI_CONTINUOUS_FLAG);
+        withFlag[_actionsCalldata.length] = abi.encode(PARTIAL_EXECUTION_FLAG);
     }
 }

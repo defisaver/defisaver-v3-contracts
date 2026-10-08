@@ -156,8 +156,8 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
 
             strategyExecutor = await redeployCore();
 
-            // trigger reads SemiContinuousTracker from registry, so it has to be deployed
-            await redeploy('SemiContinuousTracker');
+            // trigger reads StrategyPartialExecutionStorage from registry, so it has to be deployed
+            await redeploy('StrategyPartialExecutionStorage');
             await redeploy('AaveV3QuotePriceTrigger');
             await redeploy('GasPriceTrigger');
             await redeploy('SendTokenAndUnwrap');
@@ -515,8 +515,8 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
 
             strategyExecutor = await redeployCore();
 
-            // trigger reads SemiContinuousTracker from registry, so it has to be deployed
-            await redeploy('SemiContinuousTracker');
+            // trigger reads StrategyPartialExecutionStorage from registry, so it has to be deployed
+            await redeploy('StrategyPartialExecutionStorage');
             await redeploy('AaveV3QuotePriceTrigger');
             await redeploy('GasPriceTrigger');
             await redeploy('DFSSell');
@@ -861,8 +861,8 @@ const aaveV3CloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
 
             strategyExecutor = await redeployCore();
 
-            // trigger reads SemiContinuousTracker from registry, so it has to be deployed
-            await redeploy('SemiContinuousTracker');
+            // trigger reads StrategyPartialExecutionStorage from registry, so it has to be deployed
+            await redeploy('StrategyPartialExecutionStorage');
             await redeploy('AaveV3QuotePriceTrigger');
             await redeploy('GasPriceTrigger');
             await redeploy('SendTokenAndUnwrap');
@@ -1188,8 +1188,8 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
 
             strategyExecutor = await redeployCore();
 
-            // trigger reads SemiContinuousTracker from registry, so it has to be deployed
-            await redeploy('SemiContinuousTracker');
+            // trigger reads StrategyPartialExecutionStorage from registry, so it has to be deployed
+            await redeploy('StrategyPartialExecutionStorage');
             await redeploy('AaveV3QuotePriceTrigger');
             await redeploy('GasPriceTrigger');
             await redeploy('SendTokenAndUnwrap');

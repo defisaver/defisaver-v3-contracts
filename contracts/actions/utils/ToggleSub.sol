@@ -2,7 +2,9 @@
 
 pragma solidity =0.8.24;
 
-import { ISemiContinuousTracker } from "../../interfaces/core/ISemiContinuousTracker.sol";
+import {
+    IStrategyPartialExecutionStorage
+} from "../../interfaces/core/IStrategyPartialExecutionStorage.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { SubStorage } from "../../core/strategy/SubStorage.sol";
 import { Permission } from "../../auth/Permission.sol";
@@ -46,9 +48,10 @@ contract ToggleSub is ActionBase, Permission {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function updateSubData(Params memory _inputData) internal {
-        ISemiContinuousTracker semiContinuousTracker =
-            ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER));
-        semiContinuousTracker.finishExecution(_inputData.subId);
+        IStrategyPartialExecutionStorage partialExecutionStorage = IStrategyPartialExecutionStorage(
+            registry.getAddr(DFSIds.STRATEGY_PARTIAL_EXECUTION_STORAGE)
+        );
+        partialExecutionStorage.endExecution(_inputData.subId);
 
         if (_inputData.active) {
             /// @notice This gives wallet permission to our auth contract to be able to execute the strategy.

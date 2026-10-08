@@ -4,7 +4,9 @@ pragma solidity =0.8.24;
 
 import { CreateSub } from "../../contracts/actions/utils/CreateSub.sol";
 import { SubStorage } from "../../contracts/core/strategy/SubStorage.sol";
-import { SemiContinuousTracker } from "../../contracts/core/strategy/SemiContinuousTracker.sol";
+import {
+    StrategyPartialExecutionStorage
+} from "../../contracts/core/strategy/StrategyPartialExecutionStorage.sol";
 import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
 import { IDFSRegistry } from "../../contracts/interfaces/core/IDFSRegistry.sol";
 import { DFSIds } from "../../contracts/utils/DFSIds.sol";
@@ -27,17 +29,17 @@ contract SubActionsBase is ActionsUtils, RegistryUtils, BaseTest {
 
     SubStorage internal subStorage;
     CreateSub internal createSub;
-    SemiContinuousTracker internal tracker;
+    StrategyPartialExecutionStorage internal partialExecutionStorage;
     address internal strategyExecutor;
 
-    /// @dev Deploys the sub plumbing and registers the tracker, which both actions read from the
+    /// @dev Deploys the sub plumbing and registers the partial execution storage, which both actions read from the
     ///      registry. Call from the suite's setUp after forking.
     function _setUpSubActions() internal {
         subStorage = SubStorage(SUB_STORAGE_ADDR);
         createSub = new CreateSub();
 
-        tracker = new SemiContinuousTracker();
-        redeploy("SemiContinuousTracker", address(tracker));
+        partialExecutionStorage = new StrategyPartialExecutionStorage();
+        redeploy("StrategyPartialExecutionStorage", address(partialExecutionStorage));
 
         strategyExecutor = IDFSRegistry(REGISTRY_ADDR).getAddr(DFSIds.STRATEGY_EXECUTOR);
         assertTrue(strategyExecutor != address(0));
@@ -75,13 +77,13 @@ contract SubActionsBase is ActionsUtils, RegistryUtils, BaseTest {
         });
     }
 
-    /// @dev Puts a sub into semi-continuous execution the way production does: the registered
+    /// @dev Puts a sub into partial execution the way production does: the registered
     ///      StrategyExecutor approves the start, then the owner wallet starts it.
     function _startExecution(uint256 _subId) internal {
         prank(strategyExecutor);
-        tracker.approveStartOfExecution(_subId);
+        partialExecutionStorage.approveStartOfExecution(_subId);
 
         prank(address(subStorage.getSub(_subId).walletAddr));
-        tracker.startExecution(_subId, STRATEGY_ID);
+        partialExecutionStorage.startExecution(_subId, STRATEGY_ID);
     }
 }

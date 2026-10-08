@@ -1,4 +1,4 @@
-// AaveV3 Semi-Continuous Close strategies
+// AaveV3 Partial Execution Close strategies
 const hre = require('hardhat');
 const { expect } = require('chai');
 const automationSdk = require('@defisaver/automation-sdk');
@@ -36,19 +36,19 @@ const {
     getTestPairInfo,
 } = require('./common');
 
-const runSemiContinuousCloseTests = () => {
-    describe('AaveV3 Semi-Continuous Close Strategies', () => {
+const runPartialExecutionCloseTests = () => {
+    describe('AaveV3 Partial Execution Close Strategies', () => {
         let env;
-        let semiContinuousTracker;
+        let partialExecutionStorage;
         let subStorage;
 
         before(async () => {
             env = await setupGenericTestEnv({
                 extraRedeploys: [
-                    // RecipeExecutor with semi-continuous support + the tracker it reads
-                    // from registry (the close triggers read the tracker too)
+                    // RecipeExecutor with partial execution support + the partial execution storage it reads
+                    // from registry (the close triggers read the partial execution storage too)
                     'RecipeExecutor',
-                    'SemiContinuousTracker',
+                    'StrategyPartialExecutionStorage',
                     'AaveV3QuotePriceTrigger',
                     'AaveV3QuotePriceRangeTrigger',
                     'SendTokenAndUnwrap',
@@ -56,7 +56,7 @@ const runSemiContinuousCloseTests = () => {
                 ],
                 deployBundleFn: deployAaveV3CloseGenericBundle,
             });
-            semiContinuousTracker = env.contracts.SemiContinuousTracker;
+            partialExecutionStorage = env.contracts.StrategyPartialExecutionStorage;
             subStorage = await hre.ethers.getContractAt(
                 'SubStorage',
                 await getAddrFromRegistry('SubStorage'),
@@ -138,19 +138,25 @@ const runSemiContinuousCloseTests = () => {
                 return { collBalance, debtBalance, ratio };
             };
 
-            const verifyTrackerAndSubState = async (expectedWallet, expectedIsEnabled) => {
-                const executionWallet = await semiContinuousTracker.executionWalletOf(subId);
+            const verifyPartialExecutionStorageAndSubState = async (
+                expectedWallet,
+                expectedIsEnabled,
+            ) => {
+                const partialExecutionWallet =
+                    await partialExecutionStorage.getPartialExecutionWallet(subId);
                 const storedSub = await subStorage.getSub(subId);
-                console.log(`TRACKER EXECUTION WALLET FOR SUB ${subId}: ${executionWallet}`);
+                console.log(
+                    `EXECUTION WALLET IN PARTIAL EXECUTION STORAGE FOR SUB ${subId}: ${partialExecutionWallet}`,
+                );
                 console.log(`SUB ENABLED: ${storedSub.isEnabled}`);
-                expect(executionWallet.toLowerCase()).to.be.eq(expectedWallet.toLowerCase());
+                expect(partialExecutionWallet.toLowerCase()).to.be.eq(expectedWallet.toLowerCase());
                 expect(storedSub.isEnabled).to.be.eq(expectedIsEnabled);
             };
 
             // Executes one strategy run (always with flash loan). When partialCloseUsdAmount
-            // is set it's a semi-continuous partial execution: only that USD amount of debt is
+            // is set it's a partial execution: only that USD amount of debt is
             // repaid and the extra actionsCallData element tells RecipeExecutor to keep the
-            // sub active and track the executing wallet
+            // sub active and store the executing wallet
             const callCloseStrategy = async (partialCloseUsdAmount) => {
                 const isPartial = !!partialCloseUsdAmount;
                 const partialClose = isPartial
@@ -211,7 +217,7 @@ const runSemiContinuousCloseTests = () => {
             };
 
             // One partial execution: repays part of the debt, the sub must stay active
-            // and the tracker must remember the executing wallet
+            // and the partial execution storage must remember the executing wallet
             const executePartialClose = async (label, partialCloseUsdAmount, stateBefore) => {
                 console.log(`>>>>>> ${label}`);
                 await callCloseStrategy(partialCloseUsdAmount);
@@ -224,13 +230,13 @@ const runSemiContinuousCloseTests = () => {
                 );
                 expect(stateAfter.debtBalance).to.be.lt(stateBefore.debtBalance);
                 expect(stateAfter.ratio).to.be.gt(0);
-                await verifyTrackerAndSubState(proxy.address, true);
+                await verifyPartialExecutionStorageAndSubState(proxy.address, true);
                 return stateAfter;
             };
 
             let state = await logPositionState('BEFORE ANY EXECUTION');
-            // nothing tracked before the first execution, sub is enabled
-            await verifyTrackerAndSubState(nullAddress, true);
+            // nothing stored before the first execution, sub is enabled
+            await verifyPartialExecutionStorageAndSubState(nullAddress, true);
 
             state = await executePartialClose(
                 'EXECUTION 1 - PARTIAL CLOSE (~50% OF DEBT)',
@@ -241,7 +247,7 @@ const runSemiContinuousCloseTests = () => {
             // TODO: also verify the trigger price bypass directly (isTriggered returning true
             // even when the price condition is no longer met). Needs oracle price
             // mocking/manipulation between executions - currently the price condition stays
-            // true for the whole test so the tracker bypass is only implicitly exercised
+            // true for the whole test so the partial execution storage bypass is only implicitly exercised
 
             await executePartialClose(
                 'EXECUTION 2 - PARTIAL CLOSE (~25% OF DEBT)',
@@ -250,13 +256,13 @@ const runSemiContinuousCloseTests = () => {
             );
 
             // final execution - no extra actionsCallData element -> default behaviour:
-            // fully closes the position, deactivates the sub and clears the tracker
+            // fully closes the position, deactivates the sub and clears the partial execution storage
             console.log('>>>>>> EXECUTION 3 - FULL CLOSE');
             await callCloseStrategy(null);
             const finalState = await logPositionState('AFTER 3rd (FINAL) EXECUTION');
             // ratio should be 0 at the end because position is closed
             expect(finalState.ratio).to.be.eq(0);
-            await verifyTrackerAndSubState(nullAddress, false);
+            await verifyPartialExecutionStorageAndSubState(nullAddress, false);
         };
 
         const testPairs = AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY[chainIds[network]] || [];
@@ -287,5 +293,5 @@ const runSemiContinuousCloseTests = () => {
 };
 
 module.exports = {
-    runSemiContinuousCloseTests,
+    runPartialExecutionCloseTests,
 };

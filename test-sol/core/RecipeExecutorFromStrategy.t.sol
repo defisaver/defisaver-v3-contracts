@@ -7,9 +7,9 @@ import { SafeModuleAuth } from "../../contracts/core/strategy/SafeModuleAuth.sol
 import { BotAuth } from "../../contracts/core/strategy/BotAuth.sol";
 import { SubStorage } from "../../contracts/core/strategy/SubStorage.sol";
 import {
-    SemiContinuousTracker,
-    ISemiContinuousTracker
-} from "../../contracts/core/strategy/SemiContinuousTracker.sol";
+    StrategyPartialExecutionStorage,
+    IStrategyPartialExecutionStorage
+} from "../../contracts/core/strategy/StrategyPartialExecutionStorage.sol";
 import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
 import { CreateSub } from "../../contracts/actions/utils/CreateSub.sol";
 import { PullToken } from "../../contracts/actions/utils/PullToken.sol";
@@ -64,17 +64,17 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
     /*//////////////////////////////////////////////////////////////////////////
                                      VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
-    /// @dev Mirrors RecipeExecutor.SEMI_CONTINUOUS_FLAG.
-    bytes32 internal constant SEMI_CONTINUOUS_FLAG = keccak256("SEMI_CONTINUOUS_FLAG");
+    /// @dev Mirrors RecipeExecutor.PARTIAL_EXECUTION_FLAG.
+    bytes32 internal constant PARTIAL_EXECUTION_FLAG = keccak256("PARTIAL_EXECUTION_FLAG");
 
-    /// @dev The executions mapping is the only storage slot of SemiContinuousTracker, the wallet is
+    /// @dev The partialExecutions mapping is the only storage slot of StrategyPartialExecutionStorage, the wallet is
     ///      the first field of its struct value.
-    uint256 internal constant EXECUTION_WALLET_SLOT = 0;
+    uint256 internal constant PARTIAL_EXECUTIONS_SLOT = 0;
 
     uint256 internal constant PULL_AMOUNT = 1 ether;
 
     StrategyExecutor executor;
-    SemiContinuousTracker tracker;
+    StrategyPartialExecutionStorage partialExecutionStorage;
     SubStorage subStorage;
     MockTrigger trigger;
     MockTrigger secondTrigger;
@@ -98,7 +98,7 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
 
         cut = new RecipeExecutor();
         executor = new StrategyExecutor();
-        tracker = new SemiContinuousTracker();
+        partialExecutionStorage = new StrategyPartialExecutionStorage();
         trigger = new MockTrigger();
         secondTrigger = new MockTrigger();
         flActionAddr = address(new FLAction());
@@ -107,7 +107,7 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
 
         redeploy("RecipeExecutor", address(cut));
         redeploy("StrategyExecutorID", address(executor));
-        redeploy("SemiContinuousTracker", address(tracker));
+        redeploy("StrategyPartialExecutionStorage", address(partialExecutionStorage));
         redeploy("BotAuth", address(new BotAuth()));
         redeploy("CreateSub", address(new CreateSub()));
         redeploy("PullToken", address(new PullToken()));
@@ -133,7 +133,10 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         cut.executeRecipeFromStrategy(subId, _actions(1), _triggerCallData(1), 0, sub);
 
         assertTrue(subStorage.getSub(subId).isEnabled, "sub must stay untouched");
-        assertFalse(tracker.isInExecution(subId), "tracker must stay untouched");
+        assertFalse(
+            partialExecutionStorage.isInPartialExecution(subId),
+            "partial execution storage must stay untouched"
+        );
     }
 
     function test_should_revert_when_action_call_data_is_empty() public {
@@ -166,7 +169,10 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         );
         cut.executeRecipeFromStrategy(subId, _withFlag(_actions(1)), _triggerCallData(1), 0, sub);
 
-        assertFalse(tracker.isInExecution(subId), "tracker must stay untouched");
+        assertFalse(
+            partialExecutionStorage.isInPartialExecution(subId),
+            "partial execution storage must stay untouched"
+        );
         assertTrue(subStorage.getSub(subId).isEnabled, "sub must stay untouched");
     }
 
@@ -183,28 +189,28 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
     }
 
     function test_should_revert_when_flag_is_longer_than_32_bytes() public {
-        _expectInvalidFlag(abi.encode(SEMI_CONTINUOUS_FLAG, SEMI_CONTINUOUS_FLAG));
+        _expectInvalidFlag(abi.encode(PARTIAL_EXECUTION_FLAG, PARTIAL_EXECUTION_FLAG));
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                          TESTS - SEMI-CONTINUOUS LIFECYCLE
+                        TESTS - PARTIAL EXECUTION LIFECYCLE
     //////////////////////////////////////////////////////////////////////////*/
     /// @dev startExecution early-returns on the second run, so the sub is marked once only.
     function test_should_not_start_execution_twice_when_flag_is_passed_again() public {
         (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(false, 1, 1));
         _fund(2);
 
-        vm.expectEmit(true, true, true, true, address(tracker));
-        emit ISemiContinuousTracker.ExecutionStarted(subId, walletAddr);
+        vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
+        emit IStrategyPartialExecutionStorage.ExecutionStarted(subId, walletAddr);
         _execute(subId, 0, _withFlag(_actions(1)), sub);
-        assertEq(tracker.executionWalletOf(subId), walletAddr);
+        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), walletAddr);
         assertTrue(subStorage.getSub(subId).isEnabled, "sub must stay enabled");
 
         vm.recordLogs();
         _execute(subId, 0, _withFlag(_actions(1)), sub);
 
         assertEq(_countStartedEvents(), 0, "second run must not emit ExecutionStarted again");
-        assertEq(tracker.executionWalletOf(subId), walletAddr);
+        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), walletAddr);
         assertTrue(subStorage.getSub(subId).isEnabled, "sub must stay enabled");
     }
 
@@ -229,7 +235,7 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
             receiverBalanceBefore + PULL_AMOUNT,
             "$1 mapping must still resolve to the pulled amount"
         );
-        assertEq(tracker.executionWalletOf(subId), walletAddr);
+        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), walletAddr);
     }
 
     /// @dev FL based strategy. The FL path (which re-encodes the recipe and runs the actions inside the FL callback)
@@ -246,54 +252,61 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
 
         uint256 walletBalanceBefore = balanceOf(Addresses.WETH_ADDR, walletAddr);
 
-        vm.expectEmit(true, true, true, true, address(tracker));
-        emit ISemiContinuousTracker.ExecutionStarted(subId, walletAddr);
+        vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
+        emit IStrategyPartialExecutionStorage.ExecutionStarted(subId, walletAddr);
         _execute(subId, 0, _withFlag(actionsCalldata), sub);
 
         assertEq(balanceOf(Addresses.WETH_ADDR, walletAddr), walletBalanceBefore, "FL paid back");
         assertTrue(subStorage.getSub(subId).isEnabled, "sub must stay enabled");
     }
 
-    /// @dev A continuous strategy is already re-executable, so it never touches the tracker.
+    /// @dev A continuous strategy is already re-executable, so it never touches the partial execution storage.
     function test_should_not_start_execution_for_continuous_strategy() public {
         (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(true, 1, 1));
         _fund(1);
 
-        // The tracker is not called
+        // The partial execution storage is not called
         vm.expectCall(
-            address(tracker),
-            abi.encodeWithSelector(SemiContinuousTracker.startExecution.selector),
+            address(partialExecutionStorage),
+            abi.encodeWithSelector(StrategyPartialExecutionStorage.startExecution.selector),
             0
         );
         _execute(subId, 0, _actions(1), sub);
 
-        assertFalse(tracker.isInExecution(subId), "continuous strategy must not be tracked");
+        assertFalse(
+            partialExecutionStorage.isInPartialExecution(subId),
+            "continuous strategy must not be in partial execution"
+        );
         assertTrue(subStorage.getSub(subId).isEnabled);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                              TESTS - TRIGGER SKIP GUARD
     //////////////////////////////////////////////////////////////////////////*/
-    /// @dev The trigger is skipped only when the sub is in semi-continuous execution for this wallet.
+    /// @dev The trigger is skipped only when the sub is in partial execution for this wallet.
     function test_should_check_triggers_when_execution_belongs_to_another_wallet() public {
         (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(true, 1, 1));
 
-        // Set the execution wallet to a different address, so the trigger is checked.
-        _forceExecutionWallet(subId, alice);
+        // Set the partial execution wallet to a different address, so the trigger is checked.
+        _forcePartialExecutionWallet(subId, alice);
         trigger.setTriggered(false);
 
         vm.expectRevert(abi.encodeWithSelector(RecipeExecutor.TriggerNotActiveError.selector, 0));
         cut.executeRecipeFromStrategy(subId, _actions(1), _triggerCallData(1), 0, sub);
     }
 
-    /// @dev Once the sub is in execution for this wallet the trigger is not checked at all, so a
+    /// @dev Once the sub is in partial execution for this wallet the trigger is not checked at all, so a
     ///      trigger that has since turned false no longer blocks the bot.
-    function test_should_not_call_triggers_while_sub_is_in_execution() public {
+    function test_should_not_call_triggers_while_sub_is_in_partial_execution() public {
         (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(false, 1, 1));
         _fund(2);
 
         _execute(subId, 0, _withFlag(_actions(1)), sub);
-        assertEq(tracker.executionWalletOf(subId), walletAddr, "must be in execution");
+        assertEq(
+            partialExecutionStorage.getPartialExecutionWallet(subId),
+            walletAddr,
+            "must be in partial execution"
+        );
 
         trigger.setTriggered(false);
         uint256 callsBefore = trigger.callCount();
@@ -303,7 +316,7 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         assertEq(trigger.callCount(), callsBefore, "trigger must not be called at all");
     }
 
-    /// @dev Not in execution: triggers are checked and the failing one is reported by index.
+    /// @dev Not in partial execution: triggers are checked and the failing one is reported by index.
     function test_should_revert_with_the_failing_trigger_index() public {
         (uint256 subId, StrategyModel.StrategySub memory sub) =
             _subscribe(_strategy(true, 1, 2), false, 2);
@@ -315,8 +328,8 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
     }
 
     /// @dev Documents a real consequence of the skip: a changeable trigger stops updating the
-    ///      stored sub data once the sub is in semi-continuous execution.
-    function test_should_stop_updating_changeable_trigger_data_while_in_execution() public {
+    ///      stored sub data once the sub is in partial execution.
+    function test_should_stop_updating_changeable_trigger_data_while_in_partial_execution() public {
         trigger.setChangeable(true, abi.encode(uint256(42)));
 
         (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(false, 1, 1));
@@ -346,12 +359,12 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         );
     }
 
-    /// @dev RecipeExecutor reads the tracker before anything else, so an unregistered id makes
+    /// @dev RecipeExecutor reads the partial execution storage before anything else, so an unregistered id makes
     ///      every strategy execution revert.
-    function test_should_revert_when_tracker_is_not_registered() public {
+    function test_should_revert_when_partial_execution_storage_is_not_registered() public {
         (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(true, 1, 1));
 
-        redeploy("SemiContinuousTracker", address(0));
+        redeploy("StrategyPartialExecutionStorage", address(0));
 
         // call to non-contract address 0x0000000000000000000000000000000000000000
         vm.expectRevert();
@@ -385,7 +398,10 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         );
         cut.executeRecipeFromStrategy(subId, _withFlag(_actions(2)), _triggerCallData(1), 1, sub);
 
-        assertFalse(tracker.isInExecution(subId), "bundle strategies here are continuous");
+        assertFalse(
+            partialExecutionStorage.isInPartialExecution(subId),
+            "bundle strategies here are continuous"
+        );
         assertTrue(subStorage.getSub(subId).isEnabled);
     }
 
@@ -416,29 +432,35 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                RecipeExecutor.InvalidSemiContinuousFlag.selector, _flag, SEMI_CONTINUOUS_FLAG
+                RecipeExecutor.InvalidPartialExecutionFlag.selector, _flag, PARTIAL_EXECUTION_FLAG
             )
         );
         cut.executeRecipeFromStrategy(subId, actionsCalldata, _triggerCallData(1), 0, sub);
     }
 
-    /// @dev Writes executions[_subId].wallet directly. Only used for the defensive branch above,
+    /// @dev Writes partialExecutions[_subId].wallet directly. Only used for the defensive branch above,
     ///      which no legitimate sequence of calls can produce.
-    function _forceExecutionWallet(uint256 _subId, address _walletAddr) internal {
+    function _forcePartialExecutionWallet(uint256 _subId, address _walletAddr) internal {
         vm.store(
-            address(tracker),
-            keccak256(abi.encode(_subId, EXECUTION_WALLET_SLOT)),
+            address(partialExecutionStorage),
+            keccak256(abi.encode(_subId, PARTIAL_EXECUTIONS_SLOT)),
             bytes32(uint256(uint160(_walletAddr)))
         );
-        assertEq(tracker.executionWalletOf(_subId), _walletAddr, "wrong tracker storage slot");
+        assertEq(
+            partialExecutionStorage.getPartialExecutionWallet(_subId),
+            _walletAddr,
+            "wrong partialExecutions storage slot"
+        );
     }
 
     function _countStartedEvents() internal view returns (uint256 count) {
         Vm.Log[] memory logs = vm.getRecordedLogs();
 
         for (uint256 i = 0; i < logs.length; ++i) {
-            if (logs[i].emitter != address(tracker)) continue;
-            if (logs[i].topics[0] != ISemiContinuousTracker.ExecutionStarted.selector) continue;
+            if (logs[i].emitter != address(partialExecutionStorage)) continue;
+            if (logs[i].topics[0] != IStrategyPartialExecutionStorage.ExecutionStarted.selector) {
+                continue;
+            }
 
             count++;
         }
@@ -579,6 +601,6 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
             withFlag[i] = _actionsCalldata[i];
         }
 
-        withFlag[_actionsCalldata.length] = abi.encode(SEMI_CONTINUOUS_FLAG);
+        withFlag[_actionsCalldata.length] = abi.encode(PARTIAL_EXECUTION_FLAG);
     }
 }

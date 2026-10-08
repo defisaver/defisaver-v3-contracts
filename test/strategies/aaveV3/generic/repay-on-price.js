@@ -35,8 +35,8 @@ const runRepayOnPriceTests = () => {
 
         before(async () => {
             env = await setupGenericTestEnv({
-                // trigger reads SemiContinuousTracker from registry, so it has to be deployed
-                extraRedeploys: ['SemiContinuousTracker', 'AaveV3QuotePriceTrigger'],
+                // trigger reads StrategyPartialExecutionStorage from registry, so it has to be deployed
+                extraRedeploys: ['StrategyPartialExecutionStorage', 'AaveV3QuotePriceTrigger'],
                 deployBundleFn: deployAaveV3RepayOnPriceGenericBundle,
             });
         });

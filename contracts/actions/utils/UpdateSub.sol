@@ -5,7 +5,9 @@ pragma solidity =0.8.24;
 import { ActionBase } from "../ActionBase.sol";
 import { SubStorage } from "../../core/strategy/SubStorage.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
-import { ISemiContinuousTracker } from "../../interfaces/core/ISemiContinuousTracker.sol";
+import {
+    IStrategyPartialExecutionStorage
+} from "../../interfaces/core/IStrategyPartialExecutionStorage.sol";
 import { DFSIds } from "../../utils/DFSIds.sol";
 
 /// @title Updates users sub information on SubStorage contract
@@ -55,9 +57,10 @@ contract UpdateSub is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function updateSubData(Params memory _inputData) internal {
-        ISemiContinuousTracker semiContinuousTracker =
-            ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER));
-        semiContinuousTracker.finishExecution(_inputData.subId);
+        IStrategyPartialExecutionStorage partialExecutionStorage = IStrategyPartialExecutionStorage(
+            registry.getAddr(DFSIds.STRATEGY_PARTIAL_EXECUTION_STORAGE)
+        );
+        partialExecutionStorage.endExecution(_inputData.subId);
 
         SubStorage(SUB_STORAGE_ADDR).updateSubData(_inputData.subId, _inputData.sub);
     }

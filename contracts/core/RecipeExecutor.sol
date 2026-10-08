@@ -107,7 +107,9 @@ import {
 import { IStrategyStorage } from "../interfaces/core/IStrategyStorage.sol";
 import { IBundleStorage } from "../interfaces/core/IBundleStorage.sol";
 import { ISubStorage } from "../interfaces/core/ISubStorage.sol";
-import { ISemiContinuousTracker } from "../interfaces/core/ISemiContinuousTracker.sol";
+import {
+    IStrategyPartialExecutionStorage
+} from "../interfaces/core/IStrategyPartialExecutionStorage.sol";
 import { Permission } from "../auth/Permission.sol";
 import { SmartWalletUtils } from "../utils/SmartWalletUtils.sol";
 import { ActionBase } from "../actions/ActionBase.sol";
@@ -136,8 +138,8 @@ contract RecipeExecutor is
                                 CONST
     //////////////////////////////////////////////////////////////*/
     IDFSRegistry private constant registry = IDFSRegistry(REGISTRY_ADDR);
-    /// @dev Marker passed as the extra last element of _actionCallData to request semi-continuous execution
-    bytes32 internal constant SEMI_CONTINUOUS_FLAG = keccak256("SEMI_CONTINUOUS_FLAG");
+    /// @dev Marker passed as the extra last element of _actionCallData to request partial execution
+    bytes32 internal constant PARTIAL_EXECUTION_FLAG = keccak256("PARTIAL_EXECUTION_FLAG");
 
     /*//////////////////////////////////////////////////////////////
                                 ERRORS
@@ -152,11 +154,11 @@ contract RecipeExecutor is
     /// When calling TxSaver functions, caller has to be TxSaverExecutor
     error TxSaverAuthorizationError(address caller);
 
-    // Lengths must match, or actionsCallData must be one longer with the last element being SEMI_CONTINUOUS_FLAG
+    // Lengths must match, or actionsCallData must be one longer with the last element being PARTIAL_EXECUTION_FLAG
     error InvalidActionCallDataLength(uint256 actionCallDataLength, uint256 strategyActionLength);
 
-    // When executing a strategy with semi-continuous execution, the last element of actionsCallData must be SEMI_CONTINUOUS_FLAG
-    error InvalidSemiContinuousFlag(bytes actionCallDataFlag, bytes32 semiContinuousFlag);
+    // When executing a strategy with partial execution, the last element of actionsCallData must be PARTIAL_EXECUTION_FLAG
+    error InvalidPartialExecutionFlag(bytes actionCallDataFlag, bytes32 partialExecutionFlag);
 
     /*//////////////////////////////////////////////////////////////
                                 EXTERNAL
@@ -227,7 +229,7 @@ contract RecipeExecutor is
 
     /// @notice Checks if the length of _actionCallData is valid for the strategy
     /// @dev For continuous strategies, the length of _actionCallData must be equal to the length of strategy actions
-    /// @dev For one-time strategies, the length of _actionCallData must be equal to the length of strategy actions or one more with the last element being SEMI_CONTINUOUS_FLAG
+    /// @dev For one-time strategies, the length of _actionCallData must be equal to the length of strategy actions or one more with the last element being PARTIAL_EXECUTION_FLAG
     /// @param _actionCallData Actions calldata sent by backend to execute actions
     /// @param _strategy Strategy to be executed
     function _validateActionsCalldataLength(
@@ -236,7 +238,7 @@ contract RecipeExecutor is
     ) internal pure {
         uint256 actionsLength = _strategy.actionIds.length;
 
-        // only one-time strategies can have the extra SEMI_CONTINUOUS_FLAG element
+        // only one-time strategies can have the extra PARTIAL_EXECUTION_FLAG element
         uint256 maxLength = _strategy.continuous ? actionsLength : actionsLength + 1;
 
         if (_actionCallData.length < actionsLength || _actionCallData.length > maxLength) {
@@ -244,22 +246,22 @@ contract RecipeExecutor is
         }
     }
 
-    /// @notice Checks if the execution is semi-continuous, which means that the last element of _actionCallData is SEMI_CONTINUOUS_FLAG
+    /// @notice Checks if the execution is a partial execution, which means that the last element of _actionCallData is PARTIAL_EXECUTION_FLAG
     /// @dev Must be called after _validateActionsCalldataLength, which guarantees that the length is either equal to the length of strategy actions or one more
-    /// @dev Reverts if the extra element is not exactly SEMI_CONTINUOUS_FLAG
+    /// @dev Reverts if the extra element is not exactly PARTIAL_EXECUTION_FLAG
     /// @param _actionCallData Actions calldata sent by backend to execute actions
     /// @param _strategy Strategy to be executed
-    /// @return isSemiContinuous Returns if the execution is semi-continuous or not
-    function _isSemiContinuousExecution(bytes[] calldata _actionCallData, Strategy memory _strategy)
+    /// @return isPartialExecution Returns if the execution is a partial execution or not
+    function _isPartialExecution(bytes[] calldata _actionCallData, Strategy memory _strategy)
         internal
         pure
-        returns (bool isSemiContinuous)
+        returns (bool isPartialExecution)
     {
         if (_actionCallData.length == _strategy.actionIds.length + 1) {
             bytes calldata flagData = _actionCallData[_actionCallData.length - 1];
 
-            if (flagData.length != 32 || bytes32(flagData) != SEMI_CONTINUOUS_FLAG) {
-                revert InvalidSemiContinuousFlag(flagData, SEMI_CONTINUOUS_FLAG);
+            if (flagData.length != 32 || bytes32(flagData) != PARTIAL_EXECUTION_FLAG) {
+                revert InvalidPartialExecutionFlag(flagData, PARTIAL_EXECUTION_FLAG);
             }
 
             return true;
@@ -291,12 +293,13 @@ contract RecipeExecutor is
         Strategy memory strategy = IStrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
 
         // reading from registry
-        ISemiContinuousTracker semiContinuousTracker =
-            ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER));
+        IStrategyPartialExecutionStorage partialExecutionStorage = IStrategyPartialExecutionStorage(
+            registry.getAddr(DFSIds.STRATEGY_PARTIAL_EXECUTION_STORAGE)
+        );
 
-        // skip triggers check if the sub is already in semi-continuous execution
+        // skip triggers check if the sub is already in partial execution
         // deliberately skips updating sub data too
-        if (semiContinuousTracker.executionWalletOf(_subId) != address(this)) {
+        if (partialExecutionStorage.getPartialExecutionWallet(_subId) != address(this)) {
             // check if all the triggers are true
             (bool triggered, uint256 errIndex) =
                 _checkTriggers(_subId, strategy, _sub, _triggerCallData);
@@ -310,11 +313,11 @@ contract RecipeExecutor is
 
         // if this is a one time strategy
         if (!strategy.continuous) {
-            if (_isSemiContinuousExecution(_actionCallData, strategy)) {
-                // don't disable sub and start semi-continuous execution
-                semiContinuousTracker.startExecution(_subId, strategyId);
+            if (_isPartialExecution(_actionCallData, strategy)) {
+                // don't disable sub and start partial execution
+                partialExecutionStorage.startExecution(_subId, strategyId);
             } else {
-                semiContinuousTracker.finishExecution(_subId);
+                partialExecutionStorage.endExecution(_subId);
                 ISubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId);
             }
         }

@@ -7414,11 +7414,11 @@ const callAaveV3GenericFLCloseToDebtStrategy = async (
     flAmount,
     flAddr,
     marketAddress,
-    // pass { partialClose: { paybackAmount, pullAmount } } for semi-continuous partial
+    // pass { partialClose: { paybackAmount, pullAmount } } for partial
     // execution. Any truthy value encodes the real subId in triggerCallData, and
     // partialClose additionally appends an extra actionsCallData element so
     // RecipeExecutor keeps the sub active
-    semiContinuousOptions = null,
+    partialExecutionOptions = null,
 ) => {
     const isL2 = network !== 'mainnet';
     const triggerCallData = [];
@@ -7426,7 +7426,7 @@ const callAaveV3GenericFLCloseToDebtStrategy = async (
     const gasCost = 1000000;
     const collToken = exchangeObject[0];
     const debtToken = exchangeObject[1];
-    const partialClose = semiContinuousOptions && semiContinuousOptions.partialClose;
+    const partialClose = partialExecutionOptions && partialExecutionOptions.partialClose;
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction([debtToken], [flAmount]),
@@ -7488,12 +7488,12 @@ const callAaveV3GenericFLCloseToDebtStrategy = async (
     actionsCallData.push(sendTokenToEOAAction.encodeForRecipe()[0]);
 
     if (partialClose) {
-        // extra element signals RecipeExecutor to keep the sub active (semi-continuous exec)
+        // extra element signals RecipeExecutor to keep the sub active (partial execution)
         actionsCallData.push('0x');
     }
 
     triggerCallData.push(
-        semiContinuousOptions
+        partialExecutionOptions
             ? abiCoder.encode(['uint256'], [subId])
             : abiCoder.encode(
                   ['address', 'address', 'uint256', 'uint256'],
@@ -7527,18 +7527,18 @@ const callAaveV3GenericFLCloseToCollStrategy = async (
     flAmount,
     flAddr,
     marketAddress,
-    // pass { partialClose: { paybackAmount, pullAmount } } for semi-continuous partial
+    // pass { partialClose: { paybackAmount, pullAmount } } for partial
     // execution. Any truthy value encodes the real subId in triggerCallData, and
     // partialClose additionally appends an extra actionsCallData element so
     // RecipeExecutor keeps the sub active
-    semiContinuousOptions = null,
+    partialExecutionOptions = null,
 ) => {
     const isL2 = network !== 'mainnet';
     const triggerCallData = [];
     const actionsCallData = [];
     const gasCost = 1000000;
     const collToken = exchangeObject[0];
-    const partialClose = semiContinuousOptions && semiContinuousOptions.partialClose;
+    const partialClose = partialExecutionOptions && partialExecutionOptions.partialClose;
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction([collToken], [flAmount]),
@@ -7602,12 +7602,12 @@ const callAaveV3GenericFLCloseToCollStrategy = async (
     actionsCallData.push(sendTokensAction.encodeForRecipe()[0]);
 
     if (partialClose) {
-        // extra element signals RecipeExecutor to keep the sub active (semi-continuous exec)
+        // extra element signals RecipeExecutor to keep the sub active (partial execution)
         actionsCallData.push('0x');
     }
 
     triggerCallData.push(
-        semiContinuousOptions
+        partialExecutionOptions
             ? abiCoder.encode(['uint256'], [subId])
             : abiCoder.encode(
                   ['address', 'address', 'uint256', 'uint256'],

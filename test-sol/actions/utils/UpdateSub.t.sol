@@ -7,7 +7,9 @@ import { ActionBase } from "../../../contracts/actions/ActionBase.sol";
 import { StrategyModel } from "../../../contracts/core/strategy/StrategyModel.sol";
 import { IDSProxy } from "../../../contracts/interfaces/DS/IDSProxy.sol";
 import { SubStorage } from "../../../contracts/core/strategy/SubStorage.sol";
-import { ISemiContinuousTracker } from "../../../contracts/core/strategy/SemiContinuousTracker.sol";
+import {
+    IStrategyPartialExecutionStorage
+} from "../../../contracts/core/strategy/StrategyPartialExecutionStorage.sol";
 
 import { SubActionsBase } from "../../utils/SubActionsBase.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
@@ -152,22 +154,25 @@ contract TestUpdateSub is SubActionsBase {
         assertEq(subStorage.getSub(subId).strategySubHash, hashBefore, "sub must stay untouched");
     }
 
-    /// @dev When the sub is in execution the tracker's NotAuthorized check fires first, masking
+    /// @dev When the sub is in partial execution the partial execution storage's NotAuthorized check fires first, masking
     ///      SubStorage's SenderNotSubOwnerError. Same outcome, but the revert reason is different.
-    function test_should_revert_when_updating_in_execution_sub_of_another_owner() public {
+    function test_should_revert_when_updating_in_partial_execution_sub_of_another_owner() public {
         _startExecution(subId);
 
         bytes32 hashBefore = subStorage.getSub(subId).strategySubHash;
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                ISemiContinuousTracker.NotAuthorized.selector, subId, address(cut)
+                IStrategyPartialExecutionStorage.NotAuthorized.selector, subId, address(cut)
             )
         );
         cut.executeActionDirect(updateSubEncode(subId, _bundleSub(1)));
 
         assertEq(subStorage.getSub(subId).strategySubHash, hashBefore, "sub must stay untouched");
-        assertTrue(tracker.isInExecution(subId), "tracker must stay untouched");
+        assertTrue(
+            partialExecutionStorage.isInPartialExecution(subId),
+            "partial execution storage must stay untouched"
+        );
     }
 
     function test_should_revert_for_out_of_range_strategy_id() public {
@@ -212,77 +217,91 @@ contract TestUpdateSub is SubActionsBase {
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                          TESTS - SEMI-CONTINUOUS INTERACTION
+                       TESTS - PARTIAL EXECUTION INTERACTION
     //////////////////////////////////////////////////////////////////////////*/
-    function test_should_clear_semi_continuous_execution_on_update() public {
+    function test_should_clear_partial_execution_on_update() public {
         _startExecution(subId);
-        assertTrue(tracker.isInExecution(subId));
-        assertEq(tracker.executionWalletOf(subId), walletAddr);
+        assertTrue(partialExecutionStorage.isInPartialExecution(subId));
+        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), walletAddr);
 
         StrategyModel.StrategySub memory newSub = _bundleSub(1);
 
-        vm.expectEmit(true, true, true, true, address(tracker));
-        emit ISemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
+        emit IStrategyPartialExecutionStorage.ExecutionEnded(subId, walletAddr, walletAddr);
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.UpdateData(subId, keccak256(abi.encode(newSub)), newSub);
         _update(wallet, subId, newSub, false);
 
-        assertFalse(tracker.isInExecution(subId), "update must clear the tracker");
-        assertEq(tracker.executionWalletOf(subId), address(0));
+        assertFalse(
+            partialExecutionStorage.isInPartialExecution(subId),
+            "update must clear the partial execution storage"
+        );
+        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), address(0));
     }
 
-    function test_should_clear_semi_continuous_execution_on_update_direct() public {
+    function test_should_clear_partial_execution_on_update_direct() public {
         _startExecution(subId);
-        assertTrue(tracker.isInExecution(subId));
-        assertEq(tracker.executionWalletOf(subId), walletAddr);
+        assertTrue(partialExecutionStorage.isInPartialExecution(subId));
+        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), walletAddr);
 
         StrategyModel.StrategySub memory newSub = _bundleSub(1);
 
-        vm.expectEmit(true, true, true, true, address(tracker));
-        emit ISemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
+        emit IStrategyPartialExecutionStorage.ExecutionEnded(subId, walletAddr, walletAddr);
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.UpdateData(subId, keccak256(abi.encode(newSub)), newSub);
         _update(wallet, subId, newSub, true);
 
-        assertFalse(tracker.isInExecution(subId), "update must clear the tracker");
-        assertEq(tracker.executionWalletOf(subId), address(0));
+        assertFalse(
+            partialExecutionStorage.isInPartialExecution(subId),
+            "update must clear the partial execution storage"
+        );
+        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), address(0));
     }
 
-    /// @dev Updating again in the same state hits the finishExecution early-return, the first
-    ///      update already cleared the tracker.
-    function test_should_update_again_after_semi_continuous_execution_was_cleared() public {
+    /// @dev Updating again in the same state hits the endExecution early-return, the first
+    ///      update already cleared the partial execution storage.
+    function test_should_update_again_after_partial_execution_was_cleared() public {
         _startExecution(subId);
-        assertTrue(tracker.isInExecution(subId));
-        assertEq(tracker.executionWalletOf(subId), walletAddr);
+        assertTrue(partialExecutionStorage.isInPartialExecution(subId));
+        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), walletAddr);
 
         StrategyModel.StrategySub memory firstSub = _bundleSub(1);
 
-        vm.expectEmit(true, true, true, true, address(tracker));
-        emit ISemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
+        emit IStrategyPartialExecutionStorage.ExecutionEnded(subId, walletAddr, walletAddr);
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.UpdateData(subId, keccak256(abi.encode(firstSub)), firstSub);
         _update(wallet, subId, firstSub, false);
 
-        assertFalse(tracker.isInExecution(subId), "update must clear the tracker");
+        assertFalse(
+            partialExecutionStorage.isInPartialExecution(subId),
+            "update must clear the partial execution storage"
+        );
         assertEq(subStorage.getSub(subId).strategySubHash, keccak256(abi.encode(firstSub)));
-        assertEq(tracker.executionWalletOf(subId), address(0));
+        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), address(0));
 
         StrategyModel.StrategySub memory secondSub = _bundleSub(2);
 
-        /// @dev No ExecutionFinished this time, finishExecution early-returns.
+        /// @dev No ExecutionEnded this time, endExecution early-returns.
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.UpdateData(subId, keccak256(abi.encode(secondSub)), secondSub);
         _update(wallet, subId, secondSub, false);
 
-        assertFalse(tracker.isInExecution(subId), "tracker must stay cleared");
+        assertFalse(
+            partialExecutionStorage.isInPartialExecution(subId),
+            "partial execution storage must stay cleared"
+        );
         assertEq(subStorage.getSub(subId).strategySubHash, keccak256(abi.encode(secondSub)));
-        assertEq(tracker.executionWalletOf(subId), address(0));
+        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), address(0));
     }
 
-    /// @dev The tracker is a hard dependency of every update, not just semi-continuous ones.
+    /// @dev The partial execution storage is a hard dependency of every update, not just for subs in partial execution.
     ///      Reverts with no error data: the call to address(0) fails the extcodesize check.
-    function test_should_revert_on_update_when_tracker_is_not_registered() public {
-        redeploy("SemiContinuousTracker", address(0));
+    function test_should_revert_on_update_when_partial_execution_storage_is_not_registered()
+        public
+    {
+        redeploy("StrategyPartialExecutionStorage", address(0));
         bytes32 hashBefore = subStorage.getSub(subId).strategySubHash;
 
         // call to non-contract address 0x0000000000000000000000000000000000000000
@@ -290,15 +309,15 @@ contract TestUpdateSub is SubActionsBase {
         _update(wallet, subId, _bundleSub(1), false);
 
         assertEq(subStorage.getSub(subId).strategySubHash, hashBefore, "sub could not be updated");
-        assertEq(tracker.executionWalletOf(subId), address(0));
+        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), address(0));
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                        TESTS - TWO SUBS, TRACKER ISOLATION
+               TESTS - TWO SUBS, PARTIAL EXECUTION STORAGE ISOLATION
     //////////////////////////////////////////////////////////////////////////*/
-    /// @dev finishExecution is keyed by subId, so updating one sub must leave every other
-    ///      sub of the same owner in execution.
-    function test_should_clear_only_the_updated_sub_when_both_are_in_execution() public {
+    /// @dev endExecution is keyed by subId, so updating one sub must leave every other
+    ///      sub of the same owner in partial execution.
+    function test_should_clear_only_the_updated_sub_when_both_are_in_partial_execution() public {
         uint256 secondSubId = _subscribe(wallet);
         _startExecution(subId);
         _startExecution(secondSubId);
@@ -306,16 +325,16 @@ contract TestUpdateSub is SubActionsBase {
         bytes32 secondHashBefore = subStorage.getSub(secondSubId).strategySubHash;
         StrategyModel.StrategySub memory newSub = _bundleSub(123);
 
-        vm.expectEmit(true, true, true, true, address(tracker));
-        emit ISemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
+        emit IStrategyPartialExecutionStorage.ExecutionEnded(subId, walletAddr, walletAddr);
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.UpdateData(subId, keccak256(abi.encode(newSub)), newSub);
         _update(wallet, subId, newSub, false);
 
-        _assertNotInExecution(subId);
+        _assertNotInPartialExecution(subId);
         assertEq(subStorage.getSub(subId).strategySubHash, keccak256(abi.encode(newSub)));
 
-        _assertInExecution(secondSubId, walletAddr);
+        _assertInPartialExecution(secondSubId, walletAddr);
         assertEq(
             subStorage.getSub(secondSubId).strategySubHash,
             secondHashBefore,
@@ -323,9 +342,9 @@ contract TestUpdateSub is SubActionsBase {
         );
     }
 
-    /// @dev Stronger form of the above: exactly one ExecutionFinished is emitted, for the
-    ///      updated sub, so the second sub is not silently finished too.
-    function test_should_emit_execution_finished_only_for_the_updated_sub() public {
+    /// @dev Stronger form of the above: exactly one ExecutionEnded is emitted, for the
+    ///      updated sub, so the second sub is not silently ended too.
+    function test_should_emit_execution_ended_only_for_the_updated_sub() public {
         uint256 secondSubId = _subscribe(wallet);
         _startExecution(subId);
         _startExecution(secondSubId);
@@ -334,25 +353,27 @@ contract TestUpdateSub is SubActionsBase {
         _update(wallet, subId, _bundleSub(123), false);
 
         Vm.Log[] memory logs = vm.getRecordedLogs();
-        uint256 finishedCount;
+        uint256 endedCount;
         for (uint256 i = 0; i < logs.length; ++i) {
-            if (logs[i].emitter != address(tracker)) continue;
-            if (logs[i].topics[0] != ISemiContinuousTracker.ExecutionFinished.selector) continue;
+            if (logs[i].emitter != address(partialExecutionStorage)) continue;
+            if (logs[i].topics[0] != IStrategyPartialExecutionStorage.ExecutionEnded.selector) {
+                continue;
+            }
 
-            finishedCount++;
-            assertEq(uint256(logs[i].topics[1]), subId, "only the updated sub may be finished");
+            endedCount++;
+            assertEq(uint256(logs[i].topics[1]), subId, "only the updated sub may be ended");
         }
 
-        assertEq(finishedCount, 1, "exactly one ExecutionFinished must be emitted");
+        assertEq(endedCount, 1, "exactly one ExecutionEnded must be emitted");
     }
 
-    /// @dev Updating a sub that was never in execution hits finishExecution's early return
+    /// @dev Updating a sub that was never in partial execution hits endExecution's early return
     ///      and must not reach into the other sub's entry.
-    function test_should_not_touch_in_execution_sub_when_updating_an_idle_sub() public {
+    function test_should_not_touch_in_partial_execution_sub_when_updating_an_idle_sub() public {
         uint256 secondSubId = _subscribe(wallet);
         _startExecution(secondSubId);
 
-        _assertNotInExecution(subId);
+        _assertNotInPartialExecution(subId);
 
         bytes32 secondHashBefore = subStorage.getSub(secondSubId).strategySubHash;
         StrategyModel.StrategySub memory newSub = _bundleSub(123);
@@ -361,8 +382,8 @@ contract TestUpdateSub is SubActionsBase {
         emit SubStorage.UpdateData(subId, keccak256(abi.encode(newSub)), newSub);
         _update(wallet, subId, newSub, false);
 
-        _assertNotInExecution(subId);
-        _assertInExecution(secondSubId, walletAddr);
+        _assertNotInPartialExecution(subId);
+        _assertInPartialExecution(secondSubId, walletAddr);
         assertEq(
             subStorage.getSub(secondSubId).strategySubHash,
             secondHashBefore,
@@ -371,8 +392,8 @@ contract TestUpdateSub is SubActionsBase {
     }
 
     /// @dev Isolation also holds across owners: bob updating his sub cannot clear the entry
-    ///      of alice's sub, which is tracked against a different wallet.
-    function test_should_not_touch_in_execution_sub_of_another_owner() public {
+    ///      of alice's sub, which is in partial execution for a different wallet.
+    function test_should_not_touch_in_partial_execution_sub_of_another_owner() public {
         SmartWallet otherWallet = new SmartWallet(alice);
         address otherWalletAddr = otherWallet.walletAddr();
         uint256 otherSubId = _subscribe(otherWallet);
@@ -382,12 +403,12 @@ contract TestUpdateSub is SubActionsBase {
 
         bytes32 otherHashBefore = subStorage.getSub(otherSubId).strategySubHash;
 
-        vm.expectEmit(true, true, true, true, address(tracker));
-        emit ISemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
+        emit IStrategyPartialExecutionStorage.ExecutionEnded(subId, walletAddr, walletAddr);
         _update(wallet, subId, _bundleSub(123), false);
 
-        _assertNotInExecution(subId);
-        _assertInExecution(otherSubId, otherWalletAddr);
+        _assertNotInPartialExecution(subId);
+        _assertInPartialExecution(otherSubId, otherWalletAddr);
         assertEq(
             subStorage.getSub(otherSubId).strategySubHash,
             otherHashBefore,
@@ -395,8 +416,8 @@ contract TestUpdateSub is SubActionsBase {
         );
     }
 
-    /// @dev A reverted update of someone else's sub leaves both tracker entries as they were.
-    function test_should_not_clear_any_tracker_entry_when_updating_another_owners_sub_reverts()
+    /// @dev A reverted update of someone else's sub leaves both partial executions as they were.
+    function test_should_not_clear_any_partial_execution_when_updating_another_owners_sub_reverts()
         public
     {
         SmartWallet otherWallet = new SmartWallet(alice);
@@ -408,12 +429,12 @@ contract TestUpdateSub is SubActionsBase {
 
         bytes32 otherHashBefore = subStorage.getSub(otherSubId).strategySubHash;
 
-        // SemiContinuousTracker::NotAuthorized
+        // StrategyPartialExecutionStorage::NotAuthorized
         vm.expectRevert();
         _update(wallet, otherSubId, _bundleSub(123), false);
 
-        _assertInExecution(subId, walletAddr);
-        _assertInExecution(otherSubId, otherWalletAddr);
+        _assertInPartialExecution(subId, walletAddr);
+        _assertInPartialExecution(otherSubId, otherWalletAddr);
         assertEq(
             subStorage.getSub(otherSubId).strategySubHash,
             otherHashBefore,
@@ -455,13 +476,26 @@ contract TestUpdateSub is SubActionsBase {
         );
     }
 
-    function _assertInExecution(uint256 _subId, address _wallet) internal view {
-        assertTrue(tracker.isInExecution(_subId), "sub must be in execution");
-        assertEq(tracker.executionWalletOf(_subId), _wallet, "wrong execution wallet");
+    function _assertInPartialExecution(uint256 _subId, address _wallet) internal view {
+        assertTrue(
+            partialExecutionStorage.isInPartialExecution(_subId), "sub must be in partial execution"
+        );
+        assertEq(
+            partialExecutionStorage.getPartialExecutionWallet(_subId),
+            _wallet,
+            "wrong partial execution wallet"
+        );
     }
 
-    function _assertNotInExecution(uint256 _subId) internal view {
-        assertFalse(tracker.isInExecution(_subId), "sub must not be in execution");
-        assertEq(tracker.executionWalletOf(_subId), address(0), "execution wallet must be cleared");
+    function _assertNotInPartialExecution(uint256 _subId) internal view {
+        assertFalse(
+            partialExecutionStorage.isInPartialExecution(_subId),
+            "sub must not be in partial execution"
+        );
+        assertEq(
+            partialExecutionStorage.getPartialExecutionWallet(_subId),
+            address(0),
+            "partial execution wallet must be cleared"
+        );
     }
 }

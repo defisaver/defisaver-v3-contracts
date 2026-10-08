@@ -9,7 +9,9 @@ import { RegistryUtils } from "../utils/RegistryUtils.sol";
 import { TriggerView } from "../../contracts/views/strategy/TriggerView.sol";
 import { BundleStorage } from "../../contracts/core/strategy/BundleStorage.sol";
 import { StrategyStorage } from "../../contracts/core/strategy/StrategyStorage.sol";
-import { SemiContinuousTracker } from "../../contracts/core/strategy/SemiContinuousTracker.sol";
+import {
+    StrategyPartialExecutionStorage
+} from "../../contracts/core/strategy/StrategyPartialExecutionStorage.sol";
 import { AaveV3MinDebtTrigger } from "../../contracts/triggers-additional/AaveV3MinDebtTrigger.sol";
 import { AaveV3RatioTrigger } from "../../contracts/triggers/AaveV3RatioTrigger.sol";
 
@@ -41,7 +43,7 @@ contract TestTriggerView is BaseTest, RegistryUtils, TriggerView {
     //////////////////////////////////////////////////////////////////////////*/
     AaveV3MinDebtTrigger internal aaveV3MinDebtTrigger;
 
-    SemiContinuousTracker internal tracker;
+    StrategyPartialExecutionStorage internal partialExecutionStorage;
 
     /// @dev Sub trigger (AaveV3RatioTrigger) address resolved from the repay bundle - mock target.
     address internal ratioTriggerAddr;
@@ -65,8 +67,8 @@ contract TestTriggerView is BaseTest, RegistryUtils, TriggerView {
 
         ratioTriggerAddr = _resolveSubTriggerAddr(AAVE_V3_REPAY_BUNDLE_ID);
 
-        tracker = new SemiContinuousTracker();
-        redeploy("SemiContinuousTracker", address(tracker));
+        partialExecutionStorage = new StrategyPartialExecutionStorage();
+        redeploy("StrategyPartialExecutionStorage", address(partialExecutionStorage));
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -144,9 +146,9 @@ contract TestTriggerView is BaseTest, RegistryUtils, TriggerView {
         );
     }
 
-    /// @dev When the sub is in execution, STVNR short-circuits to TRUE without evaluating any
+    /// @dev When the sub is in partial execution, STVNR short-circuits to TRUE without evaluating any
     ///      trigger, even though the sub trigger would return FALSE.
-    function test_checkTriggers_subInExecution_returnsTrueWithoutCheckingTriggers() public {
+    function test_checkTriggers_subInPartialExecution_returnsTrueWithoutCheckingTriggers() public {
         _startExecutionForSub(SUB_ID);
 
         _mockTriggerOutcome(ratioTriggerAddr, TriggerStatus.FALSE);
@@ -156,14 +158,16 @@ contract TestTriggerView is BaseTest, RegistryUtils, TriggerView {
         );
 
         assertEq(
-            uint256(status), uint256(TriggerStatus.TRUE), "sub in execution should short-circuit"
+            uint256(status),
+            uint256(TriggerStatus.TRUE),
+            "sub in partial execution should short-circuit"
         );
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    /// @dev Starts semi-continuous execution for a sub. Mirrors the production flow: the
+    /// @dev Starts partial execution for a sub. Mirrors the production flow: the
     ///      registered StrategyExecutor approves the start first, then the owner wallet starts it.
     function _startExecutionForSub(uint256 _subId) internal {
         address subOwnerWallet = address(ISubStorage(SUB_STORAGE_ADDR).getSub(_subId).walletAddr);
@@ -173,12 +177,12 @@ contract TestTriggerView is BaseTest, RegistryUtils, TriggerView {
         assertTrue(strategyExecutor != address(0), "strategy executor not registered");
 
         prank(strategyExecutor);
-        tracker.approveStartOfExecution(_subId);
+        partialExecutionStorage.approveStartOfExecution(_subId);
 
         prank(subOwnerWallet);
-        tracker.startExecution(_subId, 0);
+        partialExecutionStorage.startExecution(_subId, 0);
 
-        assertEq(tracker.executionWalletOf(_subId), subOwnerWallet);
+        assertEq(partialExecutionStorage.getPartialExecutionWallet(_subId), subOwnerWallet);
     }
 
     /// @dev Mocks the ratio + min debt trigger outcomes, runs checkTriggers and asserts the result.

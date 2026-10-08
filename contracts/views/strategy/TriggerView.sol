@@ -3,7 +3,9 @@ pragma solidity =0.8.24;
 
 import { ITrigger } from "../../interfaces/core/ITrigger.sol";
 import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
-import { ISemiContinuousTracker } from "../../interfaces/core/ISemiContinuousTracker.sol";
+import {
+    IStrategyPartialExecutionStorage
+} from "../../interfaces/core/IStrategyPartialExecutionStorage.sol";
 
 import { BundleStorage } from "../../core/strategy/BundleStorage.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
@@ -95,11 +97,13 @@ contract TriggerView is StrategyModel, CoreHelper {
         bytes4[] calldata _additionalTriggerIds,
         bytes[] calldata _additionalTriggerCallData
     ) public returns (TriggerStatus) {
-        // If the sub is in "semi" execution, we want to short-circuit to TRUE without checking any triggers.
+        // If the sub is in partial execution, we want to short-circuit to TRUE without checking any triggers.
         {
-            ISemiContinuousTracker semiContinuousTracker =
-                ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER));
-            if (semiContinuousTracker.isInExecution(_subId)) return TriggerStatus.TRUE;
+            IStrategyPartialExecutionStorage partialExecutionStorage =
+                IStrategyPartialExecutionStorage(
+                    registry.getAddr(DFSIds.STRATEGY_PARTIAL_EXECUTION_STORAGE)
+                );
+            if (partialExecutionStorage.isInPartialExecution(_subId)) return TriggerStatus.TRUE;
         }
 
         Strategy memory strategy;
