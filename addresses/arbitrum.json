@@ -22,6 +22,17 @@
         "history": []
     },
     {
+        "name": "DFSProxyRegistryV2",
+        "address": "0x4fe554C08d0e0a1f52ba83F334f65bc618140D89",
+        "id": "0x0fcbdb1a",
+        "path": "contracts/utils/proxyRegistry/DFSProxyRegistryV2.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "DFSProxyRegistryController",
         "address": "0x6F6DaE1bCB60F67B2Cb939dBE565e8fD03F6F002",
         "id": "0xcbbb53f2",
@@ -870,14 +881,14 @@
     },
     {
         "name": "ChangeProxyOwner",
-        "address": "0x29F66A5fcB601c806E7156f29FDEC771BdC9c08d",
+        "address": "0xacf5bAD9543A98EcAcC620cF6CB989Ec88f1650D",
         "id": "0x67314f12",
         "path": "contracts/actions/utils/ChangeProxyOwner.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x29F66A5fcB601c806E7156f29FDEC771BdC9c08d"]
     },
     {
         "name": "AaveV3RatioCheck",

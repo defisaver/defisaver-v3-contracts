@@ -2,21 +2,22 @@
 
 pragma solidity =0.8.24;
 
+import { IDFSProxyRegistryV2 } from "../../interfaces/utils/IDFSProxyRegistryV2.sol";
 import { IDSAuth } from "../../interfaces/DS/IDSAuth.sol";
 import { ActionBase } from "../ActionBase.sol";
-import {
-    DFSProxyRegistryController
-} from "../../utils/proxyRegistry/DFSProxyRegistryController.sol";
+import { DFSIds } from "../../utils/DFSIds.sol";
 
-/// @title Changes the owner of the DSProxy and updated the DFSRegistry
+/// @title ChangeProxyOwner
+/// @notice Action used to change the owner of the DSProxy and update the DFSProxyRegistryV2.
+/// @dev If proxy is already synced, this will perform a no-op.
 contract ChangeProxyOwner is ActionBase {
+    /// @notice Error thrown when the new owner address is the zero address
+    error ZeroOwnerAddress();
+
     /// @param newOwner Address of the new owner
     struct Params {
         address newOwner;
     }
-
-    DFSProxyRegistryController constant dfsRegController =
-        DFSProxyRegistryController(DFS_REG_CONTROLLER_ADDR);
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -35,6 +36,7 @@ contract ChangeProxyOwner is ActionBase {
         return bytes32(bytes20(inputData.newOwner));
     }
 
+    /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
 
@@ -46,14 +48,16 @@ contract ChangeProxyOwner is ActionBase {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    //////////////////////////// ACTION LOGIC ////////////////////////////
-
+    /*//////////////////////////////////////////////////////////////
+                            ACTION LOGIC
+    //////////////////////////////////////////////////////////////*/
     function _changeOwner(address _newOwner) internal {
-        require(_newOwner != address(0), "Owner is empty address");
+        if (_newOwner == address(0)) revert ZeroOwnerAddress();
 
         IDSAuth(address(this)).setOwner(_newOwner);
 
-        dfsRegController.changeOwnerInDFSRegistry(_newOwner);
+        address dfsProxyRegistry = registry.getAddr(DFSIds.DFS_PROXY_REGISTRY_V2);
+        IDFSProxyRegistryV2(dfsProxyRegistry).syncProxy(address(this));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
