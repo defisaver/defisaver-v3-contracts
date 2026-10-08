@@ -7,7 +7,7 @@ import { ActionBase } from "../../../contracts/actions/ActionBase.sol";
 import { StrategyModel } from "../../../contracts/core/strategy/StrategyModel.sol";
 import { IDSProxy } from "../../../contracts/interfaces/DS/IDSProxy.sol";
 import { SubStorage } from "../../../contracts/core/strategy/SubStorage.sol";
-import { SemiContinuousTracker } from "../../../contracts/core/strategy/SemiContinuousTracker.sol";
+import { ISemiContinuousTracker } from "../../../contracts/core/strategy/SemiContinuousTracker.sol";
 
 import { SubActionsBase } from "../../utils/SubActionsBase.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
@@ -161,7 +161,7 @@ contract TestUpdateSub is SubActionsBase {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                SemiContinuousTracker.NotAuthorized.selector, subId, address(cut)
+                ISemiContinuousTracker.NotAuthorized.selector, subId, address(cut)
             )
         );
         cut.executeActionDirect(updateSubEncode(subId, _bundleSub(1)));
@@ -222,7 +222,7 @@ contract TestUpdateSub is SubActionsBase {
         StrategyModel.StrategySub memory newSub = _bundleSub(1);
 
         vm.expectEmit(true, true, true, true, address(tracker));
-        emit SemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        emit ISemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.UpdateData(subId, keccak256(abi.encode(newSub)), newSub);
         _update(wallet, subId, newSub, false);
@@ -239,7 +239,7 @@ contract TestUpdateSub is SubActionsBase {
         StrategyModel.StrategySub memory newSub = _bundleSub(1);
 
         vm.expectEmit(true, true, true, true, address(tracker));
-        emit SemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        emit ISemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.UpdateData(subId, keccak256(abi.encode(newSub)), newSub);
         _update(wallet, subId, newSub, true);
@@ -258,7 +258,7 @@ contract TestUpdateSub is SubActionsBase {
         StrategyModel.StrategySub memory firstSub = _bundleSub(1);
 
         vm.expectEmit(true, true, true, true, address(tracker));
-        emit SemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        emit ISemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.UpdateData(subId, keccak256(abi.encode(firstSub)), firstSub);
         _update(wallet, subId, firstSub, false);
@@ -307,7 +307,7 @@ contract TestUpdateSub is SubActionsBase {
         StrategyModel.StrategySub memory newSub = _bundleSub(123);
 
         vm.expectEmit(true, true, true, true, address(tracker));
-        emit SemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        emit ISemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.UpdateData(subId, keccak256(abi.encode(newSub)), newSub);
         _update(wallet, subId, newSub, false);
@@ -337,7 +337,7 @@ contract TestUpdateSub is SubActionsBase {
         uint256 finishedCount;
         for (uint256 i = 0; i < logs.length; ++i) {
             if (logs[i].emitter != address(tracker)) continue;
-            if (logs[i].topics[0] != SemiContinuousTracker.ExecutionFinished.selector) continue;
+            if (logs[i].topics[0] != ISemiContinuousTracker.ExecutionFinished.selector) continue;
 
             finishedCount++;
             assertEq(uint256(logs[i].topics[1]), subId, "only the updated sub may be finished");
@@ -383,7 +383,7 @@ contract TestUpdateSub is SubActionsBase {
         bytes32 otherHashBefore = subStorage.getSub(otherSubId).strategySubHash;
 
         vm.expectEmit(true, true, true, true, address(tracker));
-        emit SemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        emit ISemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
         _update(wallet, subId, _bundleSub(123), false);
 
         _assertNotInExecution(subId);

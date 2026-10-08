@@ -22,6 +22,9 @@ contract SubActionsBase is ActionsUtils, RegistryUtils, BaseTest {
     /// @dev Seed of the sub created by _subscribe.
     uint256 internal constant INITIAL_SEED = 1;
 
+    /// @dev Strategy ID recorded by _startExecution, the suites never read it back.
+    uint256 internal constant STRATEGY_ID = 1;
+
     SubStorage internal subStorage;
     CreateSub internal createSub;
     SemiContinuousTracker internal tracker;
@@ -79,6 +82,6 @@ contract SubActionsBase is ActionsUtils, RegistryUtils, BaseTest {
         tracker.approveStartOfExecution(_subId);
 
         prank(address(subStorage.getSub(_subId).walletAddr));
-        tracker.startExecution(_subId);
+        tracker.startExecution(_subId, STRATEGY_ID);
     }
 }

@@ -39,7 +39,7 @@ contract StartExecutionAction is ActionBase {
         uint256 subId = abi.decode(_callData, (uint256));
 
         ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER))
-            .startExecution(subId);
+            .startExecution(subId, 0);
 
         return bytes32(subId);
     }
@@ -380,7 +380,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         actionsCalldata[0] = abi.encode(subId);
 
         vm.expectEmit(true, true, true, true, address(tracker));
-        emit SemiContinuousTracker.ExecutionStarted(subId, walletAddr);
+        emit ISemiContinuousTracker.ExecutionStarted(subId, walletAddr);
         cut.executeStrategy(subId, 0, _triggers(_probeSubData()), actionsCalldata, sub);
 
         assertEq(
@@ -398,10 +398,10 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         _execute(f);
 
         vm.expectRevert(
-            abi.encodeWithSelector(SemiContinuousTracker.NotApproved.selector, f.subId, walletAddr)
+            abi.encodeWithSelector(ISemiContinuousTracker.NotApproved.selector, f.subId, walletAddr)
         );
         prank(walletAddr);
-        tracker.startExecution(f.subId);
+        tracker.startExecution(f.subId, 0);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -414,7 +414,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         uint256 balanceBefore = balanceOf(f.subData.token, sender);
 
         vm.expectEmit(true, true, true, true, address(tracker));
-        emit SemiContinuousTracker.ExecutionStarted(f.subId, walletAddr);
+        emit ISemiContinuousTracker.ExecutionStarted(f.subId, walletAddr);
         _executeWithFlag(f);
 
         assertEq(tracker.executionWalletOf(f.subId), walletAddr);
@@ -434,7 +434,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         assertTrue(tracker.isInExecution(f.subId));
 
         vm.expectEmit(true, true, true, true, address(tracker));
-        emit SemiContinuousTracker.ExecutionFinished(f.subId, walletAddr, walletAddr);
+        emit ISemiContinuousTracker.ExecutionFinished(f.subId, walletAddr, walletAddr);
         _execute(f);
 
         assertFalse(tracker.isInExecution(f.subId), "tracker must be cleared");

@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
+import { ISemiContinuousTracker } from "../../interfaces/core/ISemiContinuousTracker.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { SubStorage } from "../../core/strategy/SubStorage.sol";
 import { Permission } from "../../auth/Permission.sol";
-import { ISemiContinuousTracker } from "../../interfaces/core/ISemiContinuousTracker.sol";
 import { DFSIds } from "../../utils/DFSIds.sol";
 
 /// @title ToggleSub - Sets the state of the sub to active or deactivated.
@@ -46,15 +46,15 @@ contract ToggleSub is ActionBase, Permission {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function updateSubData(Params memory _inputData) internal {
+        ISemiContinuousTracker semiContinuousTracker =
+            ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER));
+        semiContinuousTracker.finishExecution(_inputData.subId);
+
         if (_inputData.active) {
             /// @notice This gives wallet permission to our auth contract to be able to execute the strategy.
             _givePermissionToAuthContract(_isDSProxy(address(this)));
             SubStorage(SUB_STORAGE_ADDR).activateSub(_inputData.subId);
         } else {
-            ISemiContinuousTracker semiContinuousTracker =
-                ISemiContinuousTracker(registry.getAddr(DFSIds.SEMI_CONTINUOUS_TRACKER));
-            semiContinuousTracker.finishExecution(_inputData.subId);
-
             SubStorage(SUB_STORAGE_ADDR).deactivateSub(_inputData.subId);
         }
     }

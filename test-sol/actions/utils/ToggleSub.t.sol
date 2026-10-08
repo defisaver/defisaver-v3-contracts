@@ -5,7 +5,7 @@ pragma solidity =0.8.24;
 import { ToggleSub } from "../../../contracts/actions/utils/ToggleSub.sol";
 import { ActionBase } from "../../../contracts/actions/ActionBase.sol";
 import { SubStorage } from "../../../contracts/core/strategy/SubStorage.sol";
-import { SemiContinuousTracker } from "../../../contracts/core/strategy/SemiContinuousTracker.sol";
+import { ISemiContinuousTracker } from "../../../contracts/core/strategy/SemiContinuousTracker.sol";
 import { ISafe } from "../../../contracts/interfaces/protocols/safe/ISafe.sol";
 import { IDSProxy } from "../../../contracts/interfaces/DS/IDSProxy.sol";
 
@@ -176,7 +176,7 @@ contract TestToggleSub is SubActionsBase {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                SemiContinuousTracker.NotAuthorized.selector, subId, address(cut)
+                ISemiContinuousTracker.NotAuthorized.selector, subId, address(cut)
             )
         );
         cut.executeActionDirect(toggleSubEncode(subId, false));
@@ -251,7 +251,7 @@ contract TestToggleSub is SubActionsBase {
         assertTrue(tracker.isInExecution(subId));
 
         vm.expectEmit(true, true, true, true, address(tracker));
-        emit SemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        emit ISemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
 
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.DeactivateSub(subId);
@@ -267,7 +267,7 @@ contract TestToggleSub is SubActionsBase {
         assertTrue(tracker.isInExecution(subId));
 
         vm.expectEmit(true, true, true, true, address(tracker));
-        emit SemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        emit ISemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
 
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.DeactivateSub(subId);
@@ -292,7 +292,7 @@ contract TestToggleSub is SubActionsBase {
         assertTrue(tracker.isInExecution(subId));
 
         vm.expectEmit(true, true, true, true, address(tracker));
-        emit SemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        emit ISemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
 
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.DeactivateSub(subId);
@@ -301,20 +301,22 @@ contract TestToggleSub is SubActionsBase {
         assertFalse(tracker.isInExecution(subId), "deactivate must clear the tracker");
     }
 
-    /// @dev Documents current behaviour: only the deactivate branch clears the tracker, so a
-    ///      flag that is still set when the sub is re-enabled keeps bypassing triggers.
-    function test_activate_does_not_clear_semi_continuous_execution() public {
+    /// @dev Both branches clear the tracker, so a flag that is still set can't keep bypassing
+    ///      triggers once the sub is re-enabled.
+    function test_should_clear_semi_continuous_execution_on_activate() public {
         _startExecution(subId);
         assertTrue(tracker.isInExecution(subId));
+
+        vm.expectEmit(true, true, true, true, address(tracker));
+        emit ISemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
 
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.ActivateSub(subId);
         _toggle(wallet, subId, true, false);
 
-        assertTrue(
-            tracker.isInExecution(subId),
-            "activate leaves the tracker set, only the deactivate branch clears it"
-        );
+        assertFalse(tracker.isInExecution(subId), "activate must clear the tracker");
+        assertEq(tracker.executionWalletOf(subId), address(0));
+        assertTrue(subStorage.getSub(subId).isEnabled);
     }
 
     /// @dev The tracker is a hard dependency of the deactivate path. If it is not registered
@@ -328,16 +330,15 @@ contract TestToggleSub is SubActionsBase {
         assertTrue(subStorage.getSub(subId).isEnabled, "sub could not be disabled");
     }
 
-    /// @dev The activate path never touches the tracker, so it keeps working regardless.
-    function test_should_activate_when_tracker_is_not_registered() public {
+    /// @dev The activate path calls the tracker too, so it is a hard dependency there as well.
+    function test_should_revert_on_activate_when_tracker_is_not_registered() public {
         _toggle(wallet, subId, false, false);
         redeploy("SemiContinuousTracker", address(0));
 
-        vm.expectEmit(true, true, true, true, address(subStorage));
-        emit SubStorage.ActivateSub(subId);
+        vm.expectRevert();
         _toggle(wallet, subId, true, false);
 
-        assertTrue(subStorage.getSub(subId).isEnabled);
+        assertFalse(subStorage.getSub(subId).isEnabled, "sub could not be enabled");
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -389,7 +390,7 @@ contract TestToggleSub is SubActionsBase {
         _startExecution(secondSubId);
 
         vm.expectEmit(true, true, true, true, address(tracker));
-        emit SemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        emit ISemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.DeactivateSub(subId);
         _toggle(wallet, subId, false, false);
@@ -415,7 +416,7 @@ contract TestToggleSub is SubActionsBase {
         uint256 finishedCount;
         for (uint256 i = 0; i < logs.length; ++i) {
             if (logs[i].emitter != address(tracker)) continue;
-            if (logs[i].topics[0] != SemiContinuousTracker.ExecutionFinished.selector) continue;
+            if (logs[i].topics[0] != ISemiContinuousTracker.ExecutionFinished.selector) continue;
 
             finishedCount++;
             assertEq(uint256(logs[i].topics[1]), subId, "only the toggled sub may be finished");
@@ -470,7 +471,7 @@ contract TestToggleSub is SubActionsBase {
         _startExecution(otherSubId);
 
         vm.expectEmit(true, true, true, true, address(tracker));
-        emit SemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
+        emit ISemiContinuousTracker.ExecutionFinished(subId, walletAddr, walletAddr);
         _toggle(wallet, subId, false, false);
 
         _assertNotInExecution(subId);

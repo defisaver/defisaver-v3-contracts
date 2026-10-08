@@ -21,6 +21,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
                                     VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
     uint256 internal constant SUB_ID = 3113;
+    uint256 internal constant STRATEGY_ID = 7;
 
     address subOwnerWallet;
     address adminVaultOwner;
@@ -87,10 +88,14 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
         emit ExecutionStarted(SUB_ID, subOwnerWallet);
 
         prank(subOwnerWallet);
-        cut.startExecution(SUB_ID);
+        cut.startExecution(SUB_ID, STRATEGY_ID);
 
         assertTrue(cut.isInExecution(SUB_ID));
         assertEq(cut.executionWalletOf(SUB_ID), subOwnerWallet);
+
+        (address wallet, uint256 initialStrategyId) = cut.getExecution(SUB_ID);
+        assertEq(wallet, subOwnerWallet);
+        assertEq(initialStrategyId, STRATEGY_ID);
     }
 
     /// @dev The approval gate runs before the ownership check, so an unapproved sub owner
@@ -98,7 +103,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
     function test_should_revert_when_starting_execution_without_approval() public {
         vm.expectRevert(abi.encodeWithSelector(NotApproved.selector, SUB_ID, subOwnerWallet));
         prank(subOwnerWallet);
-        cut.startExecution(SUB_ID);
+        cut.startExecution(SUB_ID, STRATEGY_ID);
 
         assertFalse(cut.isInExecution(SUB_ID));
     }
@@ -106,7 +111,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
     function test_should_revert_when_starting_execution_without_approval_for_non_owner() public {
         vm.expectRevert(abi.encodeWithSelector(NotApproved.selector, SUB_ID, bob));
         prank(bob);
-        cut.startExecution(SUB_ID);
+        cut.startExecution(SUB_ID, STRATEGY_ID);
 
         assertFalse(cut.isInExecution(SUB_ID));
     }
@@ -116,7 +121,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
     {
         vm.expectRevert(abi.encodeWithSelector(NotApproved.selector, SUB_ID, adminVaultOwner));
         prank(adminVaultOwner);
-        cut.startExecution(SUB_ID);
+        cut.startExecution(SUB_ID, STRATEGY_ID);
 
         assertFalse(cut.isInExecution(SUB_ID));
     }
@@ -128,7 +133,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
 
         vm.expectRevert(abi.encodeWithSelector(NotApproved.selector, otherSubId, subOwnerWallet));
         prank(subOwnerWallet);
-        cut.startExecution(otherSubId);
+        cut.startExecution(otherSubId, STRATEGY_ID);
 
         assertFalse(cut.isInExecution(otherSubId));
     }
@@ -138,7 +143,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
 
         vm.recordLogs();
         prank(subOwnerWallet);
-        cut.startExecution(SUB_ID);
+        cut.startExecution(SUB_ID, STRATEGY_ID);
 
         Vm.Log[] memory logs = vm.getRecordedLogs();
         assertEq(logs.length, 0);
@@ -150,7 +155,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
 
         vm.recordLogs();
         prank(bob);
-        cut.startExecution(SUB_ID);
+        cut.startExecution(SUB_ID, STRATEGY_ID);
 
         Vm.Log[] memory logs = vm.getRecordedLogs();
         assertEq(logs.length, 0);
@@ -162,7 +167,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
 
         vm.expectRevert(abi.encodeWithSelector(NotSubOwner.selector, SUB_ID, adminVaultOwner));
         prank(adminVaultOwner);
-        cut.startExecution(SUB_ID);
+        cut.startExecution(SUB_ID, STRATEGY_ID);
 
         assertFalse(cut.isInExecution(SUB_ID));
     }
@@ -172,7 +177,7 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
 
         vm.expectRevert(abi.encodeWithSelector(NotSubOwner.selector, SUB_ID, bob));
         prank(bob);
-        cut.startExecution(SUB_ID);
+        cut.startExecution(SUB_ID, STRATEGY_ID);
 
         assertFalse(cut.isInExecution(SUB_ID));
     }
@@ -306,6 +311,6 @@ contract TestCore_SemiContinuousTracker is SemiContinuousTracker, BaseTest {
         _approveStart(SUB_ID);
 
         prank(subOwnerWallet);
-        cut.startExecution(SUB_ID);
+        cut.startExecution(SUB_ID, STRATEGY_ID);
     }
 }

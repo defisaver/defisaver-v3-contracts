@@ -6,7 +6,10 @@ import { StrategyExecutor } from "../../contracts/core/strategy/StrategyExecutor
 import { SafeModuleAuth } from "../../contracts/core/strategy/SafeModuleAuth.sol";
 import { BotAuth } from "../../contracts/core/strategy/BotAuth.sol";
 import { SubStorage } from "../../contracts/core/strategy/SubStorage.sol";
-import { SemiContinuousTracker } from "../../contracts/core/strategy/SemiContinuousTracker.sol";
+import {
+    SemiContinuousTracker,
+    ISemiContinuousTracker
+} from "../../contracts/core/strategy/SemiContinuousTracker.sol";
 import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
 import { CreateSub } from "../../contracts/actions/utils/CreateSub.sol";
 import { PullToken } from "../../contracts/actions/utils/PullToken.sol";
@@ -64,7 +67,8 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
     /// @dev Mirrors RecipeExecutor.SEMI_CONTINUOUS_FLAG.
     bytes32 internal constant SEMI_CONTINUOUS_FLAG = keccak256("SEMI_CONTINUOUS_FLAG");
 
-    /// @dev executionWalletOf is the only storage slot of SemiContinuousTracker.
+    /// @dev The executions mapping is the only storage slot of SemiContinuousTracker, the wallet is
+    ///      the first field of its struct value.
     uint256 internal constant EXECUTION_WALLET_SLOT = 0;
 
     uint256 internal constant PULL_AMOUNT = 1 ether;
@@ -178,7 +182,7 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         _fund(2);
 
         vm.expectEmit(true, true, true, true, address(tracker));
-        emit SemiContinuousTracker.ExecutionStarted(subId, walletAddr);
+        emit ISemiContinuousTracker.ExecutionStarted(subId, walletAddr);
         _execute(subId, 0, _withFlag(_actions(1)), sub);
         assertEq(tracker.executionWalletOf(subId), walletAddr);
         assertTrue(subStorage.getSub(subId).isEnabled, "sub must stay enabled");
@@ -230,7 +234,7 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         uint256 walletBalanceBefore = balanceOf(Addresses.WETH_ADDR, walletAddr);
 
         vm.expectEmit(true, true, true, true, address(tracker));
-        emit SemiContinuousTracker.ExecutionStarted(subId, walletAddr);
+        emit ISemiContinuousTracker.ExecutionStarted(subId, walletAddr);
         _execute(subId, 0, _withFlag(actionsCalldata), sub);
 
         assertEq(balanceOf(Addresses.WETH_ADDR, walletAddr), walletBalanceBefore, "FL paid back");
@@ -245,7 +249,9 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
 
         // The tracker is not called
         vm.expectCall(
-            address(tracker), abi.encodeCall(SemiContinuousTracker.startExecution, (subId)), 0
+            address(tracker),
+            abi.encodeWithSelector(SemiContinuousTracker.startExecution.selector),
+            0
         );
         _execute(subId, 0, _withFlag(_actions(1)), sub);
 
@@ -401,7 +407,7 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         cut.executeRecipeFromStrategy(subId, actionsCalldata, _triggerCallData(1), 0, sub);
     }
 
-    /// @dev Writes executionWalletOf[_subId] directly. Only used for the defensive branch above,
+    /// @dev Writes executions[_subId].wallet directly. Only used for the defensive branch above,
     ///      which no legitimate sequence of calls can produce.
     function _forceExecutionWallet(uint256 _subId, address _walletAddr) internal {
         vm.store(
@@ -417,7 +423,7 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
 
         for (uint256 i = 0; i < logs.length; ++i) {
             if (logs[i].emitter != address(tracker)) continue;
-            if (logs[i].topics[0] != SemiContinuousTracker.ExecutionStarted.selector) continue;
+            if (logs[i].topics[0] != ISemiContinuousTracker.ExecutionStarted.selector) continue;
 
             count++;
         }
