@@ -76,16 +76,26 @@ contract DFSExchangeWithTxSaver is DFSExchangeCore, TxSaverGasCostCalc {
         _exData.srcAmount = amountWithoutFee;
     }
 
+    // Order of execution:
+    // 1. Both off-chain and on-chain orders are injected:
+    //    - Try the off-chain injected order first → then fall back to the on-chain injected order
+    // 2. Only an off-chain order is injected:
+    //    - Try the off-chain injected order first → then fall back to an existing on-chain order (if present)
+    // 3. Only an on-chain order is injected:
+    //    - Try the existing off-chain order first → then fall back to the on-chain injected order
+    // 4. No orders are injected:
+    //    - Try the existing off-chain order first → then fall back to the existing on-chain order (if present)
     function _injectExchangeData(
         ExchangeData memory _exData,
         InjectedExchangeData memory _injectedExchangeData
     ) internal pure {
-        // if offchain order data is present, inject it here
+        // If off-chain order data is present, inject it here.
         if (_injectedExchangeData.offchainData.price > 0) {
             _exData.offchainData = _injectedExchangeData.offchainData;
         }
 
-        // if onchain order data is present, inject it here
+        // If on-chain order data is present, inject it here.
+        // We do not clear any existing off-chain order, as it should be tried first.
         if (_injectedExchangeData.wrapper != address(0)) {
             _exData.wrapper = _injectedExchangeData.wrapper;
             _exData.wrapperData = _injectedExchangeData.wrapperData;
