@@ -174,6 +174,11 @@ const runAaveV3CollSwitchTests = () => {
             expect(dataBefore[0].enabledAsCollateral).to.be.true;
             expect(dataBefore[1].enabledAsCollateral).to.be.false;
 
+            // Leftover `fromAsset` is unwrapped if it's WETH, so track ETH in that case.
+            const dustAssetAddr =
+                fromAsset.symbol === 'WETH' ? addrs[network].ETH_ADDR : fromAsset.address;
+            const eoaDustBalanceBefore = await balanceOf(dustAssetAddr, senderAcc.address);
+
             await callAaveV3GenericFLCollateralSwitchStrategy(
                 strategyExecutor,
                 0,
@@ -196,6 +201,19 @@ const runAaveV3CollSwitchTests = () => {
             expect(proxyFromAssetBalanceAfter).to.be.eq(0);
             expect(proxyToAssetBalanceAfter).to.be.eq(0);
 
+            if (isEOA) {
+                // aTokens pulled from the EOA are fully burned by the withdraw, none are left on the proxy.
+                expect(await balanceOf(fromReserveData.aTokenAddress, proxy.address)).to.be.eq(0);
+
+                // New collateral is supplied on behalf of the EOA, the proxy must not end up with its own position.
+                const proxyData = await aaveV3View.getTokenBalances(
+                    pair.marketAddr,
+                    proxy.address,
+                    [toAsset.address],
+                );
+                expect(proxyData[0].balance).to.be.eq(0);
+            }
+
             expect(dataAfter[1].balance).to.be.gt(dataBefore[1].balance);
             expect(dataAfter[0].borrowsVariable).to.be.eq(0);
             expect(dataAfter[1].borrowsVariable).to.be.gte(dataBefore[1].borrowsVariable);
@@ -207,6 +225,10 @@ const runAaveV3CollSwitchTests = () => {
                 expect(dataAfter[0].enabledAsCollateral).to.be.false;
                 expect(dataAfter[1].enabledAsCollateral).to.be.true;
                 expect(dataAfter[0].balance).to.be.eq(0);
+
+                // Flashloan is sized at 99% of collateral, the surplus `fromAsset` goes back to the EOA.
+                const eoaDustBalanceAfter = await balanceOf(dustAssetAddr, senderAcc.address);
+                expect(eoaDustBalanceAfter).to.be.gt(eoaDustBalanceBefore);
             } else {
                 expect(dataAfter[0].enabledAsCollateral).to.be.true;
                 expect(dataAfter[1].enabledAsCollateral).to.be.true;

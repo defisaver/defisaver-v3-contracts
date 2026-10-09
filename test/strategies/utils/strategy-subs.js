@@ -855,7 +855,7 @@ const subAaveV3GenericFLCollateralSwitchStrategy = async (
     triggerPrice,
     priceState,
 ) => {
-    const strategySub = automationSdk.strategySubService.aaveV3Encode.collateralSwitch(
+    const strategySub = automationSdk.strategySubService.aaveV3Encode.collateralSwitchGeneric(
         strategyId,
         fromAsset,
         fromAssetId,
@@ -863,13 +863,12 @@ const subAaveV3GenericFLCollateralSwitchStrategy = async (
         toAssetId,
         marketAddr,
         amountToSwitch,
+        user,
         baseTokenAddress,
         quoteTokenAddress,
         triggerPrice,
         priceState,
     );
-    // The generic strategy replaces the legacy useOnBehalf slot with the position owner.
-    strategySub[3][6] = abiCoder.encode(['address'], [user]);
     const subId = await subToStrategy(proxy, strategySub);
     return { subId, strategySub };
 };
