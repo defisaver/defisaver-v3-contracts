@@ -44,13 +44,12 @@ contract SparkSupply is ActionBase, SparkHelper {
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.assetId =
             uint16(_parseParamUint(params.assetId, _paramMapping[2], _subData, _returnValues));
-        params.useDefaultMarket =
-            _parseParamUint(
-                    params.useDefaultMarket ? 1 : 0, _paramMapping[4], _subData, _returnValues
-                ) == 1;
-        params.useOnBehalf =
-            _parseParamUint(params.useOnBehalf ? 1 : 0, _paramMapping[5], _subData, _returnValues)
-                == 1;
+        params.useDefaultMarket = _parseParamUint(
+            params.useDefaultMarket ? 1 : 0, _paramMapping[4], _subData, _returnValues
+        ) == 1;
+        params.useOnBehalf = _parseParamUint(
+            params.useOnBehalf ? 1 : 0, _paramMapping[5], _subData, _returnValues
+        ) == 1;
         params.market = _parseParamAddr(params.market, _paramMapping[6], _subData, _returnValues);
         params.onBehalf =
             _parseParamAddr(params.onBehalf, _paramMapping[7], _subData, _returnValues);

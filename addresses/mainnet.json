@@ -22,6 +22,17 @@
         "history": []
     },
     {
+        "name": "DFSProxyRegistryV2",
+        "address": "0x0cCB1F91beb8590949880D2a61C26C11d6280319",
+        "id": "0x0fcbdb1a",
+        "path": "contracts/utils/proxyRegistry/DFSProxyRegistryV2.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "DFSProxyRegistryController",
         "address": "0xF8f8B3C98Cf2E63Df3041b73f80F362a4cf3A576",
         "id": "0xcbbb53f2",
@@ -563,14 +574,14 @@
     },
     {
         "name": "GeneralView",
-        "address": "0xaa82EC29f0C9A939B29C6135e93E3080ed6669e5",
+        "address": "0x9eBc20f0415B7Fe50F3F77d8158bC6b2d8d6b14a",
         "id": "0xc5831ea6",
         "path": "contracts/views/GeneralView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xaa82EC29f0C9A939B29C6135e93E3080ed6669e5"]
     },
     {
         "name": "CBChickenIn",
@@ -761,6 +772,20 @@
         "changeTime": 0,
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "BytesTransientStorage",
+        "address": "0x424e4819A1C33F2D8FDe70CD3c4801c03dB62C72",
+        "id": "0xcfee1903",
+        "path": "contracts/utils/transient/BytesTransientStorage.sol",
+        "version": "1.0.2",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": [
+            "0xd3FaFe60A64CFb4a136Cbb778e3D82e1725c4740",
+            "0xB3FE6f712c8B8c64CD2780ce714A36e7640DDf0f"
+        ]
     },
     {
         "name": "CurveView",
@@ -1105,14 +1130,14 @@
     },
     {
         "name": "ChangeProxyOwner",
-        "address": "0x81cA52CfE66421d0ceF82d5F33230e43b5F23D2B",
+        "address": "0x1cc4A7f6B17a4C900F2afe4A0718A73714AC33f2",
         "id": "0x67314f12",
         "path": "contracts/actions/utils/ChangeProxyOwner.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x81cA52CfE66421d0ceF82d5F33230e43b5F23D2B"]
     },
     {
         "name": "TokenBalance",
@@ -2117,14 +2142,17 @@
     },
     {
         "name": "SparkRatioTrigger",
-        "address": "0xE79EB831D3Fd8e9AC9B709ABC000131FB761f930",
+        "address": "0x8011ebcD2423f8ED1f91d623EF4867A8aD2cBaD8",
         "id": "0xbfb2ea35",
         "path": "contracts/triggers/SparkRatioTrigger.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x1F61250B3eFB747C7C0A9dF4851935C95CE387cC"]
+        "history": [
+            "0xE79EB831D3Fd8e9AC9B709ABC000131FB761f930",
+            "0x1F61250B3eFB747C7C0A9dF4851935C95CE387cC"
+        ]
     },
     {
         "name": "AaveV3RatioCheck",
@@ -2142,14 +2170,17 @@
     },
     {
         "name": "SparkRatioCheck",
-        "address": "0x234dCAF981FE2BdB2D0255F4bCdDbEDED0892f5B",
+        "address": "0x6d4B33a9190CA2980de02102cDC086048d24628a",
         "id": "0xaf91e475",
         "path": "contracts/actions/checkers/SparkRatioCheck.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x38D9fdc88f304d9E271679447FF07126F54CDff9"]
+        "history": [
+            "0x234dCAF981FE2BdB2D0255F4bCdDbEDED0892f5B",
+            "0x38D9fdc88f304d9E271679447FF07126F54CDff9"
+        ]
     },
     {
         "name": "AaveV3View",
@@ -2181,14 +2212,15 @@
     },
     {
         "name": "SparkView",
-        "address": "0xB6893bd106f6b15D1213d570A8E362aC081C9C74",
+        "address": "0x834e866B3A33a4b186e80FB8aD36d27961C0024E",
         "id": "0xd6f690a9",
         "path": "contracts/views/SparkView.sol",
-        "version": "1.0.6",
+        "version": "1.0.7",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xB6893bd106f6b15D1213d570A8E362aC081C9C74",
             "0x79df6aF8738d98D12c16ca59e908445F981F7eAb",
             "0x080f99a5E039e863EC61bbEBBc48a409E75C58F5",
             "0xD3780b6A694C3573C669A10bc10f61e3401412B8",
@@ -3062,14 +3094,14 @@
     },
     {
         "name": "CurveUsdSelfLiquidate",
-        "address": "0xd90d8a4955DfE9D4f45F7f60595313B0925ee1da",
+        "address": "0x0B21996Fc90993f975D8279bE8ff2D34518da79C",
         "id": "0x77f22040",
         "path": "contracts/actions/curveusd/CurveUsdSelfLiquidate.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xd90d8a4955DfE9D4f45F7f60595313B0925ee1da"]
     },
     {
         "name": "CurveUsdLevCreate",
@@ -3206,14 +3238,17 @@
     },
     {
         "name": "LlamaLendSelfLiquidate",
-        "address": "0x46173C379Fbf998E6db0B47F45b73f77C64d3897",
+        "address": "0xF0D7b730B40b02Ad555E27CFe5FAF43D6a75dfba",
         "id": "0xafcc4eb7",
         "path": "contracts/actions/llamalend/LlamaLendSelfLiquidate.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": ["0xE4944E0e46177300fa4c351EF72b95b9655E8394"]
+        "history": [
+            "0x46173C379Fbf998E6db0B47F45b73f77C64d3897",
+            "0xE4944E0e46177300fa4c351EF72b95b9655E8394"
+        ]
     },
     {
         "name": "LlamaLendPayback",
@@ -3592,14 +3627,15 @@
     },
     {
         "name": "CompV3RatioCheck",
-        "address": "0x314Bd8fFe51f6Ea7bAf978c61762F7eAaA1B5D34",
+        "address": "0xc6382c776Ff008B4f60E336f763499166Cb0ebF5",
         "id": "0x2ce67bb9",
         "path": "contracts/actions/checkers/CompV3RatioCheck.sol",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x314Bd8fFe51f6Ea7bAf978c61762F7eAaA1B5D34",
             "0xC98d94791216E6c5cf24FD3D2BBFdc577113331B",
             "0x008E50774B26E92179fe25233E6ee7399c5A11F5",
             "0xEeb7e195d69479910d071Ac1dBC923A17d042960"
@@ -3607,14 +3643,17 @@
     },
     {
         "name": "CompV3RatioTrigger",
-        "address": "0x802bBe746AcE6D0bED9aB58622D88E553fe59720",
+        "address": "0xe0153E644736a57e0aC47100D5F4CE682576D772",
         "id": "0x506812d0",
         "path": "contracts/triggers/CompV3RatioTrigger.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x8ACCaf4e0054AD73789A3ebF344c3061804c29D8"]
+        "history": [
+            "0x802bBe746AcE6D0bED9aB58622D88E553fe59720",
+            "0x8ACCaf4e0054AD73789A3ebF344c3061804c29D8"
+        ]
     },
     {
         "name": "CompV3SubProxy",
@@ -3728,14 +3767,15 @@
     },
     {
         "name": "LSVView",
-        "address": "0x8eb872563368b2a8ff6d9a4842f923067f08497a",
+        "address": "0xbe99281e4e26b1d3D9a30A8D8A762d92Fd25f6A9",
         "id": "0x373e1531",
         "path": "contracts/views/LSVView.sol",
-        "version": "1.0.6",
+        "version": "1.0.7",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x8eb872563368b2a8ff6d9a4842f923067f08497a",
             "0xF3da52d6e45A967cB6835112B2A0BC34347952e6",
             "0x096fd98653681dcf07687d2c21beb67807e0c8e6",
             "0x2bf0643b4d7e3e63d0a859048af980fb3333b478",
@@ -4160,25 +4200,31 @@
     },
     {
         "name": "LiquityV2SPDeposit",
-        "address": "0x73FF552646A7D93764Ff8D1F9e7662c422E715ef",
+        "address": "0x256e97E7f7B42Cf7De5258C59A2935AdEdDdfC63",
         "id": "0x042eb099",
         "path": "contracts/actions/liquityV2/stabilityPool/LiquityV2SPDeposit.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x1556711572a53c89912AE185f3a6Dba9FF365Bf3"]
+        "history": [
+            "0x73FF552646A7D93764Ff8D1F9e7662c422E715ef",
+            "0x1556711572a53c89912AE185f3a6Dba9FF365Bf3"
+        ]
     },
     {
         "name": "LiquityV2SPWithdraw",
-        "address": "0x8E8a4213745Ed68b3fce9d1500f563d885D02FDf",
+        "address": "0x7ab4A43DE2628EA53c88E27755325d090f28D9c9",
         "id": "0x1eea7fdb",
         "path": "contracts/actions/liquityV2/stabilityPool/LiquityV2SPWithdraw.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x237eaB8D7f9bBeaF8D27dB9797EB835e4062B8C2"]
+        "history": [
+            "0x8E8a4213745Ed68b3fce9d1500f563d885D02FDf",
+            "0x237eaB8D7f9bBeaF8D27dB9797EB835e4062B8C2"
+        ]
     },
     {
         "name": "LiquityV2SPClaimColl",
@@ -4193,14 +4239,15 @@
     },
     {
         "name": "LiquityV2View",
-        "address": "0xF1f3D940392ddAD78A5e2dE1b595aB529f63c365",
+        "address": "0x812985DaF1c471F1bA456e901258d98a9e759461",
         "id": "0xe993f355",
         "path": "contracts/views/LiquityV2View.sol",
-        "version": "1.0.5",
+        "version": "1.0.6",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
         "history": [
+            "0xF1f3D940392ddAD78A5e2dE1b595aB529f63c365",
             "0x111b737CF5233734cE16A6Ee2599aE862fB04485",
             "0x8ABc5D6850DF33D621c30ae487bab843deb9CB63",
             "0x60128705250fDf19F1e18b197D1436B30eDa3899",
@@ -4320,28 +4367,32 @@
     },
     {
         "name": "FluidVaultT1Payback",
-        "address": "0xA81bb6ce68a01d2d6CEC1631c7712e3CCd41275C",
+        "address": "0x8D56b267C6a3e5295EFAebC67Ac413483c885C05",
         "id": "0x101b4845",
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Payback",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xA81bb6ce68a01d2d6CEC1631c7712e3CCd41275C",
             "0xa7A4B84D38CD33F9901922687db24B8aE14f2455",
             "0x13b021b52989e257537b4C0ee6Ef12E77AFD4652"
         ]
     },
     {
         "name": "FluidVaultT1Adjust",
-        "address": "0x8f1443c9F24843D14fa6b302A55C59468ED7D28B",
+        "address": "0x0Dfe1e40F3DA8687a68824022176bE547Ecc0906",
         "id": "0xce25def6",
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Adjust",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x792D40CAE821905A2B57522BF8a77347e7BB0c0a"]
+        "history": [
+            "0x8f1443c9F24843D14fa6b302A55C59468ED7D28B",
+            "0x792D40CAE821905A2B57522BF8a77347e7BB0c0a"
+        ]
     },
     {
         "name": "FluidRatioTrigger",
@@ -4436,14 +4487,14 @@
     },
     {
         "name": "FluidDexPayback",
-        "address": "0xD733BD32F4AAEe92a983E2021B85ca5d31236FA0",
+        "address": "0x12D0D7c4c2c5304E5ba96A019E0F092FdF555123",
         "id": "0x1de2c822",
         "path": "contracts/actions/fluid/dex/FluidDexPayback",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0xD733BD32F4AAEe92a983E2021B85ca5d31236FA0"]
     },
     {
         "name": "KingClaim",
@@ -4617,14 +4668,14 @@
     },
     {
         "name": "CompV3PriceTrigger",
-        "address": "0xc7F3bc2E90957f7A64275b03f01EE72c6C11afD3",
+        "address": "0x96457C38123b5fFa9c5d389C56d14826ee1b9636",
         "id": "0xb67d04b5",
         "path": "contracts/actions/compV3/CompV3PriceTrigger.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xc7F3bc2E90957f7A64275b03f01EE72c6C11afD3"]
     },
     {
         "name": "CompV3PriceRangeTrigger",
@@ -4822,14 +4873,17 @@
     },
     {
         "name": "SparkTargetRatioCheck",
-        "address": "0xb43405A165b6827c665dAE8Da5b81773D9c09F94",
+        "address": "0xcC677Ae3fDBb938D4B67548BE878d4444E9a86C7",
         "id": "0x66d60c1e",
         "path": "contracts/actions/checkers/SparkTargetRatioCheck.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x4E5044F622C0FcAb587106847F4889d3AB065c79"]
+        "history": [
+            "0xb43405A165b6827c665dAE8Da5b81773D9c09F94",
+            "0x4E5044F622C0FcAb587106847F4889d3AB065c79"
+        ]
     },
     {
         "name": "SFProxyEntryPoint",
@@ -5063,6 +5117,17 @@
         "history": []
     },
     {
+        "name": "EtherFiStakeFromLido",
+        "address": "0xD4815aA46fc39e667fd7ab3194458639B59bcD82",
+        "id": "0xc9f2b6aa",
+        "path": "contracts/actions/etherfi/EtherFiStakeFromLido.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "AaveV3MinDebtTrigger",
         "address": "0x9b34580a66634AbBe64ddF7CeF78Cdc144D1Fc17",
         "id": "0xb3fa1599",
@@ -5155,6 +5220,160 @@
         "address": "0xEdd01f381416E98eAEf7A34536340Fd83F71Cd59",
         "id": "0x628ee7ee",
         "path": "contracts/views/strategy/TriggerView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV4DelegateBorrow",
+        "address": "0x4284B4e09c46Ee2b4E703dB8e5A2F892d12638e1",
+        "id": "0xaa70a0b5",
+        "path": "contracts/actions/aaveV4/AaveV4DelegateBorrow.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV4DelegateWithdraw",
+        "address": "0x5e7c404d46971E7BD3a95570A80Bc37F38bf9E29",
+        "id": "0xf3a0510b",
+        "path": "contracts/actions/aaveV4/AaveV4DelegateWithdraw.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV4DelegateSetUsingAsCollateral",
+        "address": "0xa97f8E483C147f27aE7370DeaC4E6585A37884A2",
+        "id": "0xe4860f02",
+        "path": "contracts/actions/aaveV4/AaveV4DelegateSetUsingAsCollateral.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV4SetUserManagers",
+        "address": "0x61e5d59bD82FFC61B916d2F2114eF671b17d0662",
+        "id": "0x8cc6d554",
+        "path": "contracts/actions/aaveV4/AaveV4SetUserManagers.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MidnightView",
+        "address": "0xb8e1dAAd42e18203cfCED7193FE0e2E19d713A56",
+        "id": "0xecc0f913",
+        "path": "contracts/views/MidnightView.sol",
+        "version": "1.0.1",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": ["0xB64FBf011343961D9AC4A04b714414E35ebE6BE0"]
+    },
+    {
+        "name": "MidnightBorrowFromOrders",
+        "address": "0xB37fB30b93e1D5b0E870312997426c4a04Cff8Ce",
+        "id": "0x493c5822",
+        "path": "contracts/actions/midnight/MidnightBorrowFromOrders.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MidnightPaybackDirect",
+        "address": "0x2911FFF5C567Ac71d653AAf5919410A3e078D186",
+        "id": "0x410d1066",
+        "path": "contracts/actions/midnight/MidnightPaybackDirect.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MidnightPaybackFromOrders",
+        "address": "0x55cd72fB914A60587a88962Efa680117aE900729",
+        "id": "0x190b0b43",
+        "path": "contracts/actions/midnight/MidnightPaybackFromOrders.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MidnightSupplyCollateral",
+        "address": "0x32e25a420cF132832173AFfF7e74a7A0F9EC7430",
+        "id": "0xbb30ee9a",
+        "path": "contracts/actions/midnight/MidnightSupplyCollateral.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MidnightWithdrawCollateral",
+        "address": "0x4791Ffa530757AC56Cab7857291557ad3ef8b370",
+        "id": "0xa1f04e15",
+        "path": "contracts/actions/midnight/MidnightWithdrawCollateral.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FlyWrapper",
+        "address": "0x365Fb273f7358291B86AD45cB2B3ef9BADb3bEB9",
+        "id": "0x92b2d9f8",
+        "path": "contracts/exchangeV3/offchainWrappersV3/FlyWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "OpenOceanWrapper",
+        "address": "0xc6F12dbB5C3b3E094F9EbBC7cA50b60aFD63E401",
+        "id": "0x9e3c90cd",
+        "path": "contracts/exchangeV3/offchainWrappersV3/OpenOceanWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV3BoostCollateralTrigger",
+        "address": "0x638714927378D2F79F7251A011121fFA5be7aD54",
+        "id": "0xb03dd233",
+        "path": "contracts/triggers-additional/AaveV3BoostCollateralTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LiquityMinDebtTrigger",
+        "address": "0x7C58f017A0596e885D560Fb09f35C4B011C0180a",
+        "id": "0x15cb8c0f",
+        "path": "contracts/triggers-additional/LiquityMinDebtTrigger.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,

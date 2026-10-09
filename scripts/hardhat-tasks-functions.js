@@ -425,6 +425,9 @@ async function verifyContract(contractAddress, contractName) {
     console.log(url);
 
     const tx = await axios.post(url, params, config);
+    if (tx.data.status !== '1') {
+        throw new Error(tx.data.result);
+    }
     console.log(`Verification submitted with GUID: ${tx.data.result}`);
 
     const demoUrl = `https://${hre.network.config.blockExplorer}/sourcecode-demo.html`;

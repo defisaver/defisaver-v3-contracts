@@ -10,7 +10,7 @@
             ["&3", "$1", 0],
             ["&1", "$2", "&proxy", "&4"]
         ],
-        "bundleId": 0
+        "bundleIds": [0]
     },
     {
         "name": "McdYearnRepayWithExchangeStrategy",
@@ -24,7 +24,7 @@
             ["&3", "$2", 0],
             ["&1", "$3", "&proxy", "&4"]
         ],
-        "bundleId": 0
+        "bundleIds": [0]
     },
     {
         "name": "McdMstableRepayStrategy",
@@ -37,7 +37,7 @@
             ["&3", "$1", 0],
             ["&1", "$2", "&proxy", "&4"]
         ],
-        "bundleId": 1
+        "bundleIds": [1]
     },
     {
         "name": "McdMstableRepayWithExchangeStrategy",
@@ -51,7 +51,7 @@
             ["&3", "$2", 0],
             ["&1", "$3", "&proxy", "&4"]
         ],
-        "bundleId": 1
+        "bundleIds": [1]
     },
     {
         "name": "McdRariRepayStrategy",
@@ -64,7 +64,7 @@
             ["&3", "$1", 0],
             ["&1", "$2", "&proxy", "&4"]
         ],
-        "bundleId": 2
+        "bundleIds": [2]
     },
     {
         "name": "McdRariRepayWithExchangeStrategy",
@@ -78,7 +78,7 @@
             ["&3", "$2", 0],
             ["&1", "$3", "&proxy", "&4"]
         ],
-        "bundleId": 2
+        "bundleIds": [2]
     },
     {
         "name": "McdCloseToDaiStrategy",
@@ -312,7 +312,7 @@
             ["&1", "$3", "&proxy", "&proxy"],
             ["&3", "&4", "&1"]
         ],
-        "bundleId": 82
+        "bundleIds": [3, 28, 73, 82]
     },
     {
         "name": "CompV3FLRepay",
@@ -335,7 +335,7 @@
             ["&1", 0, 0, "$1"],
             ["&3", "&4", "&1"]
         ],
-        "bundleId": 73
+        "bundleIds": [3, 73]
     },
     {
         "name": "CompV3CompositeRepay",
@@ -344,7 +344,7 @@
         "triggerIds": ["CompV3RatioTrigger"],
         "actionIds": [null],
         "paramMapping": [["&1", "&4"]],
-        "bundleId": 3
+        "bundleIds": [3]
     },
     {
         "name": "CompV3FLCompositeRepay",
@@ -353,7 +353,7 @@
         "triggerIds": ["CompV3RatioTrigger"],
         "actionIds": [null],
         "paramMapping": [["&1", "&4"]],
-        "bundleId": 3
+        "bundleIds": [3]
     },
     {
         "name": "CompV3Boost",
@@ -368,7 +368,7 @@
             ["&1", 0, "$3", "&proxy"],
             ["&3", "&4", "&1"]
         ],
-        "bundleId": 29
+        "bundleIds": [4, 29]
     },
     {
         "name": "CompV3FLBoost",
@@ -391,7 +391,7 @@
             ["&1", "$1", 0, 0],
             ["&3", "&4", "&1"]
         ],
-        "bundleId": 4
+        "bundleIds": [4]
     },
     {
         "name": "CompV3CompositeBoost",
@@ -400,7 +400,7 @@
         "triggerIds": ["CompV3RatioTrigger"],
         "actionIds": [null],
         "paramMapping": [["&1", "&4"]],
-        "bundleId": 4
+        "bundleIds": [4]
     },
     {
         "name": "CompV3FLCompositeBoost",
@@ -409,7 +409,7 @@
         "triggerIds": ["CompV3RatioTrigger"],
         "actionIds": [null],
         "paramMapping": [["&1", "&4"]],
-        "bundleId": 4
+        "bundleIds": [4]
     },
     {
         "name": "CompV3EOARepayStrategy",
@@ -430,7 +430,7 @@
             ["&1", "$3", "&proxy", "&eoa"],
             ["&3", "&4", "&1", "&eoa"]
         ],
-        "bundleId": 83
+        "bundleIds": [5, 30, 74, 83]
     },
     {
         "name": "CompV3FlEOARepayStrategy",
@@ -453,7 +453,7 @@
             ["&1", 0, 0, "$1", "&eoa"],
             ["&3", "&4", "&1", "&eoa"]
         ],
-        "bundleId": 74
+        "bundleIds": [5, 74]
     },
     {
         "name": "CompV3EOACompositeRepay",
@@ -462,7 +462,7 @@
         "triggerIds": ["CompV3RatioTrigger"],
         "actionIds": [null],
         "paramMapping": [["&1", "&4"]],
-        "bundleId": 5
+        "bundleIds": [5]
     },
     {
         "name": "CompV3EOAFLCompositeRepay",
@@ -471,7 +471,7 @@
         "triggerIds": ["CompV3RatioTrigger"],
         "actionIds": [null],
         "paramMapping": [["&1", "&4"]],
-        "bundleId": 5
+        "bundleIds": [5]
     },
     {
         "name": "CompV3EOABoostStrategy",
@@ -486,7 +486,7 @@
             ["&1", 0, "$3", "&proxy", "&eoa"],
             ["&3", "&4", "&1", "&eoa"]
         ],
-        "bundleId": 31
+        "bundleIds": [6, 31]
     },
     {
         "name": "CompV3EOAFlBoostStrategy",
@@ -509,7 +509,7 @@
             ["&1", "$1", 0, "&eoa"],
             ["&3", "&4", "&1", "&eoa"]
         ],
-        "bundleId": 6
+        "bundleIds": [6]
     },
     {
         "name": "CompV3EOACompositeBoost",
@@ -518,7 +518,7 @@
         "triggerIds": ["CompV3RatioTrigger"],
         "actionIds": [null],
         "paramMapping": [["&1", "&4"]],
-        "bundleId": 6
+        "bundleIds": [6]
     },
     {
         "name": "CompV3EOAFLCompositeBoost",
@@ -527,7 +527,7 @@
         "triggerIds": ["CompV3RatioTrigger"],
         "actionIds": [null],
         "paramMapping": [["&1", "&4"]],
-        "bundleId": 6
+        "bundleIds": [6]
     },
     {
         "name": "CBRebondStrategy",
@@ -557,7 +557,7 @@
             [0, "&proxy"],
             ["&3", "&eoa", 0]
         ],
-        "bundleId": 7
+        "bundleIds": [7]
     },
     {
         "name": "LiquityPaybackChickenOutStrategy",
@@ -572,7 +572,7 @@
             [0, "&proxy"],
             ["&3", "&eoa", 0]
         ],
-        "bundleId": 7
+        "bundleIds": [7]
     },
     {
         "name": "AaveV3Repay",
@@ -593,7 +593,7 @@
             ["$3", "&proxy", 0, 0, "&3", "&4", 0, 0],
             ["&2", "&1"]
         ],
-        "bundleId": 8
+        "bundleIds": [8]
     },
     {
         "name": "AaveFLV3Repay",
@@ -616,7 +616,7 @@
             [0, "&3", "$1", 0, 0],
             ["&2", "&1"]
         ],
-        "bundleId": 8
+        "bundleIds": [8]
     },
     {
         "name": "AaveV3Boost",
@@ -631,7 +631,7 @@
             ["$3", "&proxy", 0, "&5", "&3", "&4", 0, 0],
             ["&2", "&1"]
         ],
-        "bundleId": 9
+        "bundleIds": [9]
     },
     {
         "name": "AaveFLV3Boost",
@@ -654,7 +654,7 @@
             ["$1", 0, 0, 0, "&3", "&4", 0, 0],
             ["&2", "&1"]
         ],
-        "bundleId": 9
+        "bundleIds": [9]
     },
     {
         "name": "MakerRepayCompositeStrategy",
@@ -663,7 +663,7 @@
         "triggerIds": ["McdRatioTrigger"],
         "actionIds": ["McdRepayComposite"],
         "paramMapping": [["&1", 0, 0, 0, 0, 0]],
-        "bundleId": 75
+        "bundleIds": [10, 75]
     },
     {
         "name": "MakerFLRepayCompositeStrategy",
@@ -675,7 +675,7 @@
             [0, 0, 0, 0, 0, 0],
             ["&1", 0, "$1", 0, 0, 0]
         ],
-        "bundleId": 75
+        "bundleIds": [10, 75]
     },
     {
         "name": "MakerBoostCompositeStrategy",
@@ -684,7 +684,7 @@
         "triggerIds": ["McdRatioTrigger"],
         "actionIds": ["McdBoostComposite"],
         "paramMapping": [["&1", 0, 0, 0, 0, 0]],
-        "bundleId": 11
+        "bundleIds": [11]
     },
     {
         "name": "MakerFLBoostCompositeStrategy",
@@ -696,7 +696,7 @@
             [0, 0, 0, 0, 0, 0],
             ["&1", 0, "$1", 0, 0, 0]
         ],
-        "bundleId": 11
+        "bundleIds": [11]
     },
     {
         "name": "AaveV3CloseToDebt",
@@ -717,7 +717,7 @@
             [0, "&proxy", 0, "&4", 0, 0, "&5", "&5"],
             ["&3", "&eoa", 0]
         ],
-        "bundleId": 12
+        "bundleIds": [12]
     },
     {
         "name": "AaveV3FLCloseToDebt",
@@ -742,7 +742,7 @@
             ["&3", 0, "$1"],
             ["&3", "&eoa", 0]
         ],
-        "bundleId": 12
+        "bundleIds": [12]
     },
     {
         "name": "AaveV3CloseToColl",
@@ -765,7 +765,7 @@
             ["&3", "&eoa", 0],
             ["&1", "&eoa", 0]
         ],
-        "bundleId": 13
+        "bundleIds": [13]
     },
     {
         "name": "AaveV3FLCloseToColl",
@@ -792,7 +792,7 @@
             ["&3", "&eoa", 0],
             ["&1", "&eoa", 0]
         ],
-        "bundleId": 13
+        "bundleIds": [13]
     },
     {
         "name": "DCAStrategy",
@@ -819,7 +819,7 @@
             [0, "$3", "&proxy", "&proxy"],
             ["&1", "&2", "&proxy"]
         ],
-        "bundleId": 14
+        "bundleIds": [14]
     },
     {
         "name": "MorphoAaveV2FLRepayStrategy",
@@ -835,7 +835,7 @@
             [0, "$1", 0],
             ["&1", "&2", "&proxy"]
         ],
-        "bundleId": 14
+        "bundleIds": [14]
     },
     {
         "name": "MorphoAaveV2BoostStrategy",
@@ -850,7 +850,7 @@
             [0, "$3", "&proxy", "&proxy"],
             ["&1", "&2", "&proxy"]
         ],
-        "bundleId": 15
+        "bundleIds": [15]
     },
     {
         "name": "MorphoAaveV2FLBoostStrategy",
@@ -866,7 +866,7 @@
             [0, "$1", 0],
             ["&1", "&2", "&proxy"]
         ],
-        "bundleId": 15
+        "bundleIds": [15]
     },
     {
         "name": "LimitOrderStrategy",
@@ -895,7 +895,7 @@
             ["$3", "&proxy"],
             ["&1", "&2"]
         ],
-        "bundleId": 16
+        "bundleIds": [16]
     },
     {
         "name": "LiquityFLRepayStrategy",
@@ -910,7 +910,7 @@
             ["$1", "$3", "&3", "&4", "&proxy", 0],
             ["&1", "&2"]
         ],
-        "bundleId": 16
+        "bundleIds": [16]
     },
     {
         "name": "LiquityBoostStrategy",
@@ -931,7 +931,7 @@
             ["$3", "&proxy"],
             ["&1", "&2"]
         ],
-        "bundleId": 17
+        "bundleIds": [17]
     },
     {
         "name": "LiquityFLBoostStrategy",
@@ -946,7 +946,7 @@
             ["$3", "$1", "&3", "&4", "&proxy", 0],
             ["&1", "&2"]
         ],
-        "bundleId": 17
+        "bundleIds": [17]
     },
     {
         "name": "LiquityFLBoostWithCollStrategy",
@@ -971,7 +971,7 @@
             ["$1", 0],
             ["&1", "&2"]
         ],
-        "bundleId": 17
+        "bundleIds": [17]
     },
     {
         "name": "SparkRepay",
@@ -986,7 +986,7 @@
             ["$3", "&proxy", 0, 0, "&3", "&4", 0, 0],
             ["&2", "&1"]
         ],
-        "bundleId": 72
+        "bundleIds": [18, 72]
     },
     {
         "name": "SparkFLRepay",
@@ -1009,7 +1009,7 @@
             [0, "&3", "$1", 0, 0],
             ["&2", "&1"]
         ],
-        "bundleId": 72
+        "bundleIds": [18, 72]
     },
     {
         "name": "SparkBoost",
@@ -1024,7 +1024,7 @@
             ["$3", "&proxy", 0, "&5", "&3", "&4", 0, 0],
             ["&2", "&1"]
         ],
-        "bundleId": 19
+        "bundleIds": [19]
     },
     {
         "name": "SparkFLBoost",
@@ -1047,7 +1047,7 @@
             ["$1", 0, 0, 0, "&3", "&4", 0, 0],
             ["&2", "&1"]
         ],
-        "bundleId": 19
+        "bundleIds": [19]
     },
     {
         "name": "CompV2Repay",
@@ -1062,7 +1062,7 @@
             [0, "$3", "&proxy", "&proxy"],
             ["&2", "&1"]
         ],
-        "bundleId": 20
+        "bundleIds": [20]
     },
     {
         "name": "CompFLV2Repay",
@@ -1085,7 +1085,7 @@
             [0, "$1", 0],
             ["&2", "&1"]
         ],
-        "bundleId": 20
+        "bundleIds": [20]
     },
     {
         "name": "CompV2Boost",
@@ -1100,7 +1100,7 @@
             [0, "$3", "&proxy"],
             ["&2", "&1"]
         ],
-        "bundleId": 21
+        "bundleIds": [21]
     },
     {
         "name": "CompFLV2Boost",
@@ -1123,7 +1123,7 @@
             [0, "$1", 0],
             ["&2", "&1"]
         ],
-        "bundleId": 21
+        "bundleIds": [21]
     },
     {
         "name": "AaveV2Repay",
@@ -1138,7 +1138,7 @@
             ["&1", 0, "$3", 0, "&proxy", "&proxy"],
             ["&3", "&2"]
         ],
-        "bundleId": 22
+        "bundleIds": [22]
     },
     {
         "name": "AaveFLV2Repay",
@@ -1161,7 +1161,7 @@
             ["&1", 0, "$1", 0],
             ["&3", "&2"]
         ],
-        "bundleId": 22
+        "bundleIds": [22]
     },
     {
         "name": "AaveV2Boost",
@@ -1176,7 +1176,7 @@
             ["&1", 0, "$3", "&proxy", "&proxy", "&4"],
             ["&3", "&2"]
         ],
-        "bundleId": 23
+        "bundleIds": [23]
     },
     {
         "name": "AaveFLV2Boost",
@@ -1199,7 +1199,7 @@
             ["&1", 0, "$1", 0, 0, "&proxy"],
             ["&3", "&2"]
         ],
-        "bundleId": 23
+        "bundleIds": [23]
     },
     {
         "name": "LiquityDsrPayback",
@@ -1260,7 +1260,7 @@
             [0, "&proxy", 0, "&4", 0, 0, "&5", "&5"],
             ["&3", "&eoa", 0]
         ],
-        "bundleId": 24
+        "bundleIds": [24]
     },
     {
         "name": "AaveV3FLCloseToDebtWithMaximumGasPrice",
@@ -1285,7 +1285,7 @@
             ["&3", 0, "$1"],
             ["&3", "&eoa", 0]
         ],
-        "bundleId": 24
+        "bundleIds": [24]
     },
     {
         "name": "AaveV3CloseToCollWithMaximumGasPrice",
@@ -1308,7 +1308,7 @@
             ["&3", "&eoa", 0],
             ["&1", "&eoa", 0]
         ],
-        "bundleId": 25
+        "bundleIds": [25]
     },
     {
         "name": "AaveV3FLCloseToCollWithMaximumGasPrice",
@@ -1335,7 +1335,7 @@
             ["&3", "&eoa", 0],
             ["&1", "&eoa", 0]
         ],
-        "bundleId": 25
+        "bundleIds": [25]
     },
     {
         "name": "LiquityDebtInFrontRepayStrategy",
@@ -1367,7 +1367,7 @@
             ["&1", 0, "&eoa", 0, 0, 0, 0],
             ["&2", "&3", "&1"]
         ],
-        "bundleId": 26
+        "bundleIds": [26]
     },
     {
         "name": "CurveUsdRepayStrategy",
@@ -1388,7 +1388,7 @@
             ["&1", "&proxy", "&proxy", "&eoa", "$3", 0],
             ["&2", "&3", "&1"]
         ],
-        "bundleId": 26
+        "bundleIds": [26]
     },
     {
         "name": "CurveUsdFLRepayStrategy",
@@ -1411,7 +1411,7 @@
             ["&1", 0, "$1"],
             ["&2", "&3", "&1"]
         ],
-        "bundleId": 26
+        "bundleIds": [26]
     },
     {
         "name": "CurveUsdBoostStrategy",
@@ -1432,7 +1432,7 @@
             ["&1", "&proxy", "&proxy", "$3"],
             ["&2", "&3", "&1"]
         ],
-        "bundleId": 27
+        "bundleIds": [27]
     },
     {
         "name": "CurveUsdFLCollBoostStrategy",
@@ -1455,7 +1455,7 @@
             ["&4", "&4", 0, "&eoa", "$1", 0],
             ["&2", "&3", "&1"]
         ],
-        "bundleId": 27
+        "bundleIds": [27]
     },
     {
         "name": "CurveUsdFLDebtBoostStrategy",
@@ -1476,7 +1476,7 @@
             ["&1", "&proxy", 0, "$3", "$1"],
             ["&2", "&3", "&1"]
         ],
-        "bundleId": 27
+        "bundleIds": [27]
     },
     {
         "name": "CompV3FlRepayStrategyV2",
@@ -1499,7 +1499,7 @@
             ["&1", 0, 0, "$1", 0],
             ["&3", "&4", "&1", 0]
         ],
-        "bundleId": 82
+        "bundleIds": [28, 82]
     },
     {
         "name": "CompV3FlBoostStrategyV2",
@@ -1522,7 +1522,7 @@
             ["&1", "$1", 0, 0],
             ["&3", "&4", "&1", 0]
         ],
-        "bundleId": 29
+        "bundleIds": [29]
     },
     {
         "name": "CompV3FlEOARepayStrategyV2",
@@ -1545,7 +1545,7 @@
             ["&1", 0, 0, "$1", "&eoa"],
             ["&3", "&4", "&1", "&eoa"]
         ],
-        "bundleId": 83
+        "bundleIds": [30, 83]
     },
     {
         "name": "CompV3EOAFlBoostStrategyV2",
@@ -1568,7 +1568,7 @@
             ["&1", "$1", 0, "&eoa"],
             ["&3", "&4", "&1", "&eoa"]
         ],
-        "bundleId": 31
+        "bundleIds": [31]
     },
     {
         "name": "MorphoBlueRepayStrategy",
@@ -1589,7 +1589,7 @@
             ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&8"],
             ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
         ],
-        "bundleId": 81
+        "bundleIds": [32, 34, 78, 81]
     },
     {
         "name": "MorphoBlueFLCollRepayStrategy",
@@ -1612,7 +1612,7 @@
             ["&1", "&2", "&3", "&4", "&5", "$1", "&proxy", 0],
             ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
         ],
-        "bundleId": 78
+        "bundleIds": [32, 78]
     },
     {
         "name": "MorphoBlueFLDebtRepayStrategy",
@@ -1637,7 +1637,7 @@
             ["&1", "&1", 0, "&eoa", "$1", 0],
             ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
         ],
-        "bundleId": 81
+        "bundleIds": [32, 34, 78, 81]
     },
     {
         "name": "MorphoBlueBoostStrategy",
@@ -1658,7 +1658,7 @@
             ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&8"],
             ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
         ],
-        "bundleId": 35
+        "bundleIds": [33, 35]
     },
     {
         "name": "MorphoBlueFLDebtBoostStrategy",
@@ -1681,7 +1681,7 @@
             ["&1", "&2", "&3", "&4", "&5", "$1", "&8", 0],
             ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
         ],
-        "bundleId": 35
+        "bundleIds": [33, 35]
     },
     {
         "name": "MorphoBlueFLCollBoostStrategy",
@@ -1706,7 +1706,7 @@
             ["&2", "&2", 0, "&eoa", "$1", 0],
             ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
         ],
-        "bundleId": 35
+        "bundleIds": [33, 35]
     },
     {
         "name": "CurveUsdPaybackStrategy",
@@ -1741,7 +1741,7 @@
             ["&1", "&2", "&3", "&4", "&5", "$1", "&8", 0],
             ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
         ],
-        "bundleId": 81
+        "bundleIds": [34, 81]
     },
     {
         "name": "AaveV3OpenOrderFromCollStrategy",
@@ -1762,7 +1762,7 @@
             ["$3", "&proxy", "&2", 0, 0, "&7", "&5", 0],
             ["&6", "&5"]
         ],
-        "bundleId": 36
+        "bundleIds": [36]
     },
     {
         "name": "AaveV3FLOpenOrderFromCollStrategy",
@@ -1785,7 +1785,7 @@
             ["$1", 0, 0, "&4", 0, "&7", "&5", 0],
             ["&6", "&5"]
         ],
-        "bundleId": 36
+        "bundleIds": [36]
     },
     {
         "name": "AaveV3RepayOnPrice",
@@ -1806,7 +1806,7 @@
             ["$3", "&proxy", 0, "&4", 0, "&7", "&5", 0],
             ["&6", "&5"]
         ],
-        "bundleId": 37
+        "bundleIds": [37]
     },
     {
         "name": "AaveV3FlRepayOnPrice",
@@ -1829,7 +1829,7 @@
             ["&2", 0, "$1", 0, "&5"],
             ["&6", "&5"]
         ],
-        "bundleId": 37
+        "bundleIds": [37]
     },
     {
         "name": "MorphoBlueBoostOnTargetPriceStrategy",
@@ -1850,7 +1850,7 @@
             ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&7"],
             ["&1", "&2", "&3", "&4", "&5", "&7", "&6"]
         ],
-        "bundleId": 38
+        "bundleIds": [38, 85]
     },
     {
         "name": "MorphoBlueFLBoostOnTargetPriceStrategy",
@@ -1873,7 +1873,7 @@
             ["&1", "&2", "&3", "&4", "&5", "$1", "&7", 0],
             ["&1", "&2", "&3", "&4", "&5", "&7", "&6"]
         ],
-        "bundleId": 38
+        "bundleIds": [38, 85]
     },
     {
         "name": "LiquityV2RepayStrategy",
@@ -1894,7 +1894,7 @@
             ["&1", "&proxy", "&2", "$3"],
             ["&1", "&2", "&5", "&6"]
         ],
-        "bundleId": 39
+        "bundleIds": [39]
     },
     {
         "name": "LiquityV2FLRepayStrategy",
@@ -1915,7 +1915,7 @@
             ["&1", "&proxy", 0, "&2", "$1", "$3", 0, "&7", "&8"],
             ["&1", "&2", "&5", "&6"]
         ],
-        "bundleId": 39
+        "bundleIds": [39]
     },
     {
         "name": "LiquityV2BoostStrategy",
@@ -1936,7 +1936,7 @@
             ["&1", "&proxy", "&2", "$3"],
             ["&1", "&2", "&5", "&6"]
         ],
-        "bundleId": 40
+        "bundleIds": [40]
     },
     {
         "name": "LiquityV2FLBoostStrategy",
@@ -1957,7 +1957,7 @@
             ["&1", "&proxy", 0, "&2", "$3", "$1", 0, "&7", "&8"],
             ["&1", "&2", "&5", "&6"]
         ],
-        "bundleId": 40
+        "bundleIds": [40]
     },
     {
         "name": "LiquityV2FLBoostWithCollStrategy",
@@ -1982,7 +1982,7 @@
             ["&1", 0, "&2", "$1"],
             ["&1", "&2", "&5", "&6"]
         ],
-        "bundleId": 40
+        "bundleIds": [40]
     },
     {
         "name": "LiquityV2CloseToCollStrategy",
@@ -2003,7 +2003,7 @@
             ["&3", "$3", 0],
             ["&5", "&3", "&4", "&eoa", "&eoa", "&eoa", "&6", 0, 0]
         ],
-        "bundleId": 41
+        "bundleIds": [41]
     },
     {
         "name": "LiquityV2FLCloseToCollStrategy",
@@ -2026,7 +2026,7 @@
             ["&3", 0, "$1"],
             ["&5", "&3", "&4", "&eoa", "&eoa", "&eoa", "&6", 0, 0]
         ],
-        "bundleId": 41
+        "bundleIds": [41]
     },
     {
         "name": "LiquityV2FLCloseToDebtStrategy",
@@ -2047,7 +2047,7 @@
             ["&4", "$3", 0],
             ["&4", "&4", "&5", 0, "&eoa", "&eoa", "$1", 0, "&6"]
         ],
-        "bundleId": 41
+        "bundleIds": [41]
     },
     {
         "name": "LiquityV2RepayOnPriceStrategy",
@@ -2068,7 +2068,7 @@
             ["&1", "&proxy", "&2", "$3"],
             ["&1", "&2", "&5"]
         ],
-        "bundleId": 42
+        "bundleIds": [42]
     },
     {
         "name": "LiquityV2FLRepayOnPriceStrategy",
@@ -2089,7 +2089,7 @@
             ["&1", "&proxy", 0, "&2", "$1", "$3", 0, "&6", "&7"],
             ["&1", "&2", "&5"]
         ],
-        "bundleId": 42
+        "bundleIds": [42]
     },
     {
         "name": "LiquityV2BoostOnPriceStrategy",
@@ -2110,7 +2110,7 @@
             ["&1", "&proxy", "&2", "$3"],
             ["&1", "&2", "&5"]
         ],
-        "bundleId": 43
+        "bundleIds": [43]
     },
     {
         "name": "LiquityV2FLBoostOnPriceStrategy",
@@ -2131,7 +2131,7 @@
             ["&1", "&proxy", 0, "&2", "$3", "$1", 0, "&6", "&7"],
             ["&1", "&2", "&5"]
         ],
-        "bundleId": 43
+        "bundleIds": [43]
     },
     {
         "name": "LiquityV2FLBoostWithCollOnPriceStrategy",
@@ -2156,7 +2156,7 @@
             ["&1", 0, "&2", "$1"],
             ["&1", "&2", "&5"]
         ],
-        "bundleId": 43
+        "bundleIds": [43]
     },
     {
         "name": "LiquityV2PaybackFromSPStrategy",
@@ -2195,7 +2195,7 @@
             ["&2", "&1", "$3", "&proxy"],
             ["&1", "&3", "&4"]
         ],
-        "bundleId": 76
+        "bundleIds": [44, 76]
     },
     {
         "name": "FluidT1FLRepayStrategy",
@@ -2216,7 +2216,7 @@
             ["&2", "&1", "$1", "$3", "&proxy", 0, "&5", "&6", "&7"],
             ["&1", "&3", "&4"]
         ],
-        "bundleId": 76
+        "bundleIds": [44, 76]
     },
     {
         "name": "FluidT1BoostStrategy",
@@ -2237,7 +2237,7 @@
             ["&2", "&1", "$3", "&proxy"],
             ["&1", "&3", "&4"]
         ],
-        "bundleId": 45
+        "bundleIds": [45]
     },
     {
         "name": "FluidT1FLBoostStrategy",
@@ -2258,7 +2258,7 @@
             ["&2", "&1", "$3", "$1", "&proxy", 0, "&5", "&6", "&7"],
             ["&1", "&3", "&4"]
         ],
-        "bundleId": 45
+        "bundleIds": [45]
     },
     {
         "name": "CompV3RepayOnPriceStrategy",
@@ -2279,7 +2279,7 @@
             ["&1", "$3", "&proxy", "&6"],
             ["&5", "&4", "&1", "&6"]
         ],
-        "bundleId": 49
+        "bundleIds": [46, 49]
     },
     {
         "name": "CompV3FLRepayOnPriceStrategy",
@@ -2302,7 +2302,7 @@
             ["&1", 0, "&2", "$1", "&6"],
             ["&5", "&4", "&1", "&6"]
         ],
-        "bundleId": 49
+        "bundleIds": [46, 49]
     },
     {
         "name": "CompV3BoostOnPriceStrategy",
@@ -2317,7 +2317,7 @@
             ["&1", "&2", "$3", "&proxy", "&6"],
             ["&5", "&4", "&1", "&6"]
         ],
-        "bundleId": 50
+        "bundleIds": [47, 50]
     },
     {
         "name": "CompV3FLBoostOnPriceStrategy",
@@ -2340,7 +2340,7 @@
             ["&1", "$1", 0, "&6"],
             ["&5", "&4", "&1", "&6"]
         ],
-        "bundleId": 50
+        "bundleIds": [47, 50]
     },
     {
         "name": "CompV3FLCloseToDebtStrategy",
@@ -2363,7 +2363,7 @@
             ["&3", "$4", 0],
             ["&3", "&3", 0, "&eoa", "$1", 0]
         ],
-        "bundleId": 51
+        "bundleIds": [48, 51]
     },
     {
         "name": "CompV3FLCloseToCollStrategy",
@@ -2386,7 +2386,7 @@
             ["&2", "$4", 0],
             ["&2", "&2", "&3", 0, "&eoa", "&eoa", "$1", 0, 0]
         ],
-        "bundleId": 51
+        "bundleIds": [48, 51]
     },
     {
         "name": "LiquityV2InterestRateAdjustmentStrategy",
@@ -2420,7 +2420,7 @@
             ["$4", "&proxy", 0, 0, 0, 0, "&3", "&4"],
             ["&2", "&1", "&3", "&4"]
         ],
-        "bundleId": 79
+        "bundleIds": [52, 71, 79]
     },
     {
         "name": "AaveV3GenericFLRepayStrategy",
@@ -2445,7 +2445,7 @@
             [0, 0, "$5", 0, "&3"],
             ["&2", "&1", "&3", "&4"]
         ],
-        "bundleId": 79
+        "bundleIds": [52, 71, 79]
     },
     {
         "name": "AaveV3GenericBoostStrategy",
@@ -2460,7 +2460,7 @@
             ["$3", "&proxy", 0, 0, 0, 0, "&3", "&4"],
             ["&2", "&1", "&3", "&4"]
         ],
-        "bundleId": 53
+        "bundleIds": [53]
     },
     {
         "name": "AaveV3GenericFLBoostStrategy",
@@ -2483,7 +2483,7 @@
             ["$1", 0, 0, 0, 0, 0, "&3", "&4"],
             ["&2", "&1", "&3", "&4"]
         ],
-        "bundleId": 53
+        "bundleIds": [53]
     },
     {
         "name": "AaveV3GenericRepayOnPriceStrategy",
@@ -2506,7 +2506,7 @@
             ["$4", "&proxy", 0, "&4", 0, 0, "&5", "&7"],
             ["&6", "&5", "&7"]
         ],
-        "bundleId": 54
+        "bundleIds": [54]
     },
     {
         "name": "AaveV3GenericFLRepayOnPriceStrategy",
@@ -2531,7 +2531,7 @@
             ["&2", 0, "$5", 0, "&5"],
             ["&6", "&5", "&7"]
         ],
-        "bundleId": 54
+        "bundleIds": [54]
     },
     {
         "name": "AaveV3GenericBoostOnPriceStrategy",
@@ -2552,7 +2552,7 @@
             ["$3", "&proxy", "&2", 0, 0, 0, "&5", "&7"],
             ["&6", "&5", "&7"]
         ],
-        "bundleId": 55
+        "bundleIds": [55]
     },
     {
         "name": "AaveV3GenericFLBoostOnPriceStrategy",
@@ -2575,7 +2575,7 @@
             ["$1", 0, 0, "&4", 0, 0, "&5", "&7"],
             ["&6", "&5", "&7"]
         ],
-        "bundleId": 55
+        "bundleIds": [55]
     },
     {
         "name": "AaveV3GenericFLCloseToDebtStrategy",
@@ -2602,7 +2602,7 @@
             ["&3", 0, "$1"],
             ["&3", "&eoa", 0]
         ],
-        "bundleId": 56
+        "bundleIds": [56]
     },
     {
         "name": "AaveV3GenericFLCloseToCollStrategy",
@@ -2629,7 +2629,7 @@
             ["&1", 0, "$1"],
             ["&1", "&3", "&eoa", "&eoa", 0, 0]
         ],
-        "bundleId": 56
+        "bundleIds": [56]
     },
     {
         "name": "AaveV3FLCollateralSwitchStrategy",
@@ -2680,7 +2680,7 @@
             ["&3", 0, "$1"],
             ["&3", "&eoa", 0]
         ],
-        "bundleId": 57
+        "bundleIds": [57, 92]
     },
     {
         "name": "SparkGenericFLCloseToCollStrategy",
@@ -2707,7 +2707,7 @@
             ["&1", 0, "$1"],
             ["&1", "&3", "&eoa", "&eoa", 0, 0]
         ],
-        "bundleId": 57
+        "bundleIds": [57, 92]
     },
     {
         "name": "MorphoBlueFLCloseToDebtStrategy",
@@ -2732,7 +2732,7 @@
             ["&1", 0, "$1"],
             ["&1", "&eoa", 0]
         ],
-        "bundleId": 58
+        "bundleIds": [58, 87]
     },
     {
         "name": "MorphoBlueFLCloseToCollStrategy",
@@ -2757,7 +2757,7 @@
             ["&2", 0, "$1"],
             ["&2", "&1", "&eoa", "&eoa", 0, 0]
         ],
-        "bundleId": 58
+        "bundleIds": [58, 87]
     },
     {
         "name": "SparkRepayOnPriceStrategy",
@@ -2778,7 +2778,7 @@
             ["$3", "&proxy", 0, "&4", 0, "&7", "&5", 0],
             ["&6", "&5"]
         ],
-        "bundleId": 59
+        "bundleIds": [59]
     },
     {
         "name": "SparkFLRepayOnPriceStrategy",
@@ -2801,7 +2801,7 @@
             ["&2", 0, "$1", 0, "&5"],
             ["&6", "&5"]
         ],
-        "bundleId": 59
+        "bundleIds": [59]
     },
     {
         "name": "SparkBoostOnPriceStrategy",
@@ -2822,7 +2822,7 @@
             ["$3", "&proxy", "&2", 0, 0, 0, "&5", 0],
             ["&6", "&5"]
         ],
-        "bundleId": 60
+        "bundleIds": [60]
     },
     {
         "name": "SparkFLBoostOnPriceStrategy",
@@ -2845,7 +2845,7 @@
             ["$1", 0, 0, "&4", 0, "&7", "&5", 0],
             ["&6", "&5"]
         ],
-        "bundleId": 60
+        "bundleIds": [60]
     },
     {
         "name": "AaveV4RepayStrategy",
@@ -2866,7 +2866,7 @@
             ["&1", "&2", "&proxy", 0, "$3"],
             ["&3", "&4", "&1", "&2"]
         ],
-        "bundleId": 80
+        "bundleIds": [61, 66, 77, 80]
     },
     {
         "name": "AaveV4FLRepayStrategy",
@@ -2889,7 +2889,7 @@
             ["&1", "&2", 0, 0, "$1"],
             ["&3", "&4", "&1", "&2"]
         ],
-        "bundleId": 80
+        "bundleIds": [61, 66, 77, 80]
     },
     {
         "name": "AaveV4BoostStrategy",
@@ -2904,7 +2904,7 @@
             ["&1", "&2", "&proxy", 0, "$3", 0],
             ["&3", "&4", "&1", "&2"]
         ],
-        "bundleId": 67
+        "bundleIds": [62, 67]
     },
     {
         "name": "AaveV4FLBoostStrategy",
@@ -2927,7 +2927,7 @@
             ["&1", "&2", 0, 0, "$1"],
             ["&3", "&4", "&1", "&2"]
         ],
-        "bundleId": 67
+        "bundleIds": [62, 67]
     },
     {
         "name": "AaveV4RepayOnPriceStrategy",
@@ -2950,7 +2950,7 @@
             ["&1", "&2", "&proxy", "&6", "$4"],
             ["&7", "&8", "&1", "&2"]
         ],
-        "bundleId": 68
+        "bundleIds": [63, 68]
     },
     {
         "name": "AaveV4FLRepayOnPriceStrategy",
@@ -2975,7 +2975,7 @@
             ["&1", "&2", 0, "&4", "$1"],
             ["&7", "&8", "&1", "&2"]
         ],
-        "bundleId": 68
+        "bundleIds": [63, 68]
     },
     {
         "name": "AaveV4BoostOnPriceStrategy",
@@ -2998,7 +2998,7 @@
             ["&1", "&2", "&proxy", "&4", "$4", 0],
             ["&7", "&8", "&1", "&2"]
         ],
-        "bundleId": 69
+        "bundleIds": [64, 69]
     },
     {
         "name": "AaveV4FLBoostOnPriceStrategy",
@@ -3023,7 +3023,7 @@
             ["&1", "&2", 0, "&6", "$1"],
             ["&7", "&8", "&1", "&2"]
         ],
-        "bundleId": 69
+        "bundleIds": [64, 69]
     },
     {
         "name": "AaveV4FLCloseToDebtStrategy",
@@ -3048,7 +3048,7 @@
             ["&5", 0, "$1"],
             ["&5", "&eoa", 0]
         ],
-        "bundleId": 70
+        "bundleIds": [65, 70]
     },
     {
         "name": "AaveV4FLCloseToCollStrategy",
@@ -3073,7 +3073,7 @@
             ["&3", 0, "$1"],
             ["&3", "&5", "&eoa", "&eoa", 0, 0]
         ],
-        "bundleId": 70
+        "bundleIds": [65, 70]
     },
     {
         "name": "AaveV4FLCollateralSwitchStrategy",
@@ -3166,7 +3166,7 @@
             ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&7"],
             ["&1", "&2", "&3", "&4", "&5", "&7", "&6"]
         ],
-        "bundleId": 84
+        "bundleIds": [84, 86]
     },
     {
         "name": "MorphoBlueFLRepayOnPriceStrategy",
@@ -3189,6 +3189,210 @@
             ["&1", "&2", "&3", "&4", "&5", "$1", "&7", 0],
             ["&1", "&2", "&3", "&4", "&5", "&7", "&6"]
         ],
-        "bundleId": 84
+        "bundleIds": [84, 86]
+    },
+    {
+        "name": "SparkGenericRepayStrategy",
+        "id": 159,
+        "isContinuous": true,
+        "triggerIds": ["SparkRatioTrigger"],
+        "actionIds": [
+            "PullToken",
+            "SparkWithdraw",
+            "DFSSell",
+            "GasFeeTaker",
+            "SparkPayback",
+            "SparkRatioCheck"
+        ],
+        "paramMapping": [
+            [0, "&4", 0],
+            [0, 0, "$1", "&proxy", "&3"],
+            [0, 0, "$2", "&proxy", "&proxy"],
+            [0, "$3", 0],
+            ["$4", "&proxy", 0, 0, 0, 0, "&3", "&4"],
+            ["&2", "&1", "&3", "&4"]
+        ],
+        "bundleIds": [88, 93]
+    },
+    {
+        "name": "SparkGenericFLRepayStrategy",
+        "id": 160,
+        "isContinuous": true,
+        "triggerIds": ["SparkRatioTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTaker",
+            "SparkPayback",
+            "PullToken",
+            "SparkWithdraw",
+            "SparkRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            [0, 0, 0, "&proxy", "&proxy"],
+            [0, "$2", 0],
+            ["$3", "&proxy", 0, 0, 0, 0, "&3", "&4"],
+            [0, "&4", "$1"],
+            [0, 0, "$5", 0, "&3"],
+            ["&2", "&1", "&3", "&4"]
+        ],
+        "bundleIds": [88, 93]
+    },
+    {
+        "name": "SparkGenericBoostStrategy",
+        "id": 161,
+        "isContinuous": true,
+        "triggerIds": ["SparkRatioTrigger"],
+        "actionIds": ["SparkBorrow", "DFSSell", "GasFeeTaker", "SparkSupply", "SparkRatioCheck"],
+        "paramMapping": [
+            [0, "&proxy", 0, 0, 0, 0, "&3", "&4"],
+            [0, 0, "$1", "&proxy", "&proxy"],
+            [0, "$2", 0],
+            ["$3", "&proxy", 0, 0, 0, 0, "&3", "&4"],
+            ["&2", "&1", "&3", "&4"]
+        ],
+        "bundleIds": [89]
+    },
+    {
+        "name": "SparkGenericFLBoostStrategy",
+        "id": 162,
+        "isContinuous": true,
+        "triggerIds": ["SparkRatioTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTaker",
+            "SparkSupply",
+            "SparkBorrow",
+            "SparkRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            [0, 0, 0, "&proxy", "&proxy"],
+            [0, "$2", 0],
+            ["$3", "&proxy", 0, 0, 0, 0, "&3", "&4"],
+            ["$1", 0, 0, 0, 0, 0, "&3", "&4"],
+            ["&2", "&1", "&3", "&4"]
+        ],
+        "bundleIds": [89]
+    },
+    {
+        "name": "SparkGenericRepayOnPriceStrategy",
+        "id": 163,
+        "isContinuous": false,
+        "triggerIds": ["SparkQuotePriceTrigger"],
+        "actionIds": [
+            "PullToken",
+            "SparkWithdraw",
+            "DFSSell",
+            "GasFeeTaker",
+            "SparkPayback",
+            "SparkTargetRatioCheck"
+        ],
+        "paramMapping": [
+            [0, "&7", 0],
+            ["&2", 0, "$1", "&proxy", "&5"],
+            ["&1", "&3", "$2", "&proxy", "&proxy"],
+            ["&3", "$3", 0],
+            ["$4", "&proxy", 0, "&4", 0, 0, "&5", "&7"],
+            ["&6", "&5", "&7"]
+        ],
+        "bundleIds": [90]
+    },
+    {
+        "name": "SparkGenericFLRepayOnPriceStrategy",
+        "id": 164,
+        "isContinuous": false,
+        "triggerIds": ["SparkQuotePriceTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTaker",
+            "SparkPayback",
+            "PullToken",
+            "SparkWithdraw",
+            "SparkTargetRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", "&3", 0, "&proxy", "&proxy"],
+            ["&3", "$2", 0],
+            ["$3", "&proxy", 0, "&4", 0, 0, "&5", "&7"],
+            [0, "&7", "$1"],
+            ["&2", 0, "$5", 0, "&5"],
+            ["&6", "&5", "&7"]
+        ],
+        "bundleIds": [90]
+    },
+    {
+        "name": "SparkGenericBoostOnPriceStrategy",
+        "id": 165,
+        "isContinuous": false,
+        "triggerIds": ["SparkQuotePriceTrigger"],
+        "actionIds": [
+            "SparkBorrow",
+            "DFSSell",
+            "GasFeeTaker",
+            "SparkSupply",
+            "SparkTargetRatioCheck"
+        ],
+        "paramMapping": [
+            [0, "&proxy", 0, "&4", 0, 0, "&5", "&7"],
+            ["&3", "&1", "$1", "&proxy", "&proxy"],
+            ["&1", "$2", 0],
+            ["$3", "&proxy", "&2", 0, 0, 0, "&5", "&7"],
+            ["&6", "&5", "&7"]
+        ],
+        "bundleIds": [91]
+    },
+    {
+        "name": "SparkGenericFLBoostOnPriceStrategy",
+        "id": 166,
+        "isContinuous": false,
+        "triggerIds": ["SparkQuotePriceTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTaker",
+            "SparkSupply",
+            "SparkBorrow",
+            "SparkTargetRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&3", "&1", 0, "&proxy", "&proxy"],
+            ["&1", "$2", 0],
+            ["$3", "&proxy", "&2", 0, 0, 0, "&5", "&7"],
+            ["$1", 0, 0, "&4", 0, 0, "&5", "&7"],
+            ["&6", "&5", "&7"]
+        ],
+        "bundleIds": [91]
+    },
+    {
+        "name": "SparkGenericFLCollateralSwitchStrategy",
+        "id": 167,
+        "isContinuous": false,
+        "triggerIds": ["SparkQuotePriceTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTaker",
+            "SparkSupply",
+            "PullToken",
+            "SparkWithdraw",
+            "SendToken",
+            "SendTokenAndUnwrap"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", "&3", 0, "&proxy", "&proxy"],
+            ["&3", "$2", 0],
+            ["$3", "&proxy", "&4", 0, 0, 0, "&5", "&7"],
+            [0, "&7", "&6"],
+            ["&2", 0, "$5", "&proxy", "&5"],
+            ["&1", 0, "$1"],
+            ["&1", "&eoa", 0]
+        ]
     }
 ]

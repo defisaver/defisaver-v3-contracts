@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 contract LineaActionsUtilAddresses {
-    address internal constant DFS_REG_CONTROLLER_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; // DSProxies not supported on Linea
     address internal constant SUB_STORAGE_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; // Not needed now, waiting for automation
     address internal constant TRANSIENT_STORAGE = 0x425fA97285965E01Cc5F951B62A51F6CDEA5cc0d;
     address internal constant TRANSIENT_STORAGE_CANCUN = 0x425fA97285965E01Cc5F951B62A51F6CDEA5cc0d; // regular transient storage since no cancun support on Linea

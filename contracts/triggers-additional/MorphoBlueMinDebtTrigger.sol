@@ -37,6 +37,7 @@ contract MorphoBlueMinDebtTrigger is ITrigger, AdminAuth, MorphoBlueHelper {
 
         uint256 totalDebt =
             MorphoBalancesLib.expectedBorrowAssets(morphoBlue, marketParams, params.user);
+        if (totalDebt == 0) return false;
 
         uint256 loanTokenPrice = marketParams.loanToken.getPriceInUSD();
         if (loanTokenPrice == 0) return true;

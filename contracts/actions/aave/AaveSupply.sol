@@ -42,9 +42,9 @@ contract AaveSupply is ActionBase, AaveHelper {
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.onBehalf =
             _parseParamAddr(params.onBehalf, _paramMapping[4], _subData, _returnValues);
-        params.enableAsColl =
-            _parseParamUint(params.enableAsColl ? 1 : 0, _paramMapping[5], _subData, _returnValues)
-                == 1;
+        params.enableAsColl = _parseParamUint(
+            params.enableAsColl ? 1 : 0, _paramMapping[5], _subData, _returnValues
+        ) == 1;
 
         (uint256 supplyAmount, bytes memory logData) = _supply(
             params.market,

@@ -1,4 +1,5 @@
 [profile.default]
+cache_path = "forge-cache"
 src = 'contracts'
 out = 'artifacts'
 test = 'test-sol'

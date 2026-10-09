@@ -5,10 +5,12 @@ pragma solidity =0.8.24;
 import {
     IFluidVaultResolver
 } from "../../../../contracts/interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
+import { IERC20 } from "../../../../contracts/interfaces/token/IERC20.sol";
 import { FluidDexPayback } from "../../../../contracts/actions/fluid/dex/FluidDexPayback.sol";
 import { FluidView } from "../../../../contracts/views/FluidView.sol";
 import { FluidDexOpen } from "../../../../contracts/actions/fluid/dex/FluidDexOpen.sol";
 import { FluidDexModel } from "../../../../contracts/actions/fluid/helpers/FluidDexModel.sol";
+import { TokenUtils } from "../../../../contracts/utils/token/TokenUtils.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { FluidEncode } from "../../../utils/encode/FluidEncode.sol";
@@ -270,6 +272,9 @@ contract TestFluidDexPayback is FluidTestBase {
             FluidView.VaultData memory vaultData = fluidView.getVaultData(vaults[i]);
             LocalVars memory vars;
 
+            vars.isNativePayback0 = vaultData.borrowToken0 == TokenUtils.ETH_ADDR;
+            vars.isNativePayback1 = vaultData.borrowToken1 == TokenUtils.ETH_ADDR;
+
             (vaultData.borrowToken0, vars.paybackAmount0) = giveAndApproveToken(
                 vaultData.borrowToken0, sender, walletAddr, _config.paybackToken0AmountUSD
             );
@@ -339,6 +344,10 @@ contract TestFluidDexPayback is FluidTestBase {
             assertEq(vars.walletEthBalanceAfter, vars.walletEthBalanceBefore);
 
             if (_config.maxPaybackToken0) {
+                if (!vars.isNativePayback0) {
+                    assertEq(IERC20(vaultData.borrowToken0).allowance(walletAddr, vaults[i]), 0);
+                }
+
                 assertEq(vars.userPositionAfter.isLiquidated, false);
                 assertEq(vars.userPositionAfter.borrow, 0);
                 uint256 token0Pulled =
@@ -346,6 +355,10 @@ contract TestFluidDexPayback is FluidTestBase {
                 assertTrue(token0Pulled > 0);
                 assertTrue(token0Pulled <= vars.maxDebtToPull);
             } else if (_config.maxPaybackToken1) {
+                if (!vars.isNativePayback1) {
+                    assertEq(IERC20(vaultData.borrowToken1).allowance(walletAddr, vaults[i]), 0);
+                }
+
                 assertEq(vars.userPositionAfter.isLiquidated, false);
                 assertEq(vars.userPositionAfter.borrow, 0);
                 uint256 token1Pulled =

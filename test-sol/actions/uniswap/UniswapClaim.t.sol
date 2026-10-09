@@ -53,6 +53,16 @@ contract TestUniswapClaim is BaseTest, ActionsUtils {
         _baseTest(true, OWNER);
     }
 
+    function test_uniswapClaim_WithExistingSmartWalletBalance() public {
+        give(UNI_TOKEN, SMART_WALLET, 123e18);
+        _baseTest(false, OWNER);
+    }
+
+    function test_uniswapClaim_Direct_WithExistingSmartWalletBalance() public {
+        give(UNI_TOKEN, SMART_WALLET, 123e18);
+        _baseTest(true, OWNER);
+    }
+
     function test_uniswapClaim_toSmartWallet() public {
         _baseTest(false, SMART_WALLET);
     }
@@ -92,7 +102,11 @@ contract TestUniswapClaim is BaseTest, ActionsUtils {
         );
 
         vm.prank(OWNER);
-        IDSProxy(SMART_WALLET).execute(address(cut), executeActionCallData);
+        bytes32 returnValue = IDSProxy(SMART_WALLET).execute(address(cut), executeActionCallData);
+
+        if (!_isDirect) {
+            assertEq(returnValue, bytes32(CLAIM_AMOUNT));
+        }
 
         assertTrue(IUniswapMerkleDistributor(UNISWAP_MERKLE_DISTRIBUTOR).isClaimed(CLAIM_INDEX));
         assertEq(

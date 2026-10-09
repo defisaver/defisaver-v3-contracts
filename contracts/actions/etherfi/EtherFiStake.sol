@@ -37,9 +37,9 @@ contract EtherFiStake is ActionBase, EtherFiHelper {
             _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
-        inputData.shouldWrap =
-            _parseParamUint(inputData.shouldWrap ? 1 : 0, _paramMapping[3], _subData, _returnValues)
-                == 1;
+        inputData.shouldWrap = _parseParamUint(
+            inputData.shouldWrap ? 1 : 0, _paramMapping[3], _subData, _returnValues
+        ) == 1;
 
         (uint256 receivedAmount, bytes memory logData) = _etherFiStake(inputData);
         emit ActionEvent("EtherFiStake", logData);

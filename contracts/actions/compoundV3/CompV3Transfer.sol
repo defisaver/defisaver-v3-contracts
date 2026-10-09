@@ -69,13 +69,10 @@ contract CompV3Transfer is ActionBase, CompV3Helper {
     /// @param _to The address of an account that is the receiver in the transaction
     /// @param _asset The ERC-20 address of the asset that is being sent in the transaction
     /// @param _amount Amount of the specified asset to be transferred
-    function _transfer(
-        address _market,
-        address _from,
-        address _to,
-        address _asset,
-        uint256 _amount
-    ) internal returns (uint256, bytes memory) {
+    function _transfer(address _market, address _from, address _to, address _asset, uint256 _amount)
+        internal
+        returns (uint256, bytes memory)
+    {
         if (_to == address(0)) {
             revert CompV3TransferError();
         }

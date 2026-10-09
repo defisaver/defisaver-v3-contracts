@@ -56,10 +56,9 @@ contract FluidDexBorrow is ActionBase, FluidHelper {
         params.borrowVariableData.maxDebtShares = _parseParamUint(
             params.borrowVariableData.maxDebtShares, _paramMapping[6], _subData, _returnValues
         );
-        params.wrapBorrowedEth =
-            _parseParamUint(
-                    params.wrapBorrowedEth ? 1 : 0, _paramMapping[7], _subData, _returnValues
-                ) == 1;
+        params.wrapBorrowedEth = _parseParamUint(
+            params.wrapBorrowedEth ? 1 : 0, _paramMapping[7], _subData, _returnValues
+        ) == 1;
 
         (uint256 borrowAmountOrShares, bytes memory logData) = _borrow(params);
         emit ActionEvent("FluidDexBorrow", logData);

@@ -76,10 +76,9 @@ contract FluidDexOpen is ActionBase, FluidHelper {
         params.borrowVariableData.maxDebtShares = _parseParamUint(
             params.borrowVariableData.maxDebtShares, _paramMapping[10], _subData, _returnValues
         );
-        params.wrapBorrowedEth =
-            _parseParamUint(
-                    params.wrapBorrowedEth ? 1 : 0, _paramMapping[11], _subData, _returnValues
-                ) == 1;
+        params.wrapBorrowedEth = _parseParamUint(
+            params.wrapBorrowedEth ? 1 : 0, _paramMapping[11], _subData, _returnValues
+        ) == 1;
 
         (uint256 nftId, bytes memory logData) = _open(params);
         emit ActionEvent("FluidDexOpen", logData);

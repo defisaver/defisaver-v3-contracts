@@ -44,10 +44,9 @@ contract FluidVaultT1Open is ActionBase {
             _parseParamUint(params.debtAmount, _paramMapping[2], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
-        params.wrapBorrowedEth =
-            _parseParamUint(
-                    params.wrapBorrowedEth ? 1 : 0, _paramMapping[5], _subData, _returnValues
-                ) == 1;
+        params.wrapBorrowedEth = _parseParamUint(
+            params.wrapBorrowedEth ? 1 : 0, _paramMapping[5], _subData, _returnValues
+        ) == 1;
 
         (uint256 nftId, bytes memory logData) = _open(params);
         emit ActionEvent("FluidVaultT1Open", logData);

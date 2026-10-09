@@ -81,9 +81,8 @@ contract TestMorphoBlueMinDebtTrigger is BaseTest, MorphoBlueTestHelper {
         _baseTestAllMarkets(0);
     }
 
-    /// @notice When the loan token has no usable price (Chainlink returns 0), the trigger
-    ///         should always return true, even if the user has no debt.
-    function test_should_trigger_when_price_is_zero_even_with_no_debt() public {
+    /// @notice An empty position must be filtered out even when the loan token has no usable price.
+    function test_should_not_trigger_when_price_is_zero_and_no_debt() public {
         (MarketParams memory market, bool found) = _firstMarketWithPricedLoanToken();
         if (!found) {
             vm.skip(true, "No market with a Chainlink priced loan token on the selected network");
@@ -99,7 +98,7 @@ contract TestMorphoBlueMinDebtTrigger is BaseTest, MorphoBlueTestHelper {
         // Force the loan token's USD price to 0 on every price source PriceLib uses.
         mockZeroTokenPrices();
 
-        assertTrue(_isTriggered(market, user, MIN_DEBT), "zero price must return true");
+        assertFalse(_isTriggered(market, user, MIN_DEBT), "empty debt must return false");
 
         vm.clearMockedCalls();
     }
