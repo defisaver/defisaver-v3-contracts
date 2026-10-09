@@ -266,9 +266,12 @@ contract RecipeExecutor is
 
         // if this is a one time strategy
         if (!strategy.continuous) {
+            // don't disable sub if partialExecution is active
             if (_isStrategyPartialExecutionActive(_actionCallData, strategy.actionIds.length)) {
-                // don't disable sub and start partial execution
-                partialExecutionStorage.startExecution(_subId, strategyId);
+                // if sub is not already in partial execution, start it
+                if (!partialExecutionStorage.isInPartialExecution(_subId)) {
+                    partialExecutionStorage.startExecution(_subId, strategyId);
+                }
             } else {
                 partialExecutionStorage.endExecution(_subId);
                 ISubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId);

@@ -56,7 +56,7 @@ contract StrategyPartialExecutionStorage is
     function startExecution(uint256 _subId, uint256 _strategyId) external {
         if (isInPartialExecution(_subId)) return;
 
-        if (!isApprovedToStartExecution(_subId)) {
+        if (!_isApprovedToStartExecution(_subId)) {
             revert NotApproved(_subId, msg.sender);
         }
 
@@ -117,7 +117,7 @@ contract StrategyPartialExecutionStorage is
     /// @dev Approval can only be granted by StrategyExecutor.
     /// @param _subId Subscription ID to check approval for.
     /// @return approved True if the caller is approved to start execution, false otherwise.
-    function isApprovedToStartExecution(uint256 _subId) internal view returns (bool approved) {
+    function _isApprovedToStartExecution(uint256 _subId) internal view returns (bool approved) {
         bytes32 slot = keccak256(abi.encode(START_APPROVAL_SLOT, _subId));
         assembly {
             approved := tload(slot)
