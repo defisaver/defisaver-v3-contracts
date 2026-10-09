@@ -266,7 +266,7 @@ contract RecipeExecutor is
 
         // if this is a one time strategy
         if (!strategy.continuous) {
-            if (_isPartialExecution(_actionCallData, strategy)) {
+            if (_isStrategyPartialExecutionActive(_actionCallData, strategy.actionIds.length)) {
                 // don't disable sub and start partial execution
                 partialExecutionStorage.startExecution(_subId, strategyId);
             } else {
@@ -367,14 +367,13 @@ contract RecipeExecutor is
     /// @dev Must be called after _validateActionsCalldataLength, which guarantees that the length is either equal to the length of strategy actions or one more
     /// @dev Reverts if the extra element is not exactly STRATEGY_PARTIAL_EXECUTION_FLAG
     /// @param _actionCallData Actions calldata sent by backend to execute actions
-    /// @param _strategy Strategy to be executed
+    /// @param _strategyActionsLength Length of the strategy actions array on-chain
     /// @return isPartialExecution Returns if the execution is a partial execution or not
-    function _isPartialExecution(bytes[] calldata _actionCallData, Strategy memory _strategy)
-        internal
-        pure
-        returns (bool isPartialExecution)
-    {
-        if (_actionCallData.length == _strategy.actionIds.length + 1) {
+    function _isStrategyPartialExecutionActive(
+        bytes[] calldata _actionCallData,
+        uint256 _strategyActionsLength
+    ) internal pure returns (bool isPartialExecution) {
+        if (_actionCallData.length == _strategyActionsLength + 1) {
             bytes calldata flagData = _actionCallData[_actionCallData.length - 1];
 
             if (flagData.length != 32 || bytes32(flagData) != STRATEGY_PARTIAL_EXECUTION_FLAG) {
