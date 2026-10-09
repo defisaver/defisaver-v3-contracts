@@ -65,9 +65,10 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                      VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
-    /// @dev Mirrors RecipeExecutor.PARTIAL_EXECUTION_FLAG, the marker the bot appends to
+    /// @dev Mirrors RecipeExecutor.STRATEGY_PARTIAL_EXECUTION_FLAG, the marker the bot appends to
     ///      _actionsCallData to keep a one-time sub alive after execution.
-    bytes32 internal constant PARTIAL_EXECUTION_FLAG = keccak256("PARTIAL_EXECUTION_FLAG");
+    bytes32 internal constant STRATEGY_PARTIAL_EXECUTION_FLAG =
+        keccak256("STRATEGY_PARTIAL_EXECUTION_FLAG");
 
     SmartWallet wallet;
     address walletAddr;
@@ -734,6 +735,6 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
             withFlag[i] = _actionsCalldata[i];
         }
 
-        withFlag[_actionsCalldata.length] = abi.encode(PARTIAL_EXECUTION_FLAG);
+        withFlag[_actionsCalldata.length] = abi.encode(STRATEGY_PARTIAL_EXECUTION_FLAG);
     }
 }

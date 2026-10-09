@@ -64,8 +64,9 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
     /*//////////////////////////////////////////////////////////////////////////
                                      VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
-    /// @dev Mirrors RecipeExecutor.PARTIAL_EXECUTION_FLAG.
-    bytes32 internal constant PARTIAL_EXECUTION_FLAG = keccak256("PARTIAL_EXECUTION_FLAG");
+    /// @dev Mirrors RecipeExecutor.STRATEGY_PARTIAL_EXECUTION_FLAG.
+    bytes32 internal constant STRATEGY_PARTIAL_EXECUTION_FLAG =
+        keccak256("STRATEGY_PARTIAL_EXECUTION_FLAG");
 
     /// @dev The partialExecutions mapping is the only storage slot of StrategyPartialExecutionStorage, the wallet is
     ///      the first field of its struct value.
@@ -189,7 +190,9 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
     }
 
     function test_should_revert_when_flag_is_longer_than_32_bytes() public {
-        _expectInvalidFlag(abi.encode(PARTIAL_EXECUTION_FLAG, PARTIAL_EXECUTION_FLAG));
+        _expectInvalidFlag(
+            abi.encode(STRATEGY_PARTIAL_EXECUTION_FLAG, STRATEGY_PARTIAL_EXECUTION_FLAG)
+        );
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -432,7 +435,9 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                RecipeExecutor.InvalidPartialExecutionFlag.selector, _flag, PARTIAL_EXECUTION_FLAG
+                RecipeExecutor.InvalidPartialExecutionFlag.selector,
+                _flag,
+                STRATEGY_PARTIAL_EXECUTION_FLAG
             )
         );
         cut.executeRecipeFromStrategy(subId, actionsCalldata, _triggerCallData(1), 0, sub);
@@ -601,6 +606,6 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
             withFlag[i] = _actionsCalldata[i];
         }
 
-        withFlag[_actionsCalldata.length] = abi.encode(PARTIAL_EXECUTION_FLAG);
+        withFlag[_actionsCalldata.length] = abi.encode(STRATEGY_PARTIAL_EXECUTION_FLAG);
     }
 }

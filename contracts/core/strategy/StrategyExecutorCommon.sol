@@ -31,8 +31,7 @@ abstract contract StrategyExecutorCommon is StrategyModel, AdminAuth, CoreHelper
     }
 
     /// @notice Calls auth contract which has the auth from the user wallet which will call RecipeExecutor
-    /// @dev Always approve start of partial execution in transient storage.
-    /// @dev RecipeExecutor checks later if the execution should be started or not. This is decided by backend
+    /// @dev Always approves the sub for partial strategyExecution
     /// @param _subId Strategy data we have in storage
     /// @param _actionsCallData All input data needed to execute actions
     /// @param _triggerCallData All input data needed to check triggers
