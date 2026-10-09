@@ -250,6 +250,8 @@ contract RecipeExecutor is
 
         Strategy memory strategy = IStrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
 
+        _validateActionsCalldataLength(_actionCallData, strategy);
+
         // reading from registry
         IStrategyPartialExecutionStorage partialExecutionStorage = IStrategyPartialExecutionStorage(
             registry.getAddr(DFSIds.STRATEGY_PARTIAL_EXECUTION_STORAGE)
@@ -257,17 +259,9 @@ contract RecipeExecutor is
 
         // skip triggers check if the sub is already in partial execution
         // deliberately skips updating sub data too
-        if (partialExecutionStorage.getPartialExecutionWallet(_subId) != address(this)) {
-            // check if all the triggers are true
-            (bool triggered, uint256 errIndex) =
-                _checkTriggers(_subId, strategy, _sub, _triggerCallData);
-
-            if (!triggered) {
-                revert TriggerNotActiveError(errIndex);
-            }
+        if (!_isInPartialExecutionState(partialExecutionStorage, _subId)) {
+            _requireTriggers(_subId, strategy, _sub, _triggerCallData);
         }
-
-        _validateActionsCalldataLength(_actionCallData, strategy);
 
         // if this is a one time strategy
         if (!strategy.continuous) {
@@ -315,12 +309,18 @@ contract RecipeExecutor is
     //////////////////////////////////////////////////////////////*/
 
     /// @notice Checks if all the triggers are true
-    function _checkTriggers(
+    /// @dev If a trigger is changeable, it will update the sub data with the new value
+    /// @dev Reverts if any of the triggers are not active
+    /// @param _subId Id of the subscription we want to execute
+    /// @param strategy Strategy to be executed
+    /// @param _sub All the data related to the strategies Recipe
+    /// @param _triggerCallData All input data needed to check triggers
+    function _requireTriggers(
         uint256 _subId,
         Strategy memory strategy,
         StrategySub memory _sub,
         bytes[] calldata _triggerCallData
-    ) internal returns (bool, uint256) {
+    ) internal {
         bytes4[] memory triggerIds = strategy.triggerIds;
 
         bool isTriggered;
@@ -333,7 +333,7 @@ contract RecipeExecutor is
             isTriggered =
                 ITrigger(triggerAddr).isTriggered(_triggerCallData[i], _sub.triggerData[i]);
 
-            if (!isTriggered) return (false, i);
+            if (!isTriggered) revert TriggerNotActiveError(i);
 
             // after execution triggers flag-ed changeable can update their value
             if (ITrigger(triggerAddr).isChangeable()) {
@@ -341,8 +341,6 @@ contract RecipeExecutor is
                 ISubStorage(SUB_STORAGE_ADDR).updateSubData(_subId, _sub);
             }
         }
-
-        return (true, i);
     }
 
     /// @notice Checks if the length of _actionCallData is valid for the strategy
@@ -463,6 +461,13 @@ contract RecipeExecutor is
             );
 
         _removePermissionFrom(walletType, _flActionAddr);
+    }
+
+    function _isInPartialExecutionState(
+        IStrategyPartialExecutionStorage _partialExecutionStorage,
+        uint256 _subId
+    ) internal view returns (bool) {
+        return _partialExecutionStorage.getPartialExecutionWallet(_subId) == address(this);
     }
 
     /// @notice Checks if the specified address is of FL type action
