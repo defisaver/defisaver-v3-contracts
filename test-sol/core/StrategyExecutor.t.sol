@@ -385,25 +385,24 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         );
     }
 
-    /// @dev Documents current behaviour: the approval is granted to the whole transaction, so any
-    ///      action in the recipe can start the partial execution of the sub being executed,
-    ///      even when the bot never passed the flag. The flag is not the only way in.
-    function test_approval_leaks_to_any_action_in_the_recipe() public {
+    /// @dev The approval is cleared before the recipe's actions run, so no action can use it to start
+    ///      the partial execution of the sub being executed. The flag via RecipeExecutor is the only way in.
+    function test_approval_does_not_leak_to_actions_in_the_recipe() public {
         (uint256 subId, StrategyModel.StrategySub memory sub) = _sub_to_probe_strategy();
         _add_bot_caller();
 
         bytes[] memory actionsCalldata = new bytes[](1);
         actionsCalldata[0] = abi.encode(subId);
 
-        vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
-        emit IStrategyPartialExecutionStorage.ExecutionStarted(subId, walletAddr);
+        // StrategyPartialExecutionStorage::NotApproved, swallowed by the auth contract
+        vm.expectRevert();
         cut.executeStrategy(subId, 0, _triggers(_probeSubData()), actionsCalldata, sub);
 
-        assertEq(
-            partialExecutionStorage.getPartialExecutionWallet(subId),
-            walletAddr,
-            "an action started the execution without any flag"
+        assertFalse(
+            partialExecutionStorage.isInPartialExecution(subId),
+            "an action must not be able to start the execution"
         );
+        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), address(0));
     }
 
     /// forge-config: default.isolate = true
@@ -420,6 +419,76 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         );
         prank(walletAddr);
         partialExecutionStorage.startExecution(f.subId, 0);
+    }
+
+    /// @dev The sub owner revokes a granted approval, after which it can no longer start an execution.
+    function test_should_clear_start_approval() public {
+        Fixture memory f = _fixture(false, type(uint256).max);
+
+        prank(address(cut));
+        partialExecutionStorage.approveStartOfExecution(f.subId);
+
+        prank(walletAddr);
+        partialExecutionStorage.clearStartApproval(f.subId);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStrategyPartialExecutionStorage.NotApproved.selector, f.subId, walletAddr
+            )
+        );
+        prank(walletAddr);
+        partialExecutionStorage.startExecution(f.subId, 0);
+    }
+
+    function test_should_revert_clear_start_approval_when_not_approved() public {
+        Fixture memory f = _fixture(false, type(uint256).max);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStrategyPartialExecutionStorage.NotApproved.selector, f.subId, walletAddr
+            )
+        );
+        prank(walletAddr);
+        partialExecutionStorage.clearStartApproval(f.subId);
+    }
+
+    /// @dev A second clear in the same transaction finds nothing left to clear.
+    function test_should_revert_clear_start_approval_when_already_cleared() public {
+        Fixture memory f = _fixture(false, type(uint256).max);
+
+        prank(address(cut));
+        partialExecutionStorage.approveStartOfExecution(f.subId);
+
+        prank(walletAddr);
+        partialExecutionStorage.clearStartApproval(f.subId);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStrategyPartialExecutionStorage.NotApproved.selector, f.subId, walletAddr
+            )
+        );
+        prank(walletAddr);
+        partialExecutionStorage.clearStartApproval(f.subId);
+    }
+
+    function test_should_revert_clear_start_approval_when_caller_is_not_sub_owner() public {
+        Fixture memory f = _fixture(false, type(uint256).max);
+
+        prank(address(cut));
+        partialExecutionStorage.approveStartOfExecution(f.subId);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStrategyPartialExecutionStorage.NotSubOwner.selector, f.subId, alice
+            )
+        );
+        prank(alice);
+        partialExecutionStorage.clearStartApproval(f.subId);
+
+        // the approval is untouched, the owner can still use it
+        prank(walletAddr);
+        partialExecutionStorage.startExecution(f.subId, 0);
+        assertTrue(partialExecutionStorage.isInPartialExecution(f.subId));
     }
 
     /*//////////////////////////////////////////////////////////////////////////

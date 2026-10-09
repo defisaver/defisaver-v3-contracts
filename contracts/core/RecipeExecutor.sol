@@ -278,6 +278,8 @@ contract RecipeExecutor is
             }
         }
 
+        partialExecutionStorage.clearStartApproval(_subId);
+
         // format recipe from strategy
         Recipe memory currRecipe = Recipe({
             name: strategy.name,

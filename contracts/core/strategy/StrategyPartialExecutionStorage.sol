@@ -49,6 +49,28 @@ contract StrategyPartialExecutionStorage is
         }
     }
 
+    /// @notice Revokes the approval to start execution for a given subscription ID.
+    /// @dev Called by the sub's wallet (via RecipeExecutor) before the recipe's actions run, so no action
+    ///      can use the approval granted by StrategyExecutor to start the partial execution.
+    /// @dev Reverts if the approval was not granted in this transaction or the caller is not the sub owner.
+    /// @param _subId Subscription ID for which the approval is being revoked.
+    function clearStartApproval(uint256 _subId) external {
+        if (!_isApprovedToStartExecution(_subId)) {
+            revert NotApproved(_subId, msg.sender);
+        }
+
+        StrategyModel.StoredSubData memory subData = ISubStorage(SUB_STORAGE_ADDR).getSub(_subId);
+
+        if (address(subData.walletAddr) != msg.sender) {
+            revert NotSubOwner(_subId, msg.sender);
+        }
+
+        bytes32 slot = keccak256(abi.encode(START_APPROVAL_SLOT, _subId));
+        assembly {
+            tstore(slot, false)
+        }
+    }
+
     /// @notice Only the sub owner can start execution; the initial strategy ID is preserved until the execution ends.
     /// @dev Records the first strategy without restricting which strategy a continuation can execute.
     /// @param _subId Subscription entering partial execution.

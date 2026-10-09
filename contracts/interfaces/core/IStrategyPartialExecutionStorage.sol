@@ -21,6 +21,7 @@ interface IStrategyPartialExecutionStorage {
     );
 
     function approveStartOfExecution(uint256 _subId) external;
+    function clearStartApproval(uint256 _subId) external;
     function startExecution(uint256 _subId, uint256 _strategyId) external;
     function endExecution(uint256 _subId) external;
     function getPartialExecution(uint256 _subId)
