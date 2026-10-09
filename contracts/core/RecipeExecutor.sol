@@ -107,6 +107,9 @@ import {
 import { IStrategyStorage } from "../interfaces/core/IStrategyStorage.sol";
 import { IBundleStorage } from "../interfaces/core/IBundleStorage.sol";
 import { ISubStorage } from "../interfaces/core/ISubStorage.sol";
+import {
+    IStrategyPartialExecutionStorage
+} from "../interfaces/core/IStrategyPartialExecutionStorage.sol";
 import { Permission } from "../auth/Permission.sol";
 import { SmartWalletUtils } from "../utils/SmartWalletUtils.sol";
 import { ActionBase } from "../actions/ActionBase.sol";
@@ -135,6 +138,9 @@ contract RecipeExecutor is
                                 CONST
     //////////////////////////////////////////////////////////////*/
     IDFSRegistry private constant registry = IDFSRegistry(REGISTRY_ADDR);
+    /// @dev Marker passed as the extra last element of _actionCallData to request partial execution
+    bytes32 internal constant STRATEGY_PARTIAL_EXECUTION_FLAG =
+        keccak256("STRATEGY_PARTIAL_EXECUTION_FLAG");
 
     /*//////////////////////////////////////////////////////////////
                                 ERRORS
@@ -148,6 +154,12 @@ contract RecipeExecutor is
 
     /// When calling TxSaver functions, caller has to be TxSaverExecutor
     error TxSaverAuthorizationError(address caller);
+
+    // Lengths must match, or actionsCallData must be one longer with the last element being STRATEGY_PARTIAL_EXECUTION_FLAG
+    error InvalidActionCallDataLength(uint256 actionCallDataLength, uint256 strategyActionLength);
+
+    // When executing a strategy with partial execution, the last element of actionsCallData must be STRATEGY_PARTIAL_EXECUTION_FLAG
+    error InvalidPartialExecutionFlag(bytes actionCallDataFlag, bytes32 partialExecutionFlag);
 
     /*//////////////////////////////////////////////////////////////
                                 EXTERNAL
@@ -229,33 +241,44 @@ contract RecipeExecutor is
         uint256 _strategyIndex,
         StrategySub memory _sub
     ) external payable override {
-        Strategy memory strategy;
+        uint256 strategyId = _sub.strategyOrBundleId;
 
-        {
-            // to handle stack too deep
-            uint256 strategyId = _sub.strategyOrBundleId;
-
-            // fetch strategy if inside of bundle
-            if (_sub.isBundle) {
-                strategyId =
-                    IBundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(strategyId, _strategyIndex);
-            }
-
-            strategy = IStrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
+        // fetch strategy if inside of bundle
+        if (_sub.isBundle) {
+            strategyId =
+                IBundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(strategyId, _strategyIndex);
         }
 
-        // check if all the triggers are true
-        (bool triggered, uint256 errIndex) =
-            _checkTriggers(strategy, _sub, _triggerCallData, _subId, SUB_STORAGE_ADDR);
+        Strategy memory strategy = IStrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
 
-        if (!triggered) {
-            revert TriggerNotActiveError(errIndex);
+        _validateActionsCalldataLength(_actionCallData, strategy);
+
+        // reading from registry
+        IStrategyPartialExecutionStorage partialExecutionStorage = IStrategyPartialExecutionStorage(
+            registry.getAddr(DFSIds.STRATEGY_PARTIAL_EXECUTION_STORAGE)
+        );
+
+        // skip triggers check if the sub is already in partial execution
+        // deliberately skips updating sub data too
+        if (!_isInPartialExecutionState(partialExecutionStorage, _subId)) {
+            _requireTriggers(_subId, strategy, _sub, _triggerCallData);
         }
 
         // if this is a one time strategy
         if (!strategy.continuous) {
-            ISubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId);
+            // don't disable sub if partialExecution is active
+            if (_isStrategyPartialExecutionActive(_actionCallData, strategy.actionIds.length)) {
+                // if sub is not already in partial execution, start it
+                if (!partialExecutionStorage.isInPartialExecution(_subId)) {
+                    partialExecutionStorage.startExecution(_subId, strategyId);
+                }
+            } else {
+                partialExecutionStorage.endExecution(_subId);
+                ISubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId);
+            }
         }
+
+        partialExecutionStorage.clearStartApproval(_subId);
 
         // format recipe from strategy
         Recipe memory currRecipe = Recipe({
@@ -292,13 +315,18 @@ contract RecipeExecutor is
     //////////////////////////////////////////////////////////////*/
 
     /// @notice Checks if all the triggers are true
-    function _checkTriggers(
+    /// @dev If a trigger is changeable, it will update the sub data with the new value
+    /// @dev Reverts if any of the triggers are not active
+    /// @param _subId Id of the subscription we want to execute
+    /// @param strategy Strategy to be executed
+    /// @param _sub All the data related to the strategies Recipe
+    /// @param _triggerCallData All input data needed to check triggers
+    function _requireTriggers(
+        uint256 _subId,
         Strategy memory strategy,
         StrategySub memory _sub,
-        bytes[] calldata _triggerCallData,
-        uint256 _subId,
-        address _storageAddr
-    ) internal returns (bool, uint256) {
+        bytes[] calldata _triggerCallData
+    ) internal {
         bytes4[] memory triggerIds = strategy.triggerIds;
 
         bool isTriggered;
@@ -311,16 +339,55 @@ contract RecipeExecutor is
             isTriggered =
                 ITrigger(triggerAddr).isTriggered(_triggerCallData[i], _sub.triggerData[i]);
 
-            if (!isTriggered) return (false, i);
+            if (!isTriggered) revert TriggerNotActiveError(i);
 
             // after execution triggers flag-ed changeable can update their value
             if (ITrigger(triggerAddr).isChangeable()) {
                 _sub.triggerData[i] = ITrigger(triggerAddr).changedSubData(_sub.triggerData[i]);
-                ISubStorage(_storageAddr).updateSubData(_subId, _sub);
+                ISubStorage(SUB_STORAGE_ADDR).updateSubData(_subId, _sub);
             }
         }
+    }
 
-        return (true, i);
+    /// @notice Checks if the length of _actionCallData is valid for the strategy
+    /// @dev For continuous strategies, the length of _actionCallData must be equal to the length of strategy actions
+    /// @dev For one-time strategies, the length of _actionCallData must be equal to the length of strategy actions or one more with the last element being STRATEGY_PARTIAL_EXECUTION_FLAG
+    /// @param _actionCallData Actions calldata sent by backend to execute actions
+    /// @param _strategy Strategy to be executed
+    function _validateActionsCalldataLength(
+        bytes[] calldata _actionCallData,
+        Strategy memory _strategy
+    ) internal pure {
+        uint256 actionsLength = _strategy.actionIds.length;
+
+        // only one-time strategies can have the extra STRATEGY_PARTIAL_EXECUTION_FLAG element
+        uint256 maxLength = _strategy.continuous ? actionsLength : actionsLength + 1;
+
+        if (_actionCallData.length < actionsLength || _actionCallData.length > maxLength) {
+            revert InvalidActionCallDataLength(_actionCallData.length, actionsLength);
+        }
+    }
+
+    /// @notice Checks if the execution is a partial execution, which means that the last element of _actionCallData is STRATEGY_PARTIAL_EXECUTION_FLAG
+    /// @dev Must be called after _validateActionsCalldataLength, which guarantees that the length is either equal to the length of strategy actions or one more
+    /// @dev Reverts if the extra element is not exactly STRATEGY_PARTIAL_EXECUTION_FLAG
+    /// @param _actionCallData Actions calldata sent by backend to execute actions
+    /// @param _strategyActionsLength Length of the strategy actions array on-chain
+    /// @return isPartialExecution Returns if the execution is a partial execution or not
+    function _isStrategyPartialExecutionActive(
+        bytes[] calldata _actionCallData,
+        uint256 _strategyActionsLength
+    ) internal pure returns (bool isPartialExecution) {
+        if (_actionCallData.length == _strategyActionsLength + 1) {
+            bytes calldata flagData = _actionCallData[_actionCallData.length - 1];
+
+            if (flagData.length != 32 || bytes32(flagData) != STRATEGY_PARTIAL_EXECUTION_FLAG) {
+                revert InvalidPartialExecutionFlag(flagData, STRATEGY_PARTIAL_EXECUTION_FLAG);
+            }
+
+            return true;
+        }
+        return false;
     }
 
     /// @notice Runs all actions from the recipe
@@ -399,6 +466,13 @@ contract RecipeExecutor is
             );
 
         _removePermissionFrom(walletType, _flActionAddr);
+    }
+
+    function _isInPartialExecutionState(
+        IStrategyPartialExecutionStorage _partialExecutionStorage,
+        uint256 _subId
+    ) internal view returns (bool) {
+        return _partialExecutionStorage.getPartialExecutionWallet(_subId) == address(this);
     }
 
     /// @notice Checks if the specified address is of FL type action

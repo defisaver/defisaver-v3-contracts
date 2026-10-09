@@ -2,14 +2,18 @@
 
 pragma solidity =0.8.24;
 
+import { ISubStorage } from "../../contracts/interfaces/core/ISubStorage.sol";
+import { ITrigger } from "../../contracts/interfaces/core/ITrigger.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
 import { RegistryUtils } from "../utils/RegistryUtils.sol";
 import { TriggerView } from "../../contracts/views/strategy/TriggerView.sol";
 import { BundleStorage } from "../../contracts/core/strategy/BundleStorage.sol";
 import { StrategyStorage } from "../../contracts/core/strategy/StrategyStorage.sol";
+import {
+    StrategyPartialExecutionStorage
+} from "../../contracts/core/strategy/StrategyPartialExecutionStorage.sol";
 import { AaveV3MinDebtTrigger } from "../../contracts/triggers-additional/AaveV3MinDebtTrigger.sol";
 import { AaveV3RatioTrigger } from "../../contracts/triggers/AaveV3RatioTrigger.sol";
-import { ITrigger } from "../../contracts/interfaces/core/ITrigger.sol";
 
 contract TestTriggerView is BaseTest, RegistryUtils, TriggerView {
     /*//////////////////////////////////////////////////////////////////////////
@@ -20,6 +24,9 @@ contract TestTriggerView is BaseTest, RegistryUtils, TriggerView {
 
     /// @dev AaveV3 repay bundle the sub is subscribed to on mainnet.
     uint64 internal constant AAVE_V3_REPAY_BUNDLE_ID = 8;
+
+    /// @dev Placeholder subId for testing;
+    uint256 internal constant SUB_ID = 2154;
 
     /// @dev Mainnet AaveV3 main market (PoolAddressesProvider), the market the sub points at.
     address internal constant AAVE_V3_MARKET = 0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e;
@@ -35,6 +42,8 @@ contract TestTriggerView is BaseTest, RegistryUtils, TriggerView {
                                     VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
     AaveV3MinDebtTrigger internal aaveV3MinDebtTrigger;
+
+    StrategyPartialExecutionStorage internal partialExecutionStorage;
 
     /// @dev Sub trigger (AaveV3RatioTrigger) address resolved from the repay bundle - mock target.
     address internal ratioTriggerAddr;
@@ -57,6 +66,9 @@ contract TestTriggerView is BaseTest, RegistryUtils, TriggerView {
         minDebtTriggerAddr = address(aaveV3MinDebtTrigger);
 
         ratioTriggerAddr = _resolveSubTriggerAddr(AAVE_V3_REPAY_BUNDLE_ID);
+
+        partialExecutionStorage = new StrategyPartialExecutionStorage();
+        redeploy("StrategyPartialExecutionStorage", address(partialExecutionStorage));
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -106,7 +118,7 @@ contract TestTriggerView is BaseTest, RegistryUtils, TriggerView {
         _mockTriggerOutcome(ratioTriggerAddr, TriggerStatus.TRUE);
 
         TriggerStatus status = this.checkTriggers(
-            _aaveV3RepaySub(), _emptySubTriggerCallData(), new bytes4[](0), new bytes[](0)
+            _aaveV3RepaySub(), SUB_ID, _emptySubTriggerCallData(), new bytes4[](0), new bytes[](0)
         );
 
         assertEq(
@@ -126,7 +138,7 @@ contract TestTriggerView is BaseTest, RegistryUtils, TriggerView {
         additionalCallData[0] = bytes("");
 
         TriggerStatus status = this.checkTriggers(
-            _aaveV3RepaySub(), _emptySubTriggerCallData(), additionalIds, additionalCallData
+            _aaveV3RepaySub(), SUB_ID, _emptySubTriggerCallData(), additionalIds, additionalCallData
         );
 
         assertEq(
@@ -134,9 +146,45 @@ contract TestTriggerView is BaseTest, RegistryUtils, TriggerView {
         );
     }
 
+    /// @dev When the sub is in partial execution, STVNR short-circuits to TRUE without evaluating any
+    ///      trigger, even though the sub trigger would return FALSE.
+    function test_checkTriggers_subInPartialExecution_returnsTrueWithoutCheckingTriggers() public {
+        _startExecutionForSub(SUB_ID);
+
+        _mockTriggerOutcome(ratioTriggerAddr, TriggerStatus.FALSE);
+
+        TriggerStatus status = this.checkTriggers(
+            _aaveV3RepaySub(), SUB_ID, _emptySubTriggerCallData(), new bytes4[](0), new bytes[](0)
+        );
+
+        assertEq(
+            uint256(status),
+            uint256(TriggerStatus.TRUE),
+            "sub in partial execution should short-circuit"
+        );
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
+    /// @dev Starts partial execution for a sub. Mirrors the production flow: the
+    ///      registered StrategyExecutor approves the start first, then the owner wallet starts it.
+    function _startExecutionForSub(uint256 _subId) internal {
+        address subOwnerWallet = address(ISubStorage(SUB_STORAGE_ADDR).getSub(_subId).walletAddr);
+        assertTrue(subOwnerWallet != address(0), "sub owner wallet not found");
+
+        address strategyExecutor = getAddr("StrategyExecutorID");
+        assertTrue(strategyExecutor != address(0), "strategy executor not registered");
+
+        prank(strategyExecutor);
+        partialExecutionStorage.approveStartOfExecution(_subId);
+
+        prank(subOwnerWallet);
+        partialExecutionStorage.startExecution(_subId, 0);
+
+        assertEq(partialExecutionStorage.getPartialExecutionWallet(_subId), subOwnerWallet);
+    }
+
     /// @dev Mocks the ratio + min debt trigger outcomes, runs checkTriggers and asserts the result.
     function _assertCombination(
         TriggerStatus _ratioOutcome,
@@ -150,7 +198,7 @@ contract TestTriggerView is BaseTest, RegistryUtils, TriggerView {
             _minDebtAdditionalTrigger(MIN_DEBT);
 
         TriggerStatus status = this.checkTriggers(
-            _aaveV3RepaySub(), _emptySubTriggerCallData(), additionalIds, additionalCallData
+            _aaveV3RepaySub(), SUB_ID, _emptySubTriggerCallData(), additionalIds, additionalCallData
         );
 
         assertEq(uint256(status), uint256(_expected), "unexpected checkTriggers outcome");

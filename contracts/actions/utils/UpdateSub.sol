@@ -5,9 +5,14 @@ pragma solidity =0.8.24;
 import { ActionBase } from "../ActionBase.sol";
 import { SubStorage } from "../../core/strategy/SubStorage.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
+import {
+    IStrategyPartialExecutionStorage
+} from "../../interfaces/core/IStrategyPartialExecutionStorage.sol";
+import { DFSIds } from "../../utils/DFSIds.sol";
 
-/// @title Updates users sub information on SubStorage contract
-/// @notice User can only change his own subscriptions
+/// @title Updates users sub information on SubStorage contract.
+/// @notice User can only change his own subscriptions.
+/// @dev Clears the partial execution storage for the subscription.
 contract UpdateSub is ActionBase {
     /// @param subId Id of the Subscription
     /// @param sub Object that represents the updated sub
@@ -53,6 +58,11 @@ contract UpdateSub is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function updateSubData(Params memory _inputData) internal {
+        IStrategyPartialExecutionStorage partialExecutionStorage = IStrategyPartialExecutionStorage(
+            registry.getAddr(DFSIds.STRATEGY_PARTIAL_EXECUTION_STORAGE)
+        );
+        partialExecutionStorage.endExecution(_inputData.subId);
+
         SubStorage(SUB_STORAGE_ADDR).updateSubData(_inputData.subId, _inputData.sub);
     }
 

@@ -54,7 +54,6 @@ exclude_lints = [
     # "unsafe-cheatcode",
     # "erc20-unchecked-transfer",
     # "divide-before-multiply",
-
     "unsafe-typecast",
     "named-struct-fields",
     "unwrapped-modifier-logic",

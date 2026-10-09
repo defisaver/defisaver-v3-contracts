@@ -5,7 +5,9 @@ pragma solidity =0.8.24;
 import { IAuth } from "../../interfaces/core/IAuth.sol";
 import { IRecipeExecutor } from "../../interfaces/core/IRecipeExecutor.sol";
 import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
-
+import {
+    IStrategyPartialExecutionStorage
+} from "../../interfaces/core/IStrategyPartialExecutionStorage.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
 import { StrategyModel } from "./StrategyModel.sol";
@@ -29,6 +31,7 @@ abstract contract StrategyExecutorCommon is StrategyModel, AdminAuth, CoreHelper
     }
 
     /// @notice Calls auth contract which has the auth from the user wallet which will call RecipeExecutor
+    /// @dev Always approves the sub for partial strategyExecution
     /// @param _subId Strategy data we have in storage
     /// @param _actionsCallData All input data needed to execute actions
     /// @param _triggerCallData All input data needed to check triggers
@@ -44,6 +47,11 @@ abstract contract StrategyExecutorCommon is StrategyModel, AdminAuth, CoreHelper
         address _userWallet
     ) internal {
         address authAddr = _isDSProxy(_userWallet) ? PROXY_AUTH_ADDR : MODULE_AUTH_ADDR;
+
+        // always approve and check in RecipeExecutor if the execution should be started or not
+        IStrategyPartialExecutionStorage(
+                registry.getAddr(DFSIds.STRATEGY_PARTIAL_EXECUTION_STORAGE)
+            ).approveStartOfExecution(_subId);
 
         IAuth(authAddr).callExecute{ value: msg.value }(
             _userWallet,
