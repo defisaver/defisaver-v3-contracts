@@ -12,6 +12,12 @@ import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 
+/// @title StrategyPartialExecutionStorage
+/// @notice This contract tracks the state of subscriptions that are in partial execution.
+/// @dev Partial execution is used when backend can not execute strategy in one transaction (e.g. because of high TSI)
+/// @dev Only StrategyExecutor can approve the start of execution.
+/// @dev Only the sub owner can start execution; the initial strategy ID is preserved until the execution ends.
+/// @dev Only sub owner or admin vault owner can end execution.
 contract StrategyPartialExecutionStorage is
     IStrategyPartialExecutionStorage,
     CoreHelper,
@@ -24,9 +30,12 @@ contract StrategyPartialExecutionStorage is
         uint256 initialStrategyId;
     }
 
+    /// @notice Mapping to track the partial execution state for each subscription ID.
     mapping(uint256 => ExecutionState) private partialExecutions;
 
-    /// @notice checks if the caller is StrategyExecutor and approves starting partial execution for a given subId
+    /// @notice Approves the start of execution for a given subscription ID.
+    /// @dev Only the StrategyExecutor can call this function to approve execution.
+    /// @param _subId Subscription ID for which execution is being approved.
     function approveStartOfExecution(uint256 _subId) external {
         address strategyExecutor = IDFSRegistry(REGISTRY_ADDR).getAddr(DFSIds.STRATEGY_EXECUTOR);
 
@@ -61,7 +70,8 @@ contract StrategyPartialExecutionStorage is
         emit ExecutionStarted(_subId, msg.sender);
     }
 
-    /// @notice only sub owner or admin vault owner can end execution
+    /// @notice Only sub owner or admin vault owner can end execution
+    /// @param _subId Subscription to end the partial execution for.
     function endExecution(uint256 _subId) external {
         if (!isInPartialExecution(_subId)) return;
 
@@ -89,14 +99,24 @@ contract StrategyPartialExecutionStorage is
         return (partialExecution.wallet, partialExecution.initialStrategyId);
     }
 
+    /// @dev Returns the sub.walletAddr if subscription is in partial execution.
+    /// @dev A zero wallet means the subscription is not in partial execution.
+    /// @param _subId Subscription ID to check.
     function getPartialExecutionWallet(uint256 _subId) public view returns (address) {
         return partialExecutions[_subId].wallet;
     }
 
+    /// @notice Checks if a subscription is currently in partial execution.
+    /// @param _subId Subscription ID to check.
+    /// @return Returns true if the subscription is in partial execution, false otherwise.
     function isInPartialExecution(uint256 _subId) public view returns (bool) {
         return getPartialExecutionWallet(_subId) != address(0);
     }
 
+    /// @notice Checks if the caller is approved to start execution for a given subId
+    /// @dev Approval can only be granted by StrategyExecutor.
+    /// @param _subId Subscription ID to check approval for.
+    /// @return approved True if the caller is approved to start execution, false otherwise.
     function isApprovedToStartExecution(uint256 _subId) internal view returns (bool approved) {
         bytes32 slot = keccak256(abi.encode(START_APPROVAL_SLOT, _subId));
         assembly {

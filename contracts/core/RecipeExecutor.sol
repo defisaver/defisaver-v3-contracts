@@ -227,48 +227,6 @@ contract RecipeExecutor is
         _txSaverData.feeToken.withdrawTokens(TX_SAVER_FEE_RECIPIENT, gasCost);
     }
 
-    /// @notice Checks if the length of _actionCallData is valid for the strategy
-    /// @dev For continuous strategies, the length of _actionCallData must be equal to the length of strategy actions
-    /// @dev For one-time strategies, the length of _actionCallData must be equal to the length of strategy actions or one more with the last element being PARTIAL_EXECUTION_FLAG
-    /// @param _actionCallData Actions calldata sent by backend to execute actions
-    /// @param _strategy Strategy to be executed
-    function _validateActionsCalldataLength(
-        bytes[] calldata _actionCallData,
-        Strategy memory _strategy
-    ) internal pure {
-        uint256 actionsLength = _strategy.actionIds.length;
-
-        // only one-time strategies can have the extra PARTIAL_EXECUTION_FLAG element
-        uint256 maxLength = _strategy.continuous ? actionsLength : actionsLength + 1;
-
-        if (_actionCallData.length < actionsLength || _actionCallData.length > maxLength) {
-            revert InvalidActionCallDataLength(_actionCallData.length, actionsLength);
-        }
-    }
-
-    /// @notice Checks if the execution is a partial execution, which means that the last element of _actionCallData is PARTIAL_EXECUTION_FLAG
-    /// @dev Must be called after _validateActionsCalldataLength, which guarantees that the length is either equal to the length of strategy actions or one more
-    /// @dev Reverts if the extra element is not exactly PARTIAL_EXECUTION_FLAG
-    /// @param _actionCallData Actions calldata sent by backend to execute actions
-    /// @param _strategy Strategy to be executed
-    /// @return isPartialExecution Returns if the execution is a partial execution or not
-    function _isPartialExecution(bytes[] calldata _actionCallData, Strategy memory _strategy)
-        internal
-        pure
-        returns (bool isPartialExecution)
-    {
-        if (_actionCallData.length == _strategy.actionIds.length + 1) {
-            bytes calldata flagData = _actionCallData[_actionCallData.length - 1];
-
-            if (flagData.length != 32 || bytes32(flagData) != PARTIAL_EXECUTION_FLAG) {
-                revert InvalidPartialExecutionFlag(flagData, PARTIAL_EXECUTION_FLAG);
-            }
-
-            return true;
-        }
-        return false;
-    }
-
     /// @notice Called by user wallet through the auth contract to execute a recipe & check triggers
     /// @param _subId Id of the subscription we want to execute
     /// @param _actionCallData All input data needed to execute actions
@@ -385,6 +343,48 @@ contract RecipeExecutor is
         }
 
         return (true, i);
+    }
+
+    /// @notice Checks if the length of _actionCallData is valid for the strategy
+    /// @dev For continuous strategies, the length of _actionCallData must be equal to the length of strategy actions
+    /// @dev For one-time strategies, the length of _actionCallData must be equal to the length of strategy actions or one more with the last element being PARTIAL_EXECUTION_FLAG
+    /// @param _actionCallData Actions calldata sent by backend to execute actions
+    /// @param _strategy Strategy to be executed
+    function _validateActionsCalldataLength(
+        bytes[] calldata _actionCallData,
+        Strategy memory _strategy
+    ) internal pure {
+        uint256 actionsLength = _strategy.actionIds.length;
+
+        // only one-time strategies can have the extra PARTIAL_EXECUTION_FLAG element
+        uint256 maxLength = _strategy.continuous ? actionsLength : actionsLength + 1;
+
+        if (_actionCallData.length < actionsLength || _actionCallData.length > maxLength) {
+            revert InvalidActionCallDataLength(_actionCallData.length, actionsLength);
+        }
+    }
+
+    /// @notice Checks if the execution is a partial execution, which means that the last element of _actionCallData is PARTIAL_EXECUTION_FLAG
+    /// @dev Must be called after _validateActionsCalldataLength, which guarantees that the length is either equal to the length of strategy actions or one more
+    /// @dev Reverts if the extra element is not exactly PARTIAL_EXECUTION_FLAG
+    /// @param _actionCallData Actions calldata sent by backend to execute actions
+    /// @param _strategy Strategy to be executed
+    /// @return isPartialExecution Returns if the execution is a partial execution or not
+    function _isPartialExecution(bytes[] calldata _actionCallData, Strategy memory _strategy)
+        internal
+        pure
+        returns (bool isPartialExecution)
+    {
+        if (_actionCallData.length == _strategy.actionIds.length + 1) {
+            bytes calldata flagData = _actionCallData[_actionCallData.length - 1];
+
+            if (flagData.length != 32 || bytes32(flagData) != PARTIAL_EXECUTION_FLAG) {
+                revert InvalidPartialExecutionFlag(flagData, PARTIAL_EXECUTION_FLAG);
+            }
+
+            return true;
+        }
+        return false;
     }
 
     /// @notice Runs all actions from the recipe

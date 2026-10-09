@@ -31,6 +31,8 @@ abstract contract StrategyExecutorCommon is StrategyModel, AdminAuth, CoreHelper
     }
 
     /// @notice Calls auth contract which has the auth from the user wallet which will call RecipeExecutor
+    /// @dev Always approve start of partial execution in transient storage.
+    /// @dev RecipeExecutor checks later if the execution should be started or not. This is decided by backend
     /// @param _subId Strategy data we have in storage
     /// @param _actionsCallData All input data needed to execute actions
     /// @param _triggerCallData All input data needed to check triggers
@@ -47,7 +49,7 @@ abstract contract StrategyExecutorCommon is StrategyModel, AdminAuth, CoreHelper
     ) internal {
         address authAddr = _isDSProxy(_userWallet) ? PROXY_AUTH_ADDR : MODULE_AUTH_ADDR;
 
-        // always approve and decide in RecipeExecutor if the execution should be started or not
+        // always approve and check in RecipeExecutor if the execution should be started or not
         IStrategyPartialExecutionStorage(
                 registry.getAddr(DFSIds.STRATEGY_PARTIAL_EXECUTION_STORAGE)
             ).approveStartOfExecution(_subId);

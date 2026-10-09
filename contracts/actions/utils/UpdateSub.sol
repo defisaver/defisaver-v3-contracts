@@ -10,8 +10,9 @@ import {
 } from "../../interfaces/core/IStrategyPartialExecutionStorage.sol";
 import { DFSIds } from "../../utils/DFSIds.sol";
 
-/// @title Updates users sub information on SubStorage contract
-/// @notice User can only change his own subscriptions
+/// @title Updates users sub information on SubStorage contract.
+/// @notice User can only change his own subscriptions.
+/// @dev Clears the partial execution storage for the subscription.
 contract UpdateSub is ActionBase {
     /// @param subId Id of the Subscription
     /// @param sub Object that represents the updated sub

@@ -12,6 +12,7 @@ import { DFSIds } from "../../utils/DFSIds.sol";
 
 /// @title ToggleSub - Sets the state of the sub to active or deactivated.
 /// @notice User can only disable/enable his own subscriptions.
+/// @dev Clears the partial execution storage for the subscription.
 contract ToggleSub is ActionBase, Permission {
     /// @param subId ID of the subscription to toggle
     /// @param active Whether to activate or deactivate the subscription
