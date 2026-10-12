@@ -3,10 +3,16 @@
 pragma solidity =0.8.24;
 
 /**
- * @title Entry point into executing recipes/checking triggers directly and as part of a strategy
+ * @title RecipeExecutor
+ * @notice Entry point for executing recipes (manually or as part of a strategy)
  * @dev RecipeExecutor can be used in two scenarios:
- * 1) Execute a recipe manually through user's wallet by calling executeRecipe()
- *    Here, users can also execute a recipe with a flash loan action. To save on space, the flow will be explained in the next scenario
+ * 1) Execute a recipe manually through user's wallet by calling executeRecipe().
+ *    Supports 4 smart wallet types:
+ *    - safe wallet
+ *    - dsproxy wallet
+ *    - summer.fi wallet
+ *    - dsa (instadapp) wallet
+ *    The following flow diagram doesn't show the flash loan action flow, which will be explained in the next scenario to save on space.
  *
  *                                                                                                                       ┌────────────────┐
  *                                                                                                                   ┌───┤  1st Action    │
@@ -23,7 +29,10 @@ pragma solidity =0.8.24;
  *                                                                                                                       └────────────────┘
  *
  *
- * 2) Execute a recipe as part of a defi saver strategy system
+ * 2) Execute a recipe as part of a DefiSaver strategy
+ *    Supports 2 smart wallet types:
+ *    - safe wallet
+ *    - dsproxy wallet
  *
  *                             check:
  *                             - bot is approved                           check:                 ┌───────────────────────┐
