@@ -82,7 +82,7 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
                               TESTS - startExecution
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_start_execution() public {
-        assertFalse(cut.isInPartialExecution(SUB_ID));
+        assertFalse(cut.isSubInPartialExecution(SUB_ID));
 
         _approveStart(SUB_ID);
 
@@ -92,10 +92,10 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
         prank(subOwnerWallet);
         cut.startExecution(SUB_ID, STRATEGY_ID);
 
-        assertTrue(cut.isInPartialExecution(SUB_ID));
-        assertEq(cut.getPartialExecutionWallet(SUB_ID), subOwnerWallet);
+        assertTrue(cut.isSubInPartialExecution(SUB_ID));
+        assertEq(cut.getSubPartialExecutionWallet(SUB_ID), subOwnerWallet);
 
-        (address wallet, uint256 initialStrategyId) = cut.getPartialExecution(SUB_ID);
+        (address wallet, uint256 initialStrategyId) = cut.getSubPartialExecutionState(SUB_ID);
         assertEq(wallet, subOwnerWallet);
         assertEq(initialStrategyId, STRATEGY_ID);
     }
@@ -107,7 +107,7 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
         prank(subOwnerWallet);
         cut.startExecution(SUB_ID, STRATEGY_ID);
 
-        assertFalse(cut.isInPartialExecution(SUB_ID));
+        assertFalse(cut.isSubInPartialExecution(SUB_ID));
     }
 
     function test_should_revert_when_starting_execution_without_approval_for_non_owner() public {
@@ -115,7 +115,7 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
         prank(bob);
         cut.startExecution(SUB_ID, STRATEGY_ID);
 
-        assertFalse(cut.isInPartialExecution(SUB_ID));
+        assertFalse(cut.isSubInPartialExecution(SUB_ID));
     }
 
     function test_should_revert_when_starting_execution_without_approval_as_admin_vault_owner()
@@ -125,7 +125,7 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
         prank(adminVaultOwner);
         cut.startExecution(SUB_ID, STRATEGY_ID);
 
-        assertFalse(cut.isInPartialExecution(SUB_ID));
+        assertFalse(cut.isSubInPartialExecution(SUB_ID));
     }
 
     function test_should_revert_when_starting_execution_for_a_different_sub_than_approved() public {
@@ -137,7 +137,7 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
         prank(subOwnerWallet);
         cut.startExecution(otherSubId, STRATEGY_ID);
 
-        assertFalse(cut.isInPartialExecution(otherSubId));
+        assertFalse(cut.isSubInPartialExecution(otherSubId));
     }
 
     function test_should_return_early_when_sub_already_in_partial_execution() public {
@@ -149,7 +149,7 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
 
         Vm.Log[] memory logs = vm.getRecordedLogs();
         assertEq(logs.length, 0);
-        assertEq(cut.getPartialExecutionWallet(SUB_ID), subOwnerWallet);
+        assertEq(cut.getSubPartialExecutionWallet(SUB_ID), subOwnerWallet);
     }
 
     function test_should_not_revert_for_non_owner_when_sub_already_in_partial_execution() public {
@@ -161,7 +161,7 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
 
         Vm.Log[] memory logs = vm.getRecordedLogs();
         assertEq(logs.length, 0);
-        assertEq(cut.getPartialExecutionWallet(SUB_ID), subOwnerWallet);
+        assertEq(cut.getSubPartialExecutionWallet(SUB_ID), subOwnerWallet);
     }
 
     function test_should_revert_when_admin_vault_owner_starts_execution_even_if_approved() public {
@@ -171,7 +171,7 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
         prank(adminVaultOwner);
         cut.startExecution(SUB_ID, STRATEGY_ID);
 
-        assertFalse(cut.isInPartialExecution(SUB_ID));
+        assertFalse(cut.isSubInPartialExecution(SUB_ID));
     }
 
     function test_should_revert_when_starting_execution_for_non_owner_even_if_approved() public {
@@ -181,7 +181,7 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
         prank(bob);
         cut.startExecution(SUB_ID, STRATEGY_ID);
 
-        assertFalse(cut.isInPartialExecution(SUB_ID));
+        assertFalse(cut.isSubInPartialExecution(SUB_ID));
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -196,12 +196,12 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
         prank(subOwnerWallet);
         cut.endExecution(SUB_ID);
 
-        assertFalse(cut.isInPartialExecution(SUB_ID));
-        assertEq(cut.getPartialExecutionWallet(SUB_ID), address(0));
+        assertFalse(cut.isSubInPartialExecution(SUB_ID));
+        assertEq(cut.getSubPartialExecutionWallet(SUB_ID), address(0));
     }
 
     function test_should_return_early_when_ending_execution_that_is_not_started() public {
-        assertFalse(cut.isInPartialExecution(SUB_ID));
+        assertFalse(cut.isSubInPartialExecution(SUB_ID));
 
         vm.recordLogs();
         prank(subOwnerWallet);
@@ -209,7 +209,7 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
 
         Vm.Log[] memory logs = vm.getRecordedLogs();
         assertEq(logs.length, 0);
-        assertFalse(cut.isInPartialExecution(SUB_ID));
+        assertFalse(cut.isSubInPartialExecution(SUB_ID));
     }
 
     function test_should_revert_when_ending_execution_for_non_owner() public {
@@ -230,8 +230,8 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
         prank(adminVaultOwner);
         cut.endExecution(SUB_ID);
 
-        assertFalse(cut.isInPartialExecution(SUB_ID));
-        assertEq(cut.getPartialExecutionWallet(SUB_ID), address(0));
+        assertFalse(cut.isSubInPartialExecution(SUB_ID));
+        assertEq(cut.getSubPartialExecutionWallet(SUB_ID), address(0));
     }
 
     function test_should_revert_when_admin_vault_admin_ends_execution() public {
@@ -243,11 +243,11 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
         prank(vaultAdmin);
         cut.endExecution(SUB_ID);
 
-        assertEq(cut.getPartialExecutionWallet(SUB_ID), subOwnerWallet);
+        assertEq(cut.getSubPartialExecutionWallet(SUB_ID), subOwnerWallet);
     }
 
     function test_should_not_revert_for_non_owner_when_execution_is_not_started() public {
-        assertFalse(cut.isInPartialExecution(SUB_ID));
+        assertFalse(cut.isSubInPartialExecution(SUB_ID));
 
         vm.recordLogs();
         prank(bob);
@@ -255,11 +255,11 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
 
         Vm.Log[] memory logs = vm.getRecordedLogs();
         assertEq(logs.length, 0);
-        assertFalse(cut.isInPartialExecution(SUB_ID));
+        assertFalse(cut.isSubInPartialExecution(SUB_ID));
     }
 
     function test_should_not_revert_for_admin_when_execution_is_not_started() public {
-        assertFalse(cut.isInPartialExecution(SUB_ID));
+        assertFalse(cut.isSubInPartialExecution(SUB_ID));
 
         vm.recordLogs();
         prank(adminVaultOwner);
@@ -267,7 +267,7 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
 
         Vm.Log[] memory logs = vm.getRecordedLogs();
         assertEq(logs.length, 0);
-        assertFalse(cut.isInPartialExecution(SUB_ID));
+        assertFalse(cut.isSubInPartialExecution(SUB_ID));
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -278,12 +278,12 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
 
         prank(adminVaultOwner);
         cut.endExecution(SUB_ID);
-        assertFalse(cut.isInPartialExecution(SUB_ID));
+        assertFalse(cut.isSubInPartialExecution(SUB_ID));
 
         _startExecution();
 
-        assertTrue(cut.isInPartialExecution(SUB_ID));
-        assertEq(cut.getPartialExecutionWallet(SUB_ID), subOwnerWallet);
+        assertTrue(cut.isSubInPartialExecution(SUB_ID));
+        assertEq(cut.getSubPartialExecutionWallet(SUB_ID), subOwnerWallet);
     }
 
     function test_should_start_execution_again_after_execution_ended() public {
@@ -291,12 +291,12 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
 
         prank(subOwnerWallet);
         cut.endExecution(SUB_ID);
-        assertFalse(cut.isInPartialExecution(SUB_ID));
+        assertFalse(cut.isSubInPartialExecution(SUB_ID));
 
         _startExecution();
 
-        assertTrue(cut.isInPartialExecution(SUB_ID));
-        assertEq(cut.getPartialExecutionWallet(SUB_ID), subOwnerWallet);
+        assertTrue(cut.isSubInPartialExecution(SUB_ID));
+        assertEq(cut.getSubPartialExecutionWallet(SUB_ID), subOwnerWallet);
     }
 
     /*//////////////////////////////////////////////////////////////////////////

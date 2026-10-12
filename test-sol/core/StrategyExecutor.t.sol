@@ -281,7 +281,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
 
         _executeWithFlag(f);
         assertEq(
-            partialExecutionStorage.getPartialExecutionWallet(f.subId),
+            partialExecutionStorage.getSubPartialExecutionWallet(f.subId),
             walletAddr,
             "must be in partial execution"
         );
@@ -338,10 +338,10 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         _execute(f);
 
         assertFalse(
-            partialExecutionStorage.isInPartialExecution(f.subId),
+            partialExecutionStorage.isSubInPartialExecution(f.subId),
             "approval must not start an execution"
         );
-        assertEq(partialExecutionStorage.getPartialExecutionWallet(f.subId), address(0));
+        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(f.subId), address(0));
         assertTrue(subStorage.getSub(f.subId).isEnabled, "continuous sub must stay enabled");
     }
 
@@ -380,7 +380,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         cut.executeStrategy(subId, 0, _triggers(_probeSubData()), actionsCalldata, sub);
 
         assertFalse(
-            partialExecutionStorage.isInPartialExecution(otherSubId),
+            partialExecutionStorage.isSubInPartialExecution(otherSubId),
             "another sub must not be startable"
         );
     }
@@ -399,10 +399,10 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         cut.executeStrategy(subId, 0, _triggers(_probeSubData()), actionsCalldata, sub);
 
         assertFalse(
-            partialExecutionStorage.isInPartialExecution(subId),
+            partialExecutionStorage.isSubInPartialExecution(subId),
             "an action must not be able to start the execution"
         );
-        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), address(0));
+        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(subId), address(0));
     }
 
     /// forge-config: default.isolate = true
@@ -488,7 +488,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         // the approval is untouched, the owner can still use it
         prank(walletAddr);
         partialExecutionStorage.startExecution(f.subId, 0);
-        assertTrue(partialExecutionStorage.isInPartialExecution(f.subId));
+        assertTrue(partialExecutionStorage.isSubInPartialExecution(f.subId));
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -504,7 +504,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         emit IStrategyPartialExecutionStorage.ExecutionStarted(f.subId, walletAddr);
         _executeWithFlag(f);
 
-        assertEq(partialExecutionStorage.getPartialExecutionWallet(f.subId), walletAddr);
+        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(f.subId), walletAddr);
         assertTrue(subStorage.getSub(f.subId).isEnabled, "sub must stay enabled");
         assertEq(
             balanceOf(f.subData.token, sender),
@@ -518,14 +518,14 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         Fixture memory f = _fixture(false, type(uint256).max);
 
         _executeWithFlag(f);
-        assertTrue(partialExecutionStorage.isInPartialExecution(f.subId));
+        assertTrue(partialExecutionStorage.isSubInPartialExecution(f.subId));
 
         vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
         emit IStrategyPartialExecutionStorage.ExecutionEnded(f.subId, walletAddr, walletAddr);
         _execute(f);
 
         assertFalse(
-            partialExecutionStorage.isInPartialExecution(f.subId),
+            partialExecutionStorage.isSubInPartialExecution(f.subId),
             "partial execution storage must be cleared"
         );
         assertFalse(subStorage.getSub(f.subId).isEnabled, "one-time sub must be deactivated");
@@ -538,7 +538,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         _execute(f);
 
         assertFalse(subStorage.getSub(f.subId).isEnabled, "one-time sub must be deactivated");
-        assertFalse(partialExecutionStorage.isInPartialExecution(f.subId));
+        assertFalse(partialExecutionStorage.isSubInPartialExecution(f.subId));
 
         vm.expectRevert(
             abi.encodeWithSelector(StrategyExecutorCommon.SubNotEnabled.selector, f.subId)

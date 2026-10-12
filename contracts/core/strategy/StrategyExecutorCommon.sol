@@ -31,7 +31,7 @@ abstract contract StrategyExecutorCommon is StrategyModel, AdminAuth, CoreHelper
     }
 
     /// @notice Calls auth contract which has the auth from the user wallet which will call RecipeExecutor
-    /// @dev Always approves the sub for partial strategyExecution
+    /// @dev Always approves the sub for partial strategy execution
     /// @param _subId Strategy data we have in storage
     /// @param _actionsCallData All input data needed to execute actions
     /// @param _triggerCallData All input data needed to check triggers

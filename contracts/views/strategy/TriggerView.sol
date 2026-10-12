@@ -103,7 +103,7 @@ contract TriggerView is StrategyModel, CoreHelper {
                 IStrategyPartialExecutionStorage(
                     registry.getAddr(DFSIds.STRATEGY_PARTIAL_EXECUTION_STORAGE)
                 );
-            if (partialExecutionStorage.isInPartialExecution(_subId)) return TriggerStatus.TRUE;
+            if (partialExecutionStorage.isSubInPartialExecution(_subId)) return TriggerStatus.TRUE;
         }
 
         Strategy memory strategy;

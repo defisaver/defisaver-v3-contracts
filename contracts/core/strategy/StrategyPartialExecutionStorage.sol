@@ -14,8 +14,8 @@ import { AdminAuth } from "../../auth/AdminAuth.sol";
 
 /// @title StrategyPartialExecutionStorage
 /// @notice This contract tracks the state of subscriptions that are in partial execution.
-/// @dev Partial execution is used when backend can not execute strategy in one transaction (e.g. because of high TSI)
-/// @dev Only StrategyExecutor can approve the start of execution.
+/// @dev Partial execution is used when backend can not execute strategy in one transaction (e.g. because of high TSI).
+/// @dev Only StrategyExecutor can approve the start of execution for particular sub.
 /// @dev Only the sub owner can start execution; the initial strategy ID is preserved until the execution ends.
 /// @dev Only sub owner or admin vault owner can end execution.
 contract StrategyPartialExecutionStorage is
@@ -43,7 +43,7 @@ contract StrategyPartialExecutionStorage is
             revert NotStrategyExecutor(msg.sender, strategyExecutor);
         }
 
-        bytes32 slot = keccak256(abi.encode(START_APPROVAL_SLOT, _subId));
+        bytes32 slot = _getStartApprovalSlot(_subId);
         assembly {
             tstore(slot, true)
         }
@@ -59,13 +59,9 @@ contract StrategyPartialExecutionStorage is
             revert NotApproved(_subId, msg.sender);
         }
 
-        StrategyModel.StoredSubData memory subData = ISubStorage(SUB_STORAGE_ADDR).getSub(_subId);
+        _requireSubOwner(_subId);
 
-        if (address(subData.walletAddr) != msg.sender) {
-            revert NotSubOwner(_subId, msg.sender);
-        }
-
-        bytes32 slot = keccak256(abi.encode(START_APPROVAL_SLOT, _subId));
+        bytes32 slot = _getStartApprovalSlot(_subId);
         assembly {
             tstore(slot, false)
         }
@@ -73,19 +69,18 @@ contract StrategyPartialExecutionStorage is
 
     /// @notice Only the sub owner can start execution; the initial strategy ID is preserved until the execution ends.
     /// @dev Records the first strategy without restricting which strategy a continuation can execute.
+    /// @dev If the subscription is already in partial execution, this function is a no-op.
+    /// @dev Reverts if the caller is not the sub owner or if not approved to start execution for the subscription.
     /// @param _subId Subscription entering partial execution.
     /// @param _strategyId Resolved StrategyStorage ID of the first partial execution.
     function startExecution(uint256 _subId, uint256 _strategyId) external {
-        if (isInPartialExecution(_subId)) return;
+        if (isSubInPartialExecution(_subId)) return;
 
         if (!_isApprovedToStartExecution(_subId)) {
             revert NotApproved(_subId, msg.sender);
         }
 
-        StrategyModel.StoredSubData memory subData = ISubStorage(SUB_STORAGE_ADDR).getSub(_subId);
-        if (address(subData.walletAddr) != msg.sender) {
-            revert NotSubOwner(_subId, msg.sender);
-        }
+        _requireSubOwner(_subId);
 
         partialExecutions[_subId] =
             ExecutionState({ wallet: msg.sender, initialStrategyId: _strategyId });
@@ -93,9 +88,12 @@ contract StrategyPartialExecutionStorage is
     }
 
     /// @notice Only sub owner or admin vault owner can end execution
+    /// @dev Clears the partial execution state for the subscription.
+    /// @dev If the subscription is not in partial execution, this function is a no-op.
+    /// @dev Reverts if the caller is not the sub owner or the admin vault owner.
     /// @param _subId Subscription to end the partial execution for.
     function endExecution(uint256 _subId) external {
-        if (!isInPartialExecution(_subId)) return;
+        if (!isSubInPartialExecution(_subId)) return;
 
         StrategyModel.StoredSubData memory subData = ISubStorage(SUB_STORAGE_ADDR).getSub(_subId);
         if (address(subData.walletAddr) != msg.sender && msg.sender != adminVault.owner()) {
@@ -112,7 +110,7 @@ contract StrategyPartialExecutionStorage is
     /// @param _subId Subscription whose partial execution metadata is requested.
     /// @return wallet Active partial execution wallet, or zero when inactive.
     /// @return initialStrategyId StrategyStorage ID recorded when execution started.
-    function getPartialExecution(uint256 _subId)
+    function getSubPartialExecutionState(uint256 _subId)
         external
         view
         returns (address wallet, uint256 initialStrategyId)
@@ -124,15 +122,15 @@ contract StrategyPartialExecutionStorage is
     /// @dev Returns the sub.walletAddr if subscription is in partial execution.
     /// @dev A zero wallet means the subscription is not in partial execution.
     /// @param _subId Subscription ID to check.
-    function getPartialExecutionWallet(uint256 _subId) public view returns (address) {
+    function getSubPartialExecutionWallet(uint256 _subId) public view returns (address) {
         return partialExecutions[_subId].wallet;
     }
 
     /// @notice Checks if a subscription is currently in partial execution.
     /// @param _subId Subscription ID to check.
     /// @return Returns true if the subscription is in partial execution, false otherwise.
-    function isInPartialExecution(uint256 _subId) public view returns (bool) {
-        return getPartialExecutionWallet(_subId) != address(0);
+    function isSubInPartialExecution(uint256 _subId) public view returns (bool) {
+        return getSubPartialExecutionWallet(_subId) != address(0);
     }
 
     /// @notice Checks if the caller is approved to start execution for a given subId
@@ -140,9 +138,20 @@ contract StrategyPartialExecutionStorage is
     /// @param _subId Subscription ID to check approval for.
     /// @return approved True if the caller is approved to start execution, false otherwise.
     function _isApprovedToStartExecution(uint256 _subId) internal view returns (bool approved) {
-        bytes32 slot = keccak256(abi.encode(START_APPROVAL_SLOT, _subId));
+        bytes32 slot = _getStartApprovalSlot(_subId);
         assembly {
             approved := tload(slot)
         }
+    }
+
+    function _requireSubOwner(uint256 _subId) internal view {
+        StrategyModel.StoredSubData memory subData = ISubStorage(SUB_STORAGE_ADDR).getSub(_subId);
+        if (address(subData.walletAddr) != msg.sender) {
+            revert NotSubOwner(_subId, msg.sender);
+        }
+    }
+
+    function _getStartApprovalSlot(uint256 _subId) internal pure returns (bytes32 slot) {
+        slot = keccak256(abi.encode(START_APPROVAL_SLOT, _subId));
     }
 }

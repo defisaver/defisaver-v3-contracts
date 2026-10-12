@@ -167,7 +167,7 @@ contract RecipeExecutor is
     //////////////////////////////////////////////////////////////*/
 
     /// For strategy execution all triggers must be active
-    error TriggerNotActiveError(uint256);
+    error TriggerNotActiveError(uint256 triggerIndex);
 
     /// For TxSaver, total gas cost fee taken from user can't be higher than maxTxCost set by user
     error TxCostInFeeTokenTooHighError(uint256 maxTxCost, uint256 txCost);
@@ -249,6 +249,7 @@ contract RecipeExecutor is
     }
 
     /// @notice Called by user wallet through the auth contract to execute a recipe & check triggers
+    /// @dev If sub is already in partial execution state, it will skip the trigger check and sub data update
     /// @param _subId Id of the subscription we want to execute
     /// @param _actionCallData All input data needed to execute actions
     /// @param _triggerCallData All input data needed to check triggers
@@ -280,7 +281,7 @@ contract RecipeExecutor is
 
         // skip triggers check if the sub is already in partial execution
         // deliberately skips updating sub data too
-        if (!_isInPartialExecutionState(partialExecutionStorage, _subId)) {
+        if (!_isSubInPartialExecutionForThisWallet(partialExecutionStorage, _subId)) {
             _requireTriggers(_subId, strategy, _sub, _triggerCallData);
         }
 
@@ -289,7 +290,7 @@ contract RecipeExecutor is
             // don't disable sub if partialExecution is active
             if (_isStrategyPartialExecutionActive(_actionCallData, strategy.actionIds.length)) {
                 // if sub is not already in partial execution, start it
-                if (!partialExecutionStorage.isInPartialExecution(_subId)) {
+                if (!partialExecutionStorage.isSubInPartialExecution(_subId)) {
                     partialExecutionStorage.startExecution(_subId, strategyId);
                 }
             } else {
@@ -488,11 +489,11 @@ contract RecipeExecutor is
         _removePermissionFrom(walletType, _flActionAddr);
     }
 
-    function _isInPartialExecutionState(
+    function _isSubInPartialExecutionForThisWallet(
         IStrategyPartialExecutionStorage _partialExecutionStorage,
         uint256 _subId
     ) internal view returns (bool) {
-        return _partialExecutionStorage.getPartialExecutionWallet(_subId) == address(this);
+        return _partialExecutionStorage.getSubPartialExecutionWallet(_subId) == address(this);
     }
 
     /// @notice Checks if the specified address is of FL type action

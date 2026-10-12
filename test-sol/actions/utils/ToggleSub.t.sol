@@ -50,14 +50,14 @@ contract TestToggleSub is SubActionsBase {
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_deactivate_sub() public {
         assertTrue(subStorage.getSub(subId).isEnabled);
-        assertFalse(partialExecutionStorage.isInPartialExecution(subId));
+        assertFalse(partialExecutionStorage.isSubInPartialExecution(subId));
 
         vm.expectEmit(true, true, true, true, address(subStorage));
         emit SubStorage.DeactivateSub(subId);
         _toggle(wallet, subId, false, false);
 
         assertFalse(subStorage.getSub(subId).isEnabled);
-        assertFalse(partialExecutionStorage.isInPartialExecution(subId));
+        assertFalse(partialExecutionStorage.isSubInPartialExecution(subId));
     }
 
     function test_should_deactivate_sub_direct() public {
@@ -157,7 +157,7 @@ contract TestToggleSub is SubActionsBase {
 
         assertTrue(subStorage.getSub(subId).isEnabled, "sub must stay untouched");
         assertTrue(
-            partialExecutionStorage.isInPartialExecution(subId),
+            partialExecutionStorage.isSubInPartialExecution(subId),
             "partial execution storage must stay untouched"
         );
     }
@@ -255,7 +255,7 @@ contract TestToggleSub is SubActionsBase {
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_clear_partial_execution_on_deactivate() public {
         _startExecution(subId);
-        assertTrue(partialExecutionStorage.isInPartialExecution(subId));
+        assertTrue(partialExecutionStorage.isSubInPartialExecution(subId));
 
         vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
         emit IStrategyPartialExecutionStorage.ExecutionEnded(subId, walletAddr, walletAddr);
@@ -265,16 +265,16 @@ contract TestToggleSub is SubActionsBase {
         _toggle(wallet, subId, false, false);
 
         assertFalse(
-            partialExecutionStorage.isInPartialExecution(subId),
+            partialExecutionStorage.isSubInPartialExecution(subId),
             "deactivate must clear the partial execution storage"
         );
-        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), address(0));
+        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(subId), address(0));
         assertFalse(subStorage.getSub(subId).isEnabled);
     }
 
     function test_should_deactivate_again_after_partial_execution_was_cleared() public {
         _startExecution(subId);
-        assertTrue(partialExecutionStorage.isInPartialExecution(subId));
+        assertTrue(partialExecutionStorage.isSubInPartialExecution(subId));
 
         vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
         emit IStrategyPartialExecutionStorage.ExecutionEnded(subId, walletAddr, walletAddr);
@@ -284,10 +284,10 @@ contract TestToggleSub is SubActionsBase {
         _toggle(wallet, subId, false, false);
 
         assertFalse(
-            partialExecutionStorage.isInPartialExecution(subId),
+            partialExecutionStorage.isSubInPartialExecution(subId),
             "deactivate must clear the partial execution storage"
         );
-        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), address(0));
+        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(subId), address(0));
         assertFalse(subStorage.getSub(subId).isEnabled);
 
         /// @dev No ExecutionEnded this time, endExecution early-returns.
@@ -296,16 +296,16 @@ contract TestToggleSub is SubActionsBase {
         _toggle(wallet, subId, false, false);
 
         assertFalse(
-            partialExecutionStorage.isInPartialExecution(subId),
+            partialExecutionStorage.isSubInPartialExecution(subId),
             "partial execution storage must stay cleared"
         );
-        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), address(0));
+        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(subId), address(0));
         assertFalse(subStorage.getSub(subId).isEnabled, "sub must stay disabled");
     }
 
     function test_should_clear_partial_execution_on_deactivate_direct() public {
         _startExecution(subId);
-        assertTrue(partialExecutionStorage.isInPartialExecution(subId));
+        assertTrue(partialExecutionStorage.isSubInPartialExecution(subId));
 
         vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
         emit IStrategyPartialExecutionStorage.ExecutionEnded(subId, walletAddr, walletAddr);
@@ -315,7 +315,7 @@ contract TestToggleSub is SubActionsBase {
         _toggle(wallet, subId, false, true);
 
         assertFalse(
-            partialExecutionStorage.isInPartialExecution(subId),
+            partialExecutionStorage.isSubInPartialExecution(subId),
             "deactivate must clear the partial execution storage"
         );
     }
@@ -324,7 +324,7 @@ contract TestToggleSub is SubActionsBase {
     ///      triggers once the sub is re-enabled.
     function test_should_clear_partial_execution_on_activate() public {
         _startExecution(subId);
-        assertTrue(partialExecutionStorage.isInPartialExecution(subId));
+        assertTrue(partialExecutionStorage.isSubInPartialExecution(subId));
 
         vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
         emit IStrategyPartialExecutionStorage.ExecutionEnded(subId, walletAddr, walletAddr);
@@ -334,10 +334,10 @@ contract TestToggleSub is SubActionsBase {
         _toggle(wallet, subId, true, false);
 
         assertFalse(
-            partialExecutionStorage.isInPartialExecution(subId),
+            partialExecutionStorage.isSubInPartialExecution(subId),
             "activate must clear the partial execution storage"
         );
-        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), address(0));
+        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(subId), address(0));
         assertTrue(subStorage.getSub(subId).isEnabled);
     }
 
@@ -543,10 +543,11 @@ contract TestToggleSub is SubActionsBase {
 
     function _assertInPartialExecution(uint256 _subId, address _wallet) internal view {
         assertTrue(
-            partialExecutionStorage.isInPartialExecution(_subId), "sub must be in partial execution"
+            partialExecutionStorage.isSubInPartialExecution(_subId),
+            "sub must be in partial execution"
         );
         assertEq(
-            partialExecutionStorage.getPartialExecutionWallet(_subId),
+            partialExecutionStorage.getSubPartialExecutionWallet(_subId),
             _wallet,
             "wrong partial execution wallet"
         );
@@ -554,11 +555,11 @@ contract TestToggleSub is SubActionsBase {
 
     function _assertNotInPartialExecution(uint256 _subId) internal view {
         assertFalse(
-            partialExecutionStorage.isInPartialExecution(_subId),
+            partialExecutionStorage.isSubInPartialExecution(_subId),
             "sub must not be in partial execution"
         );
         assertEq(
-            partialExecutionStorage.getPartialExecutionWallet(_subId),
+            partialExecutionStorage.getSubPartialExecutionWallet(_subId),
             address(0),
             "partial execution wallet must be cleared"
         );

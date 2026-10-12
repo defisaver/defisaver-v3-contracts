@@ -170,7 +170,7 @@ contract TestUpdateSub is SubActionsBase {
 
         assertEq(subStorage.getSub(subId).strategySubHash, hashBefore, "sub must stay untouched");
         assertTrue(
-            partialExecutionStorage.isInPartialExecution(subId),
+            partialExecutionStorage.isSubInPartialExecution(subId),
             "partial execution storage must stay untouched"
         );
     }
@@ -221,8 +221,8 @@ contract TestUpdateSub is SubActionsBase {
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_clear_partial_execution_on_update() public {
         _startExecution(subId);
-        assertTrue(partialExecutionStorage.isInPartialExecution(subId));
-        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), walletAddr);
+        assertTrue(partialExecutionStorage.isSubInPartialExecution(subId));
+        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(subId), walletAddr);
 
         StrategyModel.StrategySub memory newSub = _bundleSub(1);
 
@@ -233,16 +233,16 @@ contract TestUpdateSub is SubActionsBase {
         _update(wallet, subId, newSub, false);
 
         assertFalse(
-            partialExecutionStorage.isInPartialExecution(subId),
+            partialExecutionStorage.isSubInPartialExecution(subId),
             "update must clear the partial execution storage"
         );
-        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), address(0));
+        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(subId), address(0));
     }
 
     function test_should_clear_partial_execution_on_update_direct() public {
         _startExecution(subId);
-        assertTrue(partialExecutionStorage.isInPartialExecution(subId));
-        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), walletAddr);
+        assertTrue(partialExecutionStorage.isSubInPartialExecution(subId));
+        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(subId), walletAddr);
 
         StrategyModel.StrategySub memory newSub = _bundleSub(1);
 
@@ -253,18 +253,18 @@ contract TestUpdateSub is SubActionsBase {
         _update(wallet, subId, newSub, true);
 
         assertFalse(
-            partialExecutionStorage.isInPartialExecution(subId),
+            partialExecutionStorage.isSubInPartialExecution(subId),
             "update must clear the partial execution storage"
         );
-        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), address(0));
+        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(subId), address(0));
     }
 
     /// @dev Updating again in the same state hits the endExecution early-return, the first
     ///      update already cleared the partial execution storage.
     function test_should_update_again_after_partial_execution_was_cleared() public {
         _startExecution(subId);
-        assertTrue(partialExecutionStorage.isInPartialExecution(subId));
-        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), walletAddr);
+        assertTrue(partialExecutionStorage.isSubInPartialExecution(subId));
+        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(subId), walletAddr);
 
         StrategyModel.StrategySub memory firstSub = _bundleSub(1);
 
@@ -275,11 +275,11 @@ contract TestUpdateSub is SubActionsBase {
         _update(wallet, subId, firstSub, false);
 
         assertFalse(
-            partialExecutionStorage.isInPartialExecution(subId),
+            partialExecutionStorage.isSubInPartialExecution(subId),
             "update must clear the partial execution storage"
         );
         assertEq(subStorage.getSub(subId).strategySubHash, keccak256(abi.encode(firstSub)));
-        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), address(0));
+        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(subId), address(0));
 
         StrategyModel.StrategySub memory secondSub = _bundleSub(2);
 
@@ -289,11 +289,11 @@ contract TestUpdateSub is SubActionsBase {
         _update(wallet, subId, secondSub, false);
 
         assertFalse(
-            partialExecutionStorage.isInPartialExecution(subId),
+            partialExecutionStorage.isSubInPartialExecution(subId),
             "partial execution storage must stay cleared"
         );
         assertEq(subStorage.getSub(subId).strategySubHash, keccak256(abi.encode(secondSub)));
-        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), address(0));
+        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(subId), address(0));
     }
 
     /// @dev The partial execution storage is a hard dependency of every update, not just for subs in partial execution.
@@ -309,7 +309,7 @@ contract TestUpdateSub is SubActionsBase {
         _update(wallet, subId, _bundleSub(1), false);
 
         assertEq(subStorage.getSub(subId).strategySubHash, hashBefore, "sub could not be updated");
-        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), address(0));
+        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(subId), address(0));
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -478,10 +478,11 @@ contract TestUpdateSub is SubActionsBase {
 
     function _assertInPartialExecution(uint256 _subId, address _wallet) internal view {
         assertTrue(
-            partialExecutionStorage.isInPartialExecution(_subId), "sub must be in partial execution"
+            partialExecutionStorage.isSubInPartialExecution(_subId),
+            "sub must be in partial execution"
         );
         assertEq(
-            partialExecutionStorage.getPartialExecutionWallet(_subId),
+            partialExecutionStorage.getSubPartialExecutionWallet(_subId),
             _wallet,
             "wrong partial execution wallet"
         );
@@ -489,11 +490,11 @@ contract TestUpdateSub is SubActionsBase {
 
     function _assertNotInPartialExecution(uint256 _subId) internal view {
         assertFalse(
-            partialExecutionStorage.isInPartialExecution(_subId),
+            partialExecutionStorage.isSubInPartialExecution(_subId),
             "sub must not be in partial execution"
         );
         assertEq(
-            partialExecutionStorage.getPartialExecutionWallet(_subId),
+            partialExecutionStorage.getSubPartialExecutionWallet(_subId),
             address(0),
             "partial execution wallet must be cleared"
         );

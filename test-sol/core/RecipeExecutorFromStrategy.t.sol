@@ -135,7 +135,7 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
 
         assertTrue(subStorage.getSub(subId).isEnabled, "sub must stay untouched");
         assertFalse(
-            partialExecutionStorage.isInPartialExecution(subId),
+            partialExecutionStorage.isSubInPartialExecution(subId),
             "partial execution storage must stay untouched"
         );
     }
@@ -171,7 +171,7 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         cut.executeRecipeFromStrategy(subId, _withFlag(_actions(1)), _triggerCallData(1), 0, sub);
 
         assertFalse(
-            partialExecutionStorage.isInPartialExecution(subId),
+            partialExecutionStorage.isSubInPartialExecution(subId),
             "partial execution storage must stay untouched"
         );
         assertTrue(subStorage.getSub(subId).isEnabled, "sub must stay untouched");
@@ -206,14 +206,14 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
         emit IStrategyPartialExecutionStorage.ExecutionStarted(subId, walletAddr);
         _execute(subId, 0, _withFlag(_actions(1)), sub);
-        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), walletAddr);
+        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(subId), walletAddr);
         assertTrue(subStorage.getSub(subId).isEnabled, "sub must stay enabled");
 
         vm.recordLogs();
         _execute(subId, 0, _withFlag(_actions(1)), sub);
 
         assertEq(_countStartedEvents(), 0, "second run must not emit ExecutionStarted again");
-        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), walletAddr);
+        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(subId), walletAddr);
         assertTrue(subStorage.getSub(subId).isEnabled, "sub must stay enabled");
     }
 
@@ -238,7 +238,7 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
             receiverBalanceBefore + PULL_AMOUNT,
             "$1 mapping must still resolve to the pulled amount"
         );
-        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), walletAddr);
+        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(subId), walletAddr);
     }
 
     /// @dev FL based strategy. The FL path (which re-encodes the recipe and runs the actions inside the FL callback)
@@ -277,7 +277,7 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         _execute(subId, 0, _actions(1), sub);
 
         assertFalse(
-            partialExecutionStorage.isInPartialExecution(subId),
+            partialExecutionStorage.isSubInPartialExecution(subId),
             "continuous strategy must not be in partial execution"
         );
         assertTrue(subStorage.getSub(subId).isEnabled);
@@ -306,7 +306,7 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
 
         _execute(subId, 0, _withFlag(_actions(1)), sub);
         assertEq(
-            partialExecutionStorage.getPartialExecutionWallet(subId),
+            partialExecutionStorage.getSubPartialExecutionWallet(subId),
             walletAddr,
             "must be in partial execution"
         );
@@ -402,7 +402,7 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         cut.executeRecipeFromStrategy(subId, _withFlag(_actions(2)), _triggerCallData(1), 1, sub);
 
         assertFalse(
-            partialExecutionStorage.isInPartialExecution(subId),
+            partialExecutionStorage.isSubInPartialExecution(subId),
             "bundle strategies here are continuous"
         );
         assertTrue(subStorage.getSub(subId).isEnabled);
@@ -452,7 +452,7 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
             bytes32(uint256(uint160(_walletAddr)))
         );
         assertEq(
-            partialExecutionStorage.getPartialExecutionWallet(_subId),
+            partialExecutionStorage.getSubPartialExecutionWallet(_subId),
             _walletAddr,
             "wrong partialExecutions storage slot"
         );

@@ -182,7 +182,7 @@ contract TestTriggerView is BaseTest, RegistryUtils, TriggerView {
         prank(subOwnerWallet);
         partialExecutionStorage.startExecution(_subId, 0);
 
-        assertEq(partialExecutionStorage.getPartialExecutionWallet(_subId), subOwnerWallet);
+        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(_subId), subOwnerWallet);
     }
 
     /// @dev Mocks the ratio + min debt trigger outcomes, runs checkTriggers and asserts the result.
