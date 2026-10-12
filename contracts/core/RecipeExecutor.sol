@@ -4,8 +4,8 @@ pragma solidity =0.8.24;
 
 /**
  * @title RecipeExecutor
- * @notice Entry point for executing recipes (manually or as part of a strategy)
- * @dev RecipeExecutor can be used in two scenarios:
+ * @notice Entry point for executing recipes (manually, as part of a strategy, or through TxSaver)
+ * @dev RecipeExecutor can be used in three scenarios:
  * 1) Execute a recipe manually through user's wallet by calling executeRecipe().
  *    Supports 4 smart wallet types:
  *    - safe wallet
@@ -100,6 +100,17 @@ pragma solidity =0.8.24;
  *                                        │              │                                         └────────────────────────┘
  *                                        └──────────────┘
  *
+ * 3) Execute a recipe through TxSaver
+ *    Supports safe wallet only.
+ *    Executing recipe actions is not shown as it is the same as previous scenarios (manually or as part of a strategy).
+ *
+ *          executeTx()                       execTransaction()                    Delegate call
+ *  ┌─────┐              ┌─────────────────┐                   ┌──────────────┐  - executeRecipeFromTxSaver() ┌─────────────────┐
+ *  │ Bot ├─────────────►│ TxSaverExecutor ├──────────────────►│ Safe Wallet  ├──────────────────────────────►│ Recipe Executor │
+ *  └─────┘              └─────────────────┘                   └──────────────┘                               └────────┬────────┘
+ *                                                                                                                     │
+ *                                                                                                                     ▼
+ *                                                                                                                    ...
  *
  *
  */
