@@ -8856,23 +8856,23 @@ const createMorphoBlueFLRepayOnPriceStrategy = () => {
     return morphoBlueFLRepayOnPriceStrategy.encodeForDsProxyCall();
 };
 
-const createAaveV3GenericFLInstantCloseToCollStrategy = () => {
-    const aaveV3GenericFLInstantCloseToCollStrategy = new dfs.Strategy(
-        'AaveV3GenericFLInstantCloseToCollStrategy',
+const createAaveV3GenericFLTsiOptimizedCloseToCollStrategy = () => {
+    const aaveV3GenericFLTsiOptimizedCloseToCollStrategy = new dfs.Strategy(
+        'AaveV3GenericFLTsiOptimizedCloseToCollStrategy',
     );
 
-    aaveV3GenericFLInstantCloseToCollStrategy.addSubSlot('&collAsset', 'address');
-    aaveV3GenericFLInstantCloseToCollStrategy.addSubSlot('&collAssetId', 'uint16');
-    aaveV3GenericFLInstantCloseToCollStrategy.addSubSlot('&debtAsset', 'address');
-    aaveV3GenericFLInstantCloseToCollStrategy.addSubSlot('&debtAssetId', 'uint16');
-    aaveV3GenericFLInstantCloseToCollStrategy.addSubSlot(
+    aaveV3GenericFLTsiOptimizedCloseToCollStrategy.addSubSlot('&collAsset', 'address');
+    aaveV3GenericFLTsiOptimizedCloseToCollStrategy.addSubSlot('&collAssetId', 'uint16');
+    aaveV3GenericFLTsiOptimizedCloseToCollStrategy.addSubSlot('&debtAsset', 'address');
+    aaveV3GenericFLTsiOptimizedCloseToCollStrategy.addSubSlot('&debtAssetId', 'uint16');
+    aaveV3GenericFLTsiOptimizedCloseToCollStrategy.addSubSlot(
         '&automationSdk.enums.CloseStrategyType',
         'uint8',
     ); // only used by backend to determine which action to call
-    aaveV3GenericFLInstantCloseToCollStrategy.addSubSlot('&marketAddr', 'address');
-    aaveV3GenericFLInstantCloseToCollStrategy.addSubSlot('&user', 'address');
-    aaveV3GenericFLInstantCloseToCollStrategy.addSubSlot('&tsi', 'uint256'); // only used by backend
-    aaveV3GenericFLInstantCloseToCollStrategy.addSubSlot('&slippage', 'uint256'); // only used by backend
+    aaveV3GenericFLTsiOptimizedCloseToCollStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3GenericFLTsiOptimizedCloseToCollStrategy.addSubSlot('&user', 'address');
+    aaveV3GenericFLTsiOptimizedCloseToCollStrategy.addSubSlot('&tsi', 'uint256'); // only used by backend
+    aaveV3GenericFLTsiOptimizedCloseToCollStrategy.addSubSlot('&slippage', 'uint256'); // only used by backend
 
     const trigger = new dfs.triggers.AaveV3QuotePriceRangeTrigger(
         nullAddress,
@@ -8880,7 +8880,7 @@ const createAaveV3GenericFLInstantCloseToCollStrategy = () => {
         '0',
         '0',
     );
-    aaveV3GenericFLInstantCloseToCollStrategy.addTrigger(trigger);
+    aaveV3GenericFLTsiOptimizedCloseToCollStrategy.addTrigger(trigger);
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
@@ -8953,35 +8953,35 @@ const createAaveV3GenericFLInstantCloseToCollStrategy = () => {
         ],
     );
 
-    aaveV3GenericFLInstantCloseToCollStrategy.addAction(flAction);
-    aaveV3GenericFLInstantCloseToCollStrategy.addAction(sellAction);
-    aaveV3GenericFLInstantCloseToCollStrategy.addAction(paybackAction);
-    aaveV3GenericFLInstantCloseToCollStrategy.addAction(pullTokenAction);
-    aaveV3GenericFLInstantCloseToCollStrategy.addAction(withdrawAction);
-    aaveV3GenericFLInstantCloseToCollStrategy.addAction(feeTakingAction);
-    aaveV3GenericFLInstantCloseToCollStrategy.addAction(sendTokenToFLAction);
-    aaveV3GenericFLInstantCloseToCollStrategy.addAction(sendTokensAction);
+    aaveV3GenericFLTsiOptimizedCloseToCollStrategy.addAction(flAction);
+    aaveV3GenericFLTsiOptimizedCloseToCollStrategy.addAction(sellAction);
+    aaveV3GenericFLTsiOptimizedCloseToCollStrategy.addAction(paybackAction);
+    aaveV3GenericFLTsiOptimizedCloseToCollStrategy.addAction(pullTokenAction);
+    aaveV3GenericFLTsiOptimizedCloseToCollStrategy.addAction(withdrawAction);
+    aaveV3GenericFLTsiOptimizedCloseToCollStrategy.addAction(feeTakingAction);
+    aaveV3GenericFLTsiOptimizedCloseToCollStrategy.addAction(sendTokenToFLAction);
+    aaveV3GenericFLTsiOptimizedCloseToCollStrategy.addAction(sendTokensAction);
 
-    return aaveV3GenericFLInstantCloseToCollStrategy.encodeForDsProxyCall();
+    return aaveV3GenericFLTsiOptimizedCloseToCollStrategy.encodeForDsProxyCall();
 };
 
-const createAaveV3GenericFLInstantCloseToDebtStrategy = () => {
-    const aaveV3GenericFLInstantCloseToDebtStrategy = new dfs.Strategy(
-        'AaveV3GenericFLInstantCloseToDebtStrategy',
+const createAaveV3GenericFLTsiOptimizedCloseToDebtStrategy = () => {
+    const aaveV3GenericFLTsiOptimizedCloseToDebtStrategy = new dfs.Strategy(
+        'AaveV3GenericFLTsiOptimizedCloseToDebtStrategy',
     );
 
-    aaveV3GenericFLInstantCloseToDebtStrategy.addSubSlot('&collAsset', 'address');
-    aaveV3GenericFLInstantCloseToDebtStrategy.addSubSlot('&collAssetId', 'uint16');
-    aaveV3GenericFLInstantCloseToDebtStrategy.addSubSlot('&debtAsset', 'address');
-    aaveV3GenericFLInstantCloseToDebtStrategy.addSubSlot('&debtAssetId', 'uint16');
-    aaveV3GenericFLInstantCloseToDebtStrategy.addSubSlot(
+    aaveV3GenericFLTsiOptimizedCloseToDebtStrategy.addSubSlot('&collAsset', 'address');
+    aaveV3GenericFLTsiOptimizedCloseToDebtStrategy.addSubSlot('&collAssetId', 'uint16');
+    aaveV3GenericFLTsiOptimizedCloseToDebtStrategy.addSubSlot('&debtAsset', 'address');
+    aaveV3GenericFLTsiOptimizedCloseToDebtStrategy.addSubSlot('&debtAssetId', 'uint16');
+    aaveV3GenericFLTsiOptimizedCloseToDebtStrategy.addSubSlot(
         '&automationSdk.enums.CloseStrategyType',
         'uint8',
     ); // only used by backend to determine which action to call
-    aaveV3GenericFLInstantCloseToDebtStrategy.addSubSlot('&marketAddr', 'address');
-    aaveV3GenericFLInstantCloseToDebtStrategy.addSubSlot('&user', 'address');
-    aaveV3GenericFLInstantCloseToDebtStrategy.addSubSlot('&tsi', 'uint256'); // only used by backend
-    aaveV3GenericFLInstantCloseToDebtStrategy.addSubSlot('&slippage', 'uint256'); // only used by backend
+    aaveV3GenericFLTsiOptimizedCloseToDebtStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3GenericFLTsiOptimizedCloseToDebtStrategy.addSubSlot('&user', 'address');
+    aaveV3GenericFLTsiOptimizedCloseToDebtStrategy.addSubSlot('&tsi', 'uint256'); // only used by backend
+    aaveV3GenericFLTsiOptimizedCloseToDebtStrategy.addSubSlot('&slippage', 'uint256'); // only used by backend
 
     const trigger = new dfs.triggers.AaveV3QuotePriceRangeTrigger(
         nullAddress,
@@ -8989,7 +8989,7 @@ const createAaveV3GenericFLInstantCloseToDebtStrategy = () => {
         '0',
         '0',
     );
-    aaveV3GenericFLInstantCloseToDebtStrategy.addTrigger(trigger);
+    aaveV3GenericFLTsiOptimizedCloseToDebtStrategy.addTrigger(trigger);
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
@@ -9053,16 +9053,16 @@ const createAaveV3GenericFLInstantCloseToDebtStrategy = () => {
         '%max(uint)',
     );
 
-    aaveV3GenericFLInstantCloseToDebtStrategy.addAction(flAction);
-    aaveV3GenericFLInstantCloseToDebtStrategy.addAction(paybackAction);
-    aaveV3GenericFLInstantCloseToDebtStrategy.addAction(pullTokenAction);
-    aaveV3GenericFLInstantCloseToDebtStrategy.addAction(withdrawAction);
-    aaveV3GenericFLInstantCloseToDebtStrategy.addAction(sellAction);
-    aaveV3GenericFLInstantCloseToDebtStrategy.addAction(feeTakingAction);
-    aaveV3GenericFLInstantCloseToDebtStrategy.addAction(sendTokenToFLAction);
-    aaveV3GenericFLInstantCloseToDebtStrategy.addAction(sendTokenToEOAAction);
+    aaveV3GenericFLTsiOptimizedCloseToDebtStrategy.addAction(flAction);
+    aaveV3GenericFLTsiOptimizedCloseToDebtStrategy.addAction(paybackAction);
+    aaveV3GenericFLTsiOptimizedCloseToDebtStrategy.addAction(pullTokenAction);
+    aaveV3GenericFLTsiOptimizedCloseToDebtStrategy.addAction(withdrawAction);
+    aaveV3GenericFLTsiOptimizedCloseToDebtStrategy.addAction(sellAction);
+    aaveV3GenericFLTsiOptimizedCloseToDebtStrategy.addAction(feeTakingAction);
+    aaveV3GenericFLTsiOptimizedCloseToDebtStrategy.addAction(sendTokenToFLAction);
+    aaveV3GenericFLTsiOptimizedCloseToDebtStrategy.addAction(sendTokenToEOAAction);
 
-    return aaveV3GenericFLInstantCloseToDebtStrategy.encodeForDsProxyCall();
+    return aaveV3GenericFLTsiOptimizedCloseToDebtStrategy.encodeForDsProxyCall();
 };
 
 module.exports = {
@@ -9206,6 +9206,6 @@ module.exports = {
     createSparkGenericFLBoostOnPriceStrategy,
     createMorphoBlueRepayOnPriceStrategy,
     createMorphoBlueFLRepayOnPriceStrategy,
-    createAaveV3GenericFLInstantCloseToCollStrategy,
-    createAaveV3GenericFLInstantCloseToDebtStrategy,
+    createAaveV3GenericFLTsiOptimizedCloseToCollStrategy,
+    createAaveV3GenericFLTsiOptimizedCloseToDebtStrategy,
 };
