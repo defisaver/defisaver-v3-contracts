@@ -14,4 +14,6 @@ library DFSIds {
     bytes4 internal constant CURVE_TRANSIENT_SWAPPER =
         bytes4(keccak256("CurveUsdSwapperTransient"));
     bytes4 internal constant SFPROXY_ENTRY_POINT = bytes4(keccak256("SFProxyEntryPoint"));
+    bytes4 internal constant STRATEGY_PARTIAL_EXECUTION_STORAGE =
+        bytes4(keccak256("StrategyPartialExecutionStorage"));
 }

@@ -707,14 +707,15 @@
     },
     {
         "name": "RecipeExecutor",
-        "address": "0x667609f05DdC5E9Fb939eC376F07953403745cf3",
+        "address": "0x1674Df46e92A393d6B29139BF8C2d2885F40F7B2",
         "id": "0x4c69ee1e",
         "path": "contracts/core/RecipeExecutor.sol",
-        "version": "1.0.5",
+        "version": "1.0.6",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x667609f05DdC5E9Fb939eC376F07953403745cf3",
             "0x6927F7Dc79B4215F307e6c1C4d5883d134053BAB",
             "0x7a25174229ea402d8ccd35fc6d55af079c399884",
             "0x4417bffFD5e3131069f62Fac07e40704EE234404",
@@ -841,14 +842,16 @@
         "history": []
     },
     {
-        "name": "StrategyExecutor",
-        "address": "0x7EC50D40C78A05dD9e8A93A222e21B2D2B29420B",
+        "name": "StrategyExecutorL2",
+        "address": "0xe4719f2d5b85F589B809AC8A1b9463238836325c",
         "id": "0x0c1dc439",
-        "version": "1.0.2",
+        "path": "contracts/core/l2/StrategyExecutorL2.sol",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "604800",
         "registryIds": [],
         "history": [
+            "0x7EC50D40C78A05dD9e8A93A222e21B2D2B29420B",
             "0xa4F087267828C3Ca8ac18b6fE7f456aB20781AA6",
             "0x9652f91B10045Cd2a36ca8D87df4A800eD2AF05D"
         ]
@@ -938,14 +941,17 @@
     },
     {
         "name": "ToggleSub",
-        "address": "0x2eabbab99759c2ab6e9e309d42ee07d3bc7c38fe",
+        "address": "0x75469d8f96368F87718162e528104B59550CD71E",
         "id": "0xd6499530",
         "path": "contracts/actions/utils/ToggleSub.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": ["0x71015226EADFd4aC887fB56556F64338e352439b"]
+        "history": [
+            "0x2eabbab99759c2ab6e9e309d42ee07d3bc7c38fe",
+            "0x71015226EADFd4aC887fB56556F64338e352439b"
+        ]
     },
     {
         "name": "UniCollectV3",
@@ -1560,14 +1566,14 @@
     },
     {
         "name": "UpdateSub",
-        "address": "0x3511f444362F8cBd185DbF21C9488D16c1306461",
+        "address": "0x404c3EE602fb4b2D3E36E371bEA36a27B2177107",
         "id": "0xa985d903",
         "path": "contracts/actions/utils/UpdateSub.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x3511f444362F8cBd185DbF21C9488D16c1306461"]
     },
     {
         "name": "MerklClaim",
@@ -1945,14 +1951,14 @@
     },
     {
         "name": "TriggerView",
-        "address": "0xE62156a3A982E3DebcD9B71Ef0f80E8200bfEa51",
+        "address": "0xF13050e0cd07deC00AFb23fCD8FD64b809ff21Ce",
         "id": "0x628ee7ee",
         "path": "contracts/views/strategy/TriggerView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xE62156a3A982E3DebcD9B71Ef0f80E8200bfEa51"]
     },
     {
         "name": "GeneralView",
@@ -1992,6 +1998,17 @@
         "address": "0x763B10e0D4d1b3B0272c6184ACb9da1ADE95F8F1",
         "id": "0xb03dd233",
         "path": "contracts/triggers-additional/AaveV3BoostCollateralTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "StrategyPartialExecutionStorage",
+        "address": "0x684C64Daa274bEdCDb67A56ADbd4419a79EF1762",
+        "id": "0x381d7b8c",
+        "path": "contracts/core/strategy/StrategyPartialExecutionStorage.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
