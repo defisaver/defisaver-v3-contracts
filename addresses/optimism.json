@@ -417,14 +417,15 @@
     },
     {
         "name": "RecipeExecutor",
-        "address": "0xEC891E6b5A93F5f29241De6B234a4e77A5456A1C",
+        "address": "0x3296C0f3Ff67B00306e5Ce251CDfA1E0160F5742",
         "id": "0x4c69ee1e",
         "path": "contracts/core/RecipeExecutor.sol",
-        "version": "1.0.6",
+        "version": "1.0.7",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xEC891E6b5A93F5f29241De6B234a4e77A5456A1C",
             "0x30CEf36b14Dd71A347284204C48E134D04c24331",
             "0x993a8c81142044e1cb0cf0c3d84bea235d842fb0",
             "0xA532771BD90dAf94b456A4acC9E9cbBdF1367572",
@@ -808,14 +809,16 @@
         ]
     },
     {
-        "name": "StrategyExecutor",
-        "address": "0xf8BFE1adf836A11fF72cDFbe1Bc363D58b72Cc45",
+        "name": "StrategyExecutorL2",
+        "address": "0x11fD849B675AF5d187DbE911845FcFC56ECeFBFD",
         "id": "0x0c1dc439",
-        "version": "1.0.4",
+        "path": "contracts/core/l2/StrategyExecutorL2.sol",
+        "version": "1.0.5",
         "inRegistry": true,
         "changeTime": "604800",
         "registryIds": [],
         "history": [
+            "0xf8BFE1adf836A11fF72cDFbe1Bc363D58b72Cc45",
             "0x2f54a62b18483f395779cCD81A598133aBb7775d",
             "0xf9c0A56c4c2D40C13d9D377b5E1Cdfe3Cb0C9FF7",
             "0xF087652A441858c1FB5F47aFA5bb4AB45C05B273",
@@ -900,14 +903,17 @@
     },
     {
         "name": "ToggleSub",
-        "address": "0xfc19a12e35bb0b5e6a3d3017be9e9022a6486eee",
+        "address": "0xA4Eaad8Fe80d1E47f2b95CED2bcFb648d5929735",
         "id": "0xd6499530",
         "path": "contracts/actions/utils/ToggleSub.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": ["0x988C5C24AE6348404196267e19962f36961CAc29"]
+        "history": [
+            "0xfc19a12e35bb0b5e6a3d3017be9e9022a6486eee",
+            "0x988C5C24AE6348404196267e19962f36961CAc29"
+        ]
     },
     {
         "name": "UniCollectV3",
@@ -1273,14 +1279,14 @@
     },
     {
         "name": "UpdateSub",
-        "address": "0xAe6ea1d13dF2bE60dC7933DB56067Cb89d6A2cDe",
+        "address": "0xe2c7D66b40e00Dd14844Db8d02142f23D4Da7071",
         "id": "0xa985d903",
         "path": "contracts/actions/utils/UpdateSub.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xAe6ea1d13dF2bE60dC7933DB56067Cb89d6A2cDe"]
     },
     {
         "name": "ConnectV2DefiSaverOptimism",
@@ -1372,14 +1378,14 @@
     },
     {
         "name": "TriggerView",
-        "address": "0x4e30a875883187F6Af8E3493127d11a322E52379",
+        "address": "0x6282D1Eeb9848b52dA695069bc04135Dc0AaFf95",
         "id": "0x628ee7ee",
         "path": "contracts/views/strategy/TriggerView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x4e30a875883187F6Af8E3493127d11a322E52379"]
     },
     {
         "name": "CompV3PriceTrigger",
@@ -1441,6 +1447,17 @@
         "address": "0xad36b6c8463DfE76eB6E5Ddd561E058b4D591317",
         "id": "0xb03dd233",
         "path": "contracts/triggers-additional/AaveV3BoostCollateralTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "StrategyPartialExecutionStorage",
+        "address": "0x7A2C6f738D5123504623Fed7B83c5eB989467C13",
+        "id": "0x381d7b8c",
+        "path": "contracts/core/strategy/StrategyPartialExecutionStorage.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,

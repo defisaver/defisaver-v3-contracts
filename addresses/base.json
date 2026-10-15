@@ -44,29 +44,16 @@
         "history": []
     },
     {
-        "name": "StrategyExecutorID",
-        "address": "0x0e778A2e5c9A2Cc75C5b38d6347284B8836E65D6",
+        "name": "StrategyExecutorL2",
+        "address": "0x2141C65b748369Cc8FDb991aed43eb68C59C70A0",
         "id": "0x0c1dc439",
-        "path": "/StrategyExecutorID.sol",
-        "version": "1.0.2",
+        "path": "contracts/core/l2/StrategyExecutorL2.sol",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "604800",
         "registryIds": [],
         "history": [
-            "0x0d099E38f6aF8778c5053349c350Aad906B1432F",
-            "0x49658E0CF3883c338397C7257619B280dF581057"
-        ]
-    },
-    {
-        "name": "StrategyExecutor",
-        "address": "0x0e778A2e5c9A2Cc75C5b38d6347284B8836E65D6",
-        "id": "0xdcb15eef",
-        "path": "contracts/core/strategy/StrategyExecutor.sol",
-        "version": "1.0.2",
-        "inRegistry": true,
-        "changeTime": "604800",
-        "registryIds": [],
-        "history": [
+            "0x0e778A2e5c9A2Cc75C5b38d6347284B8836E65D6",
             "0x0d099E38f6aF8778c5053349c350Aad906B1432F",
             "0x49658E0CF3883c338397C7257619B280dF581057"
         ]
@@ -165,14 +152,15 @@
     },
     {
         "name": "RecipeExecutor",
-        "address": "0xc91305DdE651c899EF8eE1D0C33E7dab1B5ABF0D",
+        "address": "0xB81865b724eF6DAc41DFf125E5445701924ea19D",
         "id": "0x4c69ee1e",
         "path": "contracts/core/RecipeExecutor.sol",
-        "version": "1.0.4",
+        "version": "1.0.5",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xc91305DdE651c899EF8eE1D0C33E7dab1B5ABF0D",
             "0x7De85e67745a027D41Aba5Fe2D9b288e6467d710",
             "0x7a87565b77dd65bbc153fe20e97743842f1a6e0c",
             "0xd0Ae279e330f98C399375f80968C8bf860202766",
@@ -494,14 +482,14 @@
     },
     {
         "name": "ToggleSub",
-        "address": "0x5F16C0a08d52b67fc73706c494F7535Dd3382b58",
+        "address": "0x8879fF7E7B08cdE2e634F7Cd90219e66FB64F01D",
         "id": "0xd6499530",
         "path": "contracts/actions/utils/ToggleSub.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0x5F16C0a08d52b67fc73706c494F7535Dd3382b58"]
     },
     {
         "name": "CompV3RatioTrigger",
@@ -1317,14 +1305,14 @@
     },
     {
         "name": "UpdateSub",
-        "address": "0x1601c6ABCDE6e6d8Ad96628AFe20d47908127Aea",
+        "address": "0xB3598798599d3A22EA667e5557C53c139653c673",
         "id": "0xa985d903",
         "path": "contracts/actions/utils/UpdateSub.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x1601c6ABCDE6e6d8Ad96628AFe20d47908127Aea"]
     },
     {
         "name": "MorphoBluePriceTrigger",
@@ -1731,14 +1719,14 @@
     },
     {
         "name": "TriggerView",
-        "address": "0x92A00108Fd8B8a7F10c244D0c0c9076b99b17857",
+        "address": "0xeD9BBf4506E290772bDE8c0119aaD31846Bdb1ef",
         "id": "0x628ee7ee",
         "path": "contracts/views/strategy/TriggerView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x92A00108Fd8B8a7F10c244D0c0c9076b99b17857"]
     },
     {
         "name": "MidnightView",
@@ -1833,6 +1821,17 @@
         "address": "0x5250019fF0E7E1B3e03924BF229967493cD44Ecd",
         "id": "0xb03dd233",
         "path": "contracts/triggers-additional/AaveV3BoostCollateralTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "StrategyPartialExecutionStorage",
+        "address": "0x77b0C2668aEB6071Ef0d6B84AE5b9136595f5b51",
+        "id": "0x381d7b8c",
+        "path": "contracts/core/strategy/StrategyPartialExecutionStorage.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
