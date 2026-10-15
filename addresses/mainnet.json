@@ -948,14 +948,15 @@
     },
     {
         "name": "StrategyExecutor",
-        "address": "0x8278DA54b4A47c0f6F4a0a4b00B6f31678f30181",
+        "address": "0x3727C31D4D4c5270290FFb20C4C358C84c0792C9",
         "id": "0xdcb15eef",
         "path": "contracts/core/strategy/StrategyExecutor.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "604800",
         "registryIds": [],
         "history": [
+            "0x8278DA54b4A47c0f6F4a0a4b00B6f31678f30181",
             "0xFaa763790b26E7ea354373072baB02e680Eeb07F",
             "0x252025dF8680C275D0bA80D084e5967D8BD26caf",
             "0x6a1C1B8a27E7613a595Ffb7cCE225bdda7e04832"
@@ -963,14 +964,15 @@
     },
     {
         "name": "RecipeExecutor",
-        "address": "0xbc3Fc959FeF3F12a41738f406c02198cdeE7481F",
+        "address": "0x6e7dEde13E011Eee74E0c731A06c158377fc1Cae",
         "id": "0x4c69ee1e",
         "path": "contracts/core/RecipeExecutor.sol",
-        "version": "1.0.6",
+        "version": "1.0.7",
         "inRegistry": true,
         "changeTime": "604800",
         "registryIds": [],
         "history": [
+            "0xbc3Fc959FeF3F12a41738f406c02198cdeE7481F",
             "0x4677c84699ab29637102609cD2868d0743a48DdF",
             "0x2ee96cf53ae5fbd5309284704f978d0ca66cb963",
             "0x5029336642814bC51a42bA80BF83a6322110035D",
@@ -3410,25 +3412,31 @@
     },
     {
         "name": "ToggleSub",
-        "address": "0x2120ad7b4eE1795C8B027c1592eCB918faAb163A",
+        "address": "0xf247a8525E7486884E7227EB9a161507F0FF46A6",
         "id": "0xd6499530",
         "path": "contracts/actions/utils/ToggleSub.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x9A78E9d6538cfDbA0242Ca5eC46771E6132E8085"]
+        "history": [
+            "0x2120ad7b4eE1795C8B027c1592eCB918faAb163A",
+            "0x9A78E9d6538cfDbA0242Ca5eC46771E6132E8085"
+        ]
     },
     {
         "name": "UpdateSub",
-        "address": "0xF6Cb8f7e61a64075ec8FAC3f298745605E543233",
+        "address": "0x919c472bFA4B50FcACF9849501344aFDde2E4675",
         "id": "0xa985d903",
         "path": "contracts/actions/utils/UpdateSub.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x94D707f411B852082a5ce49C3f47c49c7757761f"]
+        "history": [
+            "0xF6Cb8f7e61a64075ec8FAC3f298745605E543233",
+            "0x94D707f411B852082a5ce49C3f47c49c7757761f"
+        ]
     },
     {
         "name": "ConvexClaim",
@@ -5217,14 +5225,14 @@
     },
     {
         "name": "TriggerView",
-        "address": "0xEdd01f381416E98eAEf7A34536340Fd83F71Cd59",
+        "address": "0xDD603CA0cE5c4c840ADA52AB74b2fF0c13e07B07",
         "id": "0x628ee7ee",
         "path": "contracts/views/strategy/TriggerView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xEdd01f381416E98eAEf7A34536340Fd83F71Cd59"]
     },
     {
         "name": "AaveV4DelegateBorrow",
@@ -5374,6 +5382,17 @@
         "address": "0x7C58f017A0596e885D560Fb09f35C4B011C0180a",
         "id": "0x15cb8c0f",
         "path": "contracts/triggers-additional/LiquityMinDebtTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "StrategyPartialExecutionStorage",
+        "address": "0x146a98A29a28aEB654E2fFdd54EbDfa692D8F3Fc",
+        "id": "0x381d7b8c",
+        "path": "contracts/core/strategy/StrategyPartialExecutionStorage.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
