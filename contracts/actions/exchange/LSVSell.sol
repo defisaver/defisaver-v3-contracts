@@ -6,16 +6,22 @@ import { IWStEth } from "../../interfaces/protocols/lido/IWStEth.sol";
 import { IWeEth } from "../../interfaces/protocols/etherFi/IWeEth.sol";
 import { ILiquidityPool } from "../../interfaces/protocols/etherFi/ILiquidityPool.sol";
 import { DFSExchangeCore } from "../../exchangeV3/DFSExchangeCore.sol";
+import { SellActionHelper } from "./helpers/SellActionHelper.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { UtilAddresses } from "../../utils/addresses/UtilAddresses.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title A exchange sell action through the LSV exchange with no fee (used only for ETH Saver)
-/// @dev weth and steth will be transformed into wsteth directly if the rate is better than minPrice
-/// @dev The only action which has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
+/// @dev WETH and STETH will be transformed into WSTETH directly if the rate is better than a minPrice from exchange data
+/// @dev Action which has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
 contract LSVSell is ActionBase, UtilAddresses, DFSExchangeCore {
     using TokenUtils for address;
+    using SellActionHelper for ExchangeData;
 
+    /// @notice Parameters for the LSVSell action
+    /// @param exchangeData Exchange data
+    /// @param from Address from which we'll pull the srcTokens
+    /// @param to Address where we'll send the dest token
     struct Params {
         ExchangeData exchangeData;
         address from;
@@ -36,7 +42,6 @@ contract LSVSell is ActionBase, UtilAddresses, DFSExchangeCore {
         params.exchangeData.destAddr = _parseParamAddr(
             params.exchangeData.destAddr, _paramMapping[1], _subData, _returnValues
         );
-
         params.exchangeData.srcAmount = _parseParamUint(
             params.exchangeData.srcAmount, _paramMapping[2], _subData, _returnValues
         );
@@ -71,51 +76,32 @@ contract LSVSell is ActionBase, UtilAddresses, DFSExchangeCore {
         internal
         returns (uint256, bytes memory)
     {
-        // if we set srcAmount to max, take the whole user's wallet balance
-        if (_exchangeData.srcAmount == type(uint256).max) {
-            _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
+        _exchangeData.setMaxAmountIfNeeded(_from);
+
+        (bool handled, uint256 exchangedAmount, bytes memory logData) =
+            _exchangeData.tryHandleDirectTokenConversion(_from, _to);
+        if (handled) {
+            return (exchangedAmount, logData);
         }
 
-        // if source and destination address are same we want to skip exchanging and take no fees
-        if (_exchangeData.srcAddr == _exchangeData.destAddr) {
-            bytes memory sameAssetLogData = abi.encode(
-                address(0),
-                _exchangeData.srcAddr,
-                _exchangeData.destAddr,
-                _exchangeData.srcAmount,
-                _exchangeData.srcAmount,
-                0
-            );
-            return (_exchangeData.srcAmount, sameAssetLogData);
-        }
+        bool isEthDest = _exchangeData.pullTokens(_from);
 
-        // Wrap eth if sent directly
-        if (_exchangeData.srcAddr == TokenUtils.ETH_ADDR) {
-            TokenUtils.depositWeth(_exchangeData.srcAmount);
-            _exchangeData.srcAddr = TokenUtils.WETH_ADDR;
-        } else {
-            _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
-        }
-
-        // We always swap with weth, convert token addr when eth sent for unwrapping later
-        bool isEthDest;
-        if (_exchangeData.destAddr == TokenUtils.ETH_ADDR) {
-            _exchangeData.destAddr = TokenUtils.WETH_ADDR;
-            isEthDest = true;
-        }
-
+        // No sell fee for LSV sell.
         _exchangeData.dfsFeeDivider = 0;
+
+        // Determine if we should perform the sell, or if we should stake/wrap the tokens.
         bool shouldSell = true;
 
         address wrapper;
-        uint256 exchangedAmount;
 
+        // Stake with Lido if the rate is better than the minPrice.
         if (_exchangeData.destAddr == WSTETH_ADDR) {
             (shouldSell, exchangedAmount) = _stakeWithLidoIfBetterRate(
                 _exchangeData.srcAddr, _exchangeData.srcAmount, _exchangeData.minPrice
             );
         }
 
+        // Stake with EtherFi if the rate is better than the minPrice.
         if (_exchangeData.destAddr == WEETH_ADDR) {
             (shouldSell, exchangedAmount) = _stakeWithEtherFiIfBetterRate(
                 _exchangeData.srcAddr, _exchangeData.srcAmount, _exchangeData.minPrice
@@ -124,18 +110,17 @@ contract LSVSell is ActionBase, UtilAddresses, DFSExchangeCore {
 
         if (shouldSell) {
             (wrapper, exchangedAmount) = _sell(_exchangeData);
-        }
-
-        if (isEthDest) {
-            TokenUtils.withdrawWeth(exchangedAmount);
-
-            (bool success,) = _to.call{ value: exchangedAmount }("");
-            require(success, "Eth send failed");
         } else {
-            _exchangeData.destAddr.withdrawTokens(_to, exchangedAmount);
+            // Direct staking paths bypass _sell, so enforce the same minPrice semantics here.
+            uint256 minExpectedDestAmount = wmul(_exchangeData.minPrice, _exchangeData.srcAmount);
+            if (exchangedAmount < minExpectedDestAmount) {
+                revert SlippageHitError(exchangedAmount, minExpectedDestAmount);
+            }
         }
 
-        bytes memory logData = abi.encode(
+        _exchangeData.sendTokensAfterSell(_to, exchangedAmount, isEthDest);
+
+        logData = abi.encode(
             wrapper,
             _exchangeData.srcAddr,
             _exchangeData.destAddr,
@@ -144,6 +129,7 @@ contract LSVSell is ActionBase, UtilAddresses, DFSExchangeCore {
             _exchangeData.dfsFeeDivider,
             shouldSell
         );
+
         return (exchangedAmount, logData);
     }
 

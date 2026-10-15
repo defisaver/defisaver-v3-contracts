@@ -30,7 +30,7 @@ const vaults = [
 
 const getVaultData = async (vaultAddress) => {
     const vault = await ethers.getContractAt(
-        'contracts/interfaces/IERC4626.sol:IERC4626',
+        'contracts/interfaces/token/IERC4626.sol:IERC4626',
         vaultAddress,
     );
     const shareTokenAddress = vaultAddress;

@@ -464,4 +464,6 @@ interface ILendingPoolV2 {
     function setPause(bool val) external;
 
     function paused() external view returns (bool);
+
+    function FLASHLOAN_PREMIUM_TOTAL() external view returns (uint256);
 }

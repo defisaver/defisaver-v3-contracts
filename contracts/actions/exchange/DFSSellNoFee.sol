@@ -3,14 +3,18 @@
 pragma solidity =0.8.24;
 
 import { DFSExchangeCore } from "../../exchangeV3/DFSExchangeCore.sol";
-import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { SellActionHelper } from "./helpers/SellActionHelper.sol";
 import { ActionBase } from "../ActionBase.sol";
 
 /// @title A exchange sell action through the dfs exchange that does not take any fee
 /// @dev Action has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
 contract DFSSellNoFee is ActionBase, DFSExchangeCore {
-    using TokenUtils for address;
+    using SellActionHelper for ExchangeData;
 
+    /// @notice Parameters for the DFSSellNoFee action
+    /// @param exchangeData Exchange data
+    /// @param from Address from which we'll pull the srcTokens
+    /// @param to Address where we'll send the _to token
     struct Params {
         ExchangeData exchangeData;
         address from;
@@ -31,7 +35,6 @@ contract DFSSellNoFee is ActionBase, DFSExchangeCore {
         params.exchangeData.destAddr = _parseParamAddr(
             params.exchangeData.destAddr, _paramMapping[1], _subData, _returnValues
         );
-
         params.exchangeData.srcAmount = _parseParamUint(
             params.exchangeData.srcAmount, _paramMapping[2], _subData, _returnValues
         );
@@ -67,61 +70,26 @@ contract DFSSellNoFee is ActionBase, DFSExchangeCore {
         internal
         returns (uint256, bytes memory)
     {
-        // if we set srcAmount to max, take the whole user's wallet balance
-        if (_exchangeData.srcAmount == type(uint256).max) {
-            _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
+        _exchangeData.setMaxAmountIfNeeded(_from);
+
+        (bool handled, uint256 exchangedAmount, bytes memory logData) =
+            _exchangeData.tryHandleDirectTokenConversion(_from, _to);
+        if (handled) {
+            return (exchangedAmount, logData);
         }
 
-        // if source and destination address are same we want to skip exchanging and take no fees
-        if (_exchangeData.srcAddr == _exchangeData.destAddr) {
-            bytes memory sameAssetLogData = abi.encode(
-                address(0),
-                _exchangeData.srcAddr,
-                _exchangeData.destAddr,
-                _exchangeData.srcAmount,
-                _exchangeData.srcAmount,
-                0
-            );
-            return (_exchangeData.srcAmount, sameAssetLogData);
-        }
+        bool isEthDest = _exchangeData.pullTokens(_from);
 
-        // Wrap eth if sent directly
-        if (_exchangeData.srcAddr == TokenUtils.ETH_ADDR) {
-            TokenUtils.depositWeth(_exchangeData.srcAmount);
-            _exchangeData.srcAddr = TokenUtils.WETH_ADDR;
-        } else {
-            _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
-        }
-
-        // We always swap with weth, convert token addr when eth sent for unwrapping later
-        bool isEthDest;
-        if (_exchangeData.destAddr == TokenUtils.ETH_ADDR) {
-            _exchangeData.destAddr = TokenUtils.WETH_ADDR;
-            isEthDest = true;
-        }
-
-        /// @dev Don't take any fee
+        // Don't take any fee.
         _exchangeData.dfsFeeDivider = 0;
 
-        (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
+        // Execute the sell.
+        address wrapper;
+        (wrapper, exchangedAmount) = _sell(_exchangeData);
 
-        if (isEthDest) {
-            TokenUtils.withdrawWeth(exchangedAmount);
+        _exchangeData.sendTokensAfterSell(_to, exchangedAmount, isEthDest);
+        logData = _exchangeData.encodeSellLogData(wrapper, exchangedAmount);
 
-            (bool success,) = _to.call{ value: exchangedAmount }("");
-            require(success, "Eth send failed");
-        } else {
-            _exchangeData.destAddr.withdrawTokens(_to, exchangedAmount);
-        }
-
-        bytes memory logData = abi.encode(
-            wrapper,
-            _exchangeData.srcAddr,
-            _exchangeData.destAddr,
-            _exchangeData.srcAmount,
-            exchangedAmount,
-            _exchangeData.dfsFeeDivider
-        );
         return (exchangedAmount, logData);
     }
 

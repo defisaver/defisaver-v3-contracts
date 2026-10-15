@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { GasFeeHelper } from "./helpers/GasFeeHelper.sol";
+import { GasFeeHelper } from "../../utils/fee/GasFeeHelper.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Calculated the amount of tokens needed for paying the tx fee without sending the amount
@@ -24,7 +24,7 @@ contract GasFeeCalc is ActionBase, GasFeeHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        uint256 txCost = calcGasCost(inputData.gasUsed, inputData.feeToken, 0);
+        uint256 txCost = calcGasCost(inputData.gasUsed, inputData.feeToken);
 
         return bytes32(txCost);
     }
