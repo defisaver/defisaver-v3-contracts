@@ -15,9 +15,17 @@ import { AdminAuth } from "../../auth/AdminAuth.sol";
 /// @title StrategyPartialExecutionStorage
 /// @notice This contract tracks the state of subscriptions that are in partial execution.
 /// @dev Partial execution is used when backend can not execute strategy in one transaction (e.g. because of high TSI).
-/// @dev Only StrategyExecutor can approve the start of execution for particular sub.
-/// @dev Only the sub owner can start execution; the initial strategy ID is preserved until the execution ends.
-/// @dev Only sub owner or admin vault owner can end execution.
+/// @dev Security assumptions:
+/// - Only StrategyExecutor can approve the start of execution for a particular subscription.
+/// - Only the subscription owner can start execution.
+/// - Only the subscription owner or admin vault owner can end execution.
+/// - The initial strategy ID represents metadata used by the backend and is preserved until execution ends.
+/// - The state may become out of sync with SubStorage, e.g. if the user updates the subscription outside the UI.
+///   This is acceptable, as such subscriptions can be removed manually.
+/// - This contract is not expected to work with one-time strategies whose checker actions require trigger-written data,
+///   as trigger execution is skipped (e.g. strategies using CompV3PriceTrigger, OffchainPriceTrigger...).
+/// - At release, this contract will only be used with specific close strategies that do not have a final checker.
+///   Supporting additional strategies in the future may require changes.
 contract StrategyPartialExecutionStorage is
     IStrategyPartialExecutionStorage,
     CoreHelper,

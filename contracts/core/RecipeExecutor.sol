@@ -250,6 +250,8 @@ contract RecipeExecutor is
 
     /// @notice Called by user wallet through the auth contract to execute a recipe & check triggers
     /// @dev If sub is already in partial execution state, it will skip the trigger check and sub data update
+    /// @dev It is possible for the position to be closed manually during partial execution, leaving the subscription enabled.
+    ///      Such subscriptions cannot be disabled on-chain and must be flagged and handled by the backend.
     /// @param _subId Id of the subscription we want to execute
     /// @param _actionCallData All input data needed to execute actions
     /// @param _triggerCallData All input data needed to check triggers
