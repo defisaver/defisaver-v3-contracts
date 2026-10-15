@@ -9,6 +9,7 @@ import { IPoolAddressesProvider } from "../interfaces/protocols/aaveV3/IPoolAddr
 import { IAaveV3Oracle } from "../interfaces/protocols/aaveV3/IAaveV3Oracle.sol";
 import { IERC20 } from "../interfaces/token/IERC20.sol";
 
+/// @notice Checks minimum debt, excluding single-collateral, single-debt same-asset positions.
 contract AaveV3MinDebtTrigger is ITrigger, AdminAuth {
     /// @param user address of the user whose position we check
     /// @param market aaveV3 market address
@@ -34,6 +35,16 @@ contract AaveV3MinDebtTrigger is ITrigger, AdminAuth {
         returns (bool)
     {
         CalldataParams memory params = parseCallInputs(_calldata);
+
+        IPoolV3 pool = IPoolV3(IPoolAddressesProvider(params.market).getPool());
+        uint256 configuration = pool.getUserConfiguration(params.user).data;
+        uint256 borrowing = configuration & BORROWING_MASK;
+
+        // A single borrow bit and its matching collateral bit describe a same-asset position.
+        if (
+            borrowing != 0 && (borrowing & (borrowing - 1)) == 0
+                && configuration == (borrowing | (borrowing << 1))
+        ) return false;
 
         uint256 totalDebtUSD = getTotalDebtUSD(params.market, params.user);
 
