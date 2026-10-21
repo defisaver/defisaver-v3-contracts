@@ -13,6 +13,9 @@ import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
     using TokenUtils for address;
 
+    /// @notice Minimum fee divider, limiting the maximum fee to 25 bps (0.25%)
+    uint256 public constant MIN_FEE_DIVIDER = 400;
+
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 
     error WrongPriceFromTrigger(uint256 expected, uint256 actual);
@@ -87,7 +90,10 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
 
         // Reset the current price for the next strategy
         tempStorage.setBytes32("CURR_PRICE", bytes32(0));
-        _exchangeData.dfsFeeDivider = 0;
+
+        if (_exchangeData.dfsFeeDivider != 0 && _exchangeData.dfsFeeDivider < MIN_FEE_DIVIDER) {
+            _exchangeData.dfsFeeDivider = MIN_FEE_DIVIDER;
+        }
 
         if (_exchangeData.minPrice != currPrice) {
             revert WrongPriceFromTrigger(currPrice, _exchangeData.minPrice);

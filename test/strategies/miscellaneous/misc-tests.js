@@ -38,6 +38,9 @@ const { createLimitOrderStrategy } = require('../../../strategies-spec/mainnet')
 
 const DAY = 1 * 24 * 60 * 60;
 const TWO_DAYS = 2 * 24 * 60 * 60;
+const MIN_LIMIT_ORDER_FEE_DIVIDER = 400;
+const CAPPED_BACKEND_FEE_DIVIDER = 200;
+const CUSTOM_BACKEND_FEE_DIVIDER = 800;
 
 const limitOrderStrategyTest = async () => {
     const tokenPairs = [
@@ -89,6 +92,7 @@ const limitOrderStrategyTest = async () => {
         let sellAmountWei;
         let tokenAddrSell;
         let tokenAddrBuy;
+        let feeReceiverAddr;
         const goodUntilDuration = 24 * 60 * 60;
 
         before(async () => {
@@ -114,6 +118,12 @@ const limitOrderStrategyTest = async () => {
 
             await setNewExchangeWrapper(senderAcc, addrs[network].UNISWAP_V3_WRAPPER);
 
+            const feeRecipient = await hre.ethers.getContractAt(
+                'FeeRecipient',
+                addrs[network].FEE_RECIPIENT_ADDR,
+            );
+            feeReceiverAddr = await feeRecipient.getFeeAddr();
+
             await addBotCaller(botAcc.address);
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
 
@@ -128,6 +138,9 @@ const limitOrderStrategyTest = async () => {
 
         for (let i = 0; i < tokenPairs.length; i++) {
             const { srcTokenSymbol, destTokenSymbol, amount, uniV3Fee } = tokenPairs[i];
+            const backendFeeDivider =
+                i === 0 ? CAPPED_BACKEND_FEE_DIVIDER : CUSTOM_BACKEND_FEE_DIVIDER;
+            const appliedFeeDivider = Math.max(backendFeeDivider, MIN_LIMIT_ORDER_FEE_DIVIDER);
 
             it('... should make a new Limit order [Take profit] strategy', async () => {
                 const srcToken = getAssetInfo(srcTokenSymbol);
@@ -168,7 +181,7 @@ const limitOrderStrategyTest = async () => {
                 ));
             });
 
-            it('... should trigger a limit order [Take profit] strategy', async () => {
+            it('... should cap the limit order fee and otherwise use the backend divider', async () => {
                 await setBalance(tokenAddrSell, senderAcc.address, sellAmountWei);
 
                 let destAddrTransformed = tokenAddrBuy;
@@ -179,6 +192,7 @@ const limitOrderStrategyTest = async () => {
 
                 const buyBalanceBefore = await balanceOf(destAddrTransformed, senderAcc.address);
                 const sellBalanceBefore = await balanceOf(tokenAddrSell, senderAcc.address);
+                const feeBalanceBefore = await balanceOf(tokenAddrSell, feeReceiverAddr);
 
                 await callLimitOrderStrategy(
                     botAcc,
@@ -189,13 +203,18 @@ const limitOrderStrategyTest = async () => {
                     tokenAddrSell,
                     tokenAddrBuy,
                     uniV3Fee,
+                    backendFeeDivider,
                 );
 
                 const buyBalanceAfter = await balanceOf(destAddrTransformed, senderAcc.address);
                 const sellBalanceAfter = await balanceOf(tokenAddrSell, senderAcc.address);
+                const feeBalanceAfter = await balanceOf(tokenAddrSell, feeReceiverAddr);
 
                 expect(buyBalanceAfter).to.be.gt(buyBalanceBefore);
                 expect(sellBalanceBefore).to.be.gt(sellBalanceAfter);
+                expect(feeBalanceAfter.sub(feeBalanceBefore)).to.be.eq(
+                    sellAmountWei.div(appliedFeeDivider),
+                );
             });
 
             it('... should fail to trigger the same strategy again as its one time', async () => {
@@ -256,7 +275,7 @@ const limitOrderStrategyTest = async () => {
                 ));
             });
 
-            it('... should trigger a limit order [Stop loss] strategy', async () => {
+            it('... should keep a limit order fee-free when the backend sends zero', async () => {
                 await setBalance(tokenAddrSell, senderAcc.address, sellAmountWei);
 
                 let destAddrTransformed = tokenAddrBuy;
@@ -267,6 +286,7 @@ const limitOrderStrategyTest = async () => {
 
                 const buyBalanceBefore = await balanceOf(destAddrTransformed, senderAcc.address);
                 const sellBalanceBefore = await balanceOf(tokenAddrSell, senderAcc.address);
+                const feeBalanceBefore = await balanceOf(tokenAddrSell, feeReceiverAddr);
 
                 await callLimitOrderStrategy(
                     botAcc,
@@ -277,13 +297,16 @@ const limitOrderStrategyTest = async () => {
                     tokenAddrSell,
                     tokenAddrBuy,
                     uniV3Fee,
+                    0,
                 );
 
                 const buyBalanceAfter = await balanceOf(destAddrTransformed, senderAcc.address);
                 const sellBalanceAfter = await balanceOf(tokenAddrSell, senderAcc.address);
+                const feeBalanceAfter = await balanceOf(tokenAddrSell, feeReceiverAddr);
 
                 expect(buyBalanceAfter).to.be.gt(buyBalanceBefore);
                 expect(sellBalanceBefore).to.be.gt(sellBalanceAfter);
+                expect(feeBalanceAfter).to.be.eq(feeBalanceBefore);
             });
         }
     });
