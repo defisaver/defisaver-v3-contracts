@@ -8,7 +8,6 @@ const {
     getProxy,
     redeployCore,
     setBalance,
-    openStrategyAndBundleStorage,
     fetchAmountinUSDPrice,
     resetForkToBlock,
     network,
@@ -19,19 +18,9 @@ const {
     redeploy,
 } = require('../../utils/utils');
 
-const { addBotCaller, createStrategy, createBundle } = require('../utils/utils-strategies');
+const { addBotCaller } = require('../utils/utils-strategies');
 
-const {
-    createSparkRepayStrategy,
-    createSparkFLRepayStrategy,
-    createSparkBoostStrategy,
-    createSparkFLBoostStrategy,
-} = require('../../../strategies-spec/mainnet');
-
-const {
-    subSparkAutomationStrategy,
-    updateSparkAutomationStrategy,
-} = require('../utils/strategy-subs');
+const { subSparkAutomationStrategy } = require('../utils/strategy-subs');
 
 const {
     callSparkRepayStrategy,
@@ -41,27 +30,6 @@ const {
 } = require('../utils/strategy-calls');
 
 const { sparkSupply, sparkBorrow } = require('../../utils/actions');
-
-const deployBundles = async (isFork = false) => {
-    await openStrategyAndBundleStorage(isFork);
-    const sparkRepayStrategyEncoded = createSparkRepayStrategy();
-    const sparkRepayFLStrategyEncoded = createSparkFLRepayStrategy();
-
-    const strategyId1 = await createStrategy(...sparkRepayStrategyEncoded, true);
-    const strategyId2 = await createStrategy(...sparkRepayFLStrategyEncoded, true);
-
-    const repayBundleId = await createBundle([strategyId1, strategyId2]);
-    const sparkBoostStrategyEncoded = createSparkBoostStrategy();
-    const sparkBoostFLStrategyEncoded = createSparkFLBoostStrategy();
-
-    const strategyId11 = await createStrategy(...sparkBoostStrategyEncoded, true);
-    const strategyId22 = await createStrategy(...sparkBoostFLStrategyEncoded, true);
-
-    const boostBundleId = await createBundle([strategyId11, strategyId22]);
-
-    await getContractFromRegistry('SparkSubProxy', isFork, repayBundleId, boostBundleId);
-    return { repayBundleId, boostBundleId };
-};
 
 const testPairs = [
     {
@@ -138,7 +106,6 @@ const sparkRepayStrategyTest = async (numTestPairs) => {
 
             botAcc = (await hre.ethers.getSigners())[1];
             await addBotCaller(botAcc.address);
-            await deployBundles();
         });
 
         for (let i = 0; i < numTestPairs; ++i) {
@@ -234,19 +201,7 @@ const sparkRepayStrategyTest = async (numTestPairs) => {
                 );
                 console.log(`Spark position ratio: ${ratioBefore / 1e16}%`);
 
-                const targetRatio = hre.ethers.utils.parseUnits('2.2', '18');
-                const ratioUnder = hre.ethers.utils.parseUnits('2', '18');
-
-                subIds = await updateSparkAutomationStrategy(
-                    proxy,
-                    subIds.firstSub,
-                    subIds.secondSub,
-                    ratioUnder.toHexString().slice(2),
-                    '0',
-                    '0',
-                    targetRatio.toHexString().slice(2),
-                    false,
-                );
+                subIds = await subSparkAutomationStrategy(proxy, 200, 0, 0, 220, false);
 
                 const repayAmount = hre.ethers.utils.parseUnits(
                     fetchAmountinUSDPrice(testPairs[i].collAsset, '2300'),
@@ -335,7 +290,6 @@ const sparkBoostStrategyTest = async (numTestPairs) => {
 
             botAcc = (await hre.ethers.getSigners())[1];
             await addBotCaller(botAcc.address);
-            await deployBundles();
         });
 
         for (let i = 0; i < numTestPairs; ++i) {
@@ -430,20 +384,7 @@ const sparkBoostStrategyTest = async (numTestPairs) => {
                 );
                 console.log(`Spark position ratio: ${ratioBefore / 1e16}%`);
 
-                const targetRatio = hre.ethers.utils.parseUnits('1.5', '18');
-                const ratioOver = hre.ethers.utils.parseUnits('1.7', '18');
-
-                // update
-                subIds = await updateSparkAutomationStrategy(
-                    proxy,
-                    subIds.firstSub,
-                    subIds.secondSub,
-                    '0',
-                    ratioOver.toHexString().slice(2),
-                    targetRatio.toHexString().slice(2),
-                    '0',
-                    true,
-                );
+                subIds = await subSparkAutomationStrategy(proxy, 0, 170, 150, 0, true);
 
                 const boostAmount = hre.ethers.utils.parseUnits(
                     fetchAmountinUSDPrice(testPairs[i].debtAsset, '1000'),
@@ -486,5 +427,4 @@ module.exports = {
     sparkStrategiesTest,
     sparkRepayStrategyTest,
     sparkBoostStrategyTest,
-    deployBundles,
 };

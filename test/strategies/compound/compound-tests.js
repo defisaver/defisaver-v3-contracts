@@ -5,13 +5,6 @@ const { expect } = require('chai');
 const { ethers } = require('hardhat');
 const { supplyComp, borrowComp } = require('../../utils/actions');
 const {
-    createCompV2BoostStrategy,
-    createCompV2RepayStrategy,
-    createCompFLV2BoostStrategy,
-    createCompFLV2RepayStrategy,
-} = require('../../../strategies-spec/mainnet');
-
-const {
     callCompV2BoostStrategy,
     callCompV2RepayStrategy,
     callCompFLV2BoostStrategy,
@@ -22,7 +15,6 @@ const { subCompV2AutomationStrategy } = require('../utils/strategy-subs');
 const {
     getContractFromRegistry,
     setNetwork,
-    openStrategyAndBundleStorage,
     getProxy,
     setNewExchangeWrapper,
     fetchAmountinUSDPrice,
@@ -32,29 +24,7 @@ const {
     WETH_ADDRESS,
     redeployCore,
 } = require('../../utils/utils');
-const { createStrategy, addBotCaller, createBundle } = require('../utils/utils-strategies');
-
-const createBundleAndStrategy = async () => {
-    const repayCompStrategyEncoded = createCompV2RepayStrategy();
-    const repayFLCompStrategyEncoded = createCompFLV2RepayStrategy();
-
-    const boostCompStrategyEncoded = createCompV2BoostStrategy();
-    const boostFLCompStrategyEncoded = createCompFLV2BoostStrategy();
-
-    await openStrategyAndBundleStorage(false);
-
-    const repayId1 = await createStrategy(...repayCompStrategyEncoded, true);
-    const repayId2 = await createStrategy(...repayFLCompStrategyEncoded, true);
-
-    const boostId1 = await createStrategy(...boostCompStrategyEncoded, true);
-    const boostId2 = await createStrategy(...boostFLCompStrategyEncoded, true);
-
-    const repayBundleId = await createBundle([repayId1, repayId2]);
-
-    const boostBundleId = await createBundle([boostId1, boostId2]);
-    await redeploy('CompSubProxy', false, repayBundleId, boostBundleId);
-    return { repayBundleId, boostBundleId };
-};
+const { addBotCaller } = require('../utils/utils-strategies');
 
 const testPairs = [
     {
@@ -106,8 +76,6 @@ const compV2BoostTest = () =>
             ({ address: exchangeWrapper } = await getContractFromRegistry('UniswapWrapperV3'));
             await setNewExchangeWrapper(senderAcc, exchangeWrapper);
             await addBotCaller(botAcc.address);
-
-            await createBundleAndStrategy();
         });
 
         for (let i = 0; i < testPairs.length; i++) {
@@ -243,8 +211,6 @@ const compV2RepayTest = () =>
             ({ address: exchangeWrapper } = await getContractFromRegistry('UniswapWrapperV3'));
             await setNewExchangeWrapper(senderAcc, exchangeWrapper);
             await addBotCaller(botAcc.address);
-
-            await createBundleAndStrategy();
         });
 
         for (let i = 0; i < testPairs.length; i++) {

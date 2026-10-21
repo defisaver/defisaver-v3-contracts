@@ -9,7 +9,6 @@ const {
     redeploy,
     approve,
     balanceOf,
-    openStrategyAndBundleStorage,
     redeployCore,
     timeTravel,
     getAddrFromRegistry,
@@ -24,17 +23,10 @@ const {
 
 const { callDcaStrategy } = require('../utils/strategy-calls');
 const { subDcaStrategy } = require('../utils/strategy-subs');
-const { createLimitOrderL2Strategy } = require('../../../strategies-spec/l2');
-
-const {
-    createStrategy,
-    addBotCaller,
-    getUpdatedStrategySub,
-} = require('../utils/utils-strategies');
+const { addBotCaller, getUpdatedStrategySub } = require('../utils/utils-strategies');
 
 const { callLimitOrderStrategy } = require('../utils/strategy-calls');
 const { subLimitOrderStrategy } = require('../utils/strategy-subs');
-const { createLimitOrderStrategy } = require('../../../strategies-spec/mainnet');
 
 const DAY = 1 * 24 * 60 * 60;
 const TWO_DAYS = 2 * 24 * 60 * 60;
@@ -85,7 +77,6 @@ const limitOrderStrategyTest = async () => {
         let currPrice;
         let minPrice;
         let uniV3Wrapper;
-        let strategyId;
         let sellAmountWei;
         let tokenAddrSell;
         let tokenAddrBuy;
@@ -116,14 +107,6 @@ const limitOrderStrategyTest = async () => {
 
             await addBotCaller(botAcc.address);
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
-
-            const strategyData =
-                network === 'mainnet' ? createLimitOrderStrategy() : createLimitOrderL2Strategy();
-            await openStrategyAndBundleStorage();
-
-            strategyId = await createStrategy(...strategyData, false);
-
-            await redeploy('LimitOrderSubProxy', false, strategyId);
         });
 
         for (let i = 0; i < tokenPairs.length; i++) {

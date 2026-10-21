@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { CompUserUtils } from "./CompUserUtils.sol";
+import { UserWallet } from "../UserWallet.sol";
 import { CompV3Supply } from "../../../contracts/actions/compoundV3/CompV3Supply.sol";
 import { CompV3Borrow } from "../../../contracts/actions/compoundV3/CompV3Borrow.sol";
 
-contract CompUser is CompUserUtils {
+contract CompUser is UserWallet {
     function supply(bool _isSafe, address _market, address _tokenAddr, uint256 _amount) public {
         CompV3Supply compV3Supply = new CompV3Supply();
 
