@@ -932,6 +932,7 @@ const callLimitOrderStrategy = async (
     tokenAddrSell,
     tokenAddrBuy,
     uniV3Fee,
+    dfsFeeDivider = 0,
 ) => {
     const actionsCallData = [];
     const triggerCallData = [];
@@ -948,6 +949,7 @@ const callLimitOrderStrategy = async (
             0,
             uniV3Fee,
             minPrice.toString(),
+            dfsFeeDivider,
         ),
         placeHolderAddr,
         placeHolderAddr,
@@ -964,6 +966,7 @@ const callLimitOrderStrategy = async (
                 0,
                 uniV3Fee,
                 minPrice.toString(),
+                dfsFeeDivider,
             ),
             placeHolderAddr,
             placeHolderAddr,
