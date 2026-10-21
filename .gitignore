@@ -127,6 +127,8 @@ deployments/
 
 lib/
 
+yarn.lock
+
 gen/
 
 forge-cache/
