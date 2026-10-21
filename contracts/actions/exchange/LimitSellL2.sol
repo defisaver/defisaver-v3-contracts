@@ -13,8 +13,8 @@ import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
     using TokenUtils for address;
 
-    /// @notice Fee divider for limit sell strategies. 25 bps (0.25%)
-    uint256 public constant FEE_DIVIDER = 400;
+    /// @notice Minimum fee divider, limiting the maximum fee to 25 bps (0.25%)
+    uint256 public constant MIN_FEE_DIVIDER = 400;
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 
@@ -91,9 +91,8 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
         // Reset the current price for the next strategy
         tempStorage.setBytes32("CURR_PRICE", bytes32(0));
 
-        // Keep existing subscriptions fee-free when the backend sends a zero divider.
-        if (_exchangeData.dfsFeeDivider != 0) {
-            _exchangeData.dfsFeeDivider = FEE_DIVIDER;
+        if (_exchangeData.dfsFeeDivider != 0 && _exchangeData.dfsFeeDivider < MIN_FEE_DIVIDER) {
+            _exchangeData.dfsFeeDivider = MIN_FEE_DIVIDER;
         }
 
         if (_exchangeData.minPrice != currPrice) {

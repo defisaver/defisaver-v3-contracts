@@ -38,7 +38,9 @@ const { createLimitOrderStrategy } = require('../../../strategies-spec/mainnet')
 
 const DAY = 1 * 24 * 60 * 60;
 const TWO_DAYS = 2 * 24 * 60 * 60;
-const LIMIT_ORDER_FEE_DIVIDER = 400;
+const MIN_LIMIT_ORDER_FEE_DIVIDER = 400;
+const CAPPED_BACKEND_FEE_DIVIDER = 200;
+const CUSTOM_BACKEND_FEE_DIVIDER = 800;
 
 const limitOrderStrategyTest = async () => {
     const tokenPairs = [
@@ -136,6 +138,9 @@ const limitOrderStrategyTest = async () => {
 
         for (let i = 0; i < tokenPairs.length; i++) {
             const { srcTokenSymbol, destTokenSymbol, amount, uniV3Fee } = tokenPairs[i];
+            const backendFeeDivider =
+                i === 0 ? CAPPED_BACKEND_FEE_DIVIDER : CUSTOM_BACKEND_FEE_DIVIDER;
+            const appliedFeeDivider = Math.max(backendFeeDivider, MIN_LIMIT_ORDER_FEE_DIVIDER);
 
             it('... should make a new Limit order [Take profit] strategy', async () => {
                 const srcToken = getAssetInfo(srcTokenSymbol);
@@ -176,7 +181,7 @@ const limitOrderStrategyTest = async () => {
                 ));
             });
 
-            it('... should trigger a limit order [Take profit] strategy with a 0.25% fee', async () => {
+            it('... should cap the limit order fee and otherwise use the backend divider', async () => {
                 await setBalance(tokenAddrSell, senderAcc.address, sellAmountWei);
 
                 let destAddrTransformed = tokenAddrBuy;
@@ -198,7 +203,7 @@ const limitOrderStrategyTest = async () => {
                     tokenAddrSell,
                     tokenAddrBuy,
                     uniV3Fee,
-                    LIMIT_ORDER_FEE_DIVIDER,
+                    backendFeeDivider,
                 );
 
                 const buyBalanceAfter = await balanceOf(destAddrTransformed, senderAcc.address);
@@ -208,7 +213,7 @@ const limitOrderStrategyTest = async () => {
                 expect(buyBalanceAfter).to.be.gt(buyBalanceBefore);
                 expect(sellBalanceBefore).to.be.gt(sellBalanceAfter);
                 expect(feeBalanceAfter.sub(feeBalanceBefore)).to.be.eq(
-                    sellAmountWei.div(LIMIT_ORDER_FEE_DIVIDER),
+                    sellAmountWei.div(appliedFeeDivider),
                 );
             });
 
