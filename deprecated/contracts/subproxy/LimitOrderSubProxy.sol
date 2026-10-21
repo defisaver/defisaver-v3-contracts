@@ -10,6 +10,7 @@ import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
+/// @deprecated Use the generic SubProxy.
 contract LimitOrderSubProxy is
     StrategyModel,
     AdminAuth,
