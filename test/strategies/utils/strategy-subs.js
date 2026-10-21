@@ -840,6 +840,70 @@ const subAaveV3FLCollateralSwitchStrategy = async (
     const subId = await subToStrategy(proxy, strategySub);
     return { subId, strategySub };
 };
+const subAaveV3GenericFLCollateralSwitchStrategy = async (
+    proxy,
+    strategyId,
+    fromAsset,
+    fromAssetId,
+    toAsset,
+    toAssetId,
+    marketAddr,
+    amountToSwitch,
+    user,
+    baseTokenAddress,
+    quoteTokenAddress,
+    triggerPrice,
+    priceState,
+) => {
+    const strategySub = automationSdk.strategySubService.aaveV3Encode.collateralSwitchGeneric(
+        strategyId,
+        fromAsset,
+        fromAssetId,
+        toAsset,
+        toAssetId,
+        marketAddr,
+        amountToSwitch,
+        user,
+        baseTokenAddress,
+        quoteTokenAddress,
+        triggerPrice,
+        priceState,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+const subAaveV3GenericFLDebtSwitchStrategy = async (
+    proxy,
+    strategyId,
+    fromAsset,
+    fromAssetId,
+    toAsset,
+    toAssetId,
+    marketAddr,
+    amountToSwitch,
+    user,
+    baseTokenAddress,
+    quoteTokenAddress,
+    triggerPrice,
+    priceState,
+) => {
+    const strategySub = automationSdk.strategySubService.aaveV3Encode.debtSwitch(
+        strategyId,
+        fromAsset,
+        fromAssetId,
+        toAsset,
+        toAssetId,
+        marketAddr,
+        amountToSwitch,
+        user,
+        baseTokenAddress,
+        quoteTokenAddress,
+        triggerPrice,
+        priceState,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
 const subSparkFLCollateralSwitchStrategy = async (
     proxy,
     strategyId,
@@ -1600,6 +1664,8 @@ module.exports = {
     subCompV3BoostOnPriceBundle,
     subCompV3CloseOnPriceBundle,
     subAaveV3FLCollateralSwitchStrategy,
+    subAaveV3GenericFLCollateralSwitchStrategy,
+    subAaveV3GenericFLDebtSwitchStrategy,
     subSparkCloseGeneric,
     subMorphoBlueClose,
     subSparkRepayOnPriceBundle,
