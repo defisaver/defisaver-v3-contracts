@@ -5129,14 +5129,14 @@
     },
     {
         "name": "AaveV3MinDebtTrigger",
-        "address": "0x9b34580a66634AbBe64ddF7CeF78Cdc144D1Fc17",
+        "address": "0x4E26Fe641603f929AbCDf928be3b51d64062Bc02",
         "id": "0xb3fa1599",
         "path": "contracts/triggers-additional/AaveV3MinDebtTrigger.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x9b34580a66634AbBe64ddF7CeF78Cdc144D1Fc17"]
     },
     {
         "name": "AaveV4MinDebtTrigger",
