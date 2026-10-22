@@ -1350,14 +1350,14 @@
     },
     {
         "name": "AaveV3MinDebtTrigger",
-        "address": "0x8F521d036b395E2dd4B3A10348d323ec75A375e6",
+        "address": "0x793D1B90a1063C074aad56176A2DA6a78B06f38F",
         "id": "0xb3fa1599",
         "path": "contracts/triggers-additional/AaveV3MinDebtTrigger.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x8F521d036b395E2dd4B3A10348d323ec75A375e6"]
     },
     {
         "name": "RequiredAmountAndAllowanceTrigger",
