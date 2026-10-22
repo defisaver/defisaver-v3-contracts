@@ -210,7 +210,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             const foundryEncoded = AaveV3SetEMode.interface.encodeFunctionData(
                 'executeActionDirect',
-                [await aaveV3Encode.setEMode(categoryId, useDefaultMarket, market)],
+                [await aaveV3Encode.setEMode(categoryId, useDefaultMarket, market, nullAddress)],
             );
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });

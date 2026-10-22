@@ -51,35 +51,79 @@ contract TestAaveV3SetEMode is AaveV3TestHelper, AaveV3ExecuteActions {
     function test_should_change_eMode() public {
         address token = Addresses.WETH_ADDR;
         uint256 supplyAmount = amountInUSDPrice(token, 100_000);
-        if (!_validSupplyExecuted(token, supplyAmount)) return;
+        if (!_validSupplyExecuted(token, supplyAmount, walletAddr)) return;
 
-        bool isL2Direct = false;
         uint8 ethCorrelatedCategoryId = 1;
+        uint8[] memory newParamMapping = new uint8[](2);
 
-        _setEMode(ethCorrelatedCategoryId, isL2Direct);
+        _setEMode(ethCorrelatedCategoryId, false, address(0), walletAddr, newParamMapping);
     }
 
     function test_should_change_eMode_l2_direct() public {
         address token = Addresses.WETH_ADDR;
         uint256 supplyAmount = amountInUSDPrice(token, 100_000);
-        if (!_validSupplyExecuted(token, supplyAmount)) return;
+        if (!_validSupplyExecuted(token, supplyAmount, walletAddr)) return;
 
-        bool isL2Direct = true;
         uint8 ethCorrelatedCategoryId = 1;
 
-        _setEMode(ethCorrelatedCategoryId, isL2Direct);
+        _setEMode(ethCorrelatedCategoryId, true, walletAddr, walletAddr, new uint8[](0));
     }
 
-    function testFuzz_encode_decode_inputs_no_market(uint8 _categoryId) public view {
+    function test_should_change_eMode_on_behalf() public {
+        address token = Addresses.WETH_ADDR;
+        uint256 supplyAmount = amountInUSDPrice(token, 100_000);
+        if (!_validSupplyExecuted(token, supplyAmount, sender)) return;
+
+        _approveWalletAsPositionManager();
+
+        uint8 ethCorrelatedCategoryId = 1;
+        uint8[] memory onBehalfParamMapping = new uint8[](2);
+        onBehalfParamMapping[1] = 255; // map onBehalf to EOA owner
+
+        _setEMode(ethCorrelatedCategoryId, false, address(0), sender, onBehalfParamMapping);
+    }
+
+    function test_should_change_eMode_on_behalf_l2_direct() public {
+        address token = Addresses.WETH_ADDR;
+        uint256 supplyAmount = amountInUSDPrice(token, 100_000);
+        if (!_validSupplyExecuted(token, supplyAmount, sender)) return;
+
+        _approveWalletAsPositionManager();
+
+        uint8 ethCorrelatedCategoryId = 1;
+        _setEMode(ethCorrelatedCategoryId, true, sender, sender, new uint8[](0));
+    }
+
+    function test_should_change_eMode_with_legacy_param_mapping() public {
+        address token = Addresses.WETH_ADDR;
+        uint256 supplyAmount = amountInUSDPrice(token, 100_000);
+        if (!_validSupplyExecuted(token, supplyAmount, walletAddr)) return;
+
+        uint8 ethCorrelatedCategoryId = 1;
+        uint8[] memory legacyParamMapping = new uint8[](1);
+
+        _setEMode(ethCorrelatedCategoryId, false, address(0), walletAddr, legacyParamMapping);
+    }
+
+    function testFuzz_encode_decode_inputs_no_market(uint8 _categoryId, address _onBehalf)
+        public
+        view
+    {
         AaveV3SetEMode.Params memory params = AaveV3SetEMode.Params({
-            categoryId: _categoryId, useDefaultMarket: true, market: DEFAULT_AAVE_MARKET
+            categoryId: _categoryId,
+            useDefaultMarket: true,
+            market: DEFAULT_AAVE_MARKET,
+            onBehalf: _onBehalf
         });
         _assertParams(params);
     }
 
-    function testFuzz_encode_decode_inputs(uint8 _categoryId, address _market) public view {
+    function testFuzz_encode_decode_inputs(uint8 _categoryId, address _market, address _onBehalf)
+        public
+        view
+    {
         AaveV3SetEMode.Params memory params = AaveV3SetEMode.Params({
-            categoryId: _categoryId, useDefaultMarket: false, market: _market
+            categoryId: _categoryId, useDefaultMarket: false, market: _market, onBehalf: _onBehalf
         });
         _assertParams(params);
     }
@@ -94,37 +138,60 @@ contract TestAaveV3SetEMode is AaveV3TestHelper, AaveV3ExecuteActions {
         assertEq(decodedParams.categoryId, _params.categoryId);
         assertEq(decodedParams.useDefaultMarket, _params.useDefaultMarket);
         assertEq(decodedParams.market, _params.market);
+        assertEq(decodedParams.onBehalf, _params.onBehalf);
     }
 
-    function _setEMode(uint8 _categoryId, bool _isL2Direct) internal {
-        uint256 categoryIdBefore = pool.getUserEMode(walletAddr);
+    function _setEMode(
+        uint8 _categoryId,
+        bool _isL2Direct,
+        address _onBehalf,
+        address _expectedPositionOwner,
+        uint8[] memory _paramMapping
+    ) internal {
+        address otherPositionOwner = _expectedPositionOwner == walletAddr ? sender : walletAddr;
+        uint256 categoryIdBefore = pool.getUserEMode(_expectedPositionOwner);
+        uint256 otherCategoryIdBefore = pool.getUserEMode(otherPositionOwner);
 
         if (_isL2Direct) {
             AaveV3SetEMode.Params memory params = AaveV3SetEMode.Params({
-                categoryId: _categoryId, useDefaultMarket: true, market: address(0)
+                categoryId: _categoryId,
+                useDefaultMarket: true,
+                market: address(0),
+                onBehalf: _onBehalf
             });
             wallet.execute(address(cut), cut.encodeInputs(params), 0);
         } else {
-            bytes memory paramsCalldata = AaveV3Encode.setEMode(_categoryId, true, address(0));
+            bytes memory paramsCalldata =
+                AaveV3Encode.setEMode(_categoryId, true, address(0), _onBehalf);
 
             bytes memory _calldata = abi.encodeWithSelector(
                 AaveV3SetEMode.executeAction.selector,
                 paramsCalldata,
                 subData,
-                paramMapping,
+                _paramMapping,
                 returnValues
             );
 
             wallet.execute(address(cut), _calldata, 0);
         }
 
-        uint256 categoryIdAfter = pool.getUserEMode(walletAddr);
+        uint256 categoryIdAfter = pool.getUserEMode(_expectedPositionOwner);
+        uint256 otherCategoryIdAfter = pool.getUserEMode(otherPositionOwner);
 
         assertEq(categoryIdBefore, 0);
         assertEq(categoryIdAfter, _categoryId);
+        assertEq(otherCategoryIdAfter, otherCategoryIdBefore);
     }
 
-    function _validSupplyExecuted(address _token, uint256 _amount) internal returns (bool) {
+    function _approveWalletAsPositionManager() internal {
+        vm.prank(sender);
+        pool.approvePositionManager(walletAddr, true);
+    }
+
+    function _validSupplyExecuted(address _token, uint256 _amount, address _onBehalf)
+        internal
+        returns (bool)
+    {
         if (!isValidSupply(DEFAULT_AAVE_MARKET, _token, _amount)) {
             console2.log(
                 "[AaveV3SetEMode] Can't supply asset (check cap and flags). Skipping test..."
@@ -139,9 +206,9 @@ contract TestAaveV3SetEMode is AaveV3TestHelper, AaveV3ExecuteActions {
             assetId: tokenData.id,
             enableAsColl: true,
             useDefaultMarket: true,
-            useOnBehalf: false,
+            useOnBehalf: _onBehalf != walletAddr,
             market: address(0),
-            onBehalf: address(0)
+            onBehalf: _onBehalf
         });
 
         executeAaveV3Supply(supplyParams, _token, wallet, false, aaveV3SupplyContractAddr);

@@ -267,6 +267,20 @@ interface IPoolV3 {
     function setUserEMode(uint8 categoryId) external;
 
     /**
+     * @notice Approves or disapproves a position manager
+     * @param positionManager The address of the position manager
+     * @param approve True if the position manager should be approved, false otherwise
+     */
+    function approvePositionManager(address positionManager, bool approve) external;
+
+    /**
+     * @notice Sets the eMode category on behalf of a user
+     * @param categoryId The id of the category
+     * @param onBehalfOf The address of the user
+     */
+    function setUserEModeOnBehalfOf(uint8 categoryId, address onBehalfOf) external;
+
+    /**
      * @notice Returns the eMode the user is using
      * @param user The address of the user
      * @return The eMode id

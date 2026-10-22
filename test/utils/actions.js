@@ -2276,7 +2276,7 @@ const aaveV3SetEModeCalldataOptimised = async (proxy, market, categoryId) => {
     const signer = (await hre.ethers.getSigners())[0];
     contract = await contract.connect(signer);
 
-    const encodedInput = await contract.encodeInputs([categoryId, true, market]);
+    const encodedInput = await contract.encodeInputs([categoryId, true, market, nullAddress]);
     const aaveSetEModeAction = new dfs.actions.aaveV3.AaveV3SetEModeAction(
         true,
         market,
