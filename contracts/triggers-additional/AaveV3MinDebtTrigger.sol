@@ -36,7 +36,8 @@ contract AaveV3MinDebtTrigger is ITrigger, AdminAuth {
     {
         CalldataParams memory params = parseCallInputs(_calldata);
 
-        IPoolV3 pool = IPoolV3(IPoolAddressesProvider(params.market).getPool());
+        IPoolAddressesProvider market = IPoolAddressesProvider(params.market);
+        IPoolV3 pool = IPoolV3(market.getPool());
         uint256 configuration = pool.getUserConfiguration(params.user).data;
         uint256 borrowing = configuration & BORROWING_MASK;
 
@@ -46,35 +47,23 @@ contract AaveV3MinDebtTrigger is ITrigger, AdminAuth {
                 && configuration == (borrowing | (borrowing << 1))
         ) return false;
 
-        uint256 totalDebtUSD = getTotalDebtUSD(params.market, params.user);
+        address oracle = market.getPriceOracle();
+        uint256 totalDebtUSD;
 
-        return totalDebtUSD >= params.minDebt * PRECISION;
-    }
-
-    /// @notice Total variable debt of `_user` in `_market`, in USD with 8 decimals.
-    /// @dev Sums debt by walking only the user's borrowed reserves, so cost scales with the user's borrowed assets rather than the market size.
-    function getTotalDebtUSD(address _market, address _user)
-        public
-        view
-        returns (uint256 totalDebtUSD)
-    {
-        IPoolV3 pool = IPoolV3(IPoolAddressesProvider(_market).getPool());
-        address oracle = IPoolAddressesProvider(_market).getPriceOracle();
-
-        uint256 data = pool.getUserConfiguration(_user).data & BORROWING_MASK;
-
-        for (uint16 i = 0; data != 0; i++) {
-            if (data & 1 != 0) {
+        for (uint16 i = 0; borrowing != 0; i++) {
+            if (borrowing & 1 != 0) {
                 address reserve = pool.getReserveAddressById(i);
                 address variableDebtToken = pool.getReserveVariableDebtToken(reserve);
-                uint256 debt = IERC20(variableDebtToken).balanceOf(_user);
+                uint256 debt = IERC20(variableDebtToken).balanceOf(params.user);
                 if (debt != 0) {
                     uint256 price = IAaveV3Oracle(oracle).getAssetPrice(reserve);
                     totalDebtUSD += (debt * price) / (10 ** IERC20(reserve).decimals());
                 }
             }
-            data >>= 2;
+            borrowing >>= 2;
         }
+
+        return totalDebtUSD >= params.minDebt * PRECISION;
     }
 
     function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
