@@ -5,6 +5,7 @@ describe('Change owner', function () {
     this.timeout(80000);
 
     before(async () => {
+        await redeploy('DFSProxyRegistryV2');
         await redeploy('ChangeProxyOwner');
     });
 

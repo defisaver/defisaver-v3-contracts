@@ -22,6 +22,17 @@
         "history": []
     },
     {
+        "name": "DFSProxyRegistryV2",
+        "address": "0xa1651732a4F6a9aec2261304a7E2cd5790A224e5",
+        "id": "0x0fcbdb1a",
+        "path": "contracts/utils/proxyRegistry/DFSProxyRegistryV2.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "DFSProxyRegistryController",
         "address": "0x493C0dE902E6916128A223F66F37d3b6ee8fA408",
         "id": "0xcbbb53f2",
@@ -493,14 +504,14 @@
     },
     {
         "name": "ChangeProxyOwner",
-        "address": "0x62769258ea8b3a85cc6fb4332fc2760a122dbc9e",
+        "address": "0xf573585C38d947D8A70F7F6c83D060F1F89855AE",
         "id": "0x67314f12",
         "path": "contracts/actions/utils/ChangeProxyOwner.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x62769258ea8b3a85cc6fb4332fc2760a122dbc9e"]
     },
     {
         "name": "DFSSafeFactory",

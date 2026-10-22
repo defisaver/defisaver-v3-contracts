@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-/// @title Used to store exchange data in a transaction
+/// @title BytesTransientStorageL2
+/// @notice Used to store exchange data in a transaction
 /// @dev Always set and read data in the same tx, and keep in mind it can be accessed by anyone
+/// @dev Uses regular storage, not EIP-1153 transient storage, and is used for L2 networks
 contract BytesTransientStorageL2 {
     bytes data;
 

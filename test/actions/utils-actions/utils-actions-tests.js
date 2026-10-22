@@ -15,7 +15,6 @@ const {
     depositToWeth,
     send,
     approve,
-    stopImpersonatingAccount,
     impersonateAccount,
     setBalance,
     resetForkToBlock,
@@ -32,7 +31,6 @@ const {
     takeSnapshot,
     revertToSnapshot,
     WBTC_ADDR,
-    addrs,
     chainIds,
     network,
 } = require('../../utils/utils');
@@ -728,31 +726,10 @@ const changeOwnerTest = async () => {
         let senderAcc2;
         let proxy;
 
-        const ADMIN_VAULT = addrs[network].ADMIN_VAULT;
-        const ADMIN_ACC = addrs[network].ADMIN_ACC;
-
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             senderAcc2 = (await hre.ethers.getSigners())[1];
             proxy = await getProxy(senderAcc.address);
-
-            if (network === 'mainnet') {
-                // DFSProxyRegistry must be owned by DFSProxyRegistryController on mainnet
-                await sendEther(senderAcc, ADMIN_ACC, '1');
-                await impersonateAccount(ADMIN_ACC);
-
-                const signer = await hre.ethers.provider.getSigner(ADMIN_ACC);
-
-                const adminVaultInstance = await hre.ethers.getContractFactory(
-                    'AdminVault',
-                    signer,
-                );
-                const adminVault = await adminVaultInstance.attach(ADMIN_VAULT);
-                adminVault.connect(signer);
-                // change owner in registry to dfsRegController
-                await adminVault.changeOwner(addrs[network].DFS_REG_CONTROLLER);
-                await stopImpersonatingAccount(ADMIN_ACC);
-            }
         });
 
         it('... should change owner of users DSProxy', async () => {
@@ -1074,6 +1051,7 @@ const deployUtilsActionsContracts = async () => {
     await redeploy('SubInputs');
     await redeploy('SendToken');
     await redeploy('UniswapWrapperV3');
+    await redeploy('DFSProxyRegistryV2');
     await redeploy('ChangeProxyOwner');
     await redeploy('UpdateSub');
     await redeploy('ToggleSub');

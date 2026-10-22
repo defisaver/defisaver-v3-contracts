@@ -642,6 +642,17 @@
         "history": []
     },
     {
+        "name": "DFSProxyRegistryV2",
+        "address": "0x28C8bCf583bD10dc718A7596d1bEFF23990d1907",
+        "id": "0x0fcbdb1a",
+        "path": "contracts/utils/proxyRegistry/DFSProxyRegistryV2.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "ZrxAllowlist",
         "address": "0x169D6E128238ebabF86032Ae9da65938eaD7F69e",
         "id": "0x0c33e794",
@@ -843,14 +854,14 @@
     },
     {
         "name": "ChangeProxyOwner",
-        "address": "0x1947a44d3717a47556175d64fdc208619aa08874",
+        "address": "0x7b55d25BfF49Fd62563823570f47E9a35AA39541",
         "id": "0x67314f12",
         "path": "contracts/actions/utils/ChangeProxyOwner.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x1947a44d3717a47556175d64fdc208619aa08874"]
     },
     {
         "name": "AaveV3View",

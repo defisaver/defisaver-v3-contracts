@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { CompUserUtils } from "./CompUserUtils.sol";
+import { UserWallet } from "../UserWallet.sol";
 import { IComet } from "../../../contracts/interfaces/protocols/compoundV3/IComet.sol";
 import { IERC20 } from "../../../contracts/interfaces/token/IERC20.sol";
 
-contract CompUserEOA is CompUserUtils {
+contract CompUserEOA is UserWallet {
     IComet public comet;
 
     constructor(address _comet) {
