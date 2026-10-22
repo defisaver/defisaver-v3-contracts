@@ -34,6 +34,10 @@ const { getSparkReserveDataFromPool } = require('../../utils/spark');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
+// Mirrors RecipeExecutor.STRATEGY_PARTIAL_EXECUTION_FLAG. RecipeExecutor reverts with
+// InvalidPartialExecutionFlag if the extra last element of actionsCallData is anything else
+const STRATEGY_PARTIAL_EXECUTION_FLAG = hre.ethers.utils.id('STRATEGY_PARTIAL_EXECUTION_FLAG');
+
 const executeStrategy = async (
     isL2,
     strategyExecutorByBot,
@@ -7490,7 +7494,7 @@ const callAaveV3GenericFLCloseToDebtStrategy = async (
 
     if (partialClose) {
         // extra element signals RecipeExecutor to keep the sub active (partial execution)
-        actionsCallData.push('0x');
+        actionsCallData.push(STRATEGY_PARTIAL_EXECUTION_FLAG);
     }
 
     triggerCallData.push(
@@ -7604,7 +7608,7 @@ const callAaveV3GenericFLCloseToCollStrategy = async (
 
     if (partialClose) {
         // extra element signals RecipeExecutor to keep the sub active (partial execution)
-        actionsCallData.push('0x');
+        actionsCallData.push(STRATEGY_PARTIAL_EXECUTION_FLAG);
     }
 
     triggerCallData.push(
