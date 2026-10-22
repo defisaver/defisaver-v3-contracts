@@ -374,6 +374,46 @@ const subAaveV3CloseGeneric = async (
     return { subId, strategySub };
 };
 
+// Same as subAaveV3CloseGeneric (same strategies, but a different bundle), with 2 extra metadata
+// slots at the end of subData: [..., tsi, slippage]. The strategies don't reference them in their
+// param mapping, so on chain they are ignored. Backend reads them from the Subscribe event
+const subAaveV3TsiOptimizedCloseGeneric = async (
+    proxy,
+    user,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+    marketAddr,
+    stopLossPrice,
+    stopLossType,
+    takeProfitPrice,
+    takeProfitType,
+    bundleId,
+    tsi,
+    slippage,
+) => {
+    const strategySub =
+        automationSdk.strategySubService.aaveV3Encode.tsiOptimizedCloseOnPriceGeneric(
+            bundleId,
+            collAsset,
+            collAssetId,
+            debtAsset,
+            debtAssetId,
+            marketAddr,
+            user,
+            tsi,
+            slippage,
+            stopLossPrice,
+            stopLossType,
+            takeProfitPrice,
+            takeProfitType,
+        );
+
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
 const subCompV2AutomationStrategy = async (
     proxy,
     minRatio,
@@ -1575,6 +1615,7 @@ module.exports = {
     subAaveV3LeverageManagementGeneric,
     subAaveV3LeverageManagementOnPriceGeneric,
     subAaveV3CloseGeneric,
+    subAaveV3TsiOptimizedCloseGeneric,
     subCompV2AutomationStrategy,
     subSparkAutomationStrategy,
     updateSparkAutomationStrategy,
