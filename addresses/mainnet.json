@@ -2385,14 +2385,15 @@
     },
     {
         "name": "FLAction",
-        "address": "0xE78C05c508405207ecc256781B9415e6De1c8336",
+        "address": "0x9cA3983b3bD35609B78686BEDe00f70058f3aF0b",
         "id": "0xbcab5e2a",
         "path": "contracts/actions/flashloan/FLAction.sol",
-        "version": "1.0.6",
+        "version": "1.0.7",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xE78C05c508405207ecc256781B9415e6De1c8336",
             "0xAc83378E8B075F95640d581A42cba80452caEEa3",
             "0x7A0f3963c666d4549e5909a7162B560abF9f006D",
             "0x5f1dC84Ba060Ea3f7429c6A7bBEdd9243CF1209b",
