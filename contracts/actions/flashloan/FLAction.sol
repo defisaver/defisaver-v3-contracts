@@ -506,17 +506,10 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
 
         currBalance = ST_ETH_ADDR.getBalance(address(this));
 
-        // This means that there was not enough stETH on the faucet to cover the deficit.
+        // stETH transfers round down to shares, so the top-up may deliver less than 2 wei.
         if (currBalance < _expectedBalance) revert WrongPaybackAmountError();
 
-        // Return any excess stETH to the faucet (in practice, at most 1 wei).
-        // Keeping it would not cause issues, but returning it simplifies reasoning
-        // and preserves the invariant that the flash loan should not leave any dust.
-        if (currBalance > _expectedBalance) {
-            ST_ETH_ADDR.withdrawTokens(address(feeFaucet), currBalance - _expectedBalance);
-            currBalance = ST_ETH_ADDR.getBalance(address(this));
-        }
-
-        if (currBalance != _expectedBalance) revert WrongPaybackAmountError();
+        // Keep any surplus from the top-up (at most 1 wei). Transferring 1 wei of stETH
+        // can move zero shares, so attempting to refund it cannot guarantee exact equality.
     }
 }
