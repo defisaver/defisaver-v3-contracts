@@ -21,7 +21,7 @@ interface IStEthPaybackToken {
 
 contract FLActionPaybackHarness is FLAction {
     function verifyPaybackAmount(address _token, uint256 _expectedBalance) external {
-        _verifyPaybackAmount(_token, _expectedBalance);
+        _ensureRepaymentBalance(_token, _expectedBalance);
     }
 }
 
