@@ -3808,14 +3808,15 @@
     },
     {
         "name": "TxSaverExecutor",
-        "address": "0xDE0e1B36f54940050D4b1b421f8e3e44e40F64e0",
+        "address": "0x0651b2A5Ce8eE9A861cd93C768fBe13a7771de1b",
         "id": "0x91bfbd87",
         "path": "contracts/tx-saver/TxSaverExecutor.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xDE0e1B36f54940050D4b1b421f8e3e44e40F64e0",
             "0xac7745d524b780751cc8410224d73ebe7e7acca2",
             "0x475f433407205557E8A7aeE7Be53155EB9681c92"
         ]
