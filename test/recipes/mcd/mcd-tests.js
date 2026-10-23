@@ -20,6 +20,7 @@ const {
     approve,
     setBalance,
     UNISWAP_WRAPPER,
+    resetForkToBlock,
 } = require('../../utils/utils');
 
 const {
@@ -53,27 +54,25 @@ const mcdBoostTest = async () => {
         let makerAddresses;
         let senderAcc;
         let proxy;
-        let dydxFlAddr;
-        // let aaveV2FlAddr;
+        let flActionAddr;
         let mcdView;
         let uniWrapper;
 
         before(async () => {
+            // Preserve the legacy Maker vaults used by these recipes.
+            await resetForkToBlock(20000000);
             await redeploy('McdOpen');
             await redeploy('McdSupply');
             await redeploy('RecipeExecutor');
             await redeploy('McdGenerate');
-            await redeploy('FLDyDx');
-            await redeploy('FLAaveV2');
+            await redeploy('FLAction');
             await redeploy('DFSSell');
-            await redeploy('GUniDeposit');
 
             uniWrapper = await redeploy('UniswapWrapperV3');
             mcdView = await redeploy('McdView');
 
             makerAddresses = await fetchMakerAddresses();
-            dydxFlAddr = await getAddrFromRegistry('FLDyDx');
-            // aaveV2FlAddr = await getAddrFromRegistry('FLAaveV2');
+            flActionAddr = await getAddrFromRegistry('FLAction');
 
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
@@ -161,15 +160,12 @@ const mcdBoostTest = async () => {
             });
 
             it(`... should call a boost with FL ${boostAmount} Dai on a ${ilkData.ilkLabel} vault`, async () => {
-                // create a vault
-                // vaultId = await openVault(
-                //     makerAddresses,
-                //     proxy,
-                //     joinAddr,
-                //     tokenData,
-                //     (standardAmounts[tokenData.symbol] * 2).toString(),
-                //     (parseInt(MIN_VAULT_DAI_AMOUNT) + 200).toString()
-                // );
+                vaultId = await openVault(
+                    proxy,
+                    ilkData.ilkLabel,
+                    fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD),
+                    fetchAmountinUSDPrice('DAI', GENERATE_AMOUNT_IN_USD),
+                );
 
                 boostAmount = '200';
 
@@ -188,11 +184,13 @@ const mcdBoostTest = async () => {
                 const collToken = tokenData.address;
                 const fromToken = makerAddresses.MCD_DAI;
 
-                const dydxFLAction = new dfs.actions.flashloan.DyDxFlashLoanAction(
-                    boostAmount,
-                    fromToken,
-                    nullAddress,
-                    [],
+                const flashLoanAction = new dfs.actions.flashloan.FLAction(
+                    new dfs.actions.flashloan.BalancerFlashLoanAction(
+                        [fromToken],
+                        [boostAmount],
+                        nullAddress,
+                        [],
+                    ),
                 );
 
                 // const flAaveV2Action = new dfs.actions.flashloan.AaveV2FlashLoanAction(
@@ -221,12 +219,12 @@ const mcdBoostTest = async () => {
                 const mcdGenerateAction = new dfs.actions.maker.MakerGenerateAction(
                     vaultId,
                     '$1',
-                    dydxFlAddr,
+                    flActionAddr,
                     MCD_MANAGER_ADDR,
                 );
 
                 const boostRecipe = new dfs.Recipe('FLBoostRecipe', [
-                    dydxFLAction,
+                    flashLoanAction,
                     sellAction,
                     mcdSupplyAction,
                     mcdGenerateAction,
@@ -251,6 +249,7 @@ const mcdBoostTest = async () => {
         }
 
         it('... should call a boost for GUNIV3DAIUSDC1-A vault', async () => {
+            await redeploy('GUniDeposit');
             const GUNIV3DAIUSDC = '0xabddafb225e10b90d798bb8a886238fb835e2053';
             const joinAddr = '0xbFD445A97e7459b0eBb34cfbd3245750Dba4d7a4';
 
@@ -367,13 +366,15 @@ const mcdCloseTest = async () => {
         let makerAddresses;
         let senderAcc;
         let proxy;
-        let dydxFlAddr;
+        let flActionAddr;
         let uniWrapper;
         // let mcdView;
 
         before(async () => {
+            // Preserve the legacy Maker vaults used by these recipes.
+            await resetForkToBlock(20000000);
             await redeploy('RecipeExecutor');
-            await redeploy('FLDyDx');
+            await redeploy('FLAction');
             await redeploy('DFSSell');
             await redeploy('SendToken');
 
@@ -382,7 +383,7 @@ const mcdCloseTest = async () => {
             makerAddresses = await fetchMakerAddresses();
             uniWrapper = await redeploy('UniswapWrapperV3');
 
-            dydxFlAddr = await getAddrFromRegistry('FLDyDx');
+            flActionAddr = await getAddrFromRegistry('FLAction');
 
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
@@ -429,11 +430,13 @@ const mcdCloseTest = async () => {
                 );
 
                 const closeToDaiVaultRecipe = new dfs.Recipe('CloseToDaiVaultRecipe', [
-                    new dfs.actions.flashloan.DyDxFlashLoanAction(
-                        flAmount,
-                        daiAddr,
-                        nullAddress,
-                        [],
+                    new dfs.actions.flashloan.FLAction(
+                        new dfs.actions.flashloan.BalancerFlashLoanAction(
+                            [daiAddr],
+                            [flAmount],
+                            nullAddress,
+                            [],
+                        ),
                     ),
                     new dfs.actions.maker.MakerPaybackAction(
                         vaultId,
@@ -449,7 +452,7 @@ const mcdCloseTest = async () => {
                         MCD_MANAGER_ADDR,
                     ),
                     new dfs.actions.basic.SellAction(exchangeOrder, proxy.address, proxy.address),
-                    new dfs.actions.basic.SendTokenAction(daiAddr, dydxFlAddr, flAmount),
+                    new dfs.actions.basic.SendTokenAction(daiAddr, flActionAddr, flAmount),
                     new dfs.actions.basic.SendTokenAction(
                         daiAddr,
                         senderAcc.address,
@@ -489,20 +492,31 @@ const mcdCloseTest = async () => {
 
                 const daiAddr = makerAddresses.MCD_DAI;
 
+                const router = await hre.ethers.getContractAt(
+                    'IUniswapRouter',
+                    await uniWrapper.router(),
+                );
+                const [quotedCollAmount] = await router.getAmountsIn(flAmount, [
+                    tokenAddr,
+                    daiAddr,
+                ]);
+                // Sell only enough collateral to repay the loan, including the exchange fee.
+                const collToSell = quotedCollAmount.mul(1005).add(999).div(1000);
                 const exchangeOrder = formatExchangeObj(
                     tokenAddr,
                     daiAddr,
-                    hre.ethers.utils.parseUnits(amountColl, tokenData.decimals),
+                    collToSell,
                     uniWrapper.address,
-                    flAmount,
                 );
 
                 const closeToCollVaultRecipe = new dfs.Recipe('CloseToCollVaultRecipe', [
-                    new dfs.actions.flashloan.DyDxFlashLoanAction(
-                        flAmount,
-                        daiAddr,
-                        nullAddress,
-                        [],
+                    new dfs.actions.flashloan.FLAction(
+                        new dfs.actions.flashloan.BalancerFlashLoanAction(
+                            [daiAddr],
+                            [flAmount],
+                            nullAddress,
+                            [],
+                        ),
                     ),
                     new dfs.actions.maker.MakerPaybackAction(
                         vaultId,
@@ -517,7 +531,13 @@ const mcdCloseTest = async () => {
                         proxy.address,
                         MCD_MANAGER_ADDR,
                     ),
-                    new dfs.actions.basic.BuyAction(exchangeOrder, proxy.address, dydxFlAddr),
+                    new dfs.actions.basic.SellAction(exchangeOrder, proxy.address, proxy.address),
+                    new dfs.actions.basic.SendTokenAction(daiAddr, flActionAddr, '$1'),
+                    new dfs.actions.basic.SendTokenAction(
+                        daiAddr,
+                        senderAcc.address,
+                        hre.ethers.constants.MaxUint256,
+                    ),
                     new dfs.actions.basic.SendTokenAction(
                         tokenAddr,
                         senderAcc.address,
@@ -547,27 +567,26 @@ const mcdCreateTest = async () => {
         let makerAddresses;
         let senderAcc;
         let proxy;
-        let dydxFlAddr;
-        // let aaveV2FlAddr;
+        let flActionAddr;
         let mcdView;
         let uniWrapper;
 
         before(async () => {
+            // Preserve the legacy Maker vaults used by these recipes.
+            await resetForkToBlock(20000000);
             await redeploy('McdOpen');
             await redeploy('McdSupply');
             await redeploy('RecipeExecutor');
             await redeploy('SumInputs');
             await redeploy('McdGenerate');
-            await redeploy('FLDyDx');
-            await redeploy('FLAaveV2');
+            await redeploy('FLAction');
 
             mcdView = await redeploy('McdView');
             uniWrapper = await redeploy('UniswapWrapperV3');
 
             makerAddresses = await fetchMakerAddresses();
 
-            dydxFlAddr = await getAddrFromRegistry('FLDyDx');
-            // aaveV2FlAddr = await getAddrFromRegistry('FLAaveV2');
+            flActionAddr = await getAddrFromRegistry('FLAction');
 
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
@@ -676,11 +695,13 @@ const mcdCreateTest = async () => {
 
                 const createVaultRecipe = new dfs.Recipe('CreateVaultRecipe', [
                     // new dfs.actions.flashloan.AaveV2FlashLoanAction([daiAmount], [daiAddr], [0], nullAddress, nullAddress, []),
-                    new dfs.actions.flashloan.DyDxFlashLoanAction(
-                        daiAmount,
-                        daiAddr,
-                        nullAddress,
-                        [],
+                    new dfs.actions.flashloan.FLAction(
+                        new dfs.actions.flashloan.BalancerFlashLoanAction(
+                            [daiAddr],
+                            [daiAmount],
+                            nullAddress,
+                            [],
+                        ),
                     ),
                     new dfs.actions.basic.SellAction(exchangeOrder, proxy.address, proxy.address),
                     new dfs.actions.maker.MakerOpenVaultAction(joinAddr, MCD_MANAGER_ADDR),
@@ -695,7 +716,7 @@ const mcdCreateTest = async () => {
                     new dfs.actions.maker.MakerGenerateAction(
                         '$3',
                         '$1',
-                        dydxFlAddr,
+                        flActionAddr,
                         MCD_MANAGER_ADDR,
                     ),
                 ]);
@@ -729,15 +750,12 @@ const mcdRepayTest = async () => {
         let uniWrapper;
         let senderAcc;
         let proxy;
-        // let dydxFlAddr;
         let aaveV2FlAddr;
         let mcdView;
 
         before(async () => {
             uniWrapper = await redeploy('UniswapWrapperV3');
             mcdView = await redeploy('McdView');
-
-            // dydxFlAddr = await getAddrFromRegistry('FLDyDx');
 
             makerAddresses = await fetchMakerAddresses();
 
@@ -868,7 +886,7 @@ const mcdRepayTest = async () => {
                 );
 
                 const repayRecipe = new dfs.Recipe('FLRepayRecipe', [
-                    flAaveV2Action, // new dydxFLAction(flAmount, collToken, nullAddress, []),
+                    flAaveV2Action,
                     new SellAction(exchangeOrder, proxy.address, proxy.address),
                     new McdPaybackAction(vaultId, '$2', proxy.address, MCD_MANAGER_ADDR),
                     new McdWithdrawAction(vaultId, '$1', joinAddr, aaveV2FlAddr, MCD_MANAGER_ADDR),

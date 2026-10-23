@@ -750,7 +750,6 @@ const callFLMcdBoostStrategy = async (
     const triggerCallData = [];
     const actionsCallData = [];
 
-    // const flAction = new dfs.actions.flashloan.DyDxFlashLoanAction(boostAmount, DAI_ADDR);
     const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction([DAI_ADDR], [boostAmount]);
 
     const ratioAction = new dfs.actions.maker.MakerRatioAction('0');
