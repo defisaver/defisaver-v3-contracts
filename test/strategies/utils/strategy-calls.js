@@ -1659,14 +1659,13 @@ const callLiquityCloseToCollStrategy = async (
     subId,
     strategySub,
     flAmount,
-    balancerFlAddr,
+    flActionAddr,
     isTrailing = false,
     roundId = 0,
 ) => {
     const actionsCallData = [];
-    const flashLoanAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
-        [WETH_ADDRESS], // weth
-        [flAmount],
+    const flashLoanAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction([WETH_ADDRESS], [flAmount]),
     );
 
     const sellAction = new dfs.actions.basic.SellAction(
@@ -1687,7 +1686,7 @@ const callLiquityCloseToCollStrategy = async (
 
     const closeGasCost = 1_500_000;
     const gasFee = new dfs.actions.basic.GasFeeAction(closeGasCost, placeHolderAddr, 0);
-    const sendFL = new dfs.actions.basic.SendTokenAction(placeHolderAddr, balancerFlAddr, 0);
+    const sendFL = new dfs.actions.basic.SendTokenAction(placeHolderAddr, flActionAddr, 0);
     const sendWethToEOA = new dfs.actions.basic.SendTokenAction(
         placeHolderAddr,
         placeHolderAddr,

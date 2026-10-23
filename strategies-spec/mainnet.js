@@ -647,9 +647,11 @@ const createLiquityCloseToCollStrategy = (isTrailing = false) => {
     }
 
     liquityCloseToCollStrategy.addTrigger(trigger);
-    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
-        '%loanAmount', // (trove.debt - 200 LUSD) in weth + a bit over to handle slippage
-        '&weth', // hardcoded only weth is used (currently must be set by backend)
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['&weth'],
+            ['%loanAmount'], // (trove.debt - 200 LUSD) in weth plus slippage
+        ),
     );
 
     const sellAction = new dfs.actions.basic.SellAction(
@@ -672,7 +674,7 @@ const createLiquityCloseToCollStrategy = (isTrailing = false) => {
 
     const sendFL = new dfs.actions.basic.SendTokenAction(
         '&weth', // hardcoded only can send weth
-        '%balancerFlAddr', // kept variable this can change (FL must be paid back to work)
+        '%flActionAddr', // kept variable this can change (FL must be paid back to work)
         '$1', // hardcoded output from FL action
     );
 

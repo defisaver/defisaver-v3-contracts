@@ -35,7 +35,7 @@ const instAaveDebtShiftTest = async () => {
         let proxy;
         let ownerAcc;
         let dydxFlAddr;
-        let flMaker;
+        let flAction;
 
         /// @notice run on block number 14368070
         before(async () => {
@@ -47,7 +47,7 @@ const instAaveDebtShiftTest = async () => {
             await redeploy('AaveSupply');
             await redeploy('AaveBorrow');
             await redeploy('AavePayback');
-            flMaker = await redeploy('FLMaker');
+            flAction = await redeploy('FLAction');
             await redeploy('SendToken');
             await redeploy('RecipeExecutor');
             dydxFlAddr = await getAddrFromRegistry('FLDyDx');
@@ -79,10 +79,12 @@ const instAaveDebtShiftTest = async () => {
             [],
         );
     */
-            const flashloanAction = new dfs.actions.flashloan.MakerFlashLoanAction(
-                hre.ethers.utils.parseUnits('1000000', 18),
-                nullAddress,
-                [],
+            const flashloanAction = new dfs.actions.flashloan.FLAction(
+                new dfs.actions.flashloan.MakerFlashLoanAction(
+                    hre.ethers.utils.parseUnits('1000000', 18),
+                    nullAddress,
+                    [],
+                ),
             );
             const balanceCheckerActionUSDT = new dfs.actions.basic.TokenBalanceAction(
                 '0x531842cEbbdD378f8ee36D171d6cC9C4fcf475Ec', // VARIABLE DEBT USDT
@@ -129,7 +131,7 @@ const instAaveDebtShiftTest = async () => {
                 AAVE_MARKET,
                 DAI_ADDR,
                 '$1',
-                flMaker.address,
+                flAction.address,
             );
             // repay flashloan
             const transferRecipe = new dfs.Recipe('TransferAavePositionFromInstadapp', [

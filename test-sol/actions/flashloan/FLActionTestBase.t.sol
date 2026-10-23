@@ -44,7 +44,7 @@ abstract contract FLActionTestBase is ActionsUtils, RegistryUtils, BaseTest, Mai
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public virtual override {
-        forkFromEnv("");
+        _forkForTest();
 
         wallet = new SmartWallet(bob);
         wallet.createSafe();
@@ -63,6 +63,10 @@ abstract contract FLActionTestBase is ActionsUtils, RegistryUtils, BaseTest, Mai
     /*//////////////////////////////////////////////////////////////////////////
                                       HELPERS
     //////////////////////////////////////////////////////////////////////////*/
+    function _forkForTest() internal virtual {
+        forkFromEnv("");
+    }
+
     function _executeRecipe(StrategyModel.Recipe memory _recipe) internal {
         wallet.execute(
             address(recipeExecutor),
