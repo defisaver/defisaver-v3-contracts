@@ -83,14 +83,17 @@ library AaveV3Encode {
         );
     }
 
-    function setEMode(uint8 _categoryId, bool _useDefaultMarket, address _market)
+    function setEMode(uint8 _categoryId, bool _useDefaultMarket, address _market, address _onBehalf)
         public
         pure
         returns (bytes memory params)
     {
         params = abi.encode(
             AaveV3SetEMode.Params({
-                categoryId: _categoryId, useDefaultMarket: _useDefaultMarket, market: _market
+                categoryId: _categoryId,
+                useDefaultMarket: _useDefaultMarket,
+                market: _market,
+                onBehalf: _onBehalf
             })
         );
     }

@@ -1999,14 +1999,14 @@
     },
     {
         "name": "AaveV3SetEMode",
-        "address": "0xBe7F735d7955e0461579E34266f41F928AE06D78",
+        "address": "0x496C7Ed730E2692Fa49085aF2a9B61aCb0Bc1336",
         "id": "0x3d35d254",
         "path": "contracts/actions/aaveV3/AaveV3SetEMode.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xBe7F735d7955e0461579E34266f41F928AE06D78"]
     },
     {
         "name": "SparkSetEMode",
