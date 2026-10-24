@@ -597,14 +597,14 @@
     },
     {
         "name": "AaveV3SetEMode",
-        "address": "0x7F264737066b9b7D9729Fe9715abB97423D8b35B",
+        "address": "0xf00eEB0Cb7e6c86319022B105f261C5666535c24",
         "id": "0x3d35d254",
         "path": "contracts/actions/aaveV3/AaveV3SetEMode.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x7F264737066b9b7D9729Fe9715abB97423D8b35B"]
     },
     {
         "name": "AaveV3SwapBorrowRateMode",

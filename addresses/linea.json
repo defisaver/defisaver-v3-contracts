@@ -295,14 +295,14 @@
     },
     {
         "name": "AaveV3SetEMode",
-        "address": "0xa2ABA81e65543d18dd1a1E4A31Bc41C4a86453cf",
+        "address": "0x40C9ce603923AACD0b7407Ff0EE844c9C067cEB7",
         "id": "0x3d35d254",
         "path": "contracts/actions/aaveV3/AaveV3SetEMode.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xa2ABA81e65543d18dd1a1E4A31Bc41C4a86453cf"]
     },
     {
         "name": "AaveV3Supply",
