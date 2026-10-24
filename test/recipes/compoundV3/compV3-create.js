@@ -15,9 +15,13 @@ const {
     setNewExchangeWrapper,
     setBalance,
     fetchAmountinUSDPrice,
+    resetForkToBlock,
 } = require('../../utils/utils');
 
 const { executeAction } = require('../../utils/actions');
+const { COMP_V3_MARKETS } = require('../../utils/compoundV3');
+
+const COMET_ADDR = COMP_V3_MARKETS[1].USDC;
 
 describe('CompV3 Create test', function () {
     this.timeout(80000);
@@ -25,16 +29,19 @@ describe('CompV3 Create test', function () {
     let senderAcc;
     let proxy;
     let uniWrapper;
-    let dydxFlAddr;
+    let flActionAddr;
 
     before(async () => {
+        // Keep this legacy USDC-market fixture before collateral offboarding.
+        await resetForkToBlock(20000000);
         await redeploy('CompV3Supply');
         await redeploy('CompV3Borrow');
         await redeploy('RecipeExecutor');
-        await redeploy('FLDyDx');
+        await redeploy('FLAction');
+        await redeploy('SendToken');
         await redeploy('DFSSell');
 
-        dydxFlAddr = await getAddrFromRegistry('FLDyDx');
+        flActionAddr = await getAddrFromRegistry('FLAction');
 
         uniWrapper = await redeploy('UniswapWrapperV3');
 
@@ -65,13 +72,17 @@ describe('CompV3 Create test', function () {
 
             const recipe = new dfs.Recipe('CompoundV3 Supply & Borrow', [
                 new dfs.actions.compoundV3.CompoundV3SupplyAction(
+                    COMET_ADDR,
                     collAddress,
                     collAmount,
                     senderAcc.address,
+                    nullAddress,
                 ),
                 new dfs.actions.compoundV3.CompoundV3BorrowAction(
+                    COMET_ADDR,
                     assetAmountInWei(debtAmount, debtAsset),
                     senderAcc.address,
+                    nullAddress,
                 ),
             ]);
 
@@ -104,7 +115,7 @@ describe('CompV3 Create test', function () {
         });
     });
 
-    it('...should create a leveraged position of 2000$ in WETH/500 USDC using dYdX FL', async () => {
+    it('...should create a leveraged position of 2000$ in WETH/500 USDC using FLAction (Balancer)', async () => {
         const collAsset = 'WETH';
         const debtAsset = 'USDC';
         const fetchedAmount = fetchAmountinUSDPrice(collAsset, '2000');
@@ -129,11 +140,13 @@ describe('CompV3 Create test', function () {
 
         const recipe = new dfs.Recipe('CompoundV3 Leveraged Create Using FL', [
             // Flashloan USDC
-            new dfs.actions.flashloan.DyDxFlashLoanAction(
-                assetAmountInWei(debtAmount, debtAsset),
-                baseAssetAddress,
-                nullAddress,
-                [],
+            new dfs.actions.flashloan.FLAction(
+                new dfs.actions.flashloan.BalancerFlashLoanAction(
+                    [baseAssetAddress],
+                    [assetAmountInWei(debtAmount, debtAsset)],
+                    nullAddress,
+                    [],
+                ),
             ),
             // Sell USDC for WETH
             new dfs.actions.basic.SellAction(
@@ -147,20 +160,30 @@ describe('CompV3 Create test', function () {
                 proxy.address,
             ),
             // Supply bought WETH to Compound
-            new dfs.actions.compoundV3.CompoundV3SupplyAction(collAddress, '$2', proxy.address),
+            new dfs.actions.compoundV3.CompoundV3SupplyAction(
+                COMET_ADDR,
+                collAddress,
+                '$2',
+                proxy.address,
+                nullAddress,
+            ),
             // Supply WETH from EOA wallet to Compound
             new dfs.actions.compoundV3.CompoundV3SupplyAction(
+                COMET_ADDR,
                 collAddress,
                 collAmount,
                 senderAcc.address,
+                nullAddress,
             ),
             // Borrow USDC from Compound
             new dfs.actions.compoundV3.CompoundV3BorrowAction(
-                assetAmountInWei(debtAmount, debtAsset),
+                COMET_ADDR,
+                '$1',
                 proxy.address,
+                nullAddress,
             ),
             // Pay USDC flashloan back
-            new dfs.actions.basic.SendTokenAction(baseAssetAddress, dydxFlAddr, '$1'),
+            new dfs.actions.basic.SendTokenAction(baseAssetAddress, flActionAddr, '$1'),
         ]);
 
         const functionData = recipe.encodeForDsProxyCall();

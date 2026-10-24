@@ -4,7 +4,6 @@ const hre = require('hardhat');
 const dfs = require('@defisaver/sdk');
 
 const {
-    getAddrFromRegistry,
     getProxy,
     redeploy,
     WETH_ADDRESS,
@@ -25,8 +24,21 @@ const {
     AUNI_ADDR,
     ADAI_ADDR,
     UNI_ADDR,
+    REGISTRY_ADDR,
+    LOGGER_ADDR,
+    setCode,
 } = require('../../../utils/utils');
 const { executeAction } = require('../../../utils/actions');
+
+const resetDebtShiftFork = async () => {
+    // Both accounts still have debt here; the later fork had already repaid it.
+    await resetForkToBlock(13229894);
+    // These positions predate the current DFS registry and logger.
+    const registryArtifact = await hre.artifacts.readArtifact('DFSRegistry');
+    await setCode(REGISTRY_ADDR, registryArtifact.deployedBytecode);
+    const loggerArtifact = await hre.artifacts.readArtifact('DefisaverLogger');
+    await setCode(LOGGER_ADDR, loggerArtifact.deployedBytecode);
+};
 
 const instAaveDebtShiftTest = async () => {
     describe('Inst Aave position shift', function () {
@@ -34,30 +46,27 @@ const instAaveDebtShiftTest = async () => {
 
         let proxy;
         let ownerAcc;
-        let dydxFlAddr;
-        let flMaker;
+        let flAction;
 
-        /// @notice run on block number 14368070
         before(async () => {
-            await resetForkToBlock(14368070);
+            await resetDebtShiftFork();
             await redeploy('InstPullTokens');
             await redeploy('AaveCollateralSwitch');
             await redeploy('TokenBalance');
-            await redeploy('FLDyDx');
             await redeploy('AaveSupply');
             await redeploy('AaveBorrow');
             await redeploy('AavePayback');
-            flMaker = await redeploy('FLMaker');
+            await redeploy('AaveWithdraw');
+            flAction = await redeploy('FLAction');
             await redeploy('SendToken');
             await redeploy('RecipeExecutor');
-            dydxFlAddr = await getAddrFromRegistry('FLDyDx');
         });
 
         it('... Migrate aave position from INST (COLL : WETH, WBTC | DEBT : USDT)', async () => {
             const OWNER_ACC = '0x2Ee8670d2b936985D5fb1EE968810c155D3bB9cA';
             const dsaAddress = '0x63bf1D484d7D799722b1BA9c91f5ffa6d416D60A';
             const dsaContract = await hre.ethers.getContractAt('IInstaAccountV2', dsaAddress);
-            sendEther((await hre.ethers.getSigners())[0], OWNER_ACC, '10');
+            await sendEther((await hre.ethers.getSigners())[0], OWNER_ACC, '100');
             proxy = await getProxy(OWNER_ACC);
             // Approve dsproxy to have authority over DSA account!
             await impersonateAccount(OWNER_ACC);
@@ -71,18 +80,13 @@ const instAaveDebtShiftTest = async () => {
             const impersonatedProxy = proxy.connect(ownerAcc);
             // flashloan enough to repay all debt
 
-            /*
-        const flashloanAction = new dfs.actions.flashloan.DyDxFlashLoanAction(
-            hre.ethers.utils.parseUnits('1000', 18),
-            WETH_ADDRESS,
-            nullAddress,
-            [],
-        );
-    */
-            const flashloanAction = new dfs.actions.flashloan.MakerFlashLoanAction(
-                hre.ethers.utils.parseUnits('1000000', 18),
-                nullAddress,
-                [],
+            const flashloanAction = new dfs.actions.flashloan.FLAction(
+                new dfs.actions.flashloan.BalancerFlashLoanAction(
+                    [DAI_ADDR],
+                    [hre.ethers.utils.parseUnits('1000000', 18)],
+                    nullAddress,
+                    [],
+                ),
             );
             const balanceCheckerActionUSDT = new dfs.actions.basic.TokenBalanceAction(
                 '0x531842cEbbdD378f8ee36D171d6cC9C4fcf475Ec', // VARIABLE DEBT USDT
@@ -129,7 +133,7 @@ const instAaveDebtShiftTest = async () => {
                 AAVE_MARKET,
                 DAI_ADDR,
                 '$1',
-                flMaker.address,
+                flAction.address,
             );
             // repay flashloan
             const transferRecipe = new dfs.Recipe('TransferAavePositionFromInstadapp', [
@@ -150,6 +154,7 @@ const instAaveDebtShiftTest = async () => {
             );
             const wbtcCollAmount = await balanceOf(AWBTC_ADDR, dsaAddress);
             const wethCollAmount = await balanceOf(AWETH_ADDR, dsaAddress);
+            expect(usdtDebtAmount).to.be.gt(0);
 
             await executeAction('RecipeExecutor', functionData[1], impersonatedProxy);
             const usdtDebtAmountAfter = await balanceOf(
@@ -161,15 +166,17 @@ const instAaveDebtShiftTest = async () => {
 
             expect(wbtcCollAmount).to.be.lte(wbtcCollAmountAfter);
             expect(wethCollAmount).to.be.lte(wethCollAmountAfter);
-            console.log(usdtDebtAmount);
-            console.log(usdtDebtAmountAfter);
+            expect(usdtDebtAmountAfter).to.be.gte(usdtDebtAmount);
+            expect(
+                await balanceOf('0x531842cEbbdD378f8ee36D171d6cC9C4fcf475Ec', dsaAddress),
+            ).to.be.eq(0);
         }).timeout(1000000);
         it('... Migrate aave position from INST (COLL : WETH, LINK | DEBT : USDT, BUSD) ', async () => {
             const OWNER_ACC = '0xb5fDB9c33C4EbbF020eDE0138EdE8d7563dFe71A';
             const dsaAddress = '0x2E15905711635118da35D5aB9a0f994f2cfb304C';
             const dsaContract = await hre.ethers.getContractAt('IInstaAccountV2', dsaAddress);
 
-            sendEther((await hre.ethers.getSigners())[0], OWNER_ACC, '10');
+            await sendEther((await hre.ethers.getSigners())[0], OWNER_ACC, '100');
             proxy = await getProxy(OWNER_ACC);
             // Approve dsproxy to have authority over DSA account!
             await impersonateAccount(OWNER_ACC);
@@ -183,11 +190,13 @@ const instAaveDebtShiftTest = async () => {
             const impersonatedProxy = proxy.connect(ownerAcc);
             // flashloan enough to repay all debt
 
-            const flashloanAction = new dfs.actions.flashloan.DyDxFlashLoanAction(
-                hre.ethers.utils.parseUnits('1000', 18),
-                WETH_ADDRESS,
-                nullAddress,
-                [],
+            const flashloanAction = new dfs.actions.flashloan.FLAction(
+                new dfs.actions.flashloan.BalancerFlashLoanAction(
+                    [WETH_ADDRESS],
+                    [hre.ethers.utils.parseUnits('1000', 18)],
+                    nullAddress,
+                    [],
+                ),
             );
             const balanceCheckerActionBUSD = new dfs.actions.basic.TokenBalanceAction(
                 '0xbA429f7011c9fa04cDd46a2Da24dc0FF0aC6099c', // VARIABLE DEBT BUSD
@@ -257,7 +266,7 @@ const instAaveDebtShiftTest = async () => {
                 AAVE_MARKET,
                 WETH_ADDRESS,
                 '$1',
-                dydxFlAddr,
+                flAction.address,
             );
             const transferRecipe = new dfs.Recipe('TransferDebtlessAaveFromInstadapp', [
                 flashloanAction,
@@ -284,6 +293,8 @@ const instAaveDebtShiftTest = async () => {
             );
             const linkCollAmount = await balanceOf(ALINK_ADDR, dsaAddress);
             const wethCollAmount = await balanceOf(AWETH_ADDR, dsaAddress);
+            expect(usdtDebtAmount).to.be.gt(0);
+            expect(busdDebtAmount).to.be.gt(0);
             await executeAction('RecipeExecutor', functionData[1], impersonatedProxy);
             const busdDebtAmountAfter = await balanceOf(
                 '0xbA429f7011c9fa04cDd46a2Da24dc0FF0aC6099c',
@@ -297,10 +308,14 @@ const instAaveDebtShiftTest = async () => {
             const wethCollAmountAfter = await balanceOf(AWETH_ADDR, proxy.address);
             expect(linkCollAmount).to.be.lte(linkCollAmountAfter);
             expect(wethCollAmount).to.be.lte(wethCollAmountAfter);
-            console.log(usdtDebtAmount);
-            console.log(usdtDebtAmountAfter);
-            console.log(busdDebtAmount);
-            console.log(busdDebtAmountAfter);
+            expect(usdtDebtAmountAfter).to.be.gte(usdtDebtAmount);
+            expect(busdDebtAmountAfter).to.be.gte(busdDebtAmount);
+            expect(
+                await balanceOf('0x531842cEbbdD378f8ee36D171d6cC9C4fcf475Ec', dsaAddress),
+            ).to.be.eq(0);
+            expect(
+                await balanceOf('0xbA429f7011c9fa04cDd46a2Da24dc0FF0aC6099c', dsaAddress),
+            ).to.be.eq(0);
         }).timeout(1000000);
     });
 };
@@ -381,28 +396,26 @@ const instCompDebtShiftTest = async () => {
 
         let proxy;
         let ownerAcc;
-        let dydxFlAddr;
-
-        /// @notice run on block number #13229894
+        let flAction;
 
         before(async () => {
-            await resetForkToBlock(13229894);
+            await resetDebtShiftFork();
             await redeploy('InstPullTokens');
             await redeploy('CompCollateralSwitch');
             await redeploy('TokenBalance');
-            await redeploy('FLDyDx');
+            flAction = await redeploy('FLAction');
+            await redeploy('RecipeExecutor');
             await redeploy('CompGetDebt');
             await redeploy('CompBorrow');
             await redeploy('CompPayback');
             await redeploy('CompSupply');
             await redeploy('CompWithdraw');
-            dydxFlAddr = await getAddrFromRegistry('FLDyDx');
         });
         it('... Migrate Comp position from INST (COLL : COMP, UNI | DEBT : DAI, USDC)', async () => {
             const OWNER_ACC = '0x9488B8F6BcB897314bcB4Fd986C7C39dc26Dc51f';
             const dsaAddress = '0x2BC853B03481F0EA9e7a02D8E92fDC446f1966C6';
             const dsaContract = await hre.ethers.getContractAt('IInstaAccountV2', dsaAddress);
-            sendEther((await hre.ethers.getSigners())[0], OWNER_ACC, '10');
+            await sendEther((await hre.ethers.getSigners())[0], OWNER_ACC, '100');
             proxy = await getProxy(OWNER_ACC);
             // Approve dsproxy to have authority over DSA account!
             await impersonateAccount(OWNER_ACC);
@@ -421,11 +434,13 @@ const instCompDebtShiftTest = async () => {
             const CCOMP_ADDR = '0x70e36f6BF80a52b3B46b3aF8e106CC0ed743E8e4';
             const CUNI_ADDR = '0x35A18000230DA775CAc24873d00Ff85BccdeD550';
 
-            const flashloanAction = new dfs.actions.flashloan.DyDxFlashLoanAction(
-                hre.ethers.utils.parseUnits('5000', 18),
-                WETH_ADDRESS,
-                nullAddress,
-                [],
+            const flashloanAction = new dfs.actions.flashloan.FLAction(
+                new dfs.actions.flashloan.BalancerFlashLoanAction(
+                    [WETH_ADDRESS],
+                    [hre.ethers.utils.parseUnits('5000', 18)],
+                    nullAddress,
+                    [],
+                ),
             );
             const daiCompGetDebtAction = new dfs.actions.compound.CompoundGetDebtAction(
                 CDAI_ADDR,
@@ -475,7 +490,7 @@ const instCompDebtShiftTest = async () => {
             const compWithdrawAction = new dfs.actions.compound.CompoundWithdrawAction(
                 CETH_ADDR,
                 '$1',
-                dydxFlAddr,
+                flAction.address,
             );
             // repay flashloan
             const transferRecipe = new dfs.Recipe('TransferCompoundPositionFromInstadapp', [

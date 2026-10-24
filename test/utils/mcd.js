@@ -20,7 +20,7 @@ const cropData = {
 
 const canGenerateDebt = async (ilkInfo) => {
     const vat = await hre.ethers.getContractAt(
-        'IVat',
+        'contracts/interfaces/protocols/mcd/IVat.sol:IVat',
         '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B',
     );
 

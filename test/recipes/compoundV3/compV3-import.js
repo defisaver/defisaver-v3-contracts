@@ -15,9 +15,12 @@ const {
     getAddrFromRegistry,
     setBalance,
     nullAddress,
+    resetForkToBlock,
 } = require('../../utils/utils');
 
-const { getSupportedAssets, COMET_ADDR } = require('../../utils/compoundV3');
+const { COMP_V3_MARKETS } = require('../../utils/compoundV3');
+
+const COMET_ADDR = COMP_V3_MARKETS[1].USDC;
 
 describe('CompoundV3 Import recipe test', function () {
     this.timeout(80000);
@@ -28,7 +31,7 @@ describe('CompoundV3 Import recipe test', function () {
     let compV3View;
     let comet;
     let assets;
-    let dydxFlAddr;
+    let flActionAddr;
     let snapshot;
 
     beforeEach(async () => {
@@ -40,6 +43,8 @@ describe('CompoundV3 Import recipe test', function () {
     });
 
     before(async () => {
+        // Keep this legacy USDC-market fixture before collateral offboarding.
+        await resetForkToBlock(20000000);
         uniWrapper = await redeploy('UniswapWrapperV3');
         await redeploy('CompV3Supply');
         await redeploy('CompV3Withdraw');
@@ -47,13 +52,17 @@ describe('CompoundV3 Import recipe test', function () {
         await redeploy('CompV3Payback');
         await redeploy('CompV3Borrow');
         await redeploy('CompV3Transfer');
+        await redeploy('RecipeExecutor');
+        await redeploy('FLAction');
+        await redeploy('SendToken');
+        flActionAddr = await getAddrFromRegistry('FLAction');
 
         const compV3ViewAddr = await getAddrFromRegistry('CompV3View');
         compV3View = await hre.ethers.getContractAt('CompV3View', compV3ViewAddr);
 
         comet = await hre.ethers.getContractAt('IComet', COMET_ADDR);
 
-        assets = await getSupportedAssets(compV3View);
+        assets = await compV3View.getAssets(COMET_ADDR);
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
@@ -83,23 +92,26 @@ describe('CompoundV3 Import recipe test', function () {
             await comet.connect(senderAcc).supply(token.address, amount);
         }
 
-        const userData = await compV3View.getLoanData(senderAcc.address);
+        const userData = await compV3View.getLoanData(COMET_ADDR, senderAcc.address);
         const userDeposit = userData.depositAmount;
         const userDepositValue = userData.depositValue;
 
-        const oldProxyData = await compV3View.getLoanData(proxy.address);
+        const oldProxyData = await compV3View.getLoanData(COMET_ADDR, proxy.address);
         const oldProxyDepositValue = oldProxyData.depositValue;
         for (let i = 0; i < oldProxyData.collAmounts.length; i++) {
             await withdrawCompV3(
+                COMET_ADDR,
                 proxy,
-                proxy.address,
                 oldProxyData.collAddr[i],
                 oldProxyData.collAmounts[i],
+                nullAddress,
+                proxy.address,
             );
         }
         await comet.allow(proxy.address, true);
 
         const compV3TransferDepositAction = new dfs.actions.compoundV3.CompoundV3TransferAction(
+            COMET_ADDR,
             senderAcc.address,
             proxy.address,
             USDC_ADDR,
@@ -111,6 +123,7 @@ describe('CompoundV3 Import recipe test', function () {
             if (collAmounts[i] !== 0) {
                 transferCollateralActions.push(
                     new dfs.actions.compoundV3.CompoundV3TransferAction(
+                        COMET_ADDR,
                         senderAcc.address,
                         proxy.address,
                         userData.collAddr[i],
@@ -128,15 +141,14 @@ describe('CompoundV3 Import recipe test', function () {
 
         await executeAction('RecipeExecutor', functionData[1], proxy);
 
-        const proxyData = await compV3View.getLoanData(proxy.address);
+        const proxyData = await compV3View.getLoanData(COMET_ADDR, proxy.address);
         const proxyDepositValue = proxyData.depositValue;
         const proxyCollateralAmounts = proxyData.collAmounts;
         for (let i = 0; i < collAmounts.length; i++) {
             expect(collAmounts[i]).to.be.equal(proxyCollateralAmounts[i]);
         }
-        expect(userDepositValue.toString()).to.be.equal(
-            (proxyDepositValue - oldProxyDepositValue).toString(),
-        );
+        // Account for interest accrual and Comet's principal conversion rounding.
+        expect(proxyDepositValue.sub(oldProxyDepositValue)).to.be.closeTo(userDepositValue, 10);
     });
 
     it('... should import position with debt ', async () => {
@@ -158,7 +170,7 @@ describe('CompoundV3 Import recipe test', function () {
 
         await comet.connect(senderAcc).withdraw(USDC_ADDR, USDCamount);
 
-        const userData = await compV3View.getLoanData(senderAcc.address);
+        const userData = await compV3View.getLoanData(COMET_ADDR, senderAcc.address);
         const userBorrow = userData.borrowAmount;
         const userBorrowAmount = userData.borrowAmount;
 
@@ -166,21 +178,25 @@ describe('CompoundV3 Import recipe test', function () {
 
         const flashloanAmount = userBorrow.add(2000);
 
-        const oldProxyData = await compV3View.getLoanData(proxy.address);
+        const oldProxyData = await compV3View.getLoanData(COMET_ADDR, proxy.address);
         for (let i = 0; i < oldProxyData.collAmounts.length; i++) {
             await withdrawCompV3(
+                COMET_ADDR,
                 proxy,
-                proxy.address,
                 oldProxyData.collAddr[i],
                 oldProxyData.collAmounts[i],
+                nullAddress,
+                proxy.address,
             );
         }
 
-        const flashLoanAction = new dfs.actions.flashloan.DyDxFlashLoanAction(
-            flashloanAmount,
-            USDC_ADDR,
-            nullAddress,
-            [],
+        const flashLoanAction = new dfs.actions.flashloan.FLAction(
+            new dfs.actions.flashloan.BalancerFlashLoanAction(
+                [USDC_ADDR],
+                [flashloanAmount],
+                nullAddress,
+                [],
+            ),
         );
 
         const collAmounts = userData.collAmounts;
@@ -189,6 +205,7 @@ describe('CompoundV3 Import recipe test', function () {
             if (collAmounts[i] !== 0) {
                 transferCollateralActions.push(
                     new dfs.actions.compoundV3.CompoundV3TransferAction(
+                        COMET_ADDR,
                         senderAcc.address,
                         proxy.address,
                         userData.collAddr[i],
@@ -198,25 +215,30 @@ describe('CompoundV3 Import recipe test', function () {
             }
         }
 
-        dydxFlAddr = await getAddrFromRegistry('FLDyDx');
-
         const transferRecipe = new dfs.Recipe('TransferRecipe', [
             flashLoanAction,
             new dfs.actions.compoundV3.CompoundV3PaybackAction(
+                COMET_ADDR,
                 flashloanAmount,
                 proxy.address,
                 senderAcc.address,
+                USDC_ADDR,
             ),
             ...transferCollateralActions,
-            new dfs.actions.compoundV3.CompoundV3BorrowAction('$2', proxy.address),
-            new dfs.actions.basic.SendTokenAction(USDC_ADDR, dydxFlAddr, flashloanAmount),
+            new dfs.actions.compoundV3.CompoundV3BorrowAction(
+                COMET_ADDR,
+                '$2',
+                proxy.address,
+                nullAddress,
+            ),
+            new dfs.actions.basic.SendTokenAction(USDC_ADDR, flActionAddr, '$1'),
         ]);
 
         const functionData = transferRecipe.encodeForDsProxyCall();
 
         await executeAction('RecipeExecutor', functionData[1], proxy);
 
-        const proxyData = await compV3View.getLoanData(proxy.address);
+        const proxyData = await compV3View.getLoanData(COMET_ADDR, proxy.address);
 
         const proxyBorrowAmount = proxyData.borrowAmount;
         const proxyCollateralAmounts = proxyData.collAmounts;

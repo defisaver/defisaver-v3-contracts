@@ -635,7 +635,7 @@ const liquityCloseToCollStrategyTest = async () => {
     describe('Liquity-Close-To-Coll', function () {
         this.timeout(1200000);
 
-        let balancerFL;
+        let flAction;
 
         let senderAcc;
         let proxy;
@@ -664,7 +664,7 @@ const liquityCloseToCollStrategyTest = async () => {
 
             mockedPriceFeed = mockChainlinkPriceFeed();
 
-            balancerFL = await redeploy('FLBalancer');
+            flAction = await redeploy('FLAction');
 
             await redeploy('DFSSell');
             await redeploy('GasFeeTaker');
@@ -743,7 +743,7 @@ const liquityCloseToCollStrategyTest = async () => {
                 subId,
                 strategySub,
                 flAmount,
-                balancerFL.address,
+                flAction.address,
                 true,
                 roundId - 1,
             );
@@ -760,6 +760,7 @@ const liquityCloseToCollStrategyTest = async () => {
         });
 
         it('... should make a new Liquity close to coll strategy', async () => {
+            const strategyId = await createStrategy(...createLiquityCloseToCollStrategy(), false);
             // create new liq. position
             await depositToWeth(troveAmount);
             await send(WETH_ADDRESS, proxyAddr, troveAmount);
@@ -782,6 +783,7 @@ const liquityCloseToCollStrategyTest = async () => {
                 proxy,
                 targetPrice,
                 RATIO_STATE_OVER,
+                strategyId,
             ));
         });
 
@@ -802,7 +804,7 @@ const liquityCloseToCollStrategyTest = async () => {
                 subId,
                 strategySub,
                 flAmount,
-                balancerFL.address,
+                flAction.address,
             );
 
             // balance of eth and lusd should increase
@@ -828,7 +830,7 @@ const liquityCloseToCollStrategyTest = async () => {
                     subId,
                     strategySub,
                     flAmount,
-                    balancerFL.address,
+                    flAction.address,
                 );
             } catch (err) {
                 expect(err.toString()).to.have.string('SubNotEnabled');

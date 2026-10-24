@@ -674,20 +674,31 @@
     },
     {
         "name": "FLAction",
-        "address": "0xB57b666dAB46229e2b80113b5187F6DCD91AB159",
+        "address": "0x14762eEE465a0A4649D5744106De68b59047cB40",
         "id": "0xbcab5e2a",
         "path": "contracts/actions/flashloan/FLAction.sol",
-        "version": "1.0.5",
+        "version": "1.0.6",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xB57b666dAB46229e2b80113b5187F6DCD91AB159",
             "0xfF05C70C8d69258052228F28e571c3BFe54631c3",
             "0x13663f7f852dFa7ec6517B5F3B0caabDBd9bf049",
             "0x82d5eDeb005AfFbF381B5949C707a3305160F4A9",
             "0xE668197A175E7A2143222a028470c6ABBBD183F6",
             "0x5fA356C700F0C8A6f445B8a36Eb6e108590919D4"
         ]
+    },
+    {
+        "name": "FLActionL2",
+        "address": "0x14762eEE465a0A4649D5744106De68b59047cB40",
+        "id": "0x9f01e6ae",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     },
     {
         "name": "TokenizedVaultAdapter",
@@ -887,16 +898,6 @@
             "0x6272515E2cC68DE4Eae333A8B2e277C54a9024da",
             "0x7A36779a7b5F1128B28932604057d5b63361297c"
         ]
-    },
-    {
-        "name": "FLActionL2",
-        "address": "0x352D4a1622f2DC34c738F542934372855f219F05",
-        "id": "0x9f01e6ae",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
     },
     {
         "name": "ToggleSub",

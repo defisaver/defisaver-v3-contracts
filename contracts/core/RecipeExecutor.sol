@@ -271,6 +271,7 @@ contract RecipeExecutor is
 
     /// @notice This is the callback function that FL actions call
     /// @dev FL function must be the first action and repayment is done last
+    /// @dev This function is callable by anyone, but only calls originating from a flash loan action have semantic meaning.
     /// @param _currRecipe Recipe to be executed
     /// @param _flAmount Result value from FL action
     function executeActionsFromFL(Recipe calldata _currRecipe, bytes32 _flAmount)
