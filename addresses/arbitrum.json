@@ -754,6 +754,16 @@
         ]
     },
     {
+        "name": "FLActionL2",
+        "address": "0xC3841d482C85910082295C51D425b674Ff2FFC7A",
+        "id": "0x9f01e6ae",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "TokenBalance",
         "address": "0x483B903E702F60698Dd8124558C6199922737f1F",
         "id": "0x019d9978",
@@ -893,16 +903,6 @@
             "0x82AF88864E1A9dC1d6d2931C60A1CA25E4951487",
             "0x0Cf69Cc3A9f9d1848C78e745c504d5AA320a8153"
         ]
-    },
-    {
-        "name": "FLActionL2",
-        "address": "0x3Cc0d5DAE1B94e294152C3150aA732b97af603E1",
-        "id": "0x9f01e6ae",
-        "version": "1.0.1",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
     },
     {
         "name": "TimestampTrigger",

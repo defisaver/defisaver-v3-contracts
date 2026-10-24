@@ -680,6 +680,16 @@
         ]
     },
     {
+        "name": "FLActionL2",
+        "address": "0x14762eEE465a0A4649D5744106De68b59047cB40",
+        "id": "0x9f01e6ae",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "TokenizedVaultAdapter",
         "address": "0xdf31669FEd440f5BfF658ca0bBF0D22B8abdeb73",
         "id": "0x3e46d5ba",

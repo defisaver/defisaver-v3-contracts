@@ -307,6 +307,16 @@
         ]
     },
     {
+        "name": "FLActionL2",
+        "address": "0x11f6eD2d31f531eeb82400b8215a13B6dF040D56",
+        "id": "0x9f01e6ae",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "FLAaveV3WithFee",
         "address": "0x79Eb9cEe432Cd3e7b09A9eFdB21A733A6d7b4c3A",
         "id": "0xe10b7b9d",
