@@ -889,16 +889,6 @@
         ]
     },
     {
-        "name": "FLActionL2",
-        "address": "0x352D4a1622f2DC34c738F542934372855f219F05",
-        "id": "0x9f01e6ae",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
-    },
-    {
         "name": "ToggleSub",
         "address": "0xfc19a12e35bb0b5e6a3d3017be9e9022a6486eee",
         "id": "0xd6499530",
