@@ -1442,6 +1442,31 @@ const deployAaveV3GenericFLDebtSwitchStrategy = async () => {
     return flDebtSwitchStrategyId;
 };
 
+const signATokenPermit = async (owner, token, spender, amount) => {
+    const nonce = await token.nonces(owner.address);
+    const deadline = (await hre.ethers.provider.getBlock('latest')).timestamp + 3600;
+    const domain = {
+        name: await token.name(),
+        version: '1',
+        chainId: (await hre.ethers.provider.getNetwork()).chainId,
+        verifyingContract: token.address,
+    };
+    const signature = await owner._signTypedData(
+        domain,
+        {
+            Permit: [
+                { name: 'owner', type: 'address' },
+                { name: 'spender', type: 'address' },
+                { name: 'value', type: 'uint256' },
+                { name: 'nonce', type: 'uint256' },
+                { name: 'deadline', type: 'uint256' },
+            ],
+        },
+        { owner: owner.address, spender, value: amount, nonce, deadline },
+    );
+    return { ...hre.ethers.utils.splitSignature(signature), deadline };
+};
+
 module.exports = {
     getAaveDataProvider,
     getAaveLendingPoolV2,
@@ -1469,6 +1494,7 @@ module.exports = {
     AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST,
     AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY,
     aaveV2assetsDefaultMarket,
+    signATokenPermit,
     AAVE_NO_DEBT_MODE,
     STABLE_RATE,
     VARIABLE_RATE,
