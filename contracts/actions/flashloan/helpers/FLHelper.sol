@@ -5,6 +5,7 @@ pragma solidity =0.8.24;
 import { IRecipeExecutor } from "../../../interfaces/core/IRecipeExecutor.sol";
 import { ISafe } from "../../../interfaces/protocols/safe/ISafe.sol";
 import { IDSProxy } from "../../../interfaces/DS/IDSProxy.sol";
+import { IDFSWallet } from "../../../interfaces/dfsWallet/IDFSWallet.sol";
 import { IDFSRegistry } from "../../../interfaces/core/IDFSRegistry.sol";
 import {
     IAccountImplementation
@@ -41,6 +42,12 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
         bytes memory data = abi.encodeWithSelector(
             IRecipeExecutor.executeActionsFromFL.selector, _currRecipe, _paybackAmount
         );
+
+        if (_walletType == WalletType.DFS) {
+            IDFSWallet(_wallet).execute(DFSIds.RECIPE_EXECUTOR, data);
+
+            return;
+        }
 
         if (_walletType == WalletType.DSPROXY) {
             IDSProxy(_wallet).execute{ value: address(this).balance }(target, data);

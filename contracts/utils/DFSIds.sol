@@ -2,6 +2,7 @@
 pragma solidity =0.8.24;
 
 library DFSIds {
+    bytes4 internal constant DFS_WALLET_FACTORY = bytes4(keccak256("DFSWalletFactory"));
     bytes4 internal constant DFS_PROXY_REGISTRY_V2 = bytes4(keccak256("DFSProxyRegistryV2"));
     bytes4 internal constant RECIPE_EXECUTOR = bytes4(keccak256("RecipeExecutor"));
     bytes4 internal constant STRATEGY_EXECUTOR = bytes4(keccak256("StrategyExecutorID")); // Abstract, so support both L1 and L2

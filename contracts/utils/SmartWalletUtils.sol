@@ -3,32 +3,35 @@
 pragma solidity =0.8.24;
 
 import { IDSProxyFactory } from "../interfaces/DS/IDSProxyFactory.sol";
+import { IDFSWalletFactory } from "../interfaces/dfsWallet/IDFSWalletFactory.sol";
 import { IInstaList } from "../interfaces/protocols/insta/IInstaList.sol";
 import { IDSProxy } from "../interfaces/DS/IDSProxy.sol";
+import { IDFSWallet } from "../interfaces/dfsWallet/IDFSWallet.sol";
 import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
+
 import { DSProxyFactoryHelper } from "../utils/addresses/dsProxyFactory/DSProxyFactoryHelper.sol";
 import {
     DSAProxyFactoryHelper
 } from "../utils/addresses/dsaProxyFactory/DSAProxyFactoryHelper.sol";
 import { SFProxyFactoryHelper } from "../utils/addresses/sfProxyFactory/SFProxyFactoryHelper.sol";
+import {
+    DFSWalletFactoryHelper
+} from "../utils/addresses/dfsWalletFactory/DFSWalletFactoryHelper.sol";
 import { WalletType } from "../utils/DFSTypes.sol";
 
 /// @title SmartWalletUtils - Helper contract with utility functions for smart wallets
-contract SmartWalletUtils is DSProxyFactoryHelper, DSAProxyFactoryHelper, SFProxyFactoryHelper {
+contract SmartWalletUtils is
+    DSProxyFactoryHelper,
+    DSAProxyFactoryHelper,
+    SFProxyFactoryHelper,
+    DFSWalletFactoryHelper
+{
     /// @notice Determine the type of wallet an address represents
     function _getWalletType(address _wallet) internal view returns (WalletType) {
-        if (_isDSProxy(_wallet)) {
-            return WalletType.DSPROXY;
-        }
-
-        if (_isDSAProxy(_wallet)) {
-            return WalletType.DSAPROXY;
-        }
-
-        if (_isSFProxy(_wallet)) {
-            return WalletType.SFPROXY;
-        }
-
+        if (_isDSProxy(_wallet)) return WalletType.DSPROXY;
+        if (_isDFSWallet(_wallet)) return WalletType.DFS;
+        if (_isDSAProxy(_wallet)) return WalletType.DSAPROXY;
+        if (_isSFProxy(_wallet)) return WalletType.SFPROXY;
         // Otherwise, we assume we are in context of Safe
         return WalletType.SAFE;
     }
@@ -48,13 +51,20 @@ contract SmartWalletUtils is DSProxyFactoryHelper, DSAProxyFactoryHelper, SFProx
         return _wallet.codehash == SF_PROXY_CODEHASH;
     }
 
+    /// @notice Checks if the wallet is a DFSWallet
+    function _isDFSWallet(address _wallet) internal view returns (bool) {
+        address factory = _getDFSWalletFactory();
+        return factory != address(0) && IDFSWalletFactory(factory).isWallet(_wallet);
+    }
+
     /// @notice Fetch the owner of the smart wallet or the wallet itself
     /// @dev For 1/1 Safe it returns the owner, otherwise it returns the wallet itself
-    /// @dev Only supports Safe and DSProxy wallets because SFProxy and DSAProxy are not part of automation
+    /// @dev Only supports Safe, DSProxy and DFSWallet wallets because SFProxy and DSAProxy are not part of automation
     /// @param _wallet Address of the smart wallet
     /// @return Address of the owner or wallet
     function _fetchOwnerOrWallet(address _wallet) internal view returns (address) {
         if (_isDSProxy(_wallet)) return IDSProxy(_wallet).owner();
+        if (_isDFSWallet(_wallet)) return IDFSWallet(_wallet).owner();
 
         // Otherwise, we assume we are in context of Safe
         address[] memory owners = ISafe(_wallet).getOwners();

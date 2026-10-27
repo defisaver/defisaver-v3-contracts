@@ -11,12 +11,15 @@ import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
 import { StrategyModel } from "./StrategyModel.sol";
 import { BotAuth } from "./BotAuth.sol";
 import { CoreHelper } from "../helpers/CoreHelper.sol";
+import { WalletType } from "../../utils/DFSTypes.sol";
 import { DFSIds } from "../../utils/DFSIds.sol";
 
 /// @title StrategyExecutorCommon - Common contract used by StrategyExecutor and StrategyExecutorL2
 abstract contract StrategyExecutorCommon is StrategyModel, AdminAuth, CoreHelper, SmartWalletUtils {
     IDFSRegistry private constant registry = IDFSRegistry(REGISTRY_ADDR);
 
+    /// Strategy execution is only available for supported automation wallets
+    error UnsupportedWalletType(WalletType walletType);
     /// Caller must be authorized bot
     error BotNotApproved(address, uint256);
     /// Subscription must be enabled
@@ -43,7 +46,8 @@ abstract contract StrategyExecutorCommon is StrategyModel, AdminAuth, CoreHelper
         StrategySub memory _sub,
         address _userWallet
     ) internal {
-        address authAddr = _isDSProxy(_userWallet) ? PROXY_AUTH_ADDR : MODULE_AUTH_ADDR;
+        WalletType walletType = _getWalletType(_userWallet);
+        address authAddr = _getAuthAddress(walletType);
 
         IAuth(authAddr).callExecute{ value: msg.value }(
             _userWallet,
@@ -57,5 +61,13 @@ abstract contract StrategyExecutorCommon is StrategyModel, AdminAuth, CoreHelper
                 _sub
             )
         );
+    }
+
+    /// @notice Returns the auth adapter for a supported automation wallet.
+    function _getAuthAddress(WalletType _walletType) internal pure returns (address) {
+        if (_walletType == WalletType.DSPROXY) return PROXY_AUTH_ADDR;
+        if (_walletType == WalletType.SAFE) return MODULE_AUTH_ADDR;
+        if (_walletType == WalletType.DFS) return DFS_WALLET_AUTH_ADDR;
+        revert UnsupportedWalletType(_walletType);
     }
 }

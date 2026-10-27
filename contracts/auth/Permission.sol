@@ -6,6 +6,7 @@ import { SafeModulePermission } from "./SafeModulePermission.sol";
 import { DSProxyPermission } from "./DSProxyPermission.sol";
 import { DSAProxyPermission } from "./DSAProxyPermission.sol";
 import { SFProxyPermission } from "./SFProxyPermission.sol";
+import { DFSWalletPermission } from "./DFSWalletPermission.sol";
 import { WalletType } from "../utils/DFSTypes.sol";
 
 /// @title Permission contract to give execute permission on Smart Wallets
@@ -14,20 +15,35 @@ contract Permission is
     DSProxyPermission,
     SafeModulePermission,
     DSAProxyPermission,
-    SFProxyPermission
+    SFProxyPermission,
+    DFSWalletPermission
 {
-    /// @notice Gives permission to Auth contract used by dfs automation
-    function _givePermissionToAuthContract(bool _isDSProxyWallet) internal {
-        _isDSProxyWallet
-            ? _giveProxyPermission(PROXY_AUTH_ADDRESS)
-            : _enableModule(MODULE_AUTH_ADDRESS);
+    error UnsupportedWalletType(WalletType walletType);
+
+    /// @notice Enables automation for DSProxy, Safe or DFSWallet.
+    function _givePermissionToAuthContract(WalletType _walletType) internal {
+        if (_walletType == WalletType.DSPROXY) {
+            _giveProxyPermission(PROXY_AUTH_ADDRESS);
+        } else if (_walletType == WalletType.SAFE) {
+            _enableModule(MODULE_AUTH_ADDRESS);
+        } else if (_walletType == WalletType.DFS) {
+            _giveDFSWalletPermission(DFS_WALLET_AUTH_ADDRESS);
+        } else {
+            revert UnsupportedWalletType(_walletType);
+        }
     }
 
-    /// @notice Removes permission for Auth contract used by dfs automation
-    function _removePermissionFromAuthContract(bool _isDSProxyWallet) internal {
-        _isDSProxyWallet
-            ? _removeProxyPermission(PROXY_AUTH_ADDRESS)
-            : _disableModule(MODULE_AUTH_ADDRESS);
+    /// @notice Disables automation for DSProxy, Safe or DFSWallet.
+    function _removePermissionFromAuthContract(WalletType _walletType) internal {
+        if (_walletType == WalletType.DSPROXY) {
+            _removeProxyPermission(PROXY_AUTH_ADDRESS);
+        } else if (_walletType == WalletType.SAFE) {
+            _disableModule(MODULE_AUTH_ADDRESS);
+        } else if (_walletType == WalletType.DFS) {
+            _removeDFSWalletPermission(DFS_WALLET_AUTH_ADDRESS);
+        } else {
+            revert UnsupportedWalletType(_walletType);
+        }
     }
 
     /// @notice Gives permission to an arbitrary contract
@@ -35,7 +51,9 @@ contract Permission is
     /// @param _walletType Type of smart wallet
     /// @param _to Address of the contract to give permission to
     function _givePermissionTo(WalletType _walletType, address _to) internal {
-        if (_walletType == WalletType.DSPROXY) {
+        if (_walletType == WalletType.DFS) {
+            _giveDFSWalletPermission(_to);
+        } else if (_walletType == WalletType.DSPROXY) {
             _giveProxyPermission(_to);
         } else if (_walletType == WalletType.DSAPROXY) {
             _giveDSAProxyPermission(_to);
@@ -51,7 +69,9 @@ contract Permission is
     /// @param _walletType Type of smart wallet
     /// @param _from Address of the contract to remove permission from
     function _removePermissionFrom(WalletType _walletType, address _from) internal {
-        if (_walletType == WalletType.DSPROXY) {
+        if (_walletType == WalletType.DFS) {
+            _removeDFSWalletPermission(_from);
+        } else if (_walletType == WalletType.DSPROXY) {
             _removeProxyPermission(_from);
         } else if (_walletType == WalletType.DSAPROXY) {
             _removeDSAProxyPermission(_from);

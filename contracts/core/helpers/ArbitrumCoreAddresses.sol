@@ -8,6 +8,7 @@ contract ArbitrumCoreAddresses {
 
     address internal constant PROXY_AUTH_ADDR = 0xF3A8479538319756e100C386b3E60BF783680d8f;
     address internal constant MODULE_AUTH_ADDR = 0xb3D6b7F561C1F250bF7f0F00eFD19FAE6cE533dd;
+    address internal constant DFS_WALLET_AUTH_ADDR = address(0xDF02);
 
     address internal constant SUB_STORAGE_ADDR = 0x24ab68395660b910BfBF1cc88BaA316BA06354eE;
     address internal constant BUNDLE_STORAGE_ADDR = 0x8332F2a50A9a6C85a476e1ea33031681291cB694;
