@@ -17,6 +17,7 @@
 
 pragma solidity =0.8.24;
 
+import { IDFSWallet } from "../interfaces/dfsWallet/IDFSWallet.sol";
 import { IDSAuthority } from "../interfaces/DS/IDSAuthority.sol";
 import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 import { IDFSWalletFactory } from "../interfaces/dfsWallet/IDFSWalletFactory.sol";
@@ -24,7 +25,7 @@ import { IDFSWalletFactory } from "../interfaces/dfsWallet/IDFSWalletFactory.sol
 /// @title DFSWallet - DFSRegistry-routed delegatecall wallet
 /// @dev Adapted from DappHub DSProxy (2017), modified by DeFi Saver (2026)
 ///      Uses registry IDs, removes cache and DSNote, and synchronizes ownership with its factory.
-contract DFSWallet {
+contract DFSWallet is IDFSWallet {
     /*//////////////////////////////////////////////////////////////
                             STORAGE
     //////////////////////////////////////////////////////////////*/

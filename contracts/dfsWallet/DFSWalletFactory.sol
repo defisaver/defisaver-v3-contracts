@@ -2,6 +2,7 @@
 
 pragma solidity =0.8.24;
 
+import { IDFSWalletFactory } from "../interfaces/dfsWallet/IDFSWalletFactory.sol";
 import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 import { IDFSWallet } from "../interfaces/dfsWallet/IDFSWallet.sol";
 import { DFSWallet } from "./DFSWallet.sol";
@@ -13,7 +14,7 @@ import { AdminAuth } from "../auth/AdminAuth.sol";
 /// @title DFSWalletFactory - DFS Wallets deployment and ownership discovery
 /// @notice Tracks multiple wallets per owner and supports user/admin exclusions.
 /// @dev Discovery does not certify that a wallet or its retained permissions are trusted.
-contract DFSWalletFactory is AdminAuth, DFSWalletFactoryHelper {
+contract DFSWalletFactory is AdminAuth, DFSWalletFactoryHelper, IDFSWalletFactory {
     /*//////////////////////////////////////////////////////////////
                             CONSTANTS
     //////////////////////////////////////////////////////////////*/
@@ -71,13 +72,13 @@ contract DFSWalletFactory is AdminAuth, DFSWalletFactoryHelper {
     //////////////////////////////////////////////////////////////*/
 
     /// @notice Creates a wallet owned by the caller.
-    function build() external returns (DFSWallet) {
+    function build() external returns (IDFSWallet) {
         return build(msg.sender);
     }
 
     /// @notice Creates a wallet for a nonzero owner.
-    function build(address _owner) public returns (DFSWallet wallet) {
-        wallet = new DFSWallet(_owner, DFS_REGISTRY);
+    function build(address _owner) public returns (IDFSWallet wallet) {
+        wallet = IDFSWallet(new DFSWallet(_owner, DFS_REGISTRY));
         isWallet[address(wallet)] = true;
         trackedOwner[address(wallet)] = _owner;
         _addWallet(_owner, address(wallet));

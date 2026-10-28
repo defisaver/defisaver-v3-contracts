@@ -6,7 +6,7 @@ import { IDFSWallet } from "./IDFSWallet.sol";
 import { IDFSRegistry } from "../core/IDFSRegistry.sol";
 
 interface IDFSWalletFactory {
-    function dfsRegistry() external view returns (IDFSRegistry);
+    function DFS_REGISTRY() external view returns (IDFSRegistry);
     function isWallet(address _wallet) external view returns (bool);
     function trackedOwner(address _wallet) external view returns (address);
     function indexPlusOne(address _user, address _wallet) external view returns (uint256);
