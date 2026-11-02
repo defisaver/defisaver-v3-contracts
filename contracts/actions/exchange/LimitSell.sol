@@ -12,6 +12,9 @@ import { GasFeeHelper } from "../fee/helpers/GasFeeHelper.sol";
 contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
     using TokenUtils for address;
 
+    /// @notice Minimum fee divider, limiting the maximum fee to 25 bps (0.25%)
+    uint256 public constant MIN_FEE_DIVIDER = 400;
+
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 
     error WrongPriceFromTrigger(uint256 expected, uint256 actual);
@@ -81,8 +84,9 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
         uint256 currPrice = uint256(tempStorage.getBytes32("CURR_PRICE"));
         require(currPrice > 0, "LimitSell: Price not set");
 
-        // no fee for limit sell strategies
-        _exchangeData.dfsFeeDivider = 0;
+        if (_exchangeData.dfsFeeDivider != 0 && _exchangeData.dfsFeeDivider < MIN_FEE_DIVIDER) {
+            _exchangeData.dfsFeeDivider = MIN_FEE_DIVIDER;
+        }
 
         if (_exchangeData.minPrice != currPrice) {
             revert WrongPriceFromTrigger(currPrice, _exchangeData.minPrice);

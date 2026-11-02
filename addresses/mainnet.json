@@ -1191,14 +1191,15 @@
     },
     {
         "name": "LimitSell",
-        "address": "0x0ed287DB2d0cd0A9Dd1e3391b2D3199370f7B129",
+        "address": "0xC804aA5692787c3Af8FFca0AC1C0879aeA194163",
         "id": "0x8c712c04",
         "path": "contracts/actions/exchange/LimitSell.sol",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x0ed287DB2d0cd0A9Dd1e3391b2D3199370f7B129",
             "0xDa0df9dBD89FE40881EC2C4B000D44C76eA2Dd4A",
             "0x02b0eE3b52e8E0749444a7255B9D86c50d18D19A",
             "0x555C5B5d3e49ae015d5dA5C0476f984386e906BD"

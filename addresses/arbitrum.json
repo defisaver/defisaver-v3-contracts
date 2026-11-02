@@ -509,14 +509,15 @@
     },
     {
         "name": "LimitSellL2",
-        "address": "0x7e63C8f337eC217df43ae3F9254B17e799FC1a69",
+        "address": "0x47620F631f821219388c14Ae188aC30Edf042946",
         "id": "0x5cc47139",
         "path": "contracts/actions/exchange/LimitSellL2.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x7e63C8f337eC217df43ae3F9254B17e799FC1a69",
             "0x2D5d36e458eB151D30B189805fF2517863A41c25",
             "0xC941B49Aaa9743a5EA4Ccd60Bf9a980861bA5201"
         ]

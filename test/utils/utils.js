@@ -1137,6 +1137,7 @@ const formatExchangeObj = (
     destAmount = 0,
     uniV3fee,
     minPrice = 0,
+    dfsFeeDivider = 0,
 ) => {
     const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -1177,7 +1178,7 @@ const formatExchangeObj = (
         amount,
         destAmount,
         minPrice,
-        0,
+        dfsFeeDivider,
         nullAddress,
         wrapper,
         path,
