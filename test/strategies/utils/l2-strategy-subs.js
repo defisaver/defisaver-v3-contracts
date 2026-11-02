@@ -1,5 +1,6 @@
 const automationSdk = require('@defisaver/automation-sdk');
-const { subToAaveV3Proxy, updateAaveProxy, subToStrategy } = require('./utils-strategies');
+const { subToStrategy } = require('./utils-strategies');
+const { subAaveV3AutomationStrategy } = require('./strategy-subs');
 
 const subAaveV3L2AutomationStrategy = async (
     proxy,
@@ -9,7 +10,8 @@ const subAaveV3L2AutomationStrategy = async (
     optimalRatioRepay,
     boostEnabled,
 ) => {
-    const subInput = automationSdk.strategySubService.aaveV3Encode.leverageManagement(
+    const { repaySubId, boostSubId, repaySub, boostSub } = await subAaveV3AutomationStrategy(
+        proxy,
         minRatio,
         maxRatio,
         optimalRatioBoost,
@@ -17,55 +19,14 @@ const subAaveV3L2AutomationStrategy = async (
         boostEnabled,
     );
 
-    const subId = await subToAaveV3Proxy(proxy, subInput);
+    console.log('Subs: ', repaySubId, boostSubId);
 
-    let subId1 = '0';
-    let subId2 = '0';
-
-    if (boostEnabled) {
-        subId1 = (parseInt(subId, 10) - 1).toString();
-        subId2 = subId;
-    } else {
-        subId1 = subId;
-        subId2 = '0';
-    }
-
-    console.log('Subs: ', subId, subId2);
-
-    return { firstSub: subId1, secondSub: subId2 };
-};
-
-const updateAaveV3L2AutomationStrategy = async (
-    proxy,
-    subId1,
-    subId2,
-    minRatio,
-    maxRatio,
-    optimalRatioBoost,
-    optimalRatioRepay,
-    boostEnabled,
-) => {
-    let subInput = '0x';
-
-    const subId1Hex = (+subId1).toString(16);
-    const subId2Hex = (+subId2).toString(16);
-
-    subInput = subInput.concat(subId1Hex.padStart(8, '0'));
-    subInput = subInput.concat(subId2Hex.padStart(8, '0'));
-
-    subInput = subInput.concat(minRatio.padStart(32, '0'));
-    subInput = subInput.concat(maxRatio.padStart(32, '0'));
-    subInput = subInput.concat(optimalRatioBoost.padStart(32, '0'));
-    subInput = subInput.concat(optimalRatioRepay.padStart(32, '0'));
-    subInput = subInput.concat(boostEnabled ? '01' : '00');
-
-    const subId = await updateAaveProxy(proxy, subInput);
-
-    if (subId2 === '0' && boostEnabled === true) {
-        subId2 = subId;
-    }
-
-    return { firstSub: subId1, secondSub: subId2 };
+    return {
+        firstSub: repaySubId,
+        secondSub: boostSubId,
+        repaySub,
+        boostSub,
+    };
 };
 
 const subAaveV3CloseBundle = async (
@@ -109,6 +70,5 @@ const subAaveV3CloseBundle = async (
 
 module.exports = {
     subAaveV3L2AutomationStrategy,
-    updateAaveV3L2AutomationStrategy,
     subAaveV3CloseBundle,
 };

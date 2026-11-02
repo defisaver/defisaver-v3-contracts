@@ -1360,5 +1360,75 @@
             ["&1", "&2", "&3", "&4", "&5", "&7", "&6"]
         ],
         "bundleIds": [36, 40]
+    },
+    {
+        "name": "AaveV3GenericFLDebtSwitchL2Strategy",
+        "id": 61,
+        "isContinuous": false,
+        "triggerIds": ["AaveV3QuotePriceTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "AaveV3Payback",
+            "AaveV3Borrow",
+            "SendTokenAndUnwrap"
+        ],
+        "paramMapping": [
+            [],
+            ["&3", "&1", 0, "&proxy", "&proxy"],
+            ["&1", "$2", 0],
+            ["&6", "&proxy", 0, "&2", 0, 0, "&5", "&7"],
+            ["$1", 0, 0, "&4", 0, 0, "&5", "&7"],
+            ["&1", "&eoa", 0]
+        ]
+    },
+    {
+        "name": "AaveV3GenericFLDebtSwitchL2Strategy",
+        "id": 62,
+        "isContinuous": false,
+        "triggerIds": ["AaveV3QuotePriceTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "AaveV3Payback",
+            "AaveV3Borrow",
+            "SendTokenAndUnwrap"
+        ],
+        "paramMapping": [
+            [],
+            ["&3", "&1", 0, "&proxy", "&proxy"],
+            ["&1", "$2", 0],
+            ["&6", "&proxy", 0, "&2", 0, 0, "&5", "&7"],
+            ["$1", 0, 0, "&4", 0, 0, "&5", "&7"],
+            ["&1", "&eoa", 0]
+        ]
+    },
+    {
+        "name": "AaveV3GenericFLCollateralSwitchL2Strategy",
+        "id": 63,
+        "isContinuous": false,
+        "triggerIds": ["AaveV3QuotePriceTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "AaveV3Supply",
+            "PullToken",
+            "AaveV3Withdraw",
+            "SendToken",
+            "SendTokenAndUnwrap"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", "&3", 0, "&proxy", "&proxy"],
+            ["&3", "$2", 0],
+            ["$3", "&proxy", "&4", 0, 0, 0, "&5", "&7"],
+            [0, "&7", "&6"],
+            ["&2", 0, "$5", "&proxy", "&5"],
+            ["&1", 0, "$1"],
+            ["&1", "&eoa", 0]
+        ]
     }
 ]

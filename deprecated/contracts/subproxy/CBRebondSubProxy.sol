@@ -11,6 +11,7 @@ import { StrategyModel } from "../../../core/strategy/StrategyModel.sol";
 import { CoreHelper } from "../../../core/helpers/CoreHelper.sol";
 
 /// @title SubProxy to inject subId during subscription for the cb rebond strategy
+/// @deprecated Use the generic SubProxy.
 contract CBRebondSubProxy is
     StrategyModel,
     AdminAuth,

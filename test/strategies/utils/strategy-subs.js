@@ -1,19 +1,9 @@
 /* eslint-disable no-unused-vars */
 const hre = require('hardhat');
 const automationSdk = require('@defisaver/automation-sdk');
-const { getAssetInfo } = require('@defisaver/tokens');
+const { getAssetInfo, getAssetInfoByAddress } = require('@defisaver/tokens');
 
-const {
-    subToStrategy,
-    subToCompV2Proxy,
-    subToLimitOrderProxy,
-    subToLiquityProxy,
-    subToAaveV2Proxy,
-    subToSparkProxy,
-    updateSparkProxy,
-    subToAaveV3Proxy,
-    getLatestSubId,
-} = require('./utils-strategies');
+const { subToStrategy } = require('./utils-strategies');
 
 const {
     RATIO_STATE_UNDER,
@@ -27,18 +17,24 @@ const {
     DAI_ADDR,
     WBTC_ADDR,
     WETH_ADDRESS,
-    getContractFromRegistry,
+    AAVE_V2_MARKET_ADDR,
+    addrs,
     chainIds,
     BOLD_ADDR,
     network,
-    executeTxFromProxy,
-    getGasUsed,
-    calcGasToUSD,
-    AVG_GAS_PRICE,
 } = require('../../utils/utils');
 const { COMP_V3_MARKETS } = require('../../utils/compoundV3');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
+
+const bundleIdsByNetwork = {
+    mainnet: automationSdk.enums.Bundles.MainnetIds,
+    optimism: automationSdk.enums.Bundles.OptimismIds,
+    arbitrum: automationSdk.enums.Bundles.ArbitrumIds,
+    base: automationSdk.enums.Bundles.BaseIds,
+};
+
+const getBundleIds = () => bundleIdsByNetwork[network];
 
 const subDcaStrategy = async (
     proxy,
@@ -195,16 +191,23 @@ const subLimitOrderStrategy = async (
     goodUntilDuration,
     orderType,
 ) => {
-    const subInput = automationSdk.strategySubService.exchangeEncode.limitOrder(
+    const sellToken = getAssetInfoByAddress(tokenAddrSell, chainIds[network]);
+    const buyToken = getAssetInfoByAddress(tokenAddrBuy, chainIds[network]);
+    const latestBlock = await hre.ethers.provider.getBlock('latest');
+    const targetPriceDecimals = buyToken.decimals + 18 - sellToken.decimals;
+    const normalizedTargetPrice = hre.ethers.utils.formatUnits(targetPrice, targetPriceDecimals);
+    const strategySub = automationSdk.strategySubService.exchangeEncode.limitOrder(
         tokenAddrSell,
         tokenAddrBuy,
-        amount,
-        targetPrice,
-        goodUntilDuration,
+        amount.toString(),
+        normalizedTargetPrice,
+        latestBlock.timestamp + goodUntilDuration,
         orderType,
+        sellToken.decimals,
+        buyToken.decimals,
+        chainIds[network],
     );
-
-    const { subId, strategySub } = await subToLimitOrderProxy(proxy, [subInput]);
+    const subId = await subToStrategy(proxy, strategySub);
 
     return { subId, strategySub };
 };
@@ -217,31 +220,36 @@ const subAaveV2AutomationStrategy = async (
     optimalRatioRepay,
     boostEnabled,
 ) => {
-    const subInput = automationSdk.strategySubService.aaveV2Encode.leverageManagement(
-        minRatio,
-        maxRatio,
-        optimalRatioBoost,
+    const { AAVE_V2_REPAY, AAVE_V2_BOOST } = getBundleIds();
+    const encoder = automationSdk.strategySubService.aaveV2Encode;
+    const repaySub = encoder.leverageManagement(
+        AAVE_V2_REPAY,
+        AAVE_V2_MARKET_ADDR,
+        proxy.address,
+        automationSdk.enums.RatioState.UNDER,
         optimalRatioRepay,
-        boostEnabled,
+        minRatio,
     );
-    const subData = await subToAaveV2Proxy(proxy, [subInput]);
-
-    let subId1 = '0';
-    let subId2 = '0';
-
+    const repaySubId = await subToStrategy(proxy, repaySub);
+    let boostSubId = '0';
+    let boostSub;
     if (boostEnabled) {
-        subId1 = (parseInt(subData.subId, 10) - 1).toString();
-        subId2 = subData.subId;
-    } else {
-        subId1 = subData.subId;
-        subId2 = '0';
+        boostSub = encoder.leverageManagement(
+            AAVE_V2_BOOST,
+            AAVE_V2_MARKET_ADDR,
+            proxy.address,
+            automationSdk.enums.RatioState.OVER,
+            optimalRatioBoost,
+            maxRatio,
+        );
+        boostSubId = await subToStrategy(proxy, boostSub);
     }
 
     return {
-        repaySubId: subId1,
-        boostSubId: subId2,
-        repaySub: subData.repaySub,
-        boostSub: subData.boostSub,
+        repaySubId,
+        boostSubId,
+        repaySub,
+        boostSub,
     };
 };
 
@@ -252,34 +260,37 @@ const subAaveV3AutomationStrategy = async (
     optimalRatioBoost,
     optimalRatioRepay,
     boostEnabled,
-    subProxy,
 ) => {
-    const subInput = automationSdk.strategySubService.aaveV3Encode.leverageManagement(
-        minRatio,
-        maxRatio,
-        optimalRatioBoost,
+    const { AAVE_V3_REPAY, AAVE_V3_BOOST } = getBundleIds();
+    const encoder = automationSdk.strategySubService.aaveV3Encode;
+    const repaySub = encoder.leverageManagement(
+        AAVE_V3_REPAY,
+        addrs[network].AAVE_MARKET,
+        proxy.address,
+        automationSdk.enums.RatioState.UNDER,
         optimalRatioRepay,
-        boostEnabled,
+        minRatio,
     );
-
-    const subData = await subToAaveV3Proxy(proxy, subInput, subProxy);
-
-    let subId1 = '0';
-    let subId2 = '0';
-
+    const repaySubId = await subToStrategy(proxy, repaySub);
+    let boostSubId = '0';
+    let boostSub;
     if (boostEnabled) {
-        subId1 = (parseInt(subData.latestSubId, 10) - 1).toString();
-        subId2 = subData.latestSubId;
-    } else {
-        subId1 = subData.latestSubId;
-        subId2 = '0';
+        boostSub = encoder.leverageManagement(
+            AAVE_V3_BOOST,
+            addrs[network].AAVE_MARKET,
+            proxy.address,
+            automationSdk.enums.RatioState.OVER,
+            optimalRatioBoost,
+            maxRatio,
+        );
+        boostSubId = await subToStrategy(proxy, boostSub);
     }
 
     return {
-        repaySubId: subId1,
-        boostSubId: subId2,
-        repaySub: subData.repaySub,
-        boostSub: subData.boostSub,
+        repaySubId,
+        boostSubId,
+        repaySub,
+        boostSub,
     };
 };
 
@@ -297,7 +308,7 @@ const subAaveV3LeverageManagementGeneric = async (
 
     const user = isEOA ? eoaAddr : proxy.address;
 
-    const strategySub = encoder.leverageManagementWithoutSubProxy(
+    const strategySub = encoder.leverageManagement(
         bundleId, // strategyOrBundleId
         marketAddr, // marketAddr
         user, // user - EOA / SW, depending if it is EOA strategy
@@ -382,32 +393,34 @@ const subCompV2AutomationStrategy = async (
     optimalRatioRepay,
     boostEnabled,
 ) => {
-    const subInput = automationSdk.strategySubService.compoundV2Encode.leverageManagement(
-        minRatio,
-        maxRatio,
-        optimalRatioBoost,
+    const { COMP_V2_REPAY, COMP_V2_BOOST } = getBundleIds();
+    const encoder = automationSdk.strategySubService.compoundV2Encode;
+    const repaySub = encoder.leverageManagement(
+        COMP_V2_REPAY,
+        proxy.address,
+        automationSdk.enums.RatioState.UNDER,
         optimalRatioRepay,
-        boostEnabled,
+        minRatio,
     );
-
-    const subData = await subToCompV2Proxy(proxy, [subInput]);
-
-    let subId1 = '0';
-    let subId2 = '0';
-
+    const repaySubId = await subToStrategy(proxy, repaySub);
+    let boostSubId = '0';
+    let boostSub;
     if (boostEnabled) {
-        subId1 = (parseInt(subData.subId, 10) - 1).toString();
-        subId2 = subData.subId;
-    } else {
-        subId1 = subData.subId;
-        subId2 = '0';
+        boostSub = encoder.leverageManagement(
+            COMP_V2_BOOST,
+            proxy.address,
+            automationSdk.enums.RatioState.OVER,
+            optimalRatioBoost,
+            maxRatio,
+        );
+        boostSubId = await subToStrategy(proxy, boostSub);
     }
 
     return {
-        repaySubId: subId1,
-        boostSubId: subId2,
-        repaySub: subData.repaySub,
-        boostSub: subData.boostSub,
+        repaySubId,
+        boostSubId,
+        repaySub,
+        boostSub,
     };
 };
 
@@ -419,25 +432,27 @@ const subLiquityAutomationStrategy = async (
     optimalRatioRepay,
     boostEnabled,
 ) => {
-    const subInput = automationSdk.strategySubService.liquityEncode.leverageManagement(
-        minRatio.toString(),
-        maxRatio.toString(),
-        optimalRatioBoost.toString(),
-        optimalRatioRepay.toString(),
-        boostEnabled,
+    const { LIQUITY_REPAY, LIQUITY_BOOST } = getBundleIds();
+    const encoder = automationSdk.strategySubService.liquityEncode;
+    const repaySub = encoder.leverageManagement(
+        LIQUITY_REPAY,
+        proxy.address,
+        automationSdk.enums.RatioState.UNDER,
+        optimalRatioRepay,
+        minRatio,
     );
-
-    const { latestSubId: subId, repaySub, boostSub } = await subToLiquityProxy(proxy, [subInput]);
-
-    let repaySubId = '0';
+    const repaySubId = await subToStrategy(proxy, repaySub);
     let boostSubId = '0';
-
+    let boostSub;
     if (boostEnabled) {
-        repaySubId = (parseInt(subId, 10) - 1).toString();
-        boostSubId = subId;
-    } else {
-        repaySubId = subId;
-        boostSubId = '0';
+        boostSub = encoder.leverageManagement(
+            LIQUITY_BOOST,
+            proxy.address,
+            automationSdk.enums.RatioState.OVER,
+            optimalRatioBoost,
+            maxRatio,
+        );
+        boostSubId = await subToStrategy(proxy, boostSub);
     }
 
     return {
@@ -456,99 +471,36 @@ const subSparkAutomationStrategy = async (
     optimalRatioRepay,
     boostEnabled,
 ) => {
-    const subInput = automationSdk.strategySubService.sparkEncode.leverageManagement(
-        minRatio,
-        maxRatio,
-        optimalRatioBoost,
+    const { SPARK_REPAY, SPARK_BOOST } = getBundleIds();
+    const encoder = automationSdk.strategySubService.sparkEncode;
+    const repaySub = encoder.leverageManagement(
+        SPARK_REPAY,
+        addrs[network].SPARK_MARKET,
+        proxy.address,
+        automationSdk.enums.RatioState.UNDER,
         optimalRatioRepay,
-        boostEnabled,
+        minRatio,
     );
-
-    const { latestSubId: subId, boostSub, repaySub } = await subToSparkProxy(proxy, subInput);
-
-    let subId1 = '0';
-    let subId2 = '0';
-
+    const repaySubId = await subToStrategy(proxy, repaySub);
+    let boostSubId = '0';
+    let boostSub;
     if (boostEnabled) {
-        subId1 = (parseInt(subId, 10) - 1).toString();
-        subId2 = subId;
-    } else {
-        subId1 = subId;
-        subId2 = '0';
+        boostSub = encoder.leverageManagement(
+            SPARK_BOOST,
+            addrs[network].SPARK_MARKET,
+            proxy.address,
+            automationSdk.enums.RatioState.OVER,
+            optimalRatioBoost,
+            maxRatio,
+        );
+        boostSubId = await subToStrategy(proxy, boostSub);
     }
 
-    console.log('Subs: ', subId1, subId2);
+    console.log('Subs: ', repaySubId, boostSubId);
 
     return {
-        firstSub: subId1,
-        secondSub: subId2,
-        boostSub,
-        repaySub,
-    };
-};
-
-const updateSparkAutomationStrategy = async (
-    proxy,
-    subId1,
-    subId2,
-    minRatio,
-    maxRatio,
-    optimalRatioBoost,
-    optimalRatioRepay,
-    boostEnabled,
-) => {
-    let subInput = '0x';
-
-    const subId1Hex = (+subId1).toString(16);
-    const subId2Hex = (+subId2).toString(16);
-
-    subInput = subInput.concat(subId1Hex.padStart(8, '0'));
-    subInput = subInput.concat(subId2Hex.padStart(8, '0'));
-
-    subInput = subInput.concat(minRatio.padStart(32, '0'));
-    subInput = subInput.concat(maxRatio.padStart(32, '0'));
-    subInput = subInput.concat(optimalRatioBoost.padStart(32, '0'));
-    subInput = subInput.concat(optimalRatioRepay.padStart(32, '0'));
-    subInput = subInput.concat(boostEnabled ? '01' : '00');
-
-    const subId = await updateSparkProxy(proxy, subInput);
-
-    if (subId2 === '0' && boostEnabled === true) {
-        subId2 = subId;
-    }
-
-    const sparkSubProxyAddr = await getContractFromRegistry('SparkSubProxy').then((e) => e.address);
-    const { repaySub, boostSub } = await hre.ethers
-        .getContractAt('SparkSubProxy', sparkSubProxyAddr)
-        .then((c) => [c, c.parseSubData('0x'.concat(subInput.slice(18)))])
-        .then(async ([c, subData]) => {
-            subData = await subData;
-
-            return {
-                repaySub: await c.formatRepaySub(subData).then((s) => {
-                    const triggerData = [
-                        s.triggerData[0].replace(
-                            sparkSubProxyAddr.slice(2).toLowerCase(),
-                            proxy.address.slice(2),
-                        ),
-                    ];
-                    return { ...s, triggerData, 2: triggerData };
-                }),
-                boostSub: await c.formatBoostSub(subData).then((s) => {
-                    const triggerData = [
-                        s.triggerData[0].replace(
-                            sparkSubProxyAddr.slice(2).toLowerCase(),
-                            proxy.address.slice(2),
-                        ),
-                    ];
-                    return { ...s, triggerData, 2: triggerData };
-                }),
-            };
-        });
-
-    return {
-        firstSub: subId1,
-        secondSub: subId2,
+        firstSub: repaySubId,
+        secondSub: boostSubId,
         boostSub,
         repaySub,
     };
@@ -840,6 +792,70 @@ const subAaveV3FLCollateralSwitchStrategy = async (
     const subId = await subToStrategy(proxy, strategySub);
     return { subId, strategySub };
 };
+const subAaveV3GenericFLCollateralSwitchStrategy = async (
+    proxy,
+    strategyId,
+    fromAsset,
+    fromAssetId,
+    toAsset,
+    toAssetId,
+    marketAddr,
+    amountToSwitch,
+    user,
+    baseTokenAddress,
+    quoteTokenAddress,
+    triggerPrice,
+    priceState,
+) => {
+    const strategySub = automationSdk.strategySubService.aaveV3Encode.collateralSwitchGeneric(
+        strategyId,
+        fromAsset,
+        fromAssetId,
+        toAsset,
+        toAssetId,
+        marketAddr,
+        amountToSwitch,
+        user,
+        baseTokenAddress,
+        quoteTokenAddress,
+        triggerPrice,
+        priceState,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+const subAaveV3GenericFLDebtSwitchStrategy = async (
+    proxy,
+    strategyId,
+    fromAsset,
+    fromAssetId,
+    toAsset,
+    toAssetId,
+    marketAddr,
+    amountToSwitch,
+    user,
+    baseTokenAddress,
+    quoteTokenAddress,
+    triggerPrice,
+    priceState,
+) => {
+    const strategySub = automationSdk.strategySubService.aaveV3Encode.debtSwitch(
+        strategyId,
+        fromAsset,
+        fromAssetId,
+        toAsset,
+        toAssetId,
+        marketAddr,
+        amountToSwitch,
+        user,
+        baseTokenAddress,
+        quoteTokenAddress,
+        triggerPrice,
+        priceState,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
 const subSparkFLCollateralSwitchStrategy = async (
     proxy,
     strategyId,
@@ -1056,10 +1072,6 @@ const subFluidVaultT1BoostBundle = async (
     return { subId, strategySub };
 };
 
-/**
- * This function uses the CompV3SubProxy/CompV3SubProxyL2 instead of SubProxy for legacy reasons.
- * This supports boost/repay bundles for proxy/eoa subscriptions for all networks.
- */
 const subCompV3LeverageManagement = async (
     proxy,
     marketSymbol,
@@ -1069,7 +1081,7 @@ const subCompV3LeverageManagement = async (
     targetRatioRepay,
     boostEnabled,
     isEOA,
-    subProxyContractAddr,
+    eoaAddress,
 ) => {
     const marketAddr = COMP_V3_MARKETS[chainIds[network]][marketSymbol];
     const debtAsset = getAssetInfo(
@@ -1077,51 +1089,43 @@ const subCompV3LeverageManagement = async (
         chainIds[network],
     );
 
-    const isL2 = network !== 'mainnet';
-
-    const encoder = isL2
-        ? automationSdk.strategySubService.compoundV3L2Encode
-        : automationSdk.strategySubService.compoundV3Encode;
-
-    const subInput = encoder.leverageManagement(
+    const bundleIds = getBundleIds();
+    const repayBundleId =
+        network === 'mainnet'
+            ? bundleIds[isEOA ? 'COMP_V3_EOA_REPAY_V2_BUNDLE' : 'COMP_V3_SW_REPAY_V2_BUNDLE']
+            : bundleIds[isEOA ? 'COMP_V3_EOA_REPAY' : 'COMP_V3_SW_REPAY_BUNDLE'];
+    const boostBundleId =
+        network === 'mainnet'
+            ? bundleIds[isEOA ? 'COMP_V3_EOA_BOOST_V2_BUNDLE' : 'COMP_V3_SW_BOOST_V2_BUNDLE']
+            : bundleIds[isEOA ? 'COMP_V3_EOA_BOOST' : 'COMP_V3_SW_BOOST_BUNDLE'];
+    const user = isEOA ? eoaAddress : proxy.address;
+    const encoder = automationSdk.strategySubService.compoundV3Encode;
+    const repaySub = encoder.leverageManagement(
+        repayBundleId,
         marketAddr,
         debtAsset.address,
-        triggerRepayRatio,
-        triggerBoostRatio,
-        targetRatioBoost,
+        user,
+        automationSdk.enums.RatioState.UNDER,
         targetRatioRepay,
-        boostEnabled,
-        isEOA,
+        triggerRepayRatio,
     );
-
-    const subProxyName = isL2 ? 'CompV3SubProxyL2' : 'CompV3SubProxy';
-    const CompV3SubProxy = await hre.ethers.getContractFactory(subProxyName);
-    const functionData = CompV3SubProxy.interface.encodeFunctionData('subToCompV3Automation', [
-        subInput,
-    ]);
-
-    const receipt = await executeTxFromProxy(proxy, subProxyContractAddr, functionData);
-
-    const gasUsed = await getGasUsed(receipt);
-    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
-    console.log(
-        `GasUsed subToCompV3Proxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
-    );
-
-    const subId = await getLatestSubId();
-
-    let subId1 = '0';
-    let subId2 = '0';
-
+    const repaySubId = await subToStrategy(proxy, repaySub);
+    let boostSubId = '0';
+    let boostSub;
     if (boostEnabled) {
-        subId1 = (parseInt(subId, 10) - 1).toString();
-        subId2 = subId;
-    } else {
-        subId1 = subId;
-        subId2 = '0';
+        boostSub = encoder.leverageManagement(
+            boostBundleId,
+            marketAddr,
+            debtAsset.address,
+            user,
+            automationSdk.enums.RatioState.OVER,
+            targetRatioBoost,
+            triggerBoostRatio,
+        );
+        boostSubId = await subToStrategy(proxy, boostSub);
     }
 
-    return { subData: subInput, repaySubId: subId1, boostSubId: subId2 };
+    return { repaySubId, boostSubId, repaySub, boostSub };
 };
 
 const _subCompV3LeverageManagementOnPrice = async (
@@ -1577,7 +1581,6 @@ module.exports = {
     subAaveV3CloseGeneric,
     subCompV2AutomationStrategy,
     subSparkAutomationStrategy,
-    updateSparkAutomationStrategy,
     subLiquityDsrPaybackStrategy,
     subLiquityDsrSupplyStrategy,
     subLiquityDebtInFrontRepayStrategy,
@@ -1600,6 +1603,8 @@ module.exports = {
     subCompV3BoostOnPriceBundle,
     subCompV3CloseOnPriceBundle,
     subAaveV3FLCollateralSwitchStrategy,
+    subAaveV3GenericFLCollateralSwitchStrategy,
+    subAaveV3GenericFLDebtSwitchStrategy,
     subSparkCloseGeneric,
     subMorphoBlueClose,
     subSparkRepayOnPriceBundle,

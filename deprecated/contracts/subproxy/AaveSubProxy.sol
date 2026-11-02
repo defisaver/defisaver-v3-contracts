@@ -2,31 +2,27 @@
 
 pragma solidity =0.8.24;
 
-import { AdminAuth } from "../../../auth/AdminAuth.sol";
-import { Permission } from "../../../auth/Permission.sol";
-import { SubStorage } from "../../../core/strategy/SubStorage.sol";
-import { SmartWalletUtils } from "../../../utils/SmartWalletUtils.sol";
-import { StrategyModel } from "../../../core/strategy/StrategyModel.sol";
-import { CoreHelper } from "../../../core/helpers/CoreHelper.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
+import { Permission } from "../../auth/Permission.sol";
+import { SubStorage } from "../../core/strategy/SubStorage.sol";
+import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
+import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
+import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
-contract MorphoAaveV2SubProxy is
-    StrategyModel,
-    AdminAuth,
-    CoreHelper,
-    Permission,
-    SmartWalletUtils
-{
+/// @title Contract that subscribes users to Aave V2 automation bundles
+/// @deprecated Use the generic SubProxy.
+contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, SmartWalletUtils {
     uint64 public immutable REPAY_BUNDLE_ID;
     uint64 public immutable BOOST_BUNDLE_ID;
-
-    constructor(uint64 _repayBundleId, uint64 _boostBundleId) {
-        REPAY_BUNDLE_ID = _repayBundleId;
-        BOOST_BUNDLE_ID = _boostBundleId;
-    }
 
     enum RatioState {
         OVER,
         UNDER
+    }
+
+    constructor(uint64 _repayBundleId, uint64 _boostBundleId) {
+        REPAY_BUNDLE_ID = _repayBundleId;
+        BOOST_BUNDLE_ID = _boostBundleId;
     }
 
     /// @dev 5% offset acceptable
@@ -35,7 +31,14 @@ contract MorphoAaveV2SubProxy is
     error WrongSubParams(uint256 minRatio, uint256 maxRatio);
     error RangeTooClose(uint256 ratio, uint256 targetRatio);
 
-    struct MorphoAaveV2SubData {
+    address public constant AAVE_MARKET = 0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5;
+
+    /// @param minRatio Minimum ratio.
+    /// @param maxRatio Maximum ratio.
+    /// @param targetRatioBoost Target ratio for boost.
+    /// @param targetRatioRepay Target ratio for repay.
+    /// @param boostEnabled Whether boost is enabled.
+    struct AaveSubData {
         uint128 minRatio;
         uint128 maxRatio;
         uint128 targetRatioBoost;
@@ -47,10 +50,9 @@ contract MorphoAaveV2SubProxy is
     /// @dev Gives wallet permission if needed and registers a new sub
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
-    function subToMorphoAaveV2Automation(MorphoAaveV2SubData calldata _subData) public {
+    function subToAaveAutomation(AaveSubData calldata _subData) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
-        _giveAuthContractPermission(_getWalletType(address(this)));
-
+        _givePermissionToAuthContract(_isDSProxy(address(this)));
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
 
         SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(repaySub);
@@ -65,11 +67,9 @@ contract MorphoAaveV2SubProxy is
     /// @notice Calls SubStorage to update the users subscription data
     /// @dev Updating sub data will activate it as well
     /// @dev If we don't have a boost subId send as 0
-    function updateSubData(uint32 _subId1, uint32 _subId2, MorphoAaveV2SubData calldata _subData)
-        public
-    {
+    function updateSubData(uint32 _subId1, uint32 _subId2, AaveSubData calldata _subData) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
-        _giveAuthContractPermission(_getWalletType(address(this)));
+        _givePermissionToAuthContract(_isDSProxy(address(this)));
 
         // update repay as we must have a subId, it's ok if it's the same data
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
@@ -98,7 +98,8 @@ contract MorphoAaveV2SubProxy is
     /// @notice Activates Repay sub and if exists a Boost sub
     function activateSub(uint32 _subId1, uint32 _subId2) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
-        _giveAuthContractPermission(_getWalletType(address(this)));
+        _givePermissionToAuthContract(_isDSProxy(address(this)));
+
         SubStorage(SUB_STORAGE_ADDR).activateSub(_subId1);
 
         if (_subId2 != 0) {
@@ -117,7 +118,7 @@ contract MorphoAaveV2SubProxy is
 
     ///////////////////////////////// HELPER FUNCTIONS /////////////////////////////////
 
-    function _validateSubData(MorphoAaveV2SubData memory _subData) internal pure {
+    function _validateSubData(AaveSubData memory _subData) internal pure {
         if (_subData.minRatio > _subData.maxRatio) {
             revert WrongSubParams(_subData.minRatio, _subData.maxRatio);
         }
@@ -131,8 +132,8 @@ contract MorphoAaveV2SubProxy is
         }
     }
 
-    /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the specialized morphoAaveV2 sub
-    function formatRepaySub(MorphoAaveV2SubData memory _subData, address _wallet)
+    /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the specialized aave sub
+    function formatRepaySub(AaveSubData memory _subData, address _wallet)
         public
         view
         returns (StrategySub memory repaySub)
@@ -142,17 +143,18 @@ contract MorphoAaveV2SubProxy is
 
         // format data for ratio trigger if currRatio < minRatio = true
         bytes memory triggerData =
-            abi.encode(_wallet, uint256(_subData.minRatio), uint8(RatioState.UNDER));
+            abi.encode(_wallet, AAVE_MARKET, uint256(_subData.minRatio), uint8(RatioState.UNDER));
         repaySub.triggerData = new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
-        repaySub.subData = new bytes32[](2);
-        repaySub.subData[0] = bytes32(uint256(1)); // ratioState = repay
+        repaySub.subData = new bytes32[](3);
+        repaySub.subData[0] = bytes32(uint256(uint160(AAVE_MARKET))); // market
         repaySub.subData[1] = bytes32(uint256(_subData.targetRatioRepay)); // targetRatio
+        repaySub.subData[2] = bytes32(uint256(1)); // ratioState = repay
     }
 
-    /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized morphoAaveV2 sub
-    function formatBoostSub(MorphoAaveV2SubData memory _subData, address _wallet)
+    /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized aave sub
+    function formatBoostSub(AaveSubData memory _subData, address _wallet)
         public
         view
         returns (StrategySub memory boostSub)
@@ -162,12 +164,14 @@ contract MorphoAaveV2SubProxy is
 
         // format data for ratio trigger if currRatio > maxRatio = true
         bytes memory triggerData =
-            abi.encode(_wallet, uint256(_subData.maxRatio), uint8(RatioState.OVER));
+            abi.encode(_wallet, AAVE_MARKET, uint256(_subData.maxRatio), uint8(RatioState.OVER));
         boostSub.triggerData = new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 
-        boostSub.subData = new bytes32[](2);
-        boostSub.subData[0] = bytes32(uint256(0)); // ratioState = boost
+        boostSub.subData = new bytes32[](4);
+        boostSub.subData[0] = bytes32(uint256(uint160(AAVE_MARKET))); // market
         boostSub.subData[1] = bytes32(uint256(_subData.targetRatioBoost)); // targetRatio
+        boostSub.subData[2] = bytes32(uint256(0)); // ratioState = boost
+        boostSub.subData[3] = bytes32(uint256(1)); // enableAsColl = true
     }
 }
