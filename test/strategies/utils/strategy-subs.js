@@ -155,7 +155,7 @@ const subMcdTrailingCloseToCollStrategy = async (
     return { subId, strategySub };
 };
 
-const subLiquityCloseToCollStrategy = async (proxy, targetPrice, tokenState) => {
+const subLiquityCloseToCollStrategy = async (proxy, targetPrice, tokenState, strategyId) => {
     const strategySub = automationSdk.strategySubService.liquityEncode.closeOnPrice(
         tokenState === 1
             ? automationSdk.enums.RatioState.UNDER
@@ -165,11 +165,12 @@ const subLiquityCloseToCollStrategy = async (proxy, targetPrice, tokenState) => 
         WETH_ADDRESS,
         chainIds[network],
     );
+    if (strategyId !== undefined) strategySub[0] = strategyId;
     const subId = await subToStrategy(proxy, strategySub);
     return { subId, strategySub };
 };
 
-const subLiquityTrailingCloseToCollStrategy = async (proxy, percentage, roundId) => {
+const subLiquityTrailingCloseToCollStrategy = async (proxy, percentage, roundId, strategyId) => {
     const strategySub = automationSdk.strategySubService.liquityEncode.trailingStop(
         percentage,
         WETH_ADDRESS,
@@ -177,6 +178,7 @@ const subLiquityTrailingCloseToCollStrategy = async (proxy, percentage, roundId)
         roundId,
         chainIds[network],
     );
+    if (strategyId !== undefined) strategySub[0] = strategyId;
     const subId = await subToStrategy(proxy, strategySub);
 
     return { subId, strategySub };

@@ -11,7 +11,7 @@ import {
 } from "../../../interfaces/protocols/summerfi/IAccountImplementation.sol";
 import { IInstaAccountV2 } from "../../../interfaces/protocols/insta/IInstaAccountV2.sol";
 import { MainnetFLAddresses } from "./MainnetFLAddresses.sol";
-import { FLFeeFaucet } from "../../../utils/fee/FLFeeFaucet.sol";
+import { FeeFaucet } from "../../../utils/fee/FeeFaucet.sol";
 import { StrategyModel } from "../../../core/strategy/StrategyModel.sol";
 import { WalletType } from "../../../utils/DFSTypes.sol";
 import { DFSIds } from "../../../utils/DFSIds.sol";
@@ -21,7 +21,7 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
     uint16 internal constant AAVE_REFERRAL_CODE = 64;
     uint16 internal constant SPARK_REFERRAL_CODE = 64;
     string internal constant DEFISAVER_CONNECTOR_ID = "DEFI-SAVER-A";
-    FLFeeFaucet internal constant flFeeFaucet = FLFeeFaucet(DYDX_FL_FEE_FAUCET);
+    FeeFaucet internal constant feeFaucet = FeeFaucet(FEE_FAUCET);
 
     // Revert if execution fails when using safe wallet
     error SafeExecutionError();
@@ -43,7 +43,7 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
         );
 
         if (_walletType == WalletType.DSPROXY) {
-            IDSProxy(_wallet).execute{ value: address(this).balance }(target, data);
+            IDSProxy(_wallet).execute(target, data);
 
             return;
         }
@@ -55,11 +55,12 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
             bytes[] memory connectorsData = new bytes[](1);
             connectorsData[0] = data;
 
-            IInstaAccountV2(_wallet).cast{ value: address(this).balance }(
-                connectors,
-                connectorsData,
-                address(this) // Only used for event logging, so here we will set it to the FL contract
-            );
+            IInstaAccountV2(_wallet)
+                .cast(
+                    connectors,
+                    connectorsData,
+                    address(this) // Only used for event logging, so here we will set it to the FL contract
+                );
 
             return;
         }
@@ -69,18 +70,14 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
             address sfProxyEntryPoint =
                 IDFSRegistry(DFS_REGISTRY_ADDR).getAddr(DFSIds.SFPROXY_ENTRY_POINT);
 
-            IAccountImplementation(_wallet).execute{ value: address(this).balance }(
-                sfProxyEntryPoint, data
-            );
+            IAccountImplementation(_wallet).execute(sfProxyEntryPoint, data);
 
             return;
         }
 
         // Otherwise, we assume we are in context of Safe
-        bool success = ISafe(_wallet)
-            .execTransactionFromModule(
-                target, address(this).balance, data, ISafe.Operation.DelegateCall
-            );
+        bool success =
+            ISafe(_wallet).execTransactionFromModule(target, 0, data, ISafe.Operation.DelegateCall);
 
         if (!success) {
             revert SafeExecutionError();
