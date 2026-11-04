@@ -172,6 +172,17 @@
         "history": []
     },
     {
+        "name": "FeeFaucet",
+        "address": "0x59C7C4F78014bFeD92B10da0F7DadB29E7c1751f",
+        "id": "0x065947c3",
+        "path": "contracts/utils/fee/FeeFaucet.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "Discount",
         "address": "0x84fE6D4aaD0CA1ce3af7153eecd11729fa7a74f0",
         "id": "0x88f9bc1a",
@@ -1193,14 +1204,15 @@
     },
     {
         "name": "LimitSell",
-        "address": "0x0ed287DB2d0cd0A9Dd1e3391b2D3199370f7B129",
+        "address": "0xC804aA5692787c3Af8FFca0AC1C0879aeA194163",
         "id": "0x8c712c04",
         "path": "contracts/actions/exchange/LimitSell.sol",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x0ed287DB2d0cd0A9Dd1e3391b2D3199370f7B129",
             "0xDa0df9dBD89FE40881EC2C4B000D44C76eA2Dd4A",
             "0x02b0eE3b52e8E0749444a7255B9D86c50d18D19A",
             "0x555C5B5d3e49ae015d5dA5C0476f984386e906BD"
@@ -2001,14 +2013,14 @@
     },
     {
         "name": "AaveV3SetEMode",
-        "address": "0xBe7F735d7955e0461579E34266f41F928AE06D78",
+        "address": "0x496C7Ed730E2692Fa49085aF2a9B61aCb0Bc1336",
         "id": "0x3d35d254",
         "path": "contracts/actions/aaveV3/AaveV3SetEMode.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xBe7F735d7955e0461579E34266f41F928AE06D78"]
     },
     {
         "name": "SparkSetEMode",
@@ -2408,14 +2420,15 @@
     },
     {
         "name": "FLAction",
-        "address": "0xE78C05c508405207ecc256781B9415e6De1c8336",
+        "address": "0x9cA3983b3bD35609B78686BEDe00f70058f3aF0b",
         "id": "0xbcab5e2a",
         "path": "contracts/actions/flashloan/FLAction.sol",
-        "version": "1.0.6",
+        "version": "1.0.7",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xE78C05c508405207ecc256781B9415e6De1c8336",
             "0xAc83378E8B075F95640d581A42cba80452caEEa3",
             "0x7A0f3963c666d4549e5909a7162B560abF9f006D",
             "0x5f1dC84Ba060Ea3f7429c6A7bBEdd9243CF1209b",
@@ -3816,14 +3829,15 @@
     },
     {
         "name": "TxSaverExecutor",
-        "address": "0xDE0e1B36f54940050D4b1b421f8e3e44e40F64e0",
+        "address": "0x0651b2A5Ce8eE9A861cd93C768fBe13a7771de1b",
         "id": "0x91bfbd87",
         "path": "contracts/tx-saver/TxSaverExecutor.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xDE0e1B36f54940050D4b1b421f8e3e44e40F64e0",
             "0xac7745d524b780751cc8410224d73ebe7e7acca2",
             "0x475f433407205557E8A7aeE7Be53155EB9681c92"
         ]
@@ -5137,14 +5151,14 @@
     },
     {
         "name": "AaveV3MinDebtTrigger",
-        "address": "0x9b34580a66634AbBe64ddF7CeF78Cdc144D1Fc17",
+        "address": "0x4E26Fe641603f929AbCDf928be3b51d64062Bc02",
         "id": "0xb3fa1599",
         "path": "contracts/triggers-additional/AaveV3MinDebtTrigger.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x9b34580a66634AbBe64ddF7CeF78Cdc144D1Fc17"]
     },
     {
         "name": "AaveV4MinDebtTrigger",

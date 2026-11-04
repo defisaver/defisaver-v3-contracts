@@ -2,17 +2,29 @@
 
 pragma solidity =0.8.24;
 
+import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
+import { IRecipeExecutor } from "../interfaces/core/IRecipeExecutor.sol";
+import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { BotAuthForTxSaver } from "./BotAuthForTxSaver.sol";
 import { CoreHelper } from "../core/helpers/CoreHelper.sol";
-import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 import { StrategyModel } from "../core/strategy/StrategyModel.sol";
 import { DFSExchangeData } from "../exchangeV3/DFSExchangeData.sol";
-import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
 import { TxSaverBytesTransientStorage } from "./TxSaverBytesTransientStorage.sol";
 import { DFSIds } from "../utils/DFSIds.sol";
 
-/// @title Main entry point for executing TxSaver transactions signed by users through safe wallet
+/// @title Main entry point for executing TxSaver transactions signed by users through a safe wallet.
+/// @dev Only callable by trusted bots.
+/// @notice The bot is allowed to inject the following parameters, which bypass the user signature:
+/// - estimated gas used -> used to calculate gas cost, as we can't be precise enough on-chain due to gas refunds
+/// - additional L1 gas cost -> represents additional L1 data availability costs for Optimism-based L2 chains
+/// - injected exchange data -> allows injecting a new exchange route if the old one is outdated or if a better one can be fetched
+/// Gas cost is capped by the user-signed maxTxCostInFeeToken, and the exchange route can't have a price lower than the user-signed minPrice.
+/// @notice When taking a fee from a position, the transaction is validated off-chain before execution.
+/// The validation includes, but are not limited to:
+/// - ensuring the recipe contains exactly one sell action
+/// - ensuring the sell source and destination tokens are different
+/// Any invalid recipe will be rejected by the bot.
 contract TxSaverExecutor is StrategyModel, AdminAuth, CoreHelper, TxSaverBytesTransientStorage {
     IDFSRegistry private constant registry = IDFSRegistry(REGISTRY_ADDR);
 
@@ -22,6 +34,8 @@ contract TxSaverExecutor is StrategyModel, AdminAuth, CoreHelper, TxSaverBytesTr
     error SafeExecutionError();
     /// Revert if signature is expired
     error TxSaverSignatureExpired(uint256 deadline, uint256 currentTimestamp);
+    /// Revert if provided calldata does not target the expected TxSaver entrypoint
+    error WrongSelector(bytes4 providedSelector);
 
     /// @notice Data needed to execute a Safe transaction
     /// @param safe Address of the Safe wallet
@@ -105,6 +119,13 @@ contract TxSaverExecutor is StrategyModel, AdminAuth, CoreHelper, TxSaverBytesTr
         pure
         returns (Recipe memory recipe, TxSaverSignedData memory txSaverData)
     {
+        bytes4 selector = bytes4(_data[:4]);
+        // Make sure we use the correct entry point.
+        // Can be validated off-chain as well, but we add an on-chain sanity check to make the intention clear.
+        if (selector != IRecipeExecutor.executeRecipeFromTxSaver.selector) {
+            revert WrongSelector(selector);
+        }
+
         (recipe, txSaverData) = abi.decode(_data[4:], (Recipe, TxSaverSignedData));
     }
 }
