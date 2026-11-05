@@ -2918,43 +2918,6 @@ const createLiquityDsrSupplyStrategy = () => {
     return liquityDsrSupplyStrategy.encodeForDsProxyCall();
 };
 
-const createCurveUsdAdvancedRepayStrategy = () => {
-    const repayStrategy = new dfs.Strategy('CurveUsdAdvancedRepayStrategy');
-
-    repayStrategy.addSubSlot('&controllerAddress', 'address');
-    repayStrategy.addSubSlot('&ratioState', 'uint8');
-    repayStrategy.addSubSlot('&targetRatio', 'uint256');
-    repayStrategy.addSubSlot('&collAddress', 'address');
-    repayStrategy.addSubSlot('&crvUsdAddress', 'address');
-
-    const curveUsdCollRatioTrigger = new dfs.triggers.CurveUsdCollRatioTrigger(
-        nullAddress,
-        nullAddress,
-        '0',
-        '0',
-    );
-    repayStrategy.addTrigger(curveUsdCollRatioTrigger);
-
-    const curveUsdRepayAction = new dfs.actions.curveusd.CurveUsdRepayAction(
-        '&controllerAddress', // taken from subdata
-        '%collAmount', // calculated by backend
-        '&eoa', // most likely wont be used as this will only be partial repay
-        '%minAmount', // calculated by backend
-        '%additionalData', // packed data for exchange
-        '%gasUsed', // sent by backend
-        '%dfsFeeDivider', // 400 (25bps)
-    );
-
-    const curveUsdCollRatioCheckAction = new dfs.actions.checkers.CurveUsdCollRatioCheck(
-        '&ratioState', // taken from subdata
-        '&targetRatio', // taken from subdata
-        '&controllerAddress', // taken from subdata
-    );
-
-    repayStrategy.addAction(curveUsdRepayAction);
-    repayStrategy.addAction(curveUsdCollRatioCheckAction);
-    return repayStrategy.encodeForDsProxyCall();
-};
 const createCurveUsdRepayStrategy = () => {
     const repayStrategy = new dfs.Strategy('CurveUsdRepayStrategy');
 
@@ -9076,7 +9039,6 @@ module.exports = {
     createLiquityDsrPaybackStrategy,
     createLiquityDsrSupplyStrategy,
     createLiquityDebtInFrontRepayStrategy,
-    createCurveUsdAdvancedRepayStrategy,
     createCurveUsdRepayStrategy,
     createCurveUsdFLRepayStrategy,
     createCurveUsdBoostStrategy,
