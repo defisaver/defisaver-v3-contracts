@@ -50,6 +50,7 @@ contract CurveUsdSwapperTransient is
     /// @dev After swapping, position will be recreated on curveusd or closed fully
     function callback_repay(address _user, uint256, uint256, uint256, uint256[] memory info)
         external
+        nonReentrant
         onlyValidCrvUsdController(msg.sender)
         returns (CallbackData memory cb)
     {
@@ -79,6 +80,7 @@ contract CurveUsdSwapperTransient is
     /// @dev sends exData.srcAmount of curveUsd token to this contract for us to sell then pulls received coll token
     function callback_deposit(address _user, uint256, uint256, uint256, uint256[] memory info)
         external
+        nonReentrant
         onlyValidCrvUsdController(msg.sender)
         returns (CallbackData memory cb)
     {
@@ -98,6 +100,7 @@ contract CurveUsdSwapperTransient is
 
     function callback_liquidate(address _user, uint256, uint256, uint256, uint256[] memory info)
         external
+        nonReentrant
         onlyValidCrvUsdController(msg.sender)
         returns (CallbackData memory cb)
     {
