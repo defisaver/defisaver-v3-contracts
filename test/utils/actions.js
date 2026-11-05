@@ -2981,38 +2981,6 @@ const curveUsdCreate = async (
     return { receipt, approveObj };
 };
 
-const curveUsdLevCreate = async (
-    proxy,
-    controllerAddress,
-    collateralAmount,
-    debtAmount,
-    minAmount,
-    nBands,
-    from,
-    additionData,
-    gasUsed,
-    dfsFeeDivider,
-    useSteth,
-) => {
-    const action = new dfs.actions.curveusd.CurveUsdLevCreateAction(
-        controllerAddress,
-        collateralAmount,
-        debtAmount,
-        minAmount,
-        nBands,
-        from,
-        additionData,
-        gasUsed,
-        dfsFeeDivider,
-        useSteth,
-    );
-
-    const functionData = action.encodeForDsProxyCall()[1];
-    const receipt = await executeAction('CurveUsdLevCreate', functionData, proxy);
-
-    return receipt;
-};
-
 const curveUsdLevCreateTransient = async (
     proxy,
     controllerAddress,
@@ -3031,38 +2999,6 @@ const curveUsdLevCreateTransient = async (
     );
     const functionData = action.encodeForDsProxyCall()[1];
     const receipt = await executeAction('CurveUsdLevCreateTransient', functionData, proxy);
-
-    return receipt;
-};
-
-const curveUsdSelfLiquidateWithColl = async (
-    proxy,
-    controllerAddress,
-    percentage,
-    minCrvUsdExpected,
-    swapAmount,
-    minAmount,
-    to,
-    additionData,
-    gasUsed,
-    dfsFeeDivider,
-    useSteth,
-) => {
-    const action = new dfs.actions.curveusd.CurveUsdSelfLiquidateWithCollAction(
-        controllerAddress,
-        percentage,
-        minCrvUsdExpected,
-        swapAmount,
-        minAmount,
-        to,
-        additionData,
-        gasUsed,
-        dfsFeeDivider,
-        useSteth,
-    );
-
-    const functionData = action.encodeForDsProxyCall()[1];
-    const receipt = await executeAction('CurveUsdSelfLiquidateWithColl', functionData, proxy);
 
     return receipt;
 };
@@ -3174,34 +3110,6 @@ const curveUsdPayback = async (
     const receipt = await executeAction('CurveUsdPayback', functionData, proxy);
 
     return { receipt, approveObj };
-};
-
-const curveUsdRepay = async (
-    proxy,
-    controllerAddress,
-    debtAmount,
-    to,
-    minAmount,
-    extraData,
-    gasUsed,
-    dfsFeeDivider,
-    useSteth,
-) => {
-    const action = new dfs.actions.curveusd.CurveUsdRepayAction(
-        controllerAddress,
-        debtAmount,
-        to,
-        minAmount,
-        extraData,
-        gasUsed,
-        dfsFeeDivider,
-        useSteth,
-    );
-
-    const functionData = action.encodeForDsProxyCall()[1];
-    const receipt = await executeAction('CurveUsdRepay', functionData, proxy);
-
-    return receipt;
 };
 
 const curveUsdRepayTransient = async (proxy, controllerAddress, exData, to) => {
@@ -4157,10 +4065,7 @@ module.exports = {
     curveUsdWithdraw,
     curveUsdBorrow,
     curveUsdPayback,
-    curveUsdRepay,
     curveUsdSelfLiquidate,
-    curveUsdLevCreate,
-    curveUsdSelfLiquidateWithColl,
     curveUsdAdjust,
     curveUsdLevCreateTransient,
     curveUsdRepayTransient,
