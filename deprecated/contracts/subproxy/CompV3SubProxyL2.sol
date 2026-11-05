@@ -10,6 +10,7 @@ import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 /// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
+/// @deprecated Use the generic SubProxy.
 contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, SmartWalletUtils {
     uint64 public immutable REPAY_BUNDLE_ID;
     uint64 public immutable BOOST_BUNDLE_ID;

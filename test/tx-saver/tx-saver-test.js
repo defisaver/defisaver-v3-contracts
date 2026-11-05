@@ -19,7 +19,6 @@ const {
     formatExchangeObj,
     chainIds,
     network,
-    setNextBlockBaseFeeToOneWei,
 } = require('../utils/utils');
 const { predictSafeAddress, SAFE_MASTER_COPY_VERSIONS, deploySafe } = require('../utils/safe');
 const { topUp } = require('../../scripts/utils/fork');
@@ -57,6 +56,15 @@ describe('TxSaver tests', function () {
     const gasParams = {
         gasPrice: 20 * 1e9,
         gasLimit: 10000000,
+    };
+
+    const setNextBlockBaseFeeToOneWei = async () => {
+        if (hre.network.name === 'fork') return;
+
+        const method = hre.network.config.isAnvil
+            ? 'anvil_setNextBlockBaseFeePerGas'
+            : 'hardhat_setNextBlockBaseFeePerGas';
+        await hre.network.provider.send(method, ['0x1']);
     };
 
     beforeEach(async () => {

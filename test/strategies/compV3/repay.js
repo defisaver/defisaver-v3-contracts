@@ -26,8 +26,6 @@ const {
     getCompV3PositionRatio,
     openCompV3EOAPosition,
     addCompV3Manager,
-    deployCompV3BoostBundle,
-    deployCompV3RepayBundle,
 } = require('../../utils/compoundV3');
 const { subCompV3LeverageManagement } = require('../utils/strategy-subs');
 const { callCompV3FLRepayStrategy, callCompV3RepayStrategy } = require('../utils/strategy-calls');
@@ -48,7 +46,6 @@ const runRepayTests = () => {
         let proxy;
         let botAcc;
         let strategyExecutor;
-        let subProxyContract;
         let mockWrapper;
         let flAddr;
 
@@ -69,29 +66,6 @@ const runRepayTests = () => {
             await redeploy('CompV3Supply', isFork);
             await redeploy('CompV3Withdraw', isFork);
             await redeploy('CompV3RatioCheck', isFork);
-
-            if (network !== 'mainnet') {
-                /// @dev At the time of testing, regular repay and boost bundles are already live and deployed on L2s (arbitrum & base).
-                /// We only want to test new EOA bundles deployment. For that we need new CompV3SubProxyL2 contract with new bundle ids.
-                const existingRepayBundleId = 4;
-                const existingBoostBundleId = 5;
-                const newEoaBoostBundleId = await deployCompV3BoostBundle(true);
-                const newEoaRepayBundleId = await deployCompV3RepayBundle(true);
-                subProxyContract = await redeploy(
-                    'CompV3SubProxyL2',
-                    isFork,
-                    existingRepayBundleId,
-                    existingBoostBundleId,
-                    newEoaRepayBundleId,
-                    newEoaBoostBundleId,
-                );
-            } else {
-                /// @dev On mainnet, all bundles are already deployed, including EOA bundles, so here we just test the live state
-                subProxyContract = await hre.ethers.getContractAt(
-                    'CompV3SubProxy',
-                    addrs.mainnet.COMP_V3_SUB_PROXY_ADDR,
-                );
-            }
         });
         beforeEach(async () => {
             snapshotId = await takeSnapshot();
@@ -125,7 +99,7 @@ const runRepayTests = () => {
             const ratioBefore = await getCompV3PositionRatio(debtAsset.symbol, positionOwner);
             console.log('ratioBefore', ratioBefore);
 
-            const { subData, repaySubId } = await subCompV3LeverageManagement(
+            const { repaySubId, repaySub: strategySub } = await subCompV3LeverageManagement(
                 proxy,
                 debtAsset.symbol,
                 TRIGGER_REPAY_RATIO,
@@ -134,18 +108,6 @@ const runRepayTests = () => {
                 TARGET_RATIO_REPAY,
                 BOOST_ENABLED,
                 isEOA,
-                subProxyContract.address,
-            );
-
-            let subDataInStruct = subData;
-
-            if (network !== 'mainnet') {
-                subDataInStruct = await subProxyContract.parseSubData(subData);
-            }
-
-            const strategySub = await subProxyContract.formatRepaySub(
-                subDataInStruct,
-                proxy.address,
                 senderAcc.address,
             );
 

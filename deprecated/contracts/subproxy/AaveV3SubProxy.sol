@@ -11,6 +11,7 @@ import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 /// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
+/// @deprecated Use the generic SubProxy.
 contract AaveV3SubProxy is
     StrategyModel,
     AdminAuth,

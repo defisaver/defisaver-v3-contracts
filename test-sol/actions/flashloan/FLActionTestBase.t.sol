@@ -3,14 +3,6 @@
 pragma solidity =0.8.24;
 
 import { IPoolV3 } from "../../../contracts/interfaces/protocols/aaveV3/IPoolV3.sol";
-import { ILendingPoolV2 } from "../../../contracts/interfaces/protocols/aaveV2/ILendingPoolV2.sol";
-import { IFlashLoanBase } from "../../../contracts/interfaces/flashloan/IFlashLoanBase.sol";
-import { IERC20 } from "../../../contracts/interfaces/token/IERC20.sol";
-import { IWETH } from "../../../contracts/interfaces/token/IWETH.sol";
-import {
-    IERC3156FlashLender
-} from "../../../contracts/interfaces/flashloan/IERC3156FlashLender.sol";
-
 import { RecipeExecutor } from "../../../contracts/core/RecipeExecutor.sol";
 import { StrategyModel } from "../../../contracts/core/strategy/StrategyModel.sol";
 import { FLAction } from "../../../contracts/actions/flashloan/FLAction.sol";
@@ -19,6 +11,13 @@ import {
 } from "../../../contracts/actions/flashloan/helpers/MainnetFLAddresses.sol";
 import { SendToken } from "../../../contracts/actions/utils/SendToken.sol";
 import { SendTokens } from "../../../contracts/actions/utils/SendTokens.sol";
+import {
+    IERC3156FlashLender
+} from "../../../contracts/interfaces/flashloan/IERC3156FlashLender.sol";
+import { IFlashLoanBase } from "../../../contracts/interfaces/flashloan/IFlashLoanBase.sol";
+import { IERC20 } from "../../../contracts/interfaces/token/IERC20.sol";
+import { IWETH } from "../../../contracts/interfaces/token/IWETH.sol";
+
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 import { RegistryUtils } from "../../utils/RegistryUtils.sol";
@@ -45,7 +44,7 @@ abstract contract FLActionTestBase is ActionsUtils, RegistryUtils, BaseTest, Mai
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public virtual override {
-        forkFromEnv("");
+        _forkForTest();
 
         wallet = new SmartWallet(bob);
         wallet.createSafe();
@@ -64,6 +63,10 @@ abstract contract FLActionTestBase is ActionsUtils, RegistryUtils, BaseTest, Mai
     /*//////////////////////////////////////////////////////////////////////////
                                       HELPERS
     //////////////////////////////////////////////////////////////////////////*/
+    function _forkForTest() internal virtual {
+        forkFromEnv("");
+    }
+
     function _executeRecipe(StrategyModel.Recipe memory _recipe) internal {
         wallet.execute(
             address(recipeExecutor),
@@ -259,21 +262,16 @@ abstract contract FLActionTestBase is ActionsUtils, RegistryUtils, BaseTest, Mai
 
     function _aaveV3Fee(uint256 _amount) internal view returns (uint256) {
         uint256 premiumBps = IPoolV3(AAVE_V3_LENDING_POOL).FLASHLOAN_PREMIUM_TOTAL();
-        return _calculateFLFee(_amount, premiumBps);
+        return (_amount * premiumBps + 9999) / 10_000;
     }
 
-    function _aaveV2Fee(uint256 _amount) internal view returns (uint256) {
-        uint256 premiumBps = ILendingPoolV2(AAVE_LENDING_POOL).FLASHLOAN_PREMIUM_TOTAL();
-        return _calculateFLFee(_amount, premiumBps);
+    function _aaveV2Fee(uint256 _amount) internal pure returns (uint256) {
+        return (_amount * 9 + 9999) / 10_000;
     }
 
     function _sparkFee(uint256 _amount) internal view returns (uint256) {
         uint256 premiumBps = IPoolV3(SPARK_LENDING_POOL).FLASHLOAN_PREMIUM_TOTAL();
-        return _calculateFLFee(_amount, premiumBps);
-    }
-
-    function _calculateFLFee(uint256 _amount, uint256 _premiumBps) internal pure returns (uint256) {
-        return (_amount * _premiumBps + 9999) / 10_000;
+        return (_amount * premiumBps + 9999) / 10_000;
     }
 
     function _erc3156Fee(address _lender, address _token, uint256 _amount)

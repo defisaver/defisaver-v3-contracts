@@ -5,23 +5,24 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { Permission } from "../../auth/Permission.sol";
 import { SubStorage } from "../../core/strategy/SubStorage.sol";
-import { LiquityAdjust } from "./trove/LiquityAdjust.sol";
 import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
-contract LiquitySubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, SmartWalletUtils {
+/// @title Contract that subscribes users to Compound V2 automation bundles
+/// @deprecated Use the generic SubProxy.
+contract CompSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, SmartWalletUtils {
     uint64 public immutable REPAY_BUNDLE_ID;
     uint64 public immutable BOOST_BUNDLE_ID;
-
-    constructor(uint64 _repayBundleId, uint64 _boostBundleId) {
-        REPAY_BUNDLE_ID = _repayBundleId;
-        BOOST_BUNDLE_ID = _boostBundleId;
-    }
 
     enum RatioState {
         OVER,
         UNDER
+    }
+
+    constructor(uint64 _repayBundleId, uint64 _boostBundleId) {
+        REPAY_BUNDLE_ID = _repayBundleId;
+        BOOST_BUNDLE_ID = _boostBundleId;
     }
 
     /// @dev 5% offset acceptable
@@ -30,7 +31,7 @@ contract LiquitySubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Sm
     error WrongSubParams(uint256 minRatio, uint256 maxRatio);
     error RangeTooClose(uint256 ratio, uint256 targetRatio);
 
-    struct LiquitySubData {
+    struct CompSubData {
         uint128 minRatio;
         uint128 maxRatio;
         uint128 targetRatioBoost;
@@ -42,7 +43,7 @@ contract LiquitySubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Sm
     /// @dev Gives wallet permission if needed and registers a new sub
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
-    function subToLiquityAutomation(LiquitySubData calldata _subData) public {
+    function subToCompAutomation(CompSubData calldata _subData) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
         _givePermissionToAuthContract(_isDSProxy(address(this)));
 
@@ -60,9 +61,7 @@ contract LiquitySubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Sm
     /// @notice Calls SubStorage to update the users subscription data
     /// @dev Updating sub data will activate it as well
     /// @dev If we don't have a boost subId send as 0
-    function updateSubData(uint32 _subId1, uint32 _subId2, LiquitySubData calldata _subData)
-        public
-    {
+    function updateSubData(uint32 _subId1, uint32 _subId2, CompSubData calldata _subData) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
         _givePermissionToAuthContract(_isDSProxy(address(this)));
 
@@ -112,7 +111,7 @@ contract LiquitySubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Sm
 
     ///////////////////////////////// HELPER FUNCTIONS /////////////////////////////////
 
-    function _validateSubData(LiquitySubData memory _subData) internal pure {
+    function _validateSubData(CompSubData memory _subData) internal pure {
         if (_subData.minRatio > _subData.maxRatio) {
             revert WrongSubParams(_subData.minRatio, _subData.maxRatio);
         }
@@ -126,8 +125,8 @@ contract LiquitySubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Sm
         }
     }
 
-    /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the specialized liquity sub
-    function formatRepaySub(LiquitySubData memory _subData, address _wallet)
+    /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the specialized comp sub
+    function formatRepaySub(CompSubData memory _subData, address _wallet)
         public
         view
         returns (StrategySub memory repaySub)
@@ -135,23 +134,19 @@ contract LiquitySubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Sm
         repaySub.strategyOrBundleId = REPAY_BUNDLE_ID;
         repaySub.isBundle = true;
 
-        address user = _wallet;
-
         // format data for ratio trigger if currRatio < minRatio = true
         bytes memory triggerData =
-            abi.encode(user, uint256(_subData.minRatio), uint8(RatioState.UNDER));
+            abi.encode(_wallet, uint256(_subData.minRatio), uint8(RatioState.UNDER));
         repaySub.triggerData = new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
-        repaySub.subData = new bytes32[](4);
-        repaySub.subData[0] = bytes32(uint256(1)); // ratioState = repay
-        repaySub.subData[1] = bytes32(uint256(_subData.targetRatioRepay)); // targetRatio
-        repaySub.subData[2] = bytes32(uint256(LiquityAdjust.CollChange.WITHDRAW));
-        repaySub.subData[3] = bytes32(uint256(LiquityAdjust.DebtChange.PAYBACK));
+        repaySub.subData = new bytes32[](2);
+        repaySub.subData[0] = bytes32(uint256(_subData.targetRatioRepay)); // targetRatio
+        repaySub.subData[1] = bytes32(uint256(1)); // ratioState = repay
     }
 
-    /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized liquity sub
-    function formatBoostSub(LiquitySubData memory _subData, address _wallet)
+    /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized comp sub
+    function formatBoostSub(CompSubData memory _subData, address _wallet)
         public
         view
         returns (StrategySub memory boostSub)
@@ -159,18 +154,15 @@ contract LiquitySubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Sm
         boostSub.strategyOrBundleId = BOOST_BUNDLE_ID;
         boostSub.isBundle = true;
 
-        address user = _wallet;
-
         // format data for ratio trigger if currRatio > maxRatio = true
         bytes memory triggerData =
-            abi.encode(user, uint256(_subData.maxRatio), uint8(RatioState.OVER));
+            abi.encode(_wallet, uint256(_subData.maxRatio), uint8(RatioState.OVER));
         boostSub.triggerData = new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 
-        boostSub.subData = new bytes32[](4);
-        boostSub.subData[0] = bytes32(uint256(0)); // ratioState = boost
-        boostSub.subData[1] = bytes32(uint256(_subData.targetRatioBoost)); // targetRatio
-        boostSub.subData[2] = bytes32(uint256(LiquityAdjust.CollChange.SUPPLY));
-        boostSub.subData[3] = bytes32(uint256(LiquityAdjust.DebtChange.BORROW));
+        boostSub.subData = new bytes32[](3);
+        boostSub.subData[0] = bytes32(uint256(_subData.targetRatioBoost)); // targetRatio
+        boostSub.subData[1] = bytes32(uint256(0)); // ratioState = boost
+        boostSub.subData[2] = bytes32(uint256(1)); // enableAsColl = true
     }
 }

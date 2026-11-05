@@ -22,6 +22,17 @@
         "history": []
     },
     {
+        "name": "DFSProxyRegistryV2",
+        "address": "0xa1651732a4F6a9aec2261304a7E2cd5790A224e5",
+        "id": "0x0fcbdb1a",
+        "path": "contracts/utils/proxyRegistry/DFSProxyRegistryV2.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "DFSProxyRegistryController",
         "address": "0x493C0dE902E6916128A223F66F37d3b6ee8fA408",
         "id": "0xcbbb53f2",
@@ -493,14 +504,14 @@
     },
     {
         "name": "ChangeProxyOwner",
-        "address": "0x62769258ea8b3a85cc6fb4332fc2760a122dbc9e",
+        "address": "0xf573585C38d947D8A70F7F6c83D060F1F89855AE",
         "id": "0x67314f12",
         "path": "contracts/actions/utils/ChangeProxyOwner.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x62769258ea8b3a85cc6fb4332fc2760a122dbc9e"]
     },
     {
         "name": "DFSSafeFactory",
@@ -586,14 +597,14 @@
     },
     {
         "name": "AaveV3SetEMode",
-        "address": "0x7F264737066b9b7D9729Fe9715abB97423D8b35B",
+        "address": "0xf00eEB0Cb7e6c86319022B105f261C5666535c24",
         "id": "0x3d35d254",
         "path": "contracts/actions/aaveV3/AaveV3SetEMode.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x7F264737066b9b7D9729Fe9715abB97423D8b35B"]
     },
     {
         "name": "AaveV3SwapBorrowRateMode",
@@ -663,20 +674,31 @@
     },
     {
         "name": "FLAction",
-        "address": "0xB57b666dAB46229e2b80113b5187F6DCD91AB159",
+        "address": "0x14762eEE465a0A4649D5744106De68b59047cB40",
         "id": "0xbcab5e2a",
         "path": "contracts/actions/flashloan/FLAction.sol",
-        "version": "1.0.5",
+        "version": "1.0.6",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xB57b666dAB46229e2b80113b5187F6DCD91AB159",
             "0xfF05C70C8d69258052228F28e571c3BFe54631c3",
             "0x13663f7f852dFa7ec6517B5F3B0caabDBd9bf049",
             "0x82d5eDeb005AfFbF381B5949C707a3305160F4A9",
             "0xE668197A175E7A2143222a028470c6ABBBD183F6",
             "0x5fA356C700F0C8A6f445B8a36Eb6e108590919D4"
         ]
+    },
+    {
+        "name": "FLActionL2",
+        "address": "0x14762eEE465a0A4649D5744106De68b59047cB40",
+        "id": "0x9f01e6ae",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     },
     {
         "name": "TokenizedVaultAdapter",
@@ -784,14 +806,15 @@
     },
     {
         "name": "LimitSellL2",
-        "address": "0xFbA4C507b3f5d17e38eA1a44530300A4c5e745AE",
+        "address": "0x73f3989b1872e3d9232B7b024D4E21C6c803638f",
         "id": "0x5cc47139",
         "path": "contracts/actions/exchange/LimitSellL2.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xFbA4C507b3f5d17e38eA1a44530300A4c5e745AE",
             "0xdbEE7981c45acA9444FA98bf3bf9769A4FeAfe74",
             "0x08426bE896D68C4e37441D60d6EA43865CcF8B5C"
         ]
@@ -876,16 +899,6 @@
             "0x6272515E2cC68DE4Eae333A8B2e277C54a9024da",
             "0x7A36779a7b5F1128B28932604057d5b63361297c"
         ]
-    },
-    {
-        "name": "FLActionL2",
-        "address": "0x352D4a1622f2DC34c738F542934372855f219F05",
-        "id": "0x9f01e6ae",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
     },
     {
         "name": "ToggleSub",
@@ -1339,14 +1352,14 @@
     },
     {
         "name": "AaveV3MinDebtTrigger",
-        "address": "0x8F521d036b395E2dd4B3A10348d323ec75A375e6",
+        "address": "0x793D1B90a1063C074aad56176A2DA6a78B06f38F",
         "id": "0xb3fa1599",
         "path": "contracts/triggers-additional/AaveV3MinDebtTrigger.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x8F521d036b395E2dd4B3A10348d323ec75A375e6"]
     },
     {
         "name": "RequiredAmountAndAllowanceTrigger",

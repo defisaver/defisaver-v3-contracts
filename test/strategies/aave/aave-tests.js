@@ -4,13 +4,6 @@ const { expect } = require('chai');
 const { ethers } = require('hardhat');
 const { supplyAave, borrowAave } = require('../../utils/actions');
 const {
-    createAaveV2BoostStrategy,
-    createAaveV2RepayStrategy,
-    createAaveFLV2BoostStrategy,
-    createAaveFLV2RepayStrategy,
-} = require('../../../strategies-spec/mainnet');
-
-const {
     callAaveV2BoostStrategy,
     callAaveV2RepayStrategy,
     callAaveFLV2BoostStrategy,
@@ -21,7 +14,6 @@ const { subAaveV2AutomationStrategy } = require('../utils/strategy-subs');
 const {
     getContractFromRegistry,
     setNetwork,
-    openStrategyAndBundleStorage,
     getProxy,
     setNewExchangeWrapper,
     fetchAmountinUSDPrice,
@@ -31,31 +23,9 @@ const {
     AAVE_V2_MARKET_ADDR,
     redeployCore,
 } = require('../../utils/utils');
-const { createStrategy, addBotCaller, createBundle } = require('../utils/utils-strategies');
+const { addBotCaller } = require('../utils/utils-strategies');
 
 const VARIABLE_RATE_MODE = 2;
-
-const createBundleAndStrategy = async () => {
-    const repayAaveStrategyEncoded = createAaveV2RepayStrategy();
-    const repayFLAaveStrategyEncoded = createAaveFLV2RepayStrategy();
-
-    const boostAaveStrategyEncoded = createAaveV2BoostStrategy();
-    const boostFLAaveStrategyEncoded = createAaveFLV2BoostStrategy();
-
-    await openStrategyAndBundleStorage(false);
-
-    const repayId1 = await createStrategy(...repayAaveStrategyEncoded, true);
-    const repayId2 = await createStrategy(...repayFLAaveStrategyEncoded, true);
-
-    const boostId1 = await createStrategy(...boostAaveStrategyEncoded, true);
-    const boostId2 = await createStrategy(...boostFLAaveStrategyEncoded, true);
-
-    const repayBundleId = await createBundle([repayId1, repayId2]);
-
-    const boostBundleId = await createBundle([boostId1, boostId2]);
-    await redeploy('AaveSubProxy', false, repayBundleId, boostBundleId);
-    return { repayBundleId, boostBundleId };
-};
 
 const testPairs = [
     {
@@ -108,8 +78,6 @@ const aaveV2BoostTest = () =>
             ({ address: exchangeWrapper } = await getContractFromRegistry('UniswapWrapperV3'));
             await setNewExchangeWrapper(senderAcc, exchangeWrapper);
             await addBotCaller(botAcc.address);
-
-            await createBundleAndStrategy();
         });
 
         for (let i = 0; i < testPairs.length; i++) {
@@ -243,8 +211,6 @@ const aaveV2RepayTest = () =>
             ({ address: exchangeWrapper } = await getContractFromRegistry('UniswapWrapperV3'));
             await setNewExchangeWrapper(senderAcc, exchangeWrapper);
             await addBotCaller(botAcc.address);
-
-            await createBundleAndStrategy();
         });
 
         for (let i = 0; i < testPairs.length; i++) {

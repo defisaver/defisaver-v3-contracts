@@ -22,6 +22,17 @@
         "history": []
     },
     {
+        "name": "DFSProxyRegistryV2",
+        "address": "0x4fe554C08d0e0a1f52ba83F334f65bc618140D89",
+        "id": "0x0fcbdb1a",
+        "path": "contracts/utils/proxyRegistry/DFSProxyRegistryV2.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "DFSProxyRegistryController",
         "address": "0x6F6DaE1bCB60F67B2Cb939dBE565e8fD03F6F002",
         "id": "0xcbbb53f2",
@@ -498,14 +509,15 @@
     },
     {
         "name": "LimitSellL2",
-        "address": "0x7e63C8f337eC217df43ae3F9254B17e799FC1a69",
+        "address": "0x47620F631f821219388c14Ae188aC30Edf042946",
         "id": "0x5cc47139",
         "path": "contracts/actions/exchange/LimitSellL2.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x7e63C8f337eC217df43ae3F9254B17e799FC1a69",
             "0x2D5d36e458eB151D30B189805fF2517863A41c25",
             "0xC941B49Aaa9743a5EA4Ccd60Bf9a980861bA5201"
         ]
@@ -630,14 +642,14 @@
     },
     {
         "name": "AaveV3SetEMode",
-        "address": "0x99D5068d9520316e8D3B5136c0B6EA33C5E0c27e",
+        "address": "0x112515e9040D853C2928F9ff21D12Ac920BD6Db9",
         "id": "0x3d35d254",
         "path": "contracts/actions/aaveV3/AaveV3SetEMode.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x99D5068d9520316e8D3B5136c0B6EA33C5E0c27e"]
     },
     {
         "name": "AaveV3SwapBorrowRateMode",
@@ -735,14 +747,15 @@
     },
     {
         "name": "FLAction",
-        "address": "0xf041C72e201CD7d04a240fe06c5783E2Ee2D92b3",
+        "address": "0xC3841d482C85910082295C51D425b674Ff2FFC7A",
         "id": "0xbcab5e2a",
         "path": "contracts/actions/flashloan/FLAction.sol",
-        "version": "1.0.7",
+        "version": "1.0.8",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xf041C72e201CD7d04a240fe06c5783E2Ee2D92b3",
             "0x1f46Db75d1D0295933c8C05F691b15896C0f5752",
             "0x6AD754298a902320919cbA7a633a222d56D4b83B",
             "0x557f8E26358aa697A3b3838f21fA20Df3aB9afBD",
@@ -751,6 +764,16 @@
             "0x1561EAF39c98d45C55C7dC605E627672F4406819",
             "0xFbd213073FC4f597C840B1ee202678d210d765fb"
         ]
+    },
+    {
+        "name": "FLActionL2",
+        "address": "0xC3841d482C85910082295C51D425b674Ff2FFC7A",
+        "id": "0x9f01e6ae",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     },
     {
         "name": "TokenBalance",
@@ -870,14 +893,14 @@
     },
     {
         "name": "ChangeProxyOwner",
-        "address": "0x29F66A5fcB601c806E7156f29FDEC771BdC9c08d",
+        "address": "0xacf5bAD9543A98EcAcC620cF6CB989Ec88f1650D",
         "id": "0x67314f12",
         "path": "contracts/actions/utils/ChangeProxyOwner.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x29F66A5fcB601c806E7156f29FDEC771BdC9c08d"]
     },
     {
         "name": "AaveV3RatioCheck",
@@ -892,16 +915,6 @@
             "0x82AF88864E1A9dC1d6d2931C60A1CA25E4951487",
             "0x0Cf69Cc3A9f9d1848C78e745c504d5AA320a8153"
         ]
-    },
-    {
-        "name": "FLActionL2",
-        "address": "0x3Cc0d5DAE1B94e294152C3150aA732b97af603E1",
-        "id": "0x9f01e6ae",
-        "version": "1.0.1",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
     },
     {
         "name": "TimestampTrigger",
@@ -1326,14 +1339,15 @@
     },
     {
         "name": "TxSaverExecutor",
-        "address": "0xa0f7DA725999199ce578cA77f3eedbA4069206a0",
+        "address": "0x624041605F012A0404d12EbEa7C6d6f931B3B14F",
         "id": "0x91bfbd87",
         "path": "contracts/tx-saver/TxSaverExecutor.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xa0f7DA725999199ce578cA77f3eedbA4069206a0",
             "0x2d7993e134b820359c55ca0b12b997f29a74556a",
             "0x70cc5952c111275c30ef9aafc675e715eaf77a69"
         ]
@@ -1879,14 +1893,14 @@
     },
     {
         "name": "AaveV3MinDebtTrigger",
-        "address": "0xaF620fe599702666848a12d38d0F1807BdAe77f6",
+        "address": "0x198e910db8882ac5727fd960Ebdb863D8Ac80724",
         "id": "0xb3fa1599",
         "path": "contracts/triggers-additional/AaveV3MinDebtTrigger.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xaF620fe599702666848a12d38d0F1807BdAe77f6"]
     },
     {
         "name": "CompV3MinDebtTrigger",

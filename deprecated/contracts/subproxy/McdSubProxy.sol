@@ -11,6 +11,7 @@ import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 /// @title Subscribes users to boost/repay strategies for Maker
+/// @deprecated Use the generic SubProxy.
 contract McdSubProxy is
     StrategyModel,
     AdminAuth,

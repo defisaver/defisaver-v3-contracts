@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 contract BaseActionsUtilAddresses {
-    address internal constant DFS_REG_CONTROLLER_ADDR = 0x50bCFC115283dF48Ab6382551B9B93b08E197747;
     address internal constant SUB_STORAGE_ADDR = 0x44e98bB58d725F2eF93a195F518b335dCB784c78;
     address internal constant TRANSIENT_STORAGE = 0x9D95de57631DD8Ac071892843DA67FEe52EA3962;
     address internal constant TRANSIENT_STORAGE_CANCUN = 0x1E44a7ec82432419D5876c4c737f966fdDf2dD5C;

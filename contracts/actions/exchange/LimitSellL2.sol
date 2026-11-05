@@ -15,6 +15,9 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
     using TokenUtils for address;
     using SellActionHelper for ExchangeData;
 
+    /// @notice Minimum fee divider, limiting the maximum fee to 25 bps (0.25%)
+    uint256 public constant MIN_FEE_DIVIDER = 400;
+
     /// @notice Used for validating the price that is set in the trigger
     TransientStorageCancun public constant tempStorage =
         TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
@@ -97,8 +100,12 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
         uint256 currPrice = uint256(tempStorage.getBytes32("CURR_PRICE"));
         if (currPrice == 0) revert PriceNotSetError();
 
-        // No sell fee for limit sell strategies.
-        exchangeData.dfsFeeDivider = 0;
+        // Reset the current price for the next strategy
+        tempStorage.setBytes32("CURR_PRICE", bytes32(0));
+
+        if (exchangeData.dfsFeeDivider != 0 && exchangeData.dfsFeeDivider < MIN_FEE_DIVIDER) {
+            exchangeData.dfsFeeDivider = MIN_FEE_DIVIDER;
+        }
 
         // If the price is not the expected price, revert.
         if (exchangeData.minPrice != currPrice) {

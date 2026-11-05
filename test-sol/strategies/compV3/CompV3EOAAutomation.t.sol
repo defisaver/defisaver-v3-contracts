@@ -10,10 +10,10 @@ import { SafeModuleAuth } from "../../../contracts/core/strategy/SafeModuleAuth.
 import { CompV3RatioTrigger } from "../../../contracts/triggers/CompV3RatioTrigger.sol";
 import { GasFeeTaker } from "../../../contracts/actions/fee/GasFeeTaker.sol";
 import { DFSSell } from "../../../contracts/actions/exchange/DFSSell.sol";
-import { CompV3SubProxy } from "../../../contracts/actions/compoundV3/CompV3SubProxy.sol";
 import { CompV3RatioCheck } from "../../../contracts/actions/checkers/CompV3RatioCheck.sol";
 import { FLAction } from "../../../contracts/actions/flashloan/FLAction.sol";
 import { SubStorage } from "../../../contracts/core/strategy/SubStorage.sol";
+import { SubProxy } from "../../../contracts/core/strategy/SubProxy.sol";
 import { CompV3Supply } from "../../../contracts/actions/compoundV3/CompV3Supply.sol";
 import { CompV3Withdraw } from "../../../contracts/actions/compoundV3/CompV3Withdraw.sol";
 import { CompV3Borrow } from "../../../contracts/actions/compoundV3/CompV3Borrow.sol";
@@ -133,29 +133,37 @@ contract TestCompV3EOAAutomation is BaseTest, RegistryUtils, ActionsUtils {
     }
 
     function _subToAutomationBundles(bool _isSafe) internal {
-        CompV3SubProxy subProxy = new CompV3SubProxy(0, 0, repayBundleEoaId, boostBundleEoaId);
-
-        uint128 minRatio = 180e16;
-        uint128 maxRatio = 220e16;
-        uint128 targetRatioBoost = 200e16;
-        uint128 targetRatioRepay = 200e16;
-        bool isEOA = true;
-
-        CompV3SubProxy.CompV3SubData memory params = user1.subToAutomationBundles(
-            _isSafe,
-            address(subProxy),
-            minRatio,
-            maxRatio,
-            targetRatioBoost,
-            targetRatioRepay,
-            isEOA
+        SubProxy subProxy = new SubProxy();
+        repaySub = _formatSub(
+            repayBundleEoaId, uint8(CompV3RatioTrigger.RatioState.UNDER), 200e16, 180e16
         );
+        boostSub = _formatSub(
+            boostBundleEoaId, uint8(CompV3RatioTrigger.RatioState.OVER), 200e16, 220e16
+        );
+
+        user1.subscribeToStrategy(_isSafe, address(subProxy), repaySub);
+        user1.subscribeToStrategy(_isSafe, address(subProxy), boostSub);
 
         repaySubId = SubStorage(SUB_STORAGE_ADDR).getSubsCount() - 2;
         boostSubId = SubStorage(SUB_STORAGE_ADDR).getSubsCount() - 1;
+    }
 
-        repaySub = subProxy.formatRepaySub(params, wallet, address(user1));
-        boostSub = subProxy.formatBoostSub(params, wallet, address(user1));
+    function _formatSub(
+        uint64 _bundleId,
+        uint8 _ratioState,
+        uint256 _targetRatio,
+        uint256 _triggerRatio
+    ) internal view returns (StrategyModel.StrategySub memory sub) {
+        sub.strategyOrBundleId = _bundleId;
+        sub.isBundle = true;
+        sub.triggerData = new bytes[](1);
+        sub.triggerData[0] =
+            abi.encode(address(user1), Addresses.COMET_USDC, _triggerRatio, _ratioState);
+        sub.subData = new bytes32[](4);
+        sub.subData[0] = bytes32(uint256(uint160(Addresses.COMET_USDC)));
+        sub.subData[1] = bytes32(uint256(uint160(Addresses.USDC_ADDR)));
+        sub.subData[2] = bytes32(uint256(_ratioState));
+        sub.subData[3] = bytes32(_targetRatio);
     }
 
     function _walletSetUpBeforeEachTest(bool _isSafe) internal {

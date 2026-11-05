@@ -291,19 +291,30 @@
     },
     {
         "name": "FLAction",
-        "address": "0x87Af4769e4134379125A262408e1f3EC60d2Ab52",
+        "address": "0x11f6eD2d31f531eeb82400b8215a13B6dF040D56",
         "id": "0xbcab5e2a",
         "path": "contracts/actions/flashloan/FLAction.sol",
-        "version": "1.0.4",
+        "version": "1.0.5",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x87Af4769e4134379125A262408e1f3EC60d2Ab52",
             "0x172A75C3cCaf3b35Bc1c604cbea1367Bf7fb968e",
             "0xDA86B4c61A545a4b217746ba43C8157f0Ec612c7",
             "0x5523E61fBEF59825831Ffbb1306aBc3Bb03BB3A4",
             "0xAAbd4B0372240E319F9722c4Fd1e2FE0C8d422D2"
         ]
+    },
+    {
+        "name": "FLActionL2",
+        "address": "0x11f6eD2d31f531eeb82400b8215a13B6dF040D56",
+        "id": "0x9f01e6ae",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     },
     {
         "name": "FLAaveV3WithFee",
@@ -395,14 +406,14 @@
     },
     {
         "name": "AaveV3SetEMode",
-        "address": "0xdeF8B05Ce194D50C376233C9C5530027f6180442",
+        "address": "0xC2c66A380CC6CCb24B6C5f412905ce4f16c95D9b",
         "id": "0x3d35d254",
         "path": "contracts/actions/aaveV3/AaveV3SetEMode.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0xdeF8B05Ce194D50C376233C9C5530027f6180442"]
     },
     {
         "name": "AaveV3Supply",
@@ -642,6 +653,17 @@
         "history": []
     },
     {
+        "name": "DFSProxyRegistryV2",
+        "address": "0x28C8bCf583bD10dc718A7596d1bEFF23990d1907",
+        "id": "0x0fcbdb1a",
+        "path": "contracts/utils/proxyRegistry/DFSProxyRegistryV2.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "ZrxAllowlist",
         "address": "0x169D6E128238ebabF86032Ae9da65938eaD7F69e",
         "id": "0x0c33e794",
@@ -843,14 +865,14 @@
     },
     {
         "name": "ChangeProxyOwner",
-        "address": "0x1947a44d3717a47556175d64fdc208619aa08874",
+        "address": "0x7b55d25BfF49Fd62563823570f47E9a35AA39541",
         "id": "0x67314f12",
         "path": "contracts/actions/utils/ChangeProxyOwner.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x1947a44d3717a47556175d64fdc208619aa08874"]
     },
     {
         "name": "AaveV3View",
@@ -1064,14 +1086,14 @@
     },
     {
         "name": "LimitSellL2",
-        "address": "0xc78dEf78caD4a92cc02820eD691C978ddAe7d3e8",
+        "address": "0x60f6ff7E2F9c78Ea66Ea58f889fdD65C32E447Eb",
         "id": "0x5cc47139",
         "path": "contracts/actions/exchange/LimitSellL2.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0xc78dEf78caD4a92cc02820eD691C978ddAe7d3e8"]
     },
     {
         "name": "CompV3RatioCheck",
@@ -1665,14 +1687,14 @@
     },
     {
         "name": "AaveV3MinDebtTrigger",
-        "address": "0xE889613BD7Ed413c05f5b85118f1bFC3FC673ADA",
+        "address": "0x12990D9B54784498d408FD631d91A9323aB33Ae1",
         "id": "0xb3fa1599",
         "path": "contracts/triggers-additional/AaveV3MinDebtTrigger.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xE889613BD7Ed413c05f5b85118f1bFC3FC673ADA"]
     },
     {
         "name": "CompV3MinDebtTrigger",
