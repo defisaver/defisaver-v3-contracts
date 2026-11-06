@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { ITrigger } from "../../interfaces/core/ITrigger.sol";
-import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
+import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 
-import { BundleStorage } from "../../core/strategy/BundleStorage.sol";
-import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
-import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
-import { StrategyStorage } from "../../core/strategy/StrategyStorage.sol";
+import { BundleStorage } from "../core/strategy/BundleStorage.sol";
+import { CoreHelper } from "../core/helpers/CoreHelper.sol";
+import { StrategyModel } from "../core/strategy/StrategyModel.sol";
+import { StrategyStorage } from "../core/strategy/StrategyStorage.sol";
 
 /// @title TriggerView - Helper contract to check whether a trigger is triggered or not for a given sub.
 /// @dev This contract is designed to avoid reverts from checking triggers.

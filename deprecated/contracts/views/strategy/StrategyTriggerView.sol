@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
-import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
-import { BundleStorage } from "../../core/strategy/BundleStorage.sol";
-import { StrategyStorage } from "../../core/strategy/StrategyStorage.sol";
-import { ITrigger } from "../../interfaces/core/ITrigger.sol";
-import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
+import { StrategyModel } from "../../../../contracts/core/strategy/StrategyModel.sol";
+import { IDFSRegistry } from "../../../../contracts/interfaces/core/IDFSRegistry.sol";
+import { BundleStorage } from "../../../../contracts/core/strategy/BundleStorage.sol";
+import { StrategyStorage } from "../../../../contracts/core/strategy/StrategyStorage.sol";
+import { ITrigger } from "../../../../contracts/interfaces/core/ITrigger.sol";
+import { CoreHelper } from "../../../../contracts/core/helpers/CoreHelper.sol";
 
 contract StrategyTriggerView is StrategyModel, CoreHelper {
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
