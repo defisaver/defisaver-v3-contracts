@@ -5,8 +5,6 @@ import { IExchangeV3 } from "../interfaces/exchange/IExchangeV3.sol";
 import { DFSExchangeData } from "./DFSExchangeData.sol";
 import { Discount } from "../utils/Discount.sol";
 import { FeeRecipient } from "../utils/fee/FeeRecipient.sol";
-import { ExchangeAggregatorRegistry } from "./registries/ExchangeAggregatorRegistry.sol";
-import { WrapperExchangeRegistry } from "./registries/WrapperExchangeRegistry.sol";
 import { IOffchainWrapper } from "../interfaces/exchange/IOffchainWrapper.sol";
 import { ExchangeHelper } from "./helpers/ExchangeHelper.sol";
 import { StrategyModel } from "../core/strategy/StrategyModel.sol";
@@ -21,11 +19,6 @@ contract DFSExchangeCore is DSMath, DFSExchangeData, ExchangeHelper, StrategyMod
 
     error SlippageHitError(uint256 amountBought, uint256 amountExpected);
     error InvalidWrapperError(address wrapperAddr);
-
-    ExchangeAggregatorRegistry internal constant exchangeAggRegistry =
-        ExchangeAggregatorRegistry(EXCHANGE_AGGREGATOR_REGISTRY_ADDR);
-    WrapperExchangeRegistry internal constant wrapperRegistry =
-        WrapperExchangeRegistry(WRAPPER_EXCHANGE_REGISTRY);
 
     /// @notice Internal method that performs a sell on offchain aggregator/on-chain
     /// @dev Useful for other DFS contract to integrate for exchanging
@@ -71,12 +64,12 @@ contract DFSExchangeCore is DSMath, DFSExchangeData, ExchangeHelper, StrategyMod
     /// @param _exData Exchange data
     function offChainSwap(ExchangeData memory _exData) internal returns (bool success, uint256) {
         /// @dev Check if exchange address is in our registry to not call an untrusted contract
-        if (!exchangeAggRegistry.isExchangeAggregatorAddr(_exData.offchainData.exchangeAddr)) {
+        if (!_exchangeAggRegistry.isExchangeAggregatorAddr(_exData.offchainData.exchangeAddr)) {
             return (false, 0);
         }
 
         /// @dev Check if we have the address is a registered wrapper
-        if (!wrapperRegistry.isWrapper(_exData.offchainData.wrapper)) {
+        if (!_wrapperRegistry.isWrapper(_exData.offchainData.wrapper)) {
             return (false, 0);
         }
 
@@ -90,7 +83,7 @@ contract DFSExchangeCore is DSMath, DFSExchangeData, ExchangeHelper, StrategyMod
     /// @param _exData Exchange data struct
     /// @return swappedTokens Dest amount of tokens we get after sell
     function onChainSwap(ExchangeData memory _exData) internal returns (uint256 swappedTokens) {
-        if (!(WrapperExchangeRegistry(WRAPPER_EXCHANGE_REGISTRY).isWrapper(_exData.wrapper))) {
+        if (!_wrapperRegistry.isWrapper(_exData.wrapper)) {
             revert InvalidWrapperError(_exData.wrapper);
         }
 

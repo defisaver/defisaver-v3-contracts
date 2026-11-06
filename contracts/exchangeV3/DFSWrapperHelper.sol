@@ -5,11 +5,12 @@ pragma solidity =0.8.24;
 import { IERC20 } from "../interfaces/token/IERC20.sol";
 import { TokenUtils } from "../utils/token/TokenUtils.sol";
 import { DFSExchangeData } from "./DFSExchangeData.sol";
+import { ExchangeHelper } from "./helpers/ExchangeHelper.sol";
 import { SafeERC20 } from "../_vendor/openzeppelin/SafeERC20.sol";
 
 /// @title DFSWrapperHelper
 /// @notice Helper contract used by other Wrapper contracts
-contract DFSWrapperHelper {
+contract DFSWrapperHelper is ExchangeHelper {
     using TokenUtils for address;
     using SafeERC20 for IERC20;
 
@@ -35,6 +36,10 @@ contract DFSWrapperHelper {
         DFSExchangeData.ExchangeData memory _exData,
         bytes memory _realCalldata
     ) internal returns (bool success, uint256 tokensSwapped) {
+        if (!_exchangeAggRegistry.isExchangeAggregatorAddr(_exData.offchainData.exchangeAddr)) {
+            return (false, 0);
+        }
+
         IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
 
         uint256 tokensBefore = _exData.destAddr.getBalance(address(this));
