@@ -10,6 +10,7 @@ import { DSMath } from "../../_vendor/DS/DSMath.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { WrapperHelper } from "./helpers/WrapperHelper.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { ReentrancyGuardTransient } from "../../_vendor/openzeppelin/ReentrancyGuardTransient.sol";
 import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 
 /// @title UniV3WrapperV3Base
@@ -21,7 +22,13 @@ import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 ///    See DFSExchangeCore for more details.
 /// 2. Wrapper contracts are designed to be stateless, meaning they do not hold funds,
 ///    and any token balances can be cleared by anyone.
-contract UniV3WrapperV3Base is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
+contract UniV3WrapperV3Base is
+    DSMath,
+    IExchangeV3,
+    AdminAuth,
+    WrapperHelper,
+    ReentrancyGuardTransient
+{
     using TokenUtils for address;
     using SafeERC20 for IERC20;
 
@@ -37,6 +44,7 @@ contract UniV3WrapperV3Base is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
     function sell(address _srcAddr, address, uint256 _srcAmount, bytes calldata _additionalData)
         external
         override
+        nonReentrant
         returns (uint256 amountOut)
     {
         IERC20(_srcAddr).safeApprove(address(router), _srcAmount);
@@ -47,6 +55,8 @@ contract UniV3WrapperV3Base is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
         /// @dev DFSExchangeCore contains slippage check
 
         amountOut = router.exactInput(params);
+
+        _srcAddr.removeAllowance(address(router));
 
         // Sends leftover source tokens to the caller.
         uint256 amountLeft = IERC20(_srcAddr).balanceOf(address(this));

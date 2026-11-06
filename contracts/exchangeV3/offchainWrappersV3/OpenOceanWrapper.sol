@@ -8,26 +8,45 @@ import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { DFSWrapperHelper } from "../DFSWrapperHelper.sol";
 import { DFSExchangeData } from "../DFSExchangeData.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { ReentrancyGuardTransient } from "../../_vendor/openzeppelin/ReentrancyGuardTransient.sol";
 import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 
-/// @title Wrapper contract which will be used if offchain exchange used is OpenOcean
-contract OpenOceanWrapper is IOffchainWrapper, DFSWrapperHelper, DFSExchangeData, AdminAuth {
+/// @title OpenOceanWrapper
+/// @notice Wrapper contract used when the off-chain exchange is OpenOcean.
+/// @dev Important security assumptions:
+/// 1. Exchange wrapper contracts are not intended to be used standalone, but as part of a DFS sell action,
+///    which performs additional checks before forwarding the order and a final slippage check after the swap.
+///    See DFSExchangeCore for more details.
+/// 2. Wrapper contracts are designed to be stateless, meaning they do not hold funds,
+///    and any token balances can be cleared by anyone.
+contract OpenOceanWrapper is
+    IOffchainWrapper,
+    DFSWrapperHelper,
+    DFSExchangeData,
+    AdminAuth,
+    ReentrancyGuardTransient
+{
     using TokenUtils for address;
     using SafeERC20 for IERC20;
 
     /// @notice offchainData.callData should be this struct encoded
+    /// @param realCalldata Calldata forwarded to the OpenOcean exchange
+    /// @param offset Byte offset in realCalldata where the source amount is written
     struct OpenOceanCalldata {
         bytes realCalldata;
         uint256 offset;
     }
 
     /// @notice Takes order from OpenOcean and returns bool indicating if it is successful
-    /// @param _exData Exchange data
+    /// @param _exData The exchange data
+    /// @return success Whether the swap was successful
+    /// @return tokensSwapped Amount of destination tokens received
     function takeOrder(ExchangeData memory _exData)
         public
         payable
         override
-        returns (bool success, uint256)
+        nonReentrant
+        returns (bool success, uint256 tokensSwapped)
     {
         OpenOceanCalldata memory openOceanCalldata =
             abi.decode(_exData.offchainData.callData, (OpenOceanCalldata));
@@ -39,10 +58,7 @@ contract OpenOceanWrapper is IOffchainWrapper, DFSWrapperHelper, DFSExchangeData
 
         uint256 tokensBefore = _exData.destAddr.getBalance(address(this));
 
-        /// @dev the amount of tokens received is checked in DFSExchangeCore
-        /// @dev Exchange wrapper contracts should not be used on their own
         (success,) = _exData.offchainData.exchangeAddr.call(openOceanCalldata.realCalldata);
-        uint256 tokensSwapped = 0;
 
         if (success) {
             // get the current balance of the swapped tokens
@@ -51,6 +67,9 @@ contract OpenOceanWrapper is IOffchainWrapper, DFSWrapperHelper, DFSExchangeData
                 revert ZeroTokensSwapped();
             }
         }
+
+        _exData.srcAddr.removeAllowance(_exData.offchainData.allowanceTarget);
+
         // returns all funds from src addr, dest addr
         sendLeftover(_exData.srcAddr, _exData.destAddr, payable(msg.sender));
 

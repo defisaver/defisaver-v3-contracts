@@ -9,6 +9,7 @@ import { DSMath } from "../../_vendor/DS/DSMath.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { WrapperHelper } from "./helpers/WrapperHelper.sol";
+import { ReentrancyGuardTransient } from "../../_vendor/openzeppelin/ReentrancyGuardTransient.sol";
 import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 
 /// @title CurveWrapperV3
@@ -20,7 +21,7 @@ import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 ///    See DFSExchangeCore for more details.
 /// 2. Wrapper contracts are designed to be stateless, meaning they do not hold funds,
 ///    and any token balances can be cleared by anyone.
-contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
+contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper, ReentrancyGuardTransient {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
@@ -32,6 +33,7 @@ contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
     function sell(address _srcAddr, address, uint256 _srcAmount, bytes calldata _additionalData)
         external
         override
+        nonReentrant
         returns (uint256 amountOut)
     {
         ISwapRouterNG exchangeContract = ISwapRouterNG(CURVE_ROUTER_NG);
@@ -49,6 +51,8 @@ contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
             _pools,
             msg.sender
         );
+
+        _srcAddr.removeAllowance(address(exchangeContract));
 
         // Sends leftover source tokens to the caller.
         uint256 amountLeft = IERC20(_srcAddr).balanceOf(address(this));

@@ -11,6 +11,7 @@ import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { WrapperHelper } from "./helpers/WrapperHelper.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { DFSWrapperHelper } from "../DFSWrapperHelper.sol";
+import { ReentrancyGuardTransient } from "../../_vendor/openzeppelin/ReentrancyGuardTransient.sol";
 import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 
 /// @title KyberWrapperV3
@@ -22,9 +23,17 @@ import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 ///    See DFSExchangeCore for more details.
 /// 2. Wrapper contracts are designed to be stateless, meaning they do not hold funds,
 ///    and any token balances can be cleared by anyone.
-contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper, DFSWrapperHelper {
+contract KyberWrapperV3 is
+    DSMath,
+    IExchangeV3,
+    AdminAuth,
+    WrapperHelper,
+    DFSWrapperHelper,
+    ReentrancyGuardTransient
+{
     error WrongDestAmountError(uint256, uint256);
 
+    using TokenUtils for address;
     using SafeERC20 for IERC20;
 
     /// @notice Sells a _srcAmount of tokens at Kyber
@@ -35,6 +44,7 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper, DFSWra
     function sell(address _srcAddr, address _destAddr, uint256 _srcAmount, bytes memory)
         external
         override
+        nonReentrant
         returns (uint256 destAmount)
     {
         IERC20 srcToken = IERC20(_srcAddr);
@@ -54,6 +64,8 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper, DFSWra
             /// @dev DFSExchangeCore contains slippage check instead of writing it here
             WALLET_ID
         );
+
+        _srcAddr.removeAllowance(address(kyberNetworkProxy));
 
         // Sends leftover tokens including ETH to the caller.
         sendLeftover(_srcAddr, _destAddr, payable(msg.sender));

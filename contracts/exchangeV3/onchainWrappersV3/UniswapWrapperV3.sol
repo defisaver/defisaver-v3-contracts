@@ -9,6 +9,7 @@ import { DSMath } from "../../_vendor/DS/DSMath.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { WrapperHelper } from "./helpers/WrapperHelper.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { ReentrancyGuardTransient } from "../../_vendor/openzeppelin/ReentrancyGuardTransient.sol";
 import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 
 /// @title UniswapWrapperV3
@@ -20,7 +21,13 @@ import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 ///    See DFSExchangeCore for more details.
 /// 2. Wrapper contracts are designed to be stateless, meaning they do not hold funds,
 ///    and any token balances can be cleared by anyone.
-contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
+contract UniswapWrapperV3 is
+    DSMath,
+    IExchangeV3,
+    AdminAuth,
+    WrapperHelper,
+    ReentrancyGuardTransient
+{
     using TokenUtils for address;
     using SafeERC20 for IERC20;
 
@@ -34,6 +41,7 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
     function sell(address _srcAddr, address, uint256 _srcAmount, bytes memory _additionalData)
         external
         override
+        nonReentrant
         returns (uint256 amountOut)
     {
         uint256[] memory amounts;
@@ -45,6 +53,8 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
         /// @dev On-chain wrapper only used for simulations and strategies, in both cases we are ok with setting a dynamic timestamp
         amounts =
             router.swapExactTokensForTokens(_srcAmount, 1, path, msg.sender, block.timestamp + 1);
+
+        _srcAddr.removeAllowance(address(router));
 
         // Sends leftover source tokens to the caller.
         uint256 amountLeft = IERC20(_srcAddr).balanceOf(address(this));

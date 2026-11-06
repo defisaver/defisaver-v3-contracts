@@ -12,6 +12,7 @@ import { DFSExchangeData } from "../DFSExchangeData.sol";
 import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { ReentrancyGuardTransient } from "../../_vendor/openzeppelin/ReentrancyGuardTransient.sol";
 import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 import { DFSIds } from "../../utils/DFSIds.sol";
 
@@ -28,7 +29,8 @@ contract KyberAggregatorWrapper is
     DFSWrapperHelper,
     DFSExchangeData,
     AdminAuth,
-    CoreHelper
+    CoreHelper,
+    ReentrancyGuardTransient
 {
     using TokenUtils for address;
     using SafeERC20 for IERC20;
@@ -43,6 +45,7 @@ contract KyberAggregatorWrapper is
         public
         payable
         override
+        nonReentrant
         returns (bool success, uint256 tokensSwapped)
     {
         address scalingHelperAddr = registry.getAddr(DFSIds.KYBER_SCALING_HELPER);
@@ -66,6 +69,8 @@ contract KyberAggregatorWrapper is
 
             if (tokensSwapped == 0) revert ZeroTokensSwapped();
         }
+
+        _exData.srcAddr.removeAllowance(_exData.offchainData.allowanceTarget);
 
         // Sends leftover tokens including ETH to the caller.
         sendLeftover(_exData.srcAddr, _exData.destAddr, payable(msg.sender));

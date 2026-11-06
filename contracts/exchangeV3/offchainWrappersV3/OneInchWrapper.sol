@@ -9,6 +9,7 @@ import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { DFSWrapperHelper } from "../DFSWrapperHelper.sol";
 import { DFSExchangeData } from "../DFSExchangeData.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { ReentrancyGuardTransient } from "../../_vendor/openzeppelin/ReentrancyGuardTransient.sol";
 import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 
 /// @title OneInchWrapper
@@ -19,7 +20,13 @@ import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 ///    See DFSExchangeCore for more details.
 /// 2. Wrapper contracts are designed to be stateless, meaning they do not hold funds,
 ///    and any token balances can be cleared by anyone.
-contract OneInchWrapper is IOffchainWrapper, DFSWrapperHelper, DFSExchangeData, AdminAuth {
+contract OneInchWrapper is
+    IOffchainWrapper,
+    DFSWrapperHelper,
+    DFSExchangeData,
+    AdminAuth,
+    ReentrancyGuardTransient
+{
     using TokenUtils for address;
     using SafeERC20 for IERC20;
 
@@ -39,6 +46,7 @@ contract OneInchWrapper is IOffchainWrapper, DFSWrapperHelper, DFSExchangeData, 
         public
         payable
         override
+        nonReentrant
         returns (bool success, uint256 tokensSwapped)
     {
         OneInchCalldata memory oneInchCalldata =
@@ -63,6 +71,8 @@ contract OneInchWrapper is IOffchainWrapper, DFSWrapperHelper, DFSExchangeData, 
 
             if (tokensSwapped == 0) revert ZeroTokensSwapped();
         }
+
+        _exData.srcAddr.removeAllowance(_exData.offchainData.allowanceTarget);
 
         // Sends leftover tokens including ETH to the caller.
         sendLeftover(_exData.srcAddr, _exData.destAddr, payable(msg.sender));
