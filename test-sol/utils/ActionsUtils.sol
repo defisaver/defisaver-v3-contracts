@@ -15,6 +15,7 @@ import { MorphoTokenWrap } from "../../contracts/actions/morpho-blue/MorphoToken
 import { PendleTokenRedeem } from "../../contracts/actions/pendle/PendleTokenRedeem.sol";
 import { CreateSub } from "../../contracts/actions/utils/CreateSub.sol";
 import { ToggleSub } from "../../contracts/actions/utils/ToggleSub.sol";
+import { UpdateSub } from "../../contracts/actions/utils/UpdateSub.sol";
 import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
 import { HandleAuth } from "../../contracts/actions/utils/HandleAuth.sol";
 import { SummerfiUnsub } from "../../contracts/actions/summerfi/SummerfiUnsub.sol";
@@ -291,6 +292,14 @@ contract ActionsUtils {
         returns (bytes memory params)
     {
         params = abi.encode(ToggleSub.Params({ subId: _subId, active: _active }));
+    }
+
+    function updateSubEncode(uint256 _subId, StrategyModel.StrategySub memory _sub)
+        public
+        pure
+        returns (bytes memory params)
+    {
+        params = abi.encode(UpdateSub.Params({ subId: _subId, sub: _sub }));
     }
 
     function handleAuthEncode(bool _enableAuth) public pure returns (bytes memory params) {
