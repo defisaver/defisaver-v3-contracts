@@ -3,23 +3,14 @@
 pragma solidity =0.8.24;
 
 import { IOffchainWrapper } from "../../interfaces/exchange/IOffchainWrapper.sol";
-import { IERC20 } from "../../interfaces/token/IERC20.sol";
-
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { DFSWrapperHelper } from "../DFSWrapperHelper.sol";
 import { DFSExchangeData } from "../DFSExchangeData.sol";
-import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ReentrancyGuardTransient } from "../../_vendor/openzeppelin/ReentrancyGuardTransient.sol";
-import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 
 /// @title ZeroxWrapper
 /// @notice Wrapper contract used when the off-chain exchange is 0x.
-/// @dev Important security assumptions:
-/// 1. Exchange wrapper contracts are not intended to be used standalone, but as part of a DFS sell action,
-///    which performs additional checks before forwarding the order and a final slippage check after the swap.
-///    See DFSExchangeCore for more details.
-/// 2. Wrapper contracts are designed to be stateless, meaning they do not hold funds,
-///    and any token balances can be cleared by anyone.
+/// @dev See IOffchainWrapper for the shared security assumptions.
 contract ZeroxWrapper is
     IOffchainWrapper,
     DFSWrapperHelper,
@@ -27,13 +18,7 @@ contract ZeroxWrapper is
     AdminAuth,
     ReentrancyGuardTransient
 {
-    using TokenUtils for address;
-    using SafeERC20 for IERC20;
-
-    /// @notice Takes order from 0x and returns bool indicating if it is successful
-    /// @param _exData The exchange data
-    /// @return success Whether the swap was successful
-    /// @return tokensSwapped Amount of tokens swapped
+    /// @inheritdoc IOffchainWrapper
     function takeOrder(ExchangeData memory _exData)
         public
         payable
@@ -41,26 +26,12 @@ contract ZeroxWrapper is
         nonReentrant
         returns (bool success, uint256 tokensSwapped)
     {
-        /// @dev approve 0x allowance contract
-        IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
-
-        uint256 tokensBefore = _exData.destAddr.getBalance(address(this));
-
-        (success,) = _exData.offchainData.exchangeAddr.call(_exData.offchainData.callData);
-
-        if (success) {
-            // Gets the current balance of the swapped tokens.
-            tokensSwapped = _exData.destAddr.getBalance(address(this)) - tokensBefore;
-
-            if (tokensSwapped == 0) revert ZeroTokensSwapped();
-        }
-
-        _exData.srcAddr.removeAllowance(_exData.offchainData.allowanceTarget);
+        (success, tokensSwapped) = _executeOffchainSwap(_exData, _exData.offchainData.callData);
 
         // Sends leftover tokens including ETH to the caller.
-        sendLeftover(_exData.srcAddr, _exData.destAddr, payable(msg.sender));
+        _sendLeftover(_exData.srcAddr, _exData.destAddr, payable(msg.sender));
     }
 
     // solhint-disable-next-line no-empty-blocks
-    receive() external payable virtual { }
+    receive() external payable { }
 }

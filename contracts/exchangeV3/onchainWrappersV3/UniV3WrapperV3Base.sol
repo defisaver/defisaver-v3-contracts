@@ -15,13 +15,7 @@ import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 
 /// @title UniV3WrapperV3Base
 /// @notice Wrapper contract used when the on-chain exchange is UniswapV3 on Base.
-/// @notice On-chain wrappers are primarily used for simulations and testing.
-/// @dev Important security assumptions:
-/// 1. Exchange wrapper contracts are not intended to be used standalone, but as part of a DFS sell action,
-///    which performs additional checks before forwarding the order and a final slippage check after the swap.
-///    See DFSExchangeCore for more details.
-/// 2. Wrapper contracts are designed to be stateless, meaning they do not hold funds,
-///    and any token balances can be cleared by anyone.
+/// @dev See IExchangeV3 for the shared security assumptions.
 contract UniV3WrapperV3Base is
     DSMath,
     IExchangeV3,
@@ -35,12 +29,7 @@ contract UniV3WrapperV3Base is
     ISwapRouter02 public constant router = ISwapRouter02(UNI_V3_ROUTER);
     IQuoter public constant quoter = IQuoter(UNI_V3_QUOTER);
 
-    /// @notice Sells _srcAmount of tokens at UniswapV3
-    /// @param _srcAddr The token to sell
-    /// @param _srcAmount The amount of tokens to sell
-    /// @param _additionalData The UniswapV3 encoded path
-    /// @return amountOut Amount of tokens received
-    /// @dev On-chain wrapper only used for simulations and strategies, in both cases we are ok with setting a dynamic timestamp
+    /// @inheritdoc IExchangeV3
     function sell(address _srcAddr, address, uint256 _srcAmount, bytes calldata _additionalData)
         external
         override
@@ -49,10 +38,11 @@ contract UniV3WrapperV3Base is
     {
         IERC20(_srcAddr).safeApprove(address(router), _srcAmount);
 
+        /// @dev DFSExchangeCore contains slippage check instead of writing it here.
+        /// @dev On-chain wrapper only used for simulations and strategies, in both cases we are ok with setting a dynamic timestamp.
         ISwapRouter02.ExactInputParams memory params = ISwapRouter02.ExactInputParams({
             path: _additionalData, recipient: msg.sender, amountIn: _srcAmount, amountOutMinimum: 1
         });
-        /// @dev DFSExchangeCore contains slippage check
 
         amountOut = router.exactInput(params);
 
@@ -68,10 +58,7 @@ contract UniV3WrapperV3Base is
         return amountOut;
     }
 
-    /// @notice Return a rate for which we can sell an amount of tokens
-    /// @param _srcAmount The amount of tokens to sell
-    /// @param _additionalData The UniswapV3 encoded path
-    /// @return rate The sell rate
+    /// @inheritdoc IExchangeV3
     function getSellRate(address, address, uint256 _srcAmount, bytes memory _additionalData)
         public
         override

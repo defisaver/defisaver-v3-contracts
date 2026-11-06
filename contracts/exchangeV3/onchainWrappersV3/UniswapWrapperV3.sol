@@ -14,13 +14,7 @@ import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 
 /// @title UniswapWrapperV3
 /// @notice Wrapper contract used when the on-chain exchange is UniswapV2.
-/// @notice On-chain wrappers are primarily used for simulations and testing.
-/// @dev Important security assumptions:
-/// 1. Exchange wrapper contracts are not intended to be used standalone, but as part of a DFS sell action,
-///    which performs additional checks before forwarding the order and a final slippage check after the swap.
-///    See DFSExchangeCore for more details.
-/// 2. Wrapper contracts are designed to be stateless, meaning they do not hold funds,
-///    and any token balances can be cleared by anyone.
+/// @dev See IExchangeV3 for the shared security assumptions.
 contract UniswapWrapperV3 is
     DSMath,
     IExchangeV3,
@@ -33,11 +27,7 @@ contract UniswapWrapperV3 is
 
     IUniswapRouter public constant router = IUniswapRouter(UNI_V2_ROUTER);
 
-    /// @notice Sells a _srcAmount of tokens at UniswapV2
-    /// @param _srcAddr The token to sell
-    /// @param _srcAmount The amount of tokens to sell
-    /// @param _additionalData The UniswapV2 swap path
-    /// @return amountOut Amount of destination tokens received
+    /// @inheritdoc IExchangeV3
     function sell(address _srcAddr, address, uint256 _srcAmount, bytes memory _additionalData)
         external
         override
@@ -49,8 +39,8 @@ contract UniswapWrapperV3 is
 
         IERC20(_srcAddr).safeApprove(address(router), _srcAmount);
 
-        /// @dev DFSExchangeCore contains slippage check instead of writing it here (minOutput = 1)
-        /// @dev On-chain wrapper only used for simulations and strategies, in both cases we are ok with setting a dynamic timestamp
+        /// @dev DFSExchangeCore contains slippage check instead of writing it here.
+        /// @dev On-chain wrapper only used for simulations and strategies, in both cases we are ok with setting a dynamic timestamp.
         amounts =
             router.swapExactTokensForTokens(_srcAmount, 1, path, msg.sender, block.timestamp + 1);
 
@@ -66,10 +56,7 @@ contract UniswapWrapperV3 is
         amountOut = amounts[amounts.length - 1];
     }
 
-    /// @notice Return a rate for which we can sell an amount of tokens
-    /// @param _srcAmount The amount of tokens to sell
-    /// @param _additionalData The UniswapV2 swap path
-    /// @return rate The sell rate
+    /// @inheritdoc IExchangeV3
     function getSellRate(address, address, uint256 _srcAmount, bytes memory _additionalData)
         public
         view

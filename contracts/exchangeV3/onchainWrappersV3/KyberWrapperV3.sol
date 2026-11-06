@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { IKyberNetworkProxy } from "../../interfaces//exchange/IKyberNetworkProxy.sol";
+import { IKyberNetworkProxy } from "../../interfaces/exchange/IKyberNetworkProxy.sol";
 import { IERC20 } from "../../interfaces/token/IERC20.sol";
 import { IExchangeV3 } from "../../interfaces/exchange/IExchangeV3.sol";
 
@@ -16,13 +16,7 @@ import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 
 /// @title KyberWrapperV3
 /// @notice Wrapper contract used when the on-chain exchange is Kyber.
-/// @notice On-chain wrappers are primarily used for simulations and testing.
-/// @dev Important security assumptions:
-/// 1. Exchange wrapper contracts are not intended to be used standalone, but as part of a DFS sell action,
-///    which performs additional checks before forwarding the order and a final slippage check after the swap.
-///    See DFSExchangeCore for more details.
-/// 2. Wrapper contracts are designed to be stateless, meaning they do not hold funds,
-///    and any token balances can be cleared by anyone.
+/// @dev See IExchangeV3 for the shared security assumptions.
 contract KyberWrapperV3 is
     DSMath,
     IExchangeV3,
@@ -31,16 +25,10 @@ contract KyberWrapperV3 is
     DFSWrapperHelper,
     ReentrancyGuardTransient
 {
-    error WrongDestAmountError(uint256, uint256);
-
     using TokenUtils for address;
     using SafeERC20 for IERC20;
 
-    /// @notice Sells a _srcAmount of tokens at Kyber
-    /// @param _srcAddr The token to sell
-    /// @param _destAddr The token to buy
-    /// @param _srcAmount The amount of tokens to sell
-    /// @return destAmount Amount of destination tokens received
+    /// @inheritdoc IExchangeV3
     function sell(address _srcAddr, address _destAddr, uint256 _srcAmount, bytes memory)
         external
         override
@@ -54,29 +42,19 @@ contract KyberWrapperV3 is
 
         srcToken.safeApprove(address(kyberNetworkProxy), _srcAmount);
 
+        /// @dev DFSExchangeCore contains slippage check instead of writing it here.
         destAmount = kyberNetworkProxy.trade(
-            srcToken,
-            _srcAmount,
-            destToken,
-            msg.sender,
-            type(uint256).max,
-            0,
-            /// @dev DFSExchangeCore contains slippage check instead of writing it here
-            WALLET_ID
+            srcToken, _srcAmount, destToken, msg.sender, type(uint256).max, 0, WALLET_ID
         );
 
         _srcAddr.removeAllowance(address(kyberNetworkProxy));
 
         // Sends leftover tokens including ETH to the caller.
-        sendLeftover(_srcAddr, _destAddr, payable(msg.sender));
+        _sendLeftover(_srcAddr, _destAddr, payable(msg.sender));
     }
 
-    /// @notice Return a rate for which we can sell an amount of tokens
+    /// @inheritdoc IExchangeV3
     /// @dev Will fail if token is over 18 decimals
-    /// @param _srcAddr The token to sell
-    /// @param _destAddr The token to buy
-    /// @param _srcAmount The amount of tokens to sell
-    /// @return rate The sell rate
     function getSellRate(address _srcAddr, address _destAddr, uint256 _srcAmount, bytes memory)
         public
         view

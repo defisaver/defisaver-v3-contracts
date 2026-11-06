@@ -14,22 +14,12 @@ import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 
 /// @title CurveWrapperV3
 /// @notice Wrapper contract used when the on-chain exchange is Curve.
-/// @notice On-chain wrappers are primarily used for simulations and testing.
-/// @dev Important security assumptions:
-/// 1. Exchange wrapper contracts are not intended to be used standalone, but as part of a DFS sell action,
-///    which performs additional checks before forwarding the order and a final slippage check after the swap.
-///    See DFSExchangeCore for more details.
-/// 2. Wrapper contracts are designed to be stateless, meaning they do not hold funds,
-///    and any token balances can be cleared by anyone.
+/// @dev See IExchangeV3 for the shared security assumptions.
 contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper, ReentrancyGuardTransient {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
-    /// @notice Sells _srcAmount of tokens on Curve
-    /// @param _srcAddr The token to sell
-    /// @param _srcAmount The amount of tokens to sell
-    /// @param _additionalData The Curve route and swap params
-    /// @return amountOut Amount of tokens received
+    /// @inheritdoc IExchangeV3
     function sell(address _srcAddr, address, uint256 _srcAmount, bytes calldata _additionalData)
         external
         override
@@ -42,15 +32,9 @@ contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper, Reentr
         (address[11] memory _route, uint256[5][5] memory _swap_params, address[5] memory _pools) =
             abi.decode(_additionalData, (address[11], uint256[5][5], address[5]));
 
-        amountOut = exchangeContract.exchange(
-            _route,
-            _swap_params,
-            _srcAmount,
-            1,
-            /// @dev DFSExchangeCore contains slippage check instead of writing it here
-            _pools,
-            msg.sender
-        );
+        /// @dev DFSExchangeCore contains slippage check instead of writing it here.
+        amountOut =
+            exchangeContract.exchange(_route, _swap_params, _srcAmount, 1, _pools, msg.sender);
 
         _srcAddr.removeAllowance(address(exchangeContract));
 
@@ -62,10 +46,7 @@ contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper, Reentr
         }
     }
 
-    /// @notice Return a rate for which we can sell an amount of tokens
-    /// @param _srcAmount The amount of tokens to sell
-    /// @param _additionalData The Curve route and swap params
-    /// @return rate The sell rate
+    /// @inheritdoc IExchangeV3
     function getSellRate(address, address, uint256 _srcAmount, bytes memory _additionalData)
         public
         view
