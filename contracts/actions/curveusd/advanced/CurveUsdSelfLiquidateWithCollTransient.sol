@@ -98,7 +98,8 @@ contract CurveUsdSelfLiquidateWithCollTransient is ActionBase, CurveUsdHelper {
             );
 
         // there shouldn't be any funds left on swapper contract after sell but withdrawing it just in case
-        CurveUsdSwapperTransient(curveUsdTransientSwapper).withdrawAll(_params.controllerAddress);
+        CurveUsdSwapperTransient(payable(curveUsdTransientSwapper))
+            .withdrawAll(_params.controllerAddress);
 
         // there will usually be both coll token and debt token, unless we're selling all collateral
         (, uint256 debtTokenReceived) = _sendLeftoverFundsWithSnapshot(

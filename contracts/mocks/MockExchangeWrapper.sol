@@ -16,7 +16,7 @@ contract MockExchangeWrapper is DSMath, IExchangeV3, AdminAuth {
     /// @notice Takes srcAmount of source tokens and returns dest tokens to the caller at the provided rate.
     /// @param _srcAddr From token
     /// @param _srcAmount From amount
-    /// @param _additionalData Route and swap params
+    /// @param _additionalData Encoded rate, optionally followed by a fill percentage in basis points
     /// @return uint256 amount of tokens received from selling
     function sell(
         address _srcAddr,
@@ -27,8 +27,16 @@ contract MockExchangeWrapper is DSMath, IExchangeV3, AdminAuth {
         IERC20(_srcAddr).safeTransfer(address(this), _srcAmount);
 
         (uint256 rate) = abi.decode(_additionalData, (uint256));
-        uint256 amountOut = wmul(rate, _srcAmount);
+        uint256 fillBps = 10_000;
+        if (_additionalData.length == 64) {
+            (, fillBps) = abi.decode(_additionalData, (uint256, uint256));
+            require(fillBps <= 10_000, "Invalid fill percentage");
+        }
 
+        uint256 filledAmount = _srcAmount * fillBps / 10_000;
+        uint256 amountOut = wmul(rate, filledAmount);
+
+        _srcAddr.withdrawTokens(msg.sender, _srcAmount - filledAmount);
         _destAddr.withdrawTokens(msg.sender, amountOut);
 
         return amountOut;
