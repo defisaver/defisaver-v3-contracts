@@ -29,7 +29,9 @@ import { AaveV3Encode } from "../encode/AaveV3Encode.sol";
 import { FLAction } from "../../../contracts/actions/flashloan/FLAction.sol";
 import { SendToken } from "../../../contracts/actions/utils/SendToken.sol";
 import { DFSSell } from "../../../contracts/actions/exchange/DFSSell.sol";
-import { SFProxyEntryPoint } from "../../../contracts/actions/summerfi/SFProxyEntryPoint.sol";
+import {
+    SFProxyEntryPoint
+} from "../../../contracts/wallet-adapters/summerfi/SFProxyEntryPoint.sol";
 import { Addresses } from "../helpers/MainnetAddresses.sol";
 import {
     SFProxyFactoryHelper
