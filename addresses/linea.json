@@ -579,5 +579,16 @@
         "changeTime": 0,
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "TransientStorageCancun",
+        "address": "0xCeB876C6A4dd76aFe645622db00D4E051D16dA66",
+        "id": "0x099eb80a",
+        "path": "contracts/utils/transient/TransientStorageCancun.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
     }
 ]
