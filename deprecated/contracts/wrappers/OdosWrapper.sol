@@ -2,14 +2,14 @@
 
 pragma solidity =0.8.24;
 
-import { IOffchainWrapper } from "../../interfaces/exchange/IOffchainWrapper.sol";
-import { IERC20 } from "../../interfaces/token/IERC20.sol";
+import { IOffchainWrapper } from "../../../contracts/interfaces/exchange/IOffchainWrapper.sol";
+import { IERC20 } from "../../../contracts/interfaces/token/IERC20.sol";
 
-import { AdminAuth } from "../../auth/AdminAuth.sol";
-import { DFSWrapperHelper } from "../DFSWrapperHelper.sol";
-import { DFSExchangeData } from "../DFSExchangeData.sol";
-import { TokenUtils } from "../../utils/token/TokenUtils.sol";
-import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
+import { AdminAuth } from "../../../contracts/auth/AdminAuth.sol";
+import { DFSWrapperHelper } from "../../../contracts/exchangeV3/DFSWrapperHelper.sol";
+import { DFSExchangeData } from "../../../contracts/exchangeV3/DFSExchangeData.sol";
+import { TokenUtils } from "../../../contracts/utils/token/TokenUtils.sol";
+import { SafeERC20 } from "../../../contracts/_vendor/openzeppelin/SafeERC20.sol";
 
 /// @title OdosWrapper
 /// @notice Wrapper contract used when the off-chain exchange is Odos.
