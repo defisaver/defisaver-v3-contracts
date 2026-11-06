@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { BaseTest } from "../utils/BaseTest.sol";
 import { RegistryUtils } from "../utils/RegistryUtils.sol";
-import { TriggerView } from "../../contracts/views/strategy/TriggerView.sol";
+import { TriggerView } from "../../contracts/views/TriggerView.sol";
 import { BundleStorage } from "../../contracts/core/strategy/BundleStorage.sol";
 import { StrategyStorage } from "../../contracts/core/strategy/StrategyStorage.sol";
 import { AaveV3MinDebtTrigger } from "../../contracts/triggers-additional/AaveV3MinDebtTrigger.sol";
