@@ -9,6 +9,5 @@ contract ArbitrumExchangeAddresses {
         0x4a0c7BDF7F58AA04852Da07CDb3d367521f81446;
     address internal constant EXCHANGE_AGGREGATOR_REGISTRY_ADDR =
         0xcc0Ae28CC4ae2944B61d3b205F47F5f3aE5Ca204;
-    address internal constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant TOKEN_GROUP_REGISTRY = 0xb03fe103f54841821C080C124312059c9A3a7B5c;
 }
