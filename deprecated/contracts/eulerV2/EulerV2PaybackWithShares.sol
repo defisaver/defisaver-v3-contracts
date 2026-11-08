@@ -2,11 +2,15 @@
 
 pragma solidity =0.8.24;
 
-import { ActionBase } from "../ActionBase.sol";
+import { ActionBase } from "../../../contracts/actions/ActionBase.sol";
 
-import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
-import { IEVault, IBorrowing, IRiskManager } from "../../interfaces/protocols/eulerV2/IEVault.sol";
-import { IEVC } from "../../interfaces/protocols/eulerV2/IEVC.sol";
+import { EulerV2Helper } from "../../../contracts/actions/eulerV2/helpers/EulerV2Helper.sol";
+import {
+    IEVault,
+    IBorrowing,
+    IRiskManager
+} from "../../../contracts/interfaces/protocols/eulerV2/IEVault.sol";
+import { IEVC } from "../../../contracts/interfaces/protocols/eulerV2/IEVC.sol";
 
 /// @title Payback debt asset to a Euler vault using share tokens
 contract EulerV2PaybackWithShares is ActionBase, EulerV2Helper {

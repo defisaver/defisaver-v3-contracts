@@ -2,11 +2,11 @@
 
 pragma solidity =0.8.24;
 
-import { ActionBase } from "../ActionBase.sol";
+import { ActionBase } from "../../../contracts/actions/ActionBase.sol";
 
-import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
-import { IBorrowing } from "../../interfaces/protocols/eulerV2/IEVault.sol";
-import { IEVC } from "../../interfaces/protocols/eulerV2/IEVC.sol";
+import { EulerV2Helper } from "../../../contracts/actions/eulerV2/helpers/EulerV2Helper.sol";
+import { IBorrowing } from "../../../contracts/interfaces/protocols/eulerV2/IEVault.sol";
+import { IEVC } from "../../../contracts/interfaces/protocols/eulerV2/IEVC.sol";
 
 /// @title Pull debt from one Euler account to another
 contract EulerV2PullDebt is ActionBase, EulerV2Helper {

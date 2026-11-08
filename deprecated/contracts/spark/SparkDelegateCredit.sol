@@ -2,14 +2,14 @@
 
 pragma solidity =0.8.24;
 
-import { ISparkPool } from "../../interfaces/protocols/spark/ISparkPool.sol";
-import { ISparkDebtToken } from "../../interfaces/protocols/spark/ISparkDebtToken.sol";
-import { SparkDataTypes } from "../../interfaces/protocols/spark/SparkDataTypes.sol";
-import { SparkHelper } from "./helpers/SparkHelper.sol";
+import { ISparkPool } from "../../../contracts/interfaces/protocols/spark/ISparkPool.sol";
+import { ISparkDebtToken } from "../../../contracts/interfaces/protocols/spark/ISparkDebtToken.sol";
+import { SparkDataTypes } from "../../../contracts/interfaces/protocols/spark/SparkDataTypes.sol";
+import { SparkHelper } from "../../../contracts/actions/spark/helpers/SparkHelper.sol";
 
-import { TokenUtils } from "../../utils/token/TokenUtils.sol";
-import { ActionBase } from "../ActionBase.sol";
-import { DFSLib } from "../../utils/DFSLib.sol";
+import { TokenUtils } from "../../../contracts/utils/token/TokenUtils.sol";
+import { ActionBase } from "../../../contracts/actions/ActionBase.sol";
+import { DFSLib } from "../../../contracts/utils/DFSLib.sol";
 
 /// @title Delegate credit for someone to borrow on user's wallet behalf
 contract SparkDelegateCredit is ActionBase, SparkHelper {

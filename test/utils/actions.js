@@ -2740,22 +2740,6 @@ const sparkSwitchCollateralCallDataOptimised = async (
     return receipt;
 };
 
-const sparkDelegateCredit = async (proxy, assetId, amount, rateMode, delegatee) => {
-    const sparkDelegateAction = new dfs.actions.spark.SparkDelegateCredit(
-        true,
-        '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
-        amount,
-        rateMode,
-        assetId,
-        delegatee,
-    );
-    const functionData = sparkDelegateAction.encodeForDsProxyCall()[1];
-
-    const receipt = await executeAction('SparkDelegateCredit', functionData, proxy);
-
-    return receipt;
-};
-
 const sparkSPKClaim = async (
     rewardContract,
     to,
@@ -4026,7 +4010,6 @@ module.exports = {
     sparkClaimRewards,
     sDaiWrap,
     sDaiUnwrap,
-    sparkDelegateCredit,
     sparkSPKClaim,
 
     convexDeposit,
