@@ -693,7 +693,7 @@
         "id": "0xa69c4bb7",
         "version": "1.0.1",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": ["0x2b37E3A0ef2Bc449633F85b654a9C8D17A575F81"]
     },
@@ -888,7 +888,7 @@
         "path": "contracts/core/strategy/ProxyAuth.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "604800",
+        "changeTime": 604800,
         "registryIds": [],
         "history": []
     },
@@ -910,7 +910,7 @@
         "path": "contracts/auth/AdminVault.sol",
         "version": "1.0.0",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -921,7 +921,7 @@
         "path": "contracts/core/strategy/SubStorage.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "604800",
+        "changeTime": 604800,
         "registryIds": [],
         "history": ["0x0a5e900E8261F826484BD96F0da564C5bB365Ffa"]
     },
@@ -932,7 +932,7 @@
         "path": "contracts/core/strategy/StrategyStorage.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "604800",
+        "changeTime": 604800,
         "registryIds": [],
         "history": ["0x172f1dB6c58C524A1Ab616a1E65c19B5DF5545ae"]
     },
@@ -943,7 +943,7 @@
         "path": "contracts/core/strategy/BundleStorage.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "604800",
+        "changeTime": 604800,
         "registryIds": [],
         "history": ["0x56eB74B9963BCbd6877ab4Bf8e68daBbEe13B2Bb"]
     },
@@ -954,7 +954,7 @@
         "path": "contracts/core/strategy/BotAuth.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "604800",
+        "changeTime": 604800,
         "registryIds": [],
         "history": []
     },
@@ -965,7 +965,7 @@
         "path": "contracts/core/strategy/StrategyExecutor.sol",
         "version": "1.0.3",
         "inRegistry": true,
-        "changeTime": "604800",
+        "changeTime": 604800,
         "registryIds": [
             {
                 "name": "StrategyExecutorID",
@@ -986,7 +986,7 @@
         "path": "contracts/core/RecipeExecutor.sol",
         "version": "1.0.7",
         "inRegistry": true,
-        "changeTime": "604800",
+        "changeTime": 604800,
         "registryIds": [],
         "history": [
             "0xbc3Fc959FeF3F12a41738f406c02198cdeE7481F",
@@ -1063,7 +1063,7 @@
         "path": "contracts/actions/utils/HandleAuth.sol",
         "version": "1.0.0",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -1531,7 +1531,7 @@
         "path": "contracts/actions/aave/AaveClaimStkAave.sol",
         "version": "1.0.0",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -1542,7 +1542,7 @@
         "id": "0x9600f04b",
         "version": "1.0.0",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -1831,7 +1831,7 @@
         "path": "contracts/views/MorphoBlueView.sol",
         "version": "1.0.2",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": [
             "0x10B621823D4f3E85fBDF759e252598e4e097C1fd",
@@ -3238,7 +3238,7 @@
         "path": "contracts/views/LlamaLendView.sol",
         "version": "1.0.0",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": ["0x27b97dC577af680435351CF4F3Ccb9470D911e71"]
     },
@@ -3373,7 +3373,7 @@
         "path": "contracts/views/CurveUsdView.sol",
         "version": "1.0.2",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": [
             "0x4df1281f9d2303be453e0085881702a4b1358692",
@@ -4242,7 +4242,7 @@
         "path": "contracts/views/LiquityV2View.sol",
         "version": "1.0.6",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": [
             "0xF1f3D940392ddAD78A5e2dE1b595aB529f63c365",
@@ -4421,7 +4421,7 @@
         "path": "contracts/views/FluidView.sol",
         "version": "1.0.2",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": [
             "0xeEa800B16C51449322e48afA70FCeA948Dc58B10",
@@ -4817,7 +4817,7 @@
         "path": "contracts/views/SkyView.sol",
         "version": "1.0.3",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": [
             "0x7666Dc2D2dD1e62cF7f7Ef00a9d7514391172A62",
@@ -4843,7 +4843,7 @@
         "path": "contracts/wallet-adapters/dsa/ConnectV2DefiSaver.sol",
         "version": "1.0.0",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
