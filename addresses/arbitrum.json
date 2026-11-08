@@ -459,6 +459,17 @@
         "history": []
     },
     {
+        "name": "BytesTransientStorageL2",
+        "address": "0xab38cAeA7dcf9ffa0AE7a7567D72380f2504a0F2",
+        "id": "0xc81d3433",
+        "path": "contracts/utils/transient/BytesTransientStorageL2.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "AdminVault",
         "address": "0xd47D8D97cAd12A866900eEc6Cde1962529F25351",
         "id": "0xeb51cb26",
