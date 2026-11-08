@@ -2,8 +2,8 @@
 
 pragma solidity =0.8.24;
 
-import { McdRatioHelper } from "./helpers/McdRatioHelper.sol";
-import { ActionBase } from "../ActionBase.sol";
+import { McdRatioHelper } from "../../../contracts/actions/mcd/helpers/McdRatioHelper.sol";
+import { ActionBase } from "../../../contracts/actions/ActionBase.sol";
 
 /// @title Returns a ratio for mcd vault
 contract McdRatio is ActionBase, McdRatioHelper {
