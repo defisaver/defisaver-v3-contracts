@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { IERC721 } from "./IERC721.sol";
+import { IERC721 } from "../../../../contracts/interfaces/token/IERC721.sol";
 
 interface IERC721Enumerable is IERC721 {
     function totalSupply() external view returns (uint256);

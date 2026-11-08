@@ -1531,7 +1531,7 @@
         "name": "MorphoMarketStorage",
         "address": "0x56EE33811a6C8c1Fd443E53685ed1605E43b3971",
         "id": "0x9600f04b",
-        "path": "contracts/utils/MorphoMarketStorage",
+        "path": "deprecated/contracts/utils/MorphoMarketStorage.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": "0",
