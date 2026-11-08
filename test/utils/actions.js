@@ -2517,41 +2517,6 @@ const sparkBorrowCalldataOptimised = async (proxy, market, amount, to, rateMode,
 
     return receipt;
 };
-const sparkSwapBorrowRate = async (proxy, assetId, rateMode) => {
-    const sparkSwapRateAction = new dfs.actions.spark.SparkSwapBorrowRateModeAction(
-        true,
-        nullAddress,
-        rateMode,
-        assetId,
-    );
-    const functionData = sparkSwapRateAction.encodeForDsProxyCall()[1];
-
-    const receipt = await executeAction('SparkSwapBorrowRateMode', functionData, proxy);
-
-    return receipt;
-};
-const sparkSwapBorrowRateCalldataOptimised = async (proxy, assetId, rateMode) => {
-    const sparkSwapRateAddr = await getAddrFromRegistry('SparkSwapBorrowRateMode');
-    let contract = await hre.ethers.getContractAt('SparkSwapBorrowRateMode', sparkSwapRateAddr);
-    const signer = (await hre.ethers.getSigners())[0];
-    contract = await contract.connect(signer);
-
-    const encodedInput = await contract.encodeInputs([rateMode, assetId, true, nullAddress]);
-    const sparkSwapRateAction = new dfs.actions.spark.SparkSwapBorrowRateModeAction(
-        true,
-        nullAddress,
-        rateMode,
-        assetId,
-    );
-    const functionData = sparkSwapRateAction.encodeForDsProxyCall()[1];
-
-    console.log(functionData.toLowerCase() === encodedInput);
-
-    const receipt = await executeAction('SparkSwapBorrowRateMode', functionData, proxy);
-
-    return receipt;
-};
-
 const sparkPayback = async (proxy, market, amount, from, rateMode, assetId, tokenAddr) => {
     const sparkPaybackAction = new dfs.actions.spark.SparkPaybackAction(
         true,
@@ -4005,8 +3970,6 @@ module.exports = {
     sparkSetEModeCalldataOptimised,
     sparkSwitchCollateral,
     sparkSwitchCollateralCallDataOptimised,
-    sparkSwapBorrowRate,
-    sparkSwapBorrowRateCalldataOptimised,
     sparkClaimRewards,
     sDaiWrap,
     sDaiUnwrap,
