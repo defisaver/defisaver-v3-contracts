@@ -3,9 +3,7 @@ pragma solidity =0.8.24;
 
 import { IAaveV3Oracle } from "../../../contracts/interfaces/protocols/aaveV3/IAaveV3Oracle.sol";
 import { IAggregatorV3 } from "../../../contracts/interfaces/protocols/chainlink/IAggregatorV3.sol";
-import {
-    IPhaseAggregator
-} from "../../../contracts/interfaces/protocols/chainlink/IPhaseAggregator.sol";
+import { IPhaseAggregator } from "../interfaces/protocols/chainlink/IPhaseAggregator.sol";
 import { AaveV3RatioHelper } from "../../../contracts/actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 
 contract AaveV3OracleView is AaveV3RatioHelper {

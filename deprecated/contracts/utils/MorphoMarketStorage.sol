@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { AdminAuth } from "../auth/AdminAuth.sol";
+import { AdminAuth } from "../../../contracts/auth/AdminAuth.sol";
 
 contract MorphoMarketStorage is AdminAuth {
     mapping(uint256 => address) public morphoAddresses;
