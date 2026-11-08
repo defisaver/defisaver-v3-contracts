@@ -72,7 +72,7 @@
         "path": "contracts/core/RecipeExecutor.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "604800",
+        "changeTime": 604800,
         "registryIds": [],
         "history": ["0xB8af168883D049FF9C811ab5B5DE179f3e7d6Fb7"]
     },

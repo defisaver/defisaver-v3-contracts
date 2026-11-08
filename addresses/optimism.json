@@ -193,7 +193,7 @@
         "path": "contracts/actions/utils/HandleAuth.sol",
         "version": "1.0.0",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -204,7 +204,7 @@
         "path": "contracts/actions/utils/ApproveToken.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -547,7 +547,7 @@
         "path": "contracts/actions/aaveV3/AaveV3DelegateWithSig.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -784,7 +784,7 @@
         "path": "contracts/auth/AdminVault.sol",
         "version": "1.0.0",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -825,7 +825,7 @@
         "id": "0x0c1dc439",
         "version": "1.0.4",
         "inRegistry": true,
-        "changeTime": "604800",
+        "changeTime": 604800,
         "registryIds": [],
         "history": [
             "0x2f54a62b18483f395779cCD81A598133aBb7775d",
@@ -907,7 +907,7 @@
         "path": "contracts/actions/utils/ToggleSub.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": ["0x988C5C24AE6348404196267e19962f36961CAc29"]
     },
@@ -1039,7 +1039,7 @@
         "path": "contracts/utils/PriceFeedRegistry.sol",
         "version": "1.0.0",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -1050,7 +1050,7 @@
         "path": "contracts/actions/utils/ChangeProxyOwner.sol",
         "version": "1.0.0",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -1152,7 +1152,7 @@
         "path": "contracts/actions/utils/PermitToken.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -1214,7 +1214,7 @@
         "path": "contracts/actions/merkl/MerklClaim.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -1236,7 +1236,7 @@
         "path": "contracts/actions/utils/ExecuteCall.sol",
         "version": "1.0.0",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -1291,7 +1291,7 @@
         "path": "contracts/wallet-adapters/dsa/ConnectV2DefiSaverOptimism.sol",
         "version": "1.0.0",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },

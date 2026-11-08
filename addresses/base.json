@@ -50,7 +50,7 @@
         "path": "/StrategyExecutorID.sol",
         "version": "1.0.2",
         "inRegistry": true,
-        "changeTime": "604800",
+        "changeTime": 604800,
         "registryIds": [],
         "history": [
             "0x0d099E38f6aF8778c5053349c350Aad906B1432F",
@@ -64,7 +64,7 @@
         "path": "contracts/core/strategy/StrategyExecutor.sol",
         "version": "1.0.2",
         "inRegistry": true,
-        "changeTime": "604800",
+        "changeTime": 604800,
         "registryIds": [],
         "history": [
             "0x0d099E38f6aF8778c5053349c350Aad906B1432F",
@@ -263,7 +263,7 @@
         "path": "contracts/actions/utils/HandleAuth.sol",
         "version": "1.0.0",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -274,7 +274,7 @@
         "path": "contracts/actions/utils/ApproveToken.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -433,7 +433,7 @@
         "path": "contracts/actions/aaveV3/AaveV3DelegateWithSig.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -510,7 +510,7 @@
         "path": "contracts/actions/utils/ToggleSub.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -915,7 +915,7 @@
         "path": "contracts/actions/merkl/MerklClaim.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -948,7 +948,7 @@
         "path": "contracts/auth/AdminVault.sol",
         "version": "1.0.0",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -959,7 +959,7 @@
         "path": "contracts/utils/PriceFeedRegistry.sol",
         "version": "1.0.0",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -970,7 +970,7 @@
         "path": "contracts/actions/utils/PermitToken.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -1080,7 +1080,7 @@
         "path": "contracts/actions/fee/GasFeeTakerL2.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -1091,7 +1091,7 @@
         "path": "contracts/actions/exchange/LimitSellL2.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": ["0xc78dEf78caD4a92cc02820eD691C978ddAe7d3e8"]
     },
@@ -1150,7 +1150,7 @@
         "path": "contracts/views/MorphoBlueView",
         "version": "1.0.1",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": ["0xdbcacf59c5063da8b15481f88e7d70e13c92f2a1"]
     },
@@ -1186,7 +1186,7 @@
         "path": "contracts/core/strategy/SubProxy.sol",
         "version": "1.0.1",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": ["0xbC36AE71e15865f4074B786d992F1105cdd8c196"]
     },
@@ -1197,7 +1197,7 @@
         "path": "deprecated/contracts/views/strategy/StrategyTriggerView.sol",
         "version": "1.0.0",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -1260,7 +1260,7 @@
         "path": "contracts/actions/aaveV3/AaveV3SubProxy.sol",
         "version": "1.0.1",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": ["0x8489B4e243Ba8062D3351439D560E6AF477867ab"]
     },
@@ -1271,7 +1271,7 @@
         "path": "contracts/actions/exchange/LimitOrderSubProxy.sol",
         "version": "1.0.0",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -1282,7 +1282,7 @@
         "path": "contracts/actions/compoundV3/CompV3SubProxyL2.sol",
         "version": "1.0.2",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": [
             "0x376d5BBB9e62de2Df23fB7B9fF6365E0231fD1a8",
@@ -1296,7 +1296,7 @@
         "path": "contracts/views/CompV3View.sol",
         "version": "1.0.0",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -1461,7 +1461,7 @@
         "path": "contracts/views/FluidView",
         "version": "1.0.1",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": ["0x5835CaDbA8843CD6d6d55782908351E9c74221aD"]
     },
@@ -1527,7 +1527,7 @@
         "path": "contracts/actions/utils/ExecuteCall.sol",
         "version": "1.0.0",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -1615,7 +1615,7 @@
         "path": "contracts/wallet-adapters/dsa/ConnectV2DefiSaverBase.sol",
         "version": "1.0.0",
         "inRegistry": false,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
