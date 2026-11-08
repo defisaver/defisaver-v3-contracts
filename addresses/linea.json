@@ -199,7 +199,7 @@
         "name": "OdosWrapper",
         "address": "0xd9b23d81418f5b86b52b3d381512c37701868a22",
         "id": "0x79d17c0f",
-        "path": "contracts/exchangeV3/offchainWrappersV3/OdosWrapper.sol",
+        "path": "deprecated/contracts/exchangeV3/offchainWrappersV3/OdosWrapper.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,

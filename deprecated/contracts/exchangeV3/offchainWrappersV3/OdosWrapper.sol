@@ -2,13 +2,13 @@
 
 pragma solidity =0.8.24;
 
-import { AdminAuth } from "../../auth/AdminAuth.sol";
-import { DFSExchangeHelper } from "../DFSExchangeHelper.sol";
-import { IOffchainWrapper } from "../../interfaces/exchange/IOffchainWrapper.sol";
-import { DFSExchangeData } from "../DFSExchangeData.sol";
-import { TokenUtils } from "../../utils/token/TokenUtils.sol";
-import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
-import { IERC20 } from "../../interfaces/token/IERC20.sol";
+import { AdminAuth } from "../../../../contracts/auth/AdminAuth.sol";
+import { DFSExchangeHelper } from "../../../../contracts/exchangeV3/DFSExchangeHelper.sol";
+import { IOffchainWrapper } from "../../../../contracts/interfaces/exchange/IOffchainWrapper.sol";
+import { DFSExchangeData } from "../../../../contracts/exchangeV3/DFSExchangeData.sol";
+import { TokenUtils } from "../../../../contracts/utils/token/TokenUtils.sol";
+import { SafeERC20 } from "../../../../contracts/_vendor/openzeppelin/SafeERC20.sol";
+import { IERC20 } from "../../../../contracts/interfaces/token/IERC20.sol";
 
 /// @title Wrapper contract which will be used if offchain exchange used is Odos
 contract OdosWrapper is IOffchainWrapper, DFSExchangeHelper, DFSExchangeData, AdminAuth {

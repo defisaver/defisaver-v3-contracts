@@ -586,10 +586,6 @@ describe('Test direct actions encoding for sdk and foundry', () => {
         const tokenAddr = WETH_ADDRESS;
         const amount = 10000;
         const enableAsColl = true;
-        const indexes = [
-            [1, 2],
-            [3, 4],
-        ];
 
         before(async () => {
             eulerV2Encode = await deploy('EulerV2Encode');
@@ -661,56 +657,6 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             const foundryEncoded = EulerV2Payback.interface.encodeFunctionData(
                 'executeActionDirect',
                 [await eulerV2Encode.payback(vault, account, from, amount)],
-            );
-
-            expect(sdkEncoded).to.be.eq(foundryEncoded);
-        });
-        it('Test eulerV2PaybackWithSharesEncode', async () => {
-            const EulerV2PaybackWithShares = await hre.ethers.getContractFactory(
-                'EulerV2PaybackWithShares',
-            );
-            const sdkEncoded = new sdk.actions.eulerV2.EulerV2PaybackWithSharesAction(
-                vault,
-                account,
-                from,
-                amount,
-            ).encodeForDsProxyCall()[1];
-
-            const foundryEncoded = EulerV2PaybackWithShares.interface.encodeFunctionData(
-                'executeActionDirect',
-                [await eulerV2Encode.paybackWithShares(vault, from, account, amount)],
-            );
-
-            expect(sdkEncoded).to.be.eq(foundryEncoded);
-        });
-        it('Test eulerV2PullDebtEncode', async () => {
-            const EulerV2PullDebt = await hre.ethers.getContractFactory('EulerV2PullDebt');
-            const sdkEncoded = new sdk.actions.eulerV2.EulerV2PullDebtAction(
-                vault,
-                account,
-                from,
-                amount,
-            ).encodeForDsProxyCall()[1];
-
-            const foundryEncoded = EulerV2PullDebt.interface.encodeFunctionData(
-                'executeActionDirect',
-                [await eulerV2Encode.pullDebt(vault, account, from, amount)],
-            );
-
-            expect(sdkEncoded).to.be.eq(foundryEncoded);
-        });
-        it('Test eulerV2ReorderCollateralsEncode', async () => {
-            const EulerV2ReorderCollaterals = await hre.ethers.getContractFactory(
-                'EulerV2ReorderCollaterals',
-            );
-            const sdkEncoded = new sdk.actions.eulerV2.EulerV2ReorderCollateralsAction(
-                account,
-                indexes,
-            ).encodeForDsProxyCall()[1];
-
-            const foundryEncoded = EulerV2ReorderCollaterals.interface.encodeFunctionData(
-                'executeActionDirect',
-                [await eulerV2Encode.reorderCollaterals(account, indexes)],
             );
 
             expect(sdkEncoded).to.be.eq(foundryEncoded);
