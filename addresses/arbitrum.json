@@ -766,7 +766,16 @@
         "version": "1.0.8",
         "inRegistry": true,
         "changeTime": 86400,
-        "registryIds": [],
+        "registryIds": [
+            {
+                "name": "FLAction",
+                "id": "0xbcab5e2a"
+            },
+            {
+                "name": "FLActionL2",
+                "id": "0x9f01e6ae"
+            }
+        ],
         "history": [
             "0xf041C72e201CD7d04a240fe06c5783E2Ee2D92b3",
             "0x1f46Db75d1D0295933c8C05F691b15896C0f5752",
@@ -777,17 +786,6 @@
             "0x1561EAF39c98d45C55C7dC605E627672F4406819",
             "0xFbd213073FC4f597C840B1ee202678d210d765fb"
         ]
-    },
-    {
-        "name": "FLActionL2",
-        "address": "0xC3841d482C85910082295C51D425b674Ff2FFC7A",
-        "id": "0x9f01e6ae",
-        "path": "contracts/actions/flashloan/FLAction.sol",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": 86400,
-        "registryIds": [],
-        "history": []
     },
     {
         "name": "TokenBalance",
