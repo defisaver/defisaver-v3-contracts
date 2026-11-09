@@ -125,7 +125,7 @@
     {
         "name": "SafeModuleAuth",
         "address": "0xA9BFa0bFCffBb6d375CE61474BF184E879F4D533",
-        "id": "0x5079c3ea",
+        "id": "0xb95b8f36",
         "path": "contracts/core/strategy/SafeModuleAuth.sol",
         "version": "1.0.0",
         "inRegistry": false,
