@@ -16,8 +16,8 @@
         "id": "0x43ebc538",
         "path": "contracts/core/strategy/StrategyStorage.sol",
         "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": 86400,
+        "inRegistry": false,
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -27,8 +27,8 @@
         "id": "0x9d6d05f4",
         "path": "contracts/core/l2/SubStorageL2.sol",
         "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": 86400,
+        "inRegistry": false,
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -38,8 +38,8 @@
         "id": "0x471b2a04",
         "path": "contracts/core/strategy/BundleStorage.sol",
         "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": 86400,
+        "inRegistry": false,
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -117,8 +117,8 @@
         "id": "0x5079c3ea",
         "path": "contracts/core/strategy/ProxyAuth.sol",
         "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": 86400,
+        "inRegistry": false,
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -140,7 +140,7 @@
         "path": "contracts/core/strategy/BotAuth.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 86400,
+        "changeTime": 604800,
         "registryIds": [],
         "history": []
     },
@@ -162,7 +162,7 @@
         "path": "contracts/core/RecipeExecutor.sol",
         "version": "1.0.5",
         "inRegistry": true,
-        "changeTime": 86400,
+        "changeTime": 604800,
         "registryIds": [],
         "history": [
             "0xc91305DdE651c899EF8eE1D0C33E7dab1B5ABF0D",
