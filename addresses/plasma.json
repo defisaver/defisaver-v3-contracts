@@ -267,8 +267,8 @@
         "id": "0x641f5b73",
         "path": "contracts/actions/aaveV3/AaveV3DelegateWithSig.sol",
         "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "inRegistry": true,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -323,7 +323,7 @@
         "path": "contracts/actions/merkl/MerklClaim.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -334,7 +334,7 @@
         "path": "contracts/actions/utils/ApproveToken.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -345,7 +345,7 @@
         "path": "contracts/actions/utils/PermitToken.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -444,7 +444,7 @@
         "path": "contracts/actions/utils/TokenizedVaultAdapter.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -455,7 +455,7 @@
         "path": "contracts/actions/utils/TransferNFT.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -463,7 +463,7 @@
         "name": "UnwrapEth",
         "address": "0x93A6E0dC4C4a6033922d386e4cbd9e31278A2BBa",
         "id": "0x929145d0",
-        "path": "contracts/actions/utils/UnwrapETH.sol",
+        "path": "contracts/actions/utils/UnwrapEth.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": 86400,
@@ -474,7 +474,7 @@
         "name": "WrapEth",
         "address": "0x520E8b0573a03D26D0E39a409E85E28459e24C0E",
         "id": "0x11135183",
-        "path": "contracts/actions/utils/WrapETH.sol",
+        "path": "contracts/actions/utils/WrapEth.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": 86400,
@@ -518,7 +518,6 @@
         "name": "TxSaverExecutor",
         "address": "0xc5D0FF89e950a364207fC5be1b070170C874Dd87",
         "id": "0x91bfbd87",
-        "path": "contracts/tx-saver/MockTxSaverExecutor.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": 86400,
@@ -731,6 +730,17 @@
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "KyberInputScalingHelper",
+        "address": "0x2f577A41BeC1BE1152AeEA12e73b7391d15f655D",
+        "id": "0x559d99f5",
+        "path": "external_contract",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     }
