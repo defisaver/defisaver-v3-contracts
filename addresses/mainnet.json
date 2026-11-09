@@ -963,7 +963,7 @@
         "address": "0x3727C31D4D4c5270290FFb20C4C358C84c0792C9",
         "id": "0x0c1dc439",
         "path": "contracts/core/strategy/StrategyExecutor.sol",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": 604800,
         "registryIds": [
