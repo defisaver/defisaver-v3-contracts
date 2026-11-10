@@ -44,7 +44,7 @@
         "history": []
     },
     {
-        "name": "StrategyExecutor",
+        "name": "StrategyExecutorL2",
         "address": "0x2141C65b748369Cc8FDb991aed43eb68C59C70A0",
         "id": "0x0c1dc439",
         "path": "contracts/core/l2/StrategyExecutorL2.sol",
