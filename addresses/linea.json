@@ -197,9 +197,9 @@
     },
     {
         "name": "OdosWrapper",
+        "deprecated": true,
         "address": "0xd9b23d81418f5b86b52b3d381512c37701868a22",
         "id": "0x79d17c0f",
-        "path": "deprecated/contracts/exchangeV3/offchainWrappersV3/OdosWrapper.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -279,7 +279,7 @@
         "path": "contracts/actions/aaveV3/AaveV3DelegateWithSig.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -334,7 +334,7 @@
         "path": "contracts/actions/merkl/MerklClaim.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -345,7 +345,7 @@
         "path": "contracts/actions/utils/ApproveToken.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -356,7 +356,7 @@
         "path": "contracts/actions/utils/PermitToken.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -378,7 +378,7 @@
         "path": "contracts/actions/utils/RemoveTokenApproval.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -474,7 +474,7 @@
         "name": "UnwrapEth",
         "address": "0xc5D0FF89e950a364207fC5be1b070170C874Dd87",
         "id": "0x929145d0",
-        "path": "contracts/actions/utils/UnwrapETH.sol",
+        "path": "contracts/actions/utils/UnwrapEth.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": 86400,
@@ -485,7 +485,7 @@
         "name": "WrapEth",
         "address": "0xB8af168883D049FF9C811ab5B5DE179f3e7d6Fb7",
         "id": "0x11135183",
-        "path": "contracts/actions/utils/WrapETH.sol",
+        "path": "contracts/actions/utils/WrapEth.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": 86400,
@@ -529,7 +529,6 @@
         "name": "TxSaverExecutor",
         "address": "0xa4673229241Fb5fAaCFd849375DCb8fc8d07e826",
         "id": "0x91bfbd87",
-        "path": "contracts/tx-saver/MockTxSaverExecutor.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": 0,
@@ -588,6 +587,17 @@
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "KyberInputScalingHelper",
+        "address": "0x2f577A41BeC1BE1152AeEA12e73b7391d15f655D",
+        "id": "0x559d99f5",
+        "path": "external_contract",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     }

@@ -12,9 +12,9 @@
     },
     {
         "name": "DFSProxyRegistry",
+        "deprecated": true,
         "address": "0x7cB647205ec73A026fe3566777e5c73Cd5A11b38",
         "id": "0xc83e4f5e",
-        "path": "contracts/utils/proxyRegistry/DFSProxyRegistry.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -27,16 +27,16 @@
         "id": "0x0fcbdb1a",
         "path": "contracts/utils/proxyRegistry/DFSProxyRegistryV2.sol",
         "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "inRegistry": true,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
     {
         "name": "DFSProxyRegistryController",
+        "deprecated": true,
         "address": "0x493C0dE902E6916128A223F66F37d3b6ee8fA408",
         "id": "0xcbbb53f2",
-        "path": "contracts/utils/proxyRegistry/DFSProxyRegistryController.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": 86400,
@@ -60,9 +60,9 @@
     },
     {
         "name": "AaveV3SubProxy",
+        "deprecated": true,
         "address": "0x9b8717066797bd46a2880b4a0f99e7c6e098ae34",
         "id": "0x9275abae",
-        "path": "contracts/actions/aaveV3/AaveV3SubProxy.sol",
         "version": "1.0.3",
         "inRegistry": false,
         "changeTime": 0,
@@ -75,9 +75,9 @@
     },
     {
         "name": "LimitOrderSubProxy",
+        "deprecated": true,
         "address": "0x4aB43f57e30e13fFaCcC01A01ED738642152884e",
         "id": "0x82fc0e77",
-        "path": "contracts/actions/exchange/LimitOrderSubProxy.sol",
         "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
@@ -89,9 +89,9 @@
     },
     {
         "name": "ZrxAllowlist",
+        "deprecated": true,
         "address": "0x52F6ae5aE5a8a6316c970d3a02C50b74c1a50bB8",
         "id": "0x0c33e794",
-        "path": "contracts/utils/ZrxAllowlist.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -133,9 +133,9 @@
     },
     {
         "name": "OdosWrapper",
+        "deprecated": true,
         "address": "0x02451c3a514c2e3b9d26eddb75449bb82ee018bf",
         "id": "0x79d17c0f",
-        "path": "deprecated/contracts/exchangeV3/offchainWrappersV3/OdosWrapper.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -155,14 +155,15 @@
     },
     {
         "name": "KyberInputScalingHelper",
-        "address": "0x1E3b2371b3790bDc7C667d50aB077Dce7121391A",
+        "address": "0x2f577A41BeC1BE1152AeEA12e73b7391d15f655D",
         "id": "0x559d99f5",
-        "path": "contracts/utils/KyberInputScalingHelperL2",
-        "version": "1.0.2",
+        "path": "external_contract",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
         "history": [
+            "0x1E3b2371b3790bDc7C667d50aB077Dce7121391A",
             "0x08d2e6e2f18455258c0b0a620c749a676e91ad58",
             "0x7ce957981a02ced5baeec6102d04b4e0328b4b06"
         ]
@@ -204,7 +205,7 @@
         "path": "contracts/actions/utils/ApproveToken.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -283,9 +284,9 @@
     },
     {
         "name": "DFSPrices",
+        "deprecated": true,
         "address": "0x9b2BAd10669B449E2EF8A8fF14eD0706F033A9a3",
         "id": "0x066e594a",
-        "path": "contracts/exchangeV3/DFSPrices.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -294,9 +295,9 @@
     },
     {
         "name": "SaverExchangeRegistry",
+        "deprecated": true,
         "address": "0xFfE2F824f0a1Ca917885CB4f848f3aEf4a32AaB9",
         "id": "0x848bdf22",
-        "path": "contracts/exchangeV3/SaverExchangeRegistry.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -318,7 +319,7 @@
         "name": "TokenGroupRegistry",
         "address": "0x566b2a957D8FCE39D2744059d558F27aF52a70c0",
         "id": "0x4f594ea4",
-        "path": "contracts/exchangeV3/TokenGroupRegistry.sol",
+        "path": "contracts/exchangeV3/registries/TokenGroupRegistry.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -327,9 +328,9 @@
     },
     {
         "name": "StrategyTriggerView",
+        "deprecated": true,
         "address": "0xa45692Ea3476EE295Ea1C01b4566Ea73DB9bEf1d",
         "id": "0x5e0ef18c",
-        "path": "deprecated/contracts/views/strategy/StrategyTriggerView.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -338,9 +339,9 @@
     },
     {
         "name": "StrategyTriggerViewNoRevert",
+        "deprecated": true,
         "address": "0x4289ebe738FEde5167D2AC723bF7486fA41e68D7",
         "id": "0x37a21cb5",
-        "path": "contracts/views/strategy/StrategyTriggerViewNoRevert.sol",
         "version": "1.0.7",
         "inRegistry": false,
         "changeTime": 0,
@@ -417,14 +418,15 @@
     },
     {
         "name": "RecipeExecutor",
-        "address": "0xEC891E6b5A93F5f29241De6B234a4e77A5456A1C",
+        "address": "0x3296C0f3Ff67B00306e5Ce251CDfA1E0160F5742",
         "id": "0x4c69ee1e",
         "path": "contracts/core/RecipeExecutor.sol",
-        "version": "1.0.6",
+        "version": "1.0.7",
         "inRegistry": true,
-        "changeTime": 86400,
+        "changeTime": 604800,
         "registryIds": [],
         "history": [
+            "0xEC891E6b5A93F5f29241De6B234a4e77A5456A1C",
             "0x30CEf36b14Dd71A347284204C48E134D04c24331",
             "0x993a8c81142044e1cb0cf0c3d84bea235d842fb0",
             "0xA532771BD90dAf94b456A4acC9E9cbBdF1367572",
@@ -507,11 +509,14 @@
         "address": "0xf573585C38d947D8A70F7F6c83D060F1F89855AE",
         "id": "0x67314f12",
         "path": "contracts/actions/utils/ChangeProxyOwner.sol",
-        "version": "1.0.1",
-        "inRegistry": false,
-        "changeTime": 0,
+        "version": "1.0.2",
+        "inRegistry": true,
+        "changeTime": 86400,
         "registryIds": [],
-        "history": ["0x62769258ea8b3a85cc6fb4332fc2760a122dbc9e"]
+        "history": [
+            "0x62769258ea8b3a85cc6fb4332fc2760a122dbc9e",
+            "0x6df854D8f784C7917Ca91968C59C3d591Aa10300"
+        ]
     },
     {
         "name": "DFSSafeFactory",
@@ -529,7 +534,7 @@
         "address": "0x7e49bdf4690feef64cb341ca46d1e3b45233a683",
         "id": "0xfc33bf00",
         "path": "contracts/actions/aaveV3/AaveV3Supply.sol",
-        "version": "1.0.1",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
@@ -547,7 +552,7 @@
         "path": "contracts/actions/aaveV3/AaveV3DelegateWithSig.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -608,9 +613,9 @@
     },
     {
         "name": "AaveV3SwapBorrowRateMode",
+        "deprecated": true,
         "address": "0xB8f0243b492f0e80feF5315Ba8692e7635481845",
         "id": "0xd5baf3f8",
-        "path": "contracts/actions/aaveV3/AaveV3SwapBorrowRateMode.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": 86400,
@@ -641,9 +646,9 @@
     },
     {
         "name": "AaveV3TrailingQuotePriceTrigger",
+        "deprecated": true,
         "address": "0xB1550a97D3B5B5b5b5F685c06FcB24aCd125cED7",
         "id": "0x0e31244d",
-        "path": "contracts/triggers/AaveV3TrailingQuotePriceTrigger.sol",
         "version": "1.0.1",
         "inRegistry": true,
         "changeTime": 86400,
@@ -652,9 +657,9 @@
     },
     {
         "name": "FLAaveV3",
+        "deprecated": true,
         "address": "0xfbcF23D2BeF8A2C491cfa4dD409D8dF12d431c85",
         "id": "0x8d7fb192",
-        "path": "contracts/actions/flashloan/FLAaveV3.sol",
         "version": "1.0.1",
         "inRegistry": true,
         "changeTime": 86400,
@@ -663,9 +668,9 @@
     },
     {
         "name": "FLAaveV3WithFee",
+        "deprecated": true,
         "address": "0x8A07E93d2B74A80D726eE4E4A0aC1F906aB5Cc63",
         "id": "0xe10b7b9d",
-        "path": "contracts/actions/flashloan/FLAaveV3.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": 86400,
@@ -680,7 +685,16 @@
         "version": "1.0.6",
         "inRegistry": true,
         "changeTime": 86400,
-        "registryIds": [],
+        "registryIds": [
+            {
+                "name": "FLAction",
+                "id": "0xbcab5e2a"
+            },
+            {
+                "name": "FLActionL2",
+                "id": "0x9f01e6ae"
+            }
+        ],
         "history": [
             "0xB57b666dAB46229e2b80113b5187F6DCD91AB159",
             "0xfF05C70C8d69258052228F28e571c3BFe54631c3",
@@ -689,16 +703,6 @@
             "0xE668197A175E7A2143222a028470c6ABBBD183F6",
             "0x5fA356C700F0C8A6f445B8a36Eb6e108590919D4"
         ]
-    },
-    {
-        "name": "FLActionL2",
-        "address": "0x14762eEE465a0A4649D5744106De68b59047cB40",
-        "id": "0x9f01e6ae",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": 86400,
-        "registryIds": [],
-        "history": []
     },
     {
         "name": "TokenizedVaultAdapter",
@@ -718,7 +722,7 @@
         "path": "contracts/core/strategy/BotAuth.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 86400,
+        "changeTime": 604800,
         "registryIds": [],
         "history": []
     },
@@ -728,8 +732,8 @@
         "id": "0x43ebc538",
         "path": "contracts/core/strategy/StrategyStorage.sol",
         "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": 86400,
+        "inRegistry": false,
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -739,8 +743,8 @@
         "id": "0x471b2a04",
         "path": "contracts/core/strategy/BundleStorage.sol",
         "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": 86400,
+        "inRegistry": false,
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -750,8 +754,8 @@
         "id": "0x9d6d05f4",
         "path": "contracts/core/l2/SubStorageL2.sol",
         "version": "1.0.1",
-        "inRegistry": true,
-        "changeTime": 86400,
+        "inRegistry": false,
+        "changeTime": 0,
         "registryIds": [],
         "history": ["0x7dba2b04c6efaE74D5076248666B86a9C551da5e"]
     },
@@ -761,15 +765,15 @@
         "id": "0x5079c3ea",
         "path": "contracts/core/strategy/ProxyAuth.sol",
         "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": 86400,
+        "inRegistry": false,
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
     {
         "name": "SafeModuleAuth",
         "address": "0x6D6Bc726955d46AC4EBbEe0f2c3Ed01128E261A6",
-        "id": "0x5079c3ea",
+        "id": "0xb95b8f36",
         "path": "contracts/core/strategy/SafeModuleAuth.sol",
         "version": "1.0.0",
         "inRegistry": false,
@@ -820,14 +824,21 @@
         ]
     },
     {
-        "name": "StrategyExecutor",
-        "address": "0xf8BFE1adf836A11fF72cDFbe1Bc363D58b72Cc45",
+        "name": "StrategyExecutorL2",
+        "address": "0x11fD849B675AF5d187DbE911845FcFC56ECeFBFD",
         "id": "0x0c1dc439",
-        "version": "1.0.4",
+        "path": "contracts/core/l2/StrategyExecutorL2.sol",
+        "version": "1.0.5",
         "inRegistry": true,
         "changeTime": 604800,
-        "registryIds": [],
+        "registryIds": [
+            {
+                "name": "StrategyExecutorID",
+                "id": "0x0c1dc439"
+            }
+        ],
         "history": [
+            "0xf8BFE1adf836A11fF72cDFbe1Bc363D58b72Cc45",
             "0x2f54a62b18483f395779cCD81A598133aBb7775d",
             "0xf9c0A56c4c2D40C13d9D377b5E1Cdfe3Cb0C9FF7",
             "0xF087652A441858c1FB5F47aFA5bb4AB45C05B273",
@@ -902,14 +913,17 @@
     },
     {
         "name": "ToggleSub",
-        "address": "0xfc19a12e35bb0b5e6a3d3017be9e9022a6486eee",
+        "address": "0xA4Eaad8Fe80d1E47f2b95CED2bcFb648d5929735",
         "id": "0xd6499530",
         "path": "contracts/actions/utils/ToggleSub.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": 86400,
         "registryIds": [],
-        "history": ["0x988C5C24AE6348404196267e19962f36961CAc29"]
+        "history": [
+            "0xfc19a12e35bb0b5e6a3d3017be9e9022a6486eee",
+            "0x988C5C24AE6348404196267e19962f36961CAc29"
+        ]
     },
     {
         "name": "UniCollectV3",
@@ -1023,9 +1037,9 @@
     },
     {
         "name": "FLBalancer",
+        "deprecated": true,
         "address": "0x79d6bf536b8DD65909a3174C87eA6395310d5c41",
         "id": "0xf97d044f",
-        "path": "contracts/actions/flashloan/FLBalancer.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": 86400,
@@ -1037,17 +1051,6 @@
         "address": "0x7E3D9e4E620842d61aB111a6DbF1be5a8cc91774",
         "id": "0x6f51c997",
         "path": "contracts/utils/PriceFeedRegistry.sol",
-        "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
-        "registryIds": [],
-        "history": []
-    },
-    {
-        "name": "ChangeProxyOwner",
-        "address": "0x6df854D8f784C7917Ca91968C59C3d591Aa10300",
-        "id": "0x67314f12",
-        "path": "contracts/actions/utils/ChangeProxyOwner.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -1070,7 +1073,7 @@
         "address": "0x2cc1ec3c2b8734b4e57c0415a7641bbaba1d8c21",
         "id": "0xbb9f4021",
         "path": "contracts/actions/compoundV3/CompV3Borrow.sol",
-        "version": "1.0.1",
+        "version": "1.0.0",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
@@ -1081,7 +1084,7 @@
         "address": "0xAD36437D50DB3C6c225564A4081acb354b55a5D6",
         "id": "0xf8470345",
         "path": "contracts/actions/compoundV3/CompV3Claim.sol",
-        "version": "1.0.1",
+        "version": "1.0.0",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
@@ -1103,7 +1106,7 @@
         "address": "0xf4c3D99c43E1DB968CF92770DaE6d377697b0B81",
         "id": "0x71643f58",
         "path": "contracts/actions/compoundV3/CompV3Supply.sol",
-        "version": "1.0.1",
+        "version": "1.0.0",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
@@ -1125,7 +1128,7 @@
         "address": "0x744ad24e92d092e0788d429f5178286672288782",
         "id": "0xc0072381",
         "path": "contracts/actions/compoundV3/CompV3Withdraw.sol",
-        "version": "1.0.1",
+        "version": "1.0.0",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
@@ -1152,7 +1155,7 @@
         "path": "contracts/actions/utils/PermitToken.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -1177,7 +1180,7 @@
         "path": "contracts/tx-saver/BotAuthForTxSaver.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -1214,7 +1217,7 @@
         "path": "contracts/actions/merkl/MerklClaim.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -1235,8 +1238,8 @@
         "id": "0xd82327eb",
         "path": "contracts/actions/utils/ExecuteCall.sol",
         "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "inRegistry": true,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -1275,14 +1278,14 @@
     },
     {
         "name": "UpdateSub",
-        "address": "0xAe6ea1d13dF2bE60dC7933DB56067Cb89d6A2cDe",
+        "address": "0xe2c7D66b40e00Dd14844Db8d02142f23D4Da7071",
         "id": "0xa985d903",
         "path": "contracts/actions/utils/UpdateSub.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
-        "history": []
+        "history": ["0xAe6ea1d13dF2bE60dC7933DB56067Cb89d6A2cDe"]
     },
     {
         "name": "ConnectV2DefiSaverOptimism",
@@ -1312,8 +1315,8 @@
         "id": "0xa7559614",
         "path": "contracts/actions/summerfi/SummerfiUnsubV2.sol",
         "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "inRegistry": true,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -1356,8 +1359,8 @@
         "id": "0xb3fa1599",
         "path": "contracts/triggers-additional/AaveV3MinDebtTrigger.sol",
         "version": "1.0.1",
-        "inRegistry": false,
-        "changeTime": 0,
+        "inRegistry": true,
+        "changeTime": 86400,
         "registryIds": [],
         "history": ["0x8F521d036b395E2dd4B3A10348d323ec75A375e6"]
     },
@@ -1367,8 +1370,8 @@
         "id": "0xbd30ff8e",
         "path": "contracts/triggers-additional/RequiredAmountAndAllowanceTrigger.sol",
         "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "inRegistry": true,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -1389,8 +1392,8 @@
         "id": "0xb67d04b5",
         "path": "contracts/triggers/CompV3PriceTrigger.sol",
         "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "inRegistry": true,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -1444,8 +1447,18 @@
         "id": "0xb03dd233",
         "path": "contracts/triggers-additional/AaveV3BoostCollateralTrigger.sol",
         "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "inRegistry": true,
+        "changeTime": 86400,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "StrategyPartialExecutionStorage",
+        "address": "0x7A2C6f738D5123504623Fed7B83c5eB989467C13",
+        "id": "0x381d7b8c",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     }
