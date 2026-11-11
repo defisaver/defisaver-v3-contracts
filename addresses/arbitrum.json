@@ -1331,14 +1331,17 @@
     },
     {
         "name": "LlamaLendSwapper",
-        "address": "0xee41a84da283a82cbeadab051aa07dbb442eb0b4",
+        "address": "0xce3701F72eF99d3990E2185729347435b14D9C6D",
         "id": "0x4a94e2c3",
         "path": "contracts/actions/llamalend/advanced/LlamaLendSwapper.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
-        "history": ["0x9b4a6d3674b099317d0c5dfe2592ed222057c878"]
+        "history": [
+            "0xee41a84da283a82cbeadab051aa07dbb442eb0b4",
+            "0x9b4a6d3674b099317d0c5dfe2592ed222057c878"
+        ]
     },
     {
         "name": "PermitToken",
