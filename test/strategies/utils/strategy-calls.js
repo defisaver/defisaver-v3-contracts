@@ -3613,59 +3613,6 @@ const callAaveFLCloseToCollStrategy = async (
     return receipt;
 };
 
-const callCurveUsdAdvancedRepayStrategy = async (
-    botAcc,
-    strategyExecutor,
-    strategyIndex,
-    subId,
-    strategySub,
-    repayAmount,
-    additionalData,
-) => {
-    const triggerCallData = [];
-    const actionsCallData = [];
-    const repayGasCost = 1000000; // .8 mil gas
-    const curveUsdRepayAction = new dfs.actions.curveusd.CurveUsdRepayAction(
-        nullAddress,
-        repayAmount,
-        nullAddress,
-        0,
-        additionalData,
-        repayGasCost,
-        400,
-    );
-    const curveUsdCollRatioCheck = new dfs.actions.checkers.CurveUsdCollRatioCheck(
-        '0',
-        '0',
-        nullAddress,
-    );
-    actionsCallData.push(curveUsdRepayAction.encodeForRecipe()[0]);
-    actionsCallData.push(curveUsdCollRatioCheck.encodeForRecipe()[0]);
-    triggerCallData.push(
-        abiCoder.encode(
-            ['address', 'address', 'uint256', 'uint8'],
-            [nullAddress, nullAddress, '0', '0'],
-        ),
-    );
-    const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    const receipt = await strategyExecutorByBot.executeStrategy(
-        subId,
-        strategyIndex,
-        triggerCallData,
-        actionsCallData,
-        strategySub,
-        {
-            gasLimit: 8000000,
-        },
-    );
-
-    const gasUsed = await getGasUsed(receipt);
-    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
-
-    console.log(
-        `GasUsed callCurveUsdAdvancedRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
-    );
-};
 const callCurveUsdRepayStrategy = async (
     botAcc,
     strategyExecutor,
@@ -10516,7 +10463,6 @@ module.exports = {
     callAaveCloseToCollStrategy,
     callAaveFLCloseToCollWithMaximumGasPriceStrategy,
     callAaveFLCloseToCollStrategy,
-    callCurveUsdAdvancedRepayStrategy,
     callCurveUsdRepayStrategy,
     callCurveUsdFLRepayStrategy,
     callCurveUsdBoostStrategy,

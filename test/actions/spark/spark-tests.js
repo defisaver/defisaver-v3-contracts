@@ -14,7 +14,6 @@ const {
     approve,
     impersonateAccount,
     Float2BN,
-    getAddrFromRegistry,
     network,
     sendEther,
     stopImpersonatingAccount,
@@ -30,8 +29,6 @@ const {
     sparkWithdrawCalldataOptimised,
     sparkPayback,
     sparkPaybackCalldataOptimised,
-    sparkSwapBorrowRateCalldataOptimised,
-    sparkSwapBorrowRate,
     sparkSetEModeCalldataOptimised,
     sparkSetEMode,
     sparkSwitchCollateral,
@@ -42,7 +39,6 @@ const {
     sparkClaimRewards,
     sDaiWrap,
     sDaiUnwrap,
-    sparkDelegateCredit,
     sparkSPKClaim,
 } = require('../../utils/actions');
 
@@ -533,139 +529,6 @@ const sparkPaybackTest = async () => {
     });
 };
 
-const sparkSwapBorrowRateTest = async () => {
-    describe('Spark-Swap-Borrow-Rate', function () {
-        this.timeout(150000);
-
-        let senderAcc;
-        let proxy;
-        let pool;
-        let snapshotId;
-
-        let WETH_ADDRESS;
-        let spWETH;
-        let DAI_ADDRESS;
-
-        before(async () => {
-            senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
-            const sparkMarketContract = await hre.ethers.getContractAt(
-                'IPoolAddressesProvider',
-                sparkMarket,
-            );
-            const poolAddress = await sparkMarketContract.getPool();
-
-            pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
-            WETH_ADDRESS = addrs[network].WETH_ADDRESS;
-            DAI_ADDRESS = addrs[network].DAI_ADDRESS;
-
-            spWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
-        });
-        beforeEach(async () => {
-            snapshotId = await takeSnapshot();
-        });
-
-        afterEach(async () => {
-            await revertToSnapshot(snapshotId);
-        });
-
-        // TODO - find assets that can be stable borrowed at test runtime
-        // at the time of this commit no asset can be stable borrowed
-        it.skip('... should supply WETH and borrow variable rate DAI then change it to stable on Spark', async () => {
-            const amount = hre.ethers.utils.parseUnits('10', 18);
-            await setBalance(WETH_ADDRESS, senderAcc.address, amount);
-
-            const wethBalanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
-            console.log(`WETH on eoa: ${wethBalanceBefore.toString()}`);
-
-            const reserveData = await pool.getReserveData(WETH_ADDRESS);
-            const assetId = reserveData.id;
-            const from = senderAcc.address;
-            const to = senderAcc.address;
-
-            const balanceBefore = await balanceOf(spWETH, proxy.address);
-            console.log(`spWETH on proxy before: ${balanceBefore.toString()}`);
-            await sparkSupply(proxy, sparkMarket, amount, WETH_ADDRESS, assetId, from);
-
-            const balanceAfter = await balanceOf(spWETH, proxy.address);
-            console.log(`spWETH on proxy after: ${balanceAfter.toString()}`);
-
-            const reserveDataDAI = await pool.getReserveData(DAI_ADDRESS);
-            const amountDai = hre.ethers.utils.parseUnits('1000', 18);
-
-            const daiBalanceBefore = await balanceOf(DAI_ADDRESS, senderAcc.address);
-            console.log(`DAI on EOA before borrow: ${daiBalanceBefore.toString()}`);
-            await sparkBorrow(proxy, sparkMarket, amountDai, to, 1, reserveDataDAI.id);
-
-            const daiBalanceAfter = await balanceOf(DAI_ADDRESS, senderAcc.address);
-            console.log(`DAI on EOA after borrow: ${daiBalanceAfter.toString()}`);
-            expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
-
-            const variableRateDai = reserveDataDAI.variableDebtTokenAddress;
-            const stableRateDai = reserveDataDAI.stableDebtTokenAddress;
-
-            const variableDaiDebtBefore = await balanceOf(variableRateDai, proxy.address);
-            const stableDaiDebtBefore = await balanceOf(stableRateDai, proxy.address);
-            console.log(`Variable debt before rate swap ${variableDaiDebtBefore.toString()}`);
-            console.log(`Stable debt before rate swap ${stableDaiDebtBefore.toString()}`);
-
-            await sparkSwapBorrowRate(proxy, reserveDataDAI.id, 1);
-
-            const variableDaiDebtAfter = await balanceOf(variableRateDai, proxy.address);
-            const stableDaiDebtAfter = await balanceOf(stableRateDai, proxy.address);
-            console.log(`Variable debt after rate swap ${variableDaiDebtAfter.toString()}`);
-            console.log(`Stable debt after rate swap ${stableDaiDebtAfter.toString()}`);
-        });
-
-        // TODO - find assets that can be stable borrowed at test runtime
-        // at the time of this commit no asset can be stable borrowed
-        it.skip('... should supply WETH and borrow variable rate DAI then change it to stable on Spark using optimised calldata', async () => {
-            const amount = hre.ethers.utils.parseUnits('10', 18);
-            await setBalance(WETH_ADDRESS, senderAcc.address, amount);
-
-            const wethBalanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
-            console.log(`WETH on eoa: ${wethBalanceBefore.toString()}`);
-
-            const reserveData = await pool.getReserveData(WETH_ADDRESS);
-            const assetId = reserveData.id;
-            const from = senderAcc.address;
-            const to = senderAcc.address;
-
-            const balanceBefore = await balanceOf(spWETH, proxy.address);
-            console.log(`spWETH on proxy before: ${balanceBefore.toString()}`);
-            await sparkSupply(proxy, sparkMarket, amount, WETH_ADDRESS, assetId, from);
-
-            const balanceAfter = await balanceOf(spWETH, proxy.address);
-            console.log(`spWETH on proxy after: ${balanceAfter.toString()}`);
-
-            const reserveDataDAI = await pool.getReserveData(DAI_ADDRESS);
-            const amountDai = hre.ethers.utils.parseUnits('1000', 18);
-
-            const daiBalanceBefore = await balanceOf(DAI_ADDRESS, senderAcc.address);
-            console.log(`DAI on EOA before borrow: ${daiBalanceBefore.toString()}`);
-            await sparkBorrow(proxy, sparkMarket, amountDai, to, 1, reserveDataDAI.id);
-
-            const daiBalanceAfter = await balanceOf(DAI_ADDRESS, senderAcc.address);
-            console.log(`DAI on EOA after borrow: ${daiBalanceAfter.toString()}`);
-            expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
-
-            const variableRateDai = reserveDataDAI.variableDebtTokenAddress;
-            const stableRateDai = reserveDataDAI.stableDebtTokenAddress;
-
-            const variableDaiDebtBefore = await balanceOf(variableRateDai, proxy.address);
-            const stableDaiDebtBefore = await balanceOf(stableRateDai, proxy.address);
-            console.log(`Variable debt before rate swap ${variableDaiDebtBefore.toString()}`);
-            console.log(`Stable debt before rate swap ${stableDaiDebtBefore.toString()}`);
-
-            await sparkSwapBorrowRateCalldataOptimised(proxy, reserveDataDAI.id, 1);
-
-            const variableDaiDebtAfter = await balanceOf(variableRateDai, proxy.address);
-            const stableDaiDebtAfter = await balanceOf(stableRateDai, proxy.address);
-            console.log(`Variable debt after rate swap ${variableDaiDebtAfter.toString()}`);
-            console.log(`Stable debt after rate swap ${stableDaiDebtAfter.toString()}`);
-        });
-    });
-};
 const sparkSetEModeTest = async () => {
     describe('Spark-Set-EMode', function () {
         this.timeout(150000);
@@ -1242,41 +1105,6 @@ const sDaiUnwrapTest = async () =>
             expect(await balanceOf(daiAddr, senderAcc.address)).to.be.gt(expectedSDaiAmount);
         });
     });
-const sparkDelegateCreditTest = async () => {
-    describe('Spark-DelegateCreditTest', function () {
-        this.timeout(150000);
-        let senderAcc;
-        let proxy;
-
-        before(async () => {
-            senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
-        });
-
-        it('... delegate credit on Spark', async () => {
-            const delegatee = '0x000000000000000000000000000000000000dEaD';
-            const assetId = 0;
-            const rateMode = 2;
-            const amount = hre.ethers.utils.parseUnits('100', 18);
-            await sparkDelegateCredit(proxy, assetId, amount, rateMode, delegatee);
-            const sparkDelegateAddr = await getAddrFromRegistry('SparkDelegateCredit');
-            const sparkDelegateContract = await hre.ethers.getContractAt(
-                'SparkDelegateCredit',
-                sparkDelegateAddr,
-            );
-            const delegatedAmount = await sparkDelegateContract.getCreditDelegation(
-                sparkMarket,
-                assetId,
-                rateMode,
-                proxy.address,
-                delegatee,
-            );
-            console.log(delegatedAmount.toString());
-            expect(delegatedAmount).to.be.eq(amount);
-        }).timeout(50000);
-    });
-};
-
 const sparkClaimSPKTest = async () => {
     describe('Spark-SPK-Claim', function () {
         this.timeout(150000);
@@ -1438,9 +1266,7 @@ const sparkDeployContracts = async () => {
     await redeploy('SparkCollateralSwitch');
     await redeploy('SparkPayback');
     await redeploy('SparkSetEMode');
-    await redeploy('SparkSwapBorrowRateMode');
     await redeploy('SparkWithdraw');
-    await redeploy('SparkDelegateCredit');
 
     await redeploy('SDaiWrap');
     await redeploy('SDaiUnwrap');
@@ -1456,12 +1282,10 @@ const sparkFullTest = async () => {
     await sparkSupplyTest();
     await sparkBorrowTest();
     await sparkWithdrawTest();
-    await sparkSwapBorrowRateTest();
     await sparkSetEModeTest();
     await sparkPaybackTest();
     await sparkCollSwitchTest();
     await sparkSpTokenPaybackTest();
-    await sparkDelegateCreditTest();
     await sparkClaimSPKTest();
 };
 module.exports = {
@@ -1469,7 +1293,6 @@ module.exports = {
     sparkSupplyTest,
     sparkBorrowTest,
     sparkWithdrawTest,
-    sparkSwapBorrowRateTest,
     sparkSetEModeTest,
     sparkPaybackTest,
     sparkCollSwitchTest,
@@ -1477,6 +1300,5 @@ module.exports = {
     sparkClaimRewardsTest,
     sDaiWrapTest,
     sDaiUnwrapTest,
-    sparkDelegateCreditTest,
     sparkClaimSPKTest,
 };

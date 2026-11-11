@@ -95,7 +95,6 @@ const mcdBoostStrategyTest = async (numTests) => {
             await redeploy('MockExchangeWrapper').then(({ address }) =>
                 setNewExchangeWrapper(senderAcc, address),
             );
-            await redeploy('McdRatio');
             await redeploy('McdBoostComposite');
             await redeploy('DFSSell');
 
@@ -245,7 +244,6 @@ const mcdRepayStrategyTest = async (numTests) => {
             await redeploy('MockExchangeWrapper').then(({ address }) =>
                 setNewExchangeWrapper(senderAcc, address),
             );
-            await redeploy('McdRatio');
             await redeploy('McdRepayComposite');
 
             await addBotCaller(botAcc.address);

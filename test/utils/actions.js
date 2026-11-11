@@ -2517,41 +2517,6 @@ const sparkBorrowCalldataOptimised = async (proxy, market, amount, to, rateMode,
 
     return receipt;
 };
-const sparkSwapBorrowRate = async (proxy, assetId, rateMode) => {
-    const sparkSwapRateAction = new dfs.actions.spark.SparkSwapBorrowRateModeAction(
-        true,
-        nullAddress,
-        rateMode,
-        assetId,
-    );
-    const functionData = sparkSwapRateAction.encodeForDsProxyCall()[1];
-
-    const receipt = await executeAction('SparkSwapBorrowRateMode', functionData, proxy);
-
-    return receipt;
-};
-const sparkSwapBorrowRateCalldataOptimised = async (proxy, assetId, rateMode) => {
-    const sparkSwapRateAddr = await getAddrFromRegistry('SparkSwapBorrowRateMode');
-    let contract = await hre.ethers.getContractAt('SparkSwapBorrowRateMode', sparkSwapRateAddr);
-    const signer = (await hre.ethers.getSigners())[0];
-    contract = await contract.connect(signer);
-
-    const encodedInput = await contract.encodeInputs([rateMode, assetId, true, nullAddress]);
-    const sparkSwapRateAction = new dfs.actions.spark.SparkSwapBorrowRateModeAction(
-        true,
-        nullAddress,
-        rateMode,
-        assetId,
-    );
-    const functionData = sparkSwapRateAction.encodeForDsProxyCall()[1];
-
-    console.log(functionData.toLowerCase() === encodedInput);
-
-    const receipt = await executeAction('SparkSwapBorrowRateMode', functionData, proxy);
-
-    return receipt;
-};
-
 const sparkPayback = async (proxy, market, amount, from, rateMode, assetId, tokenAddr) => {
     const sparkPaybackAction = new dfs.actions.spark.SparkPaybackAction(
         true,
@@ -2736,22 +2701,6 @@ const sparkSwitchCollateralCallDataOptimised = async (
     const functionData = sparkSwithCollAction.encodeForDsProxyCall()[1];
 
     const receipt = await executeAction('SparkCollateralSwitch', functionData, proxy);
-
-    return receipt;
-};
-
-const sparkDelegateCredit = async (proxy, assetId, amount, rateMode, delegatee) => {
-    const sparkDelegateAction = new dfs.actions.spark.SparkDelegateCredit(
-        true,
-        '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
-        amount,
-        rateMode,
-        assetId,
-        delegatee,
-    );
-    const functionData = sparkDelegateAction.encodeForDsProxyCall()[1];
-
-    const receipt = await executeAction('SparkDelegateCredit', functionData, proxy);
 
     return receipt;
 };
@@ -2981,38 +2930,6 @@ const curveUsdCreate = async (
     return { receipt, approveObj };
 };
 
-const curveUsdLevCreate = async (
-    proxy,
-    controllerAddress,
-    collateralAmount,
-    debtAmount,
-    minAmount,
-    nBands,
-    from,
-    additionData,
-    gasUsed,
-    dfsFeeDivider,
-    useSteth,
-) => {
-    const action = new dfs.actions.curveusd.CurveUsdLevCreateAction(
-        controllerAddress,
-        collateralAmount,
-        debtAmount,
-        minAmount,
-        nBands,
-        from,
-        additionData,
-        gasUsed,
-        dfsFeeDivider,
-        useSteth,
-    );
-
-    const functionData = action.encodeForDsProxyCall()[1];
-    const receipt = await executeAction('CurveUsdLevCreate', functionData, proxy);
-
-    return receipt;
-};
-
 const curveUsdLevCreateTransient = async (
     proxy,
     controllerAddress,
@@ -3031,38 +2948,6 @@ const curveUsdLevCreateTransient = async (
     );
     const functionData = action.encodeForDsProxyCall()[1];
     const receipt = await executeAction('CurveUsdLevCreateTransient', functionData, proxy);
-
-    return receipt;
-};
-
-const curveUsdSelfLiquidateWithColl = async (
-    proxy,
-    controllerAddress,
-    percentage,
-    minCrvUsdExpected,
-    swapAmount,
-    minAmount,
-    to,
-    additionData,
-    gasUsed,
-    dfsFeeDivider,
-    useSteth,
-) => {
-    const action = new dfs.actions.curveusd.CurveUsdSelfLiquidateWithCollAction(
-        controllerAddress,
-        percentage,
-        minCrvUsdExpected,
-        swapAmount,
-        minAmount,
-        to,
-        additionData,
-        gasUsed,
-        dfsFeeDivider,
-        useSteth,
-    );
-
-    const functionData = action.encodeForDsProxyCall()[1];
-    const receipt = await executeAction('CurveUsdSelfLiquidateWithColl', functionData, proxy);
 
     return receipt;
 };
@@ -3174,34 +3059,6 @@ const curveUsdPayback = async (
     const receipt = await executeAction('CurveUsdPayback', functionData, proxy);
 
     return { receipt, approveObj };
-};
-
-const curveUsdRepay = async (
-    proxy,
-    controllerAddress,
-    debtAmount,
-    to,
-    minAmount,
-    extraData,
-    gasUsed,
-    dfsFeeDivider,
-    useSteth,
-) => {
-    const action = new dfs.actions.curveusd.CurveUsdRepayAction(
-        controllerAddress,
-        debtAmount,
-        to,
-        minAmount,
-        extraData,
-        gasUsed,
-        dfsFeeDivider,
-        useSteth,
-    );
-
-    const functionData = action.encodeForDsProxyCall()[1];
-    const receipt = await executeAction('CurveUsdRepay', functionData, proxy);
-
-    return receipt;
 };
 
 const curveUsdRepayTransient = async (proxy, controllerAddress, exData, to) => {
@@ -4113,12 +3970,9 @@ module.exports = {
     sparkSetEModeCalldataOptimised,
     sparkSwitchCollateral,
     sparkSwitchCollateralCallDataOptimised,
-    sparkSwapBorrowRate,
-    sparkSwapBorrowRateCalldataOptimised,
     sparkClaimRewards,
     sDaiWrap,
     sDaiUnwrap,
-    sparkDelegateCredit,
     sparkSPKClaim,
 
     convexDeposit,
@@ -4157,10 +4011,7 @@ module.exports = {
     curveUsdWithdraw,
     curveUsdBorrow,
     curveUsdPayback,
-    curveUsdRepay,
     curveUsdSelfLiquidate,
-    curveUsdLevCreate,
-    curveUsdSelfLiquidateWithColl,
     curveUsdAdjust,
     curveUsdLevCreateTransient,
     curveUsdRepayTransient,

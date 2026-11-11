@@ -36,8 +36,7 @@ library Addresses {
         0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant BUNDLE_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public constant STORAGE_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    // @dev Address of regular TransientStorage as Linea does not have cancun support
-    address public constant TRANSIENT_STORAGE_CANCUN = 0x425fA97285965E01Cc5F951B62A51F6CDEA5cc0d;
+    address public constant TRANSIENT_STORAGE_CANCUN = 0xCeB876C6A4dd76aFe645622db00D4E051D16dA66;
 
     // Euler V2
     address public constant E_WETH_2 = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
