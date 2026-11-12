@@ -36,7 +36,8 @@ contract DFSWrapperHelper is ExchangeHelper {
         DFSExchangeData.ExchangeData memory _exData,
         bytes memory _realCalldata
     ) internal returns (bool success, uint256 tokensSwapped) {
-        if (!_exchangeAggRegistry.isExchangeAggregatorAddr(_exData.offchainData.exchangeAddr)) {
+        if (!_getExchangeAggregatorRegistry()
+                .isExchangeAggregatorAddr(_exData.offchainData.exchangeAddr)) {
             return (false, 0);
         }
 

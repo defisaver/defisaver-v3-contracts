@@ -10,6 +10,8 @@ import { AdminAuth } from "../../auth/AdminAuth.sol";
 contract ExchangeAggregatorRegistry is AdminAuth, IExchangeAggregatorRegistry {
     error EmptyAddrError();
 
+    event ExchangeTargetAddrUpdated(address indexed exchangeAddr, bool state);
+
     mapping(address => bool) public exchangeTargetAddresses;
 
     function setExchangeTargetAddr(address _exchangeAddr, bool _state) external onlyOwner {
@@ -18,6 +20,7 @@ contract ExchangeAggregatorRegistry is AdminAuth, IExchangeAggregatorRegistry {
         }
 
         exchangeTargetAddresses[_exchangeAddr] = _state;
+        emit ExchangeTargetAddrUpdated(_exchangeAddr, _state);
     }
 
     function isExchangeAggregatorAddr(address _exchangeAddr) external view returns (bool) {

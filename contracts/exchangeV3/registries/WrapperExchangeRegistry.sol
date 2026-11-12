@@ -7,6 +7,9 @@ import { AdminAuth } from "../../auth/AdminAuth.sol";
 contract WrapperExchangeRegistry is AdminAuth, IWrapperExchangeRegistry {
     error EmptyAddrError();
 
+    event WrapperAdded(address indexed wrapper);
+    event WrapperRemoved(address indexed wrapper);
+
     mapping(address => bool) private wrappers;
 
     function addWrapper(address _wrapper) external onlyOwner {
@@ -15,10 +18,12 @@ contract WrapperExchangeRegistry is AdminAuth, IWrapperExchangeRegistry {
         }
 
         wrappers[_wrapper] = true;
+        emit WrapperAdded(_wrapper);
     }
 
     function removeWrapper(address _wrapper) external onlyOwner {
         wrappers[_wrapper] = false;
+        emit WrapperRemoved(_wrapper);
     }
 
     function isWrapper(address _wrapper) external view returns (bool) {
