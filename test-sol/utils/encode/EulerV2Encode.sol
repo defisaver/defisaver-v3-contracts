@@ -8,13 +8,6 @@ import { EulerV2Payback } from "../../../contracts/actions/eulerV2/EulerV2Paybac
 import {
     EulerV2CollateralSwitch
 } from "../../../contracts/actions/eulerV2/EulerV2CollateralSwitch.sol";
-import {
-    EulerV2ReorderCollaterals
-} from "../../../contracts/actions/eulerV2/EulerV2ReorderCollaterals.sol";
-import {
-    EulerV2PaybackWithShares
-} from "../../../contracts/actions/eulerV2/EulerV2PaybackWithShares.sol";
-import { EulerV2PullDebt } from "../../../contracts/actions/eulerV2/EulerV2PullDebt.sol";
 
 library EulerV2Encode {
     function supply(
@@ -79,40 +72,6 @@ library EulerV2Encode {
         params = abi.encode(
             EulerV2CollateralSwitch.Params({
                 vault: _vault, account: _account, enableAsColl: _enableAsColl
-            })
-        );
-    }
-
-    function reorderCollaterals(address _account, uint8[][] memory _indexes)
-        public
-        pure
-        returns (bytes memory params)
-    {
-        params = abi.encode(
-            EulerV2ReorderCollaterals.Params({ account: _account, indexes: _indexes })
-        );
-    }
-
-    function paybackWithShares(address _vault, address _from, address _account, uint256 _amount)
-        public
-        pure
-        returns (bytes memory params)
-    {
-        params = abi.encode(
-            EulerV2PaybackWithShares.Params({
-                vault: _vault, from: _from, account: _account, amount: _amount
-            })
-        );
-    }
-
-    function pullDebt(address _vault, address _account, address _from, uint256 _amount)
-        public
-        pure
-        returns (bytes memory params)
-    {
-        params = abi.encode(
-            EulerV2PullDebt.Params({
-                vault: _vault, account: _account, from: _from, amount: _amount
             })
         );
     }

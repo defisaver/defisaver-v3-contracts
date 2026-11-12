@@ -204,7 +204,7 @@ module.exports = {
                         enabled: true,
                         runs: 1000,
                     },
-                    evmVersion: 'cancun', // london used only for Linea
+                    evmVersion: 'cancun',
                 },
             },
         ],
