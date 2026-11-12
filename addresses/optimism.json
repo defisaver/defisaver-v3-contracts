@@ -104,8 +104,8 @@
         "id": "0x04abec26",
         "path": "contracts/exchangeV3/registries/ExchangeAggregatorRegistry.sol",
         "version": "1.0.1",
-        "inRegistry": false,
-        "changeTime": 0,
+        "inRegistry": true,
+        "changeTime": 86400,
         "registryIds": [],
         "history": ["0x79586d55DECB755B9Bb436B2287eFf93025E549D"]
     },
@@ -310,8 +310,8 @@
         "id": "0x0df19746",
         "path": "contracts/exchangeV3/registries/WrapperExchangeRegistry.sol",
         "version": "1.0.1",
-        "inRegistry": false,
-        "changeTime": 0,
+        "inRegistry": true,
+        "changeTime": 86400,
         "registryIds": [],
         "history": ["0x82b039Ca3c16E971132603f960a6E98582d8F021"]
     },
