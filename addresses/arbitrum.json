@@ -99,14 +99,14 @@
     },
     {
         "name": "ExchangeAggregatorRegistry",
-        "address": "0xcc0Ae28CC4ae2944B61d3b205F47F5f3aE5Ca204",
+        "address": "0x61CAe57F2b01539e2a980d1e7A3942f458694108",
         "id": "0x04abec26",
         "path": "contracts/exchangeV3/registries/ExchangeAggregatorRegistry.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xcc0Ae28CC4ae2944B61d3b205F47F5f3aE5Ca204"]
     },
     {
         "name": "Discount",
@@ -316,14 +316,14 @@
     },
     {
         "name": "WrapperExchangeRegistry",
-        "address": "0x4a0c7BDF7F58AA04852Da07CDb3d367521f81446",
+        "address": "0xa00d10EC5963f2bFca1863F974a57E79CF2Ce6Dd",
         "id": "0x0df19746",
         "path": "contracts/exchangeV3/registries/WrapperExchangeRegistry.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x4a0c7BDF7F58AA04852Da07CDb3d367521f81446"]
     },
     {
         "name": "TokenGroupRegistry",

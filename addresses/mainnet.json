@@ -140,25 +140,25 @@
     },
     {
         "name": "ExchangeAggregatorRegistry",
-        "address": "0x7b67D9D7993A258C4b2C31CDD9E6cbD5Fb674985",
+        "address": "0x98eAC0Cb47951166b880E3a53477Fd3aa3bA6Ea8",
         "id": "0x04abec26",
         "path": "contracts/exchangeV3/registries/ExchangeAggregatorRegistry.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x7b67D9D7993A258C4b2C31CDD9E6cbD5Fb674985"]
     },
     {
         "name": "WrapperExchangeRegistry",
-        "address": "0x653893375dD1D942D2C429caB51641F2bf14d426",
+        "address": "0x6E6e95bC0Da741c835a3570F9681d5B0D00B4E3A",
         "id": "0x0df19746",
         "path": "contracts/exchangeV3/registries/WrapperExchangeRegistry.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x653893375dD1D942D2C429caB51641F2bf14d426"]
     },
     {
         "name": "FLFeeFaucet",

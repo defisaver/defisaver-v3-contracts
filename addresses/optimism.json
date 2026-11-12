@@ -100,14 +100,14 @@
     },
     {
         "name": "ExchangeAggregatorRegistry",
-        "address": "0x79586d55DECB755B9Bb436B2287eFf93025E549D",
+        "address": "0x0290d314C3852bFaCBAa7F84cb67050A0594a909",
         "id": "0x04abec26",
         "path": "contracts/exchangeV3/registries/ExchangeAggregatorRegistry.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x79586d55DECB755B9Bb436B2287eFf93025E549D"]
     },
     {
         "name": "ParaswapWrapper",
@@ -306,14 +306,14 @@
     },
     {
         "name": "WrapperExchangeRegistry",
-        "address": "0x82b039Ca3c16E971132603f960a6E98582d8F021",
+        "address": "0x4F07399419Ccf8265F82621A7a3f5077E62E1CE6",
         "id": "0x0df19746",
         "path": "contracts/exchangeV3/registries/WrapperExchangeRegistry.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x82b039Ca3c16E971132603f960a6E98582d8F021"]
     },
     {
         "name": "TokenGroupRegistry",
