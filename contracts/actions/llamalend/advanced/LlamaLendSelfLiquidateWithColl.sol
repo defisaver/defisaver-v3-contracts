@@ -110,7 +110,7 @@ contract LlamaLendSelfLiquidateWithColl is ActionBase, LlamaLendHelper {
         }
 
         // there shouldn't be any funds left on swapper contract but withdrawing it just in case
-        LlamaLendSwapper(llamalendSwapper).withdrawAll(_params.controllerAddress);
+        LlamaLendSwapper(payable(llamalendSwapper)).withdrawAll(_params.controllerAddress);
 
         // there will usually be both coll token and debt token, unless we're selling all collateral
         (, uint256 debtTokenReceived) = _sendLeftoverFunds(
