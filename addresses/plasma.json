@@ -526,14 +526,14 @@
     },
     {
         "name": "FluidView",
-        "address": "0x27C0BAe2338cE28097122393faF90375B9395dd1",
+        "address": "0xBd2d2d4718C24B8D35168480553b1F5a11f9884b",
         "id": "0xae75a797",
         "path": "contracts/views/FluidView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x27C0BAe2338cE28097122393faF90375B9395dd1"]
     },
     {
         "name": "FluidVaultT1Open",
