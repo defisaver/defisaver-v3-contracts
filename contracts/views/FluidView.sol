@@ -14,11 +14,26 @@ import {
 } from "../interfaces/protocols/fluid/resolvers/IFluidLendingResolver.sol";
 import { FluidRatioHelper } from "../../contracts/actions/fluid/helpers/FluidRatioHelper.sol";
 import { FluidVaultTypes } from "../../contracts/actions/fluid/helpers/FluidVaultTypes.sol";
+import {
+    IFluidVaultOracleV2,
+    IFluidUsdOracleV2
+} from "../interfaces/protocols/fluid/oracles/IFluidVaultOracleV2.sol";
 import { IERC20 } from "../interfaces/token/IERC20.sol";
 
 /// @title FluidView - aggregate various information about Fluid vaults and users
 contract FluidView is FluidRatioHelper {
     using FluidVaultTypes for uint256;
+
+    /// @dev V2 prices are USD per whole share/token, scaled by 1e27.
+    struct OracleV2Data {
+        IFluidVaultOracleV2.OracleConfig config;
+        uint256 supplyPrice;
+        uint256 borrowPrice;
+        uint256 supplyQuotePrice;
+        uint256 borrowQuotePrice;
+    }
+
+    error InvalidOracleV2Price();
 
     /**
      *
@@ -277,18 +292,10 @@ contract FluidView is FluidRatioHelper {
             supplyToken1: supplyToken1,
             borrowToken0: borrowToken0,
             borrowToken1: borrowToken1,
-            supplyToken0Decimals: supplyToken0 != NATIVE_TOKEN_ADDR
-                ? IERC20(supplyToken0).decimals()
-                : 18,
-            supplyToken1Decimals: supplyToken1 != address(0)
-                ? (supplyToken1 != NATIVE_TOKEN_ADDR ? IERC20(supplyToken1).decimals() : 18)
-                : 0,
-            borrowToken0Decimals: borrowToken0 != NATIVE_TOKEN_ADDR
-                ? IERC20(borrowToken0).decimals()
-                : 18,
-            borrowToken1Decimals: borrowToken1 != address(0)
-                ? (borrowToken1 != NATIVE_TOKEN_ADDR ? IERC20(borrowToken1).decimals() : 18)
-                : 0,
+            supplyToken0Decimals: _getTokenDecimals(supplyToken0),
+            supplyToken1Decimals: supplyToken1 != address(0) ? _getTokenDecimals(supplyToken1) : 0,
+            borrowToken0Decimals: _getTokenDecimals(borrowToken0),
+            borrowToken1Decimals: borrowToken1 != address(0) ? _getTokenDecimals(borrowToken1) : 0,
             collateralFactor: data.configs.collateralFactor,
             liquidationThreshold: data.configs.liquidationThreshold,
             liquidationMaxLimit: data.configs.liquidationMaxLimit,
@@ -326,12 +333,23 @@ contract FluidView is FluidRatioHelper {
             dexBorrowData: dexBorrowData
         });
 
+        OracleV2Data memory oracleV2;
+        if (vaultData.isSmartColl || vaultData.isSmartDebt) {
+            try IFluidVaultOracleV2(vaultData.oracle).getOracleConfig() returns (
+                IFluidVaultOracleV2.OracleConfig memory config
+            ) {
+                oracleV2.config = config;
+            } catch { }
+        }
+
+        bool isOracleV2 = oracleV2.config.usdOracle != address(0);
+
         // smart coll
         if (vaultData.vaultType.isT2Vault()) {
             IFluidDexResolver.DexEntireData memory dexData = IFluidDexResolver(FLUID_DEX_RESOLVER)
                 .getDexEntireData(data.constantVariables.supply);
             vaultData.dexSupplyData =
-                _fillDexSupplyData(dexData, vaultData.oracle, vaultData.withdrawable);
+                _fillDexSupplyData(dexData, vaultData.oracle, vaultData.withdrawable, oracleV2);
         }
 
         // smart debt
@@ -339,7 +357,7 @@ contract FluidView is FluidRatioHelper {
             IFluidDexResolver.DexEntireData memory dexData = IFluidDexResolver(FLUID_DEX_RESOLVER)
                 .getDexEntireData(data.constantVariables.borrow);
             vaultData.dexBorrowData =
-                _fillDexBorrowData(dexData, vaultData.oracle, vaultData.borrowable);
+                _fillDexBorrowData(dexData, vaultData.oracle, vaultData.borrowable, oracleV2);
         }
 
         // smart coll and smart debt
@@ -348,23 +366,29 @@ contract FluidView is FluidRatioHelper {
                 .getDexEntireData(data.constantVariables.supply);
 
             vaultData.dexSupplyData = _fillDexSupplyData(
-                dexData, _getSmartCollateralDexOracle(vaultData.oracle), vaultData.withdrawable
+                dexData,
+                !isOracleV2 ? _getSmartCollateralDexOracle(vaultData.oracle) : vaultData.oracle,
+                vaultData.withdrawable,
+                oracleV2
             );
 
-            // if it's a same dex, no need to fetch again
-            if (data.constantVariables.borrow == data.constantVariables.supply) {
-                vaultData.dexBorrowData =
-                    _fillDexBorrowData(dexData, vaultData.oracle, vaultData.borrowable);
-            } else {
+            // Reuse the supply DEX data when both sides use the same pool.
+            if (data.constantVariables.borrow != data.constantVariables.supply) {
                 dexData = IFluidDexResolver(FLUID_DEX_RESOLVER)
                     .getDexEntireData(data.constantVariables.borrow);
-                vaultData.dexBorrowData =
-                    _fillDexBorrowData(dexData, vaultData.oracle, vaultData.borrowable);
             }
+            vaultData.dexBorrowData =
+                _fillDexBorrowData(dexData, vaultData.oracle, vaultData.borrowable, oracleV2);
 
-            // In the case of T4 vaults, quoteTokensPerShare is actually returned as shareTokensPerQuote, so we invert it here.
-            vaultData.dexBorrowData.quoteTokensPerShare =
-                1e54 / vaultData.dexBorrowData.quoteTokensPerShare;
+            // Legacy T4 oracles return shares per quote token, so only that path is inverted.
+            if (!isOracleV2) {
+                vaultData.dexBorrowData.quoteTokensPerShare =
+                    1e54 / vaultData.dexBorrowData.quoteTokensPerShare;
+            }
+        }
+
+        if (isOracleV2) {
+            _setOracleV2ShareRates(vaultData, oracleV2);
         }
     }
 
@@ -683,6 +707,88 @@ contract FluidView is FluidRatioHelper {
      *                         INTERNAL FUNCTIONS
      *
      */
+    function _getTokenDecimals(address _token) internal view returns (uint256) {
+        return _token == NATIVE_TOKEN_ADDR ? 18 : IERC20(_token).decimals();
+    }
+
+    /// @dev Read the same operate-side USD prices as the V2 vault oracle's raw resolver path.
+    function _getOracleV2TokenPrice(
+        IFluidVaultOracleV2.OracleConfig memory _config,
+        address _token,
+        bool _isCollateral
+    ) internal view returns (uint256 price) {
+        (price,,) = IFluidUsdOracleV2(_config.usdOracle)
+            .getPriceDetailedViewRaw(
+                _token,
+                _isCollateral ? _config.supplyEMode : _config.borrowEMode,
+                true,
+                _isCollateral
+            );
+        if (price == 0) revert InvalidOracleV2Price();
+    }
+
+    /// @dev Matches Fluid oracleV2/common/dexShareResolver.sol reserve valuation.
+    /// Unbuffered USD value of one DEX share. V2 uses Liquidity accounting, not the
+    /// DEX's virtual/real trading reserves. Normalize reserves to 1e12 before valuation,
+    /// exactly as Fluid's DexShareResolver; shares have 18 decimals and USD prices 27.
+    function _getOracleV2DexPrice(
+        IFluidDexResolver.DexEntireData memory _dex,
+        IFluidVaultOracleV2.OracleConfig memory _config,
+        bool _isCollateral
+    ) internal view returns (uint256 sharePrice, uint256 quotePrice) {
+        quotePrice = _getOracleV2TokenPrice(_config, _dex.constantViews.token0, _isCollateral);
+        uint256 token1Price =
+            _getOracleV2TokenPrice(_config, _dex.constantViews.token1, _isCollateral);
+        uint256 reserve0 = _isCollateral
+            ? _dex.limitsAndAvailability.liquidityUserSupplyDataToken0.supply
+            : _dex.limitsAndAvailability.liquidityUserBorrowDataToken0.borrow;
+        uint256 reserve1 = _isCollateral
+            ? _dex.limitsAndAvailability.liquidityUserSupplyDataToken1.supply
+            : _dex.limitsAndAvailability.liquidityUserBorrowDataToken1.borrow;
+        reserve0 = reserve0 * _dex.constantViews2.token0NumeratorPrecision
+            / _dex.constantViews2.token0DenominatorPrecision;
+        reserve1 = reserve1 * _dex.constantViews2.token1NumeratorPrecision
+            / _dex.constantViews2.token1DenominatorPrecision;
+        uint256 shares =
+            _isCollateral ? _dex.dexState.totalSupplyShares : _dex.dexState.totalBorrowShares;
+        sharePrice = (reserve0 * quotePrice + reserve1 * token1Price) * 1e6 / shares;
+    }
+
+    /// @dev Recover buffered share values without hardcoding the oracle's immutable peg buffer.
+    /// T2/T3 have one normal token, so the vault exchange rate determines the other leg.
+    /// T4 uses the same buffer b on both legs: C'=C*(1-b), D'=D*(1+b), R=C'/D'.
+    /// Consequently D'=2*C*D/(C+R*D) and C'=R*D'. R is scaled by 1e27 (both legs 18 decimals).
+    /// This preserves V2's buffer up to reserve-level integer rounding, instead of silently
+    /// treating unbuffered reserves as the oracle price. The resulting quotes are whole
+    /// token0 per whole share in 1e27; unlike legacy T4 debt rates they are NOT inverted.
+    function _setOracleV2ShareRates(VaultData memory _vault, OracleV2Data memory _data)
+        internal
+        view
+    {
+        uint256 rate = _vault.oraclePriceOperate;
+        if (rate == 0) revert InvalidOracleV2Price();
+        if (!_vault.isSmartDebt) {
+            uint256 debtPrice = _getOracleV2TokenPrice(_data.config, _vault.borrowToken0, false);
+            _data.supplyPrice = rate * debtPrice / (10 ** (9 + _vault.borrowToken0Decimals));
+        } else if (!_vault.isSmartColl) {
+            uint256 collPrice = _getOracleV2TokenPrice(_data.config, _vault.supplyToken0, true);
+            _data.borrowPrice = collPrice * (10 ** (45 - _vault.supplyToken0Decimals)) / rate;
+        } else {
+            uint256 debtInCollUsd = rate * _data.borrowPrice / 1e27;
+            _data.borrowPrice =
+                2 * _data.supplyPrice * _data.borrowPrice / (_data.supplyPrice + debtInCollUsd);
+            _data.supplyPrice = rate * _data.borrowPrice / 1e27;
+        }
+        if (_vault.isSmartColl) {
+            _vault.dexSupplyData.quoteTokensPerShare =
+                _data.supplyPrice * 1e27 / _data.supplyQuotePrice;
+        }
+        if (_vault.isSmartDebt) {
+            _vault.dexBorrowData.quoteTokensPerShare =
+                _data.borrowPrice * 1e27 / _data.borrowQuotePrice;
+        }
+    }
+
     /// @notice Helper function used for T4 vaults to determine which oracle has to be used for smart collateral DEX.
     function _getSmartCollateralDexOracle(address _vaultOracle)
         internal
@@ -702,13 +808,21 @@ contract FluidView is FluidRatioHelper {
     function _fillDexSupplyData(
         IFluidDexResolver.DexEntireData memory _dexData,
         address _oracle,
-        uint256 _sharesWithdrawable
+        uint256 _sharesWithdrawable,
+        OracleV2Data memory _oracleV2
     ) internal view returns (DexSupplyData memory dexSupplyData) {
-        address quoteToken = _isQuoteInToken0ForSmartCollOracle(_oracle)
-            ? _dexData.constantViews.token0
-            : _dexData.constantViews.token1;
-
-        (uint256 quoteTokensPerShare,) = IDexSmartCollOracle(_oracle).dexSmartColSharesRates();
+        address quoteToken;
+        uint256 quoteTokensPerShare;
+        if (_oracleV2.config.usdOracle != address(0)) {
+            quoteToken = _dexData.constantViews.token0;
+            (_oracleV2.supplyPrice, _oracleV2.supplyQuotePrice) =
+                _getOracleV2DexPrice(_dexData, _oracleV2.config, true);
+        } else {
+            quoteToken = _isQuoteInToken0ForSmartCollOracle(_oracle)
+                ? _dexData.constantViews.token0
+                : _dexData.constantViews.token1;
+            (quoteTokensPerShare,) = IDexSmartCollOracle(_oracle).dexSmartColSharesRates();
+        }
 
         dexSupplyData = DexSupplyData({
             dexPool: _dexData.dex,
@@ -744,13 +858,21 @@ contract FluidView is FluidRatioHelper {
     function _fillDexBorrowData(
         IFluidDexResolver.DexEntireData memory _dexData,
         address _oracle,
-        uint256 _sharesBorrowable
+        uint256 _sharesBorrowable,
+        OracleV2Data memory _oracleV2
     ) internal view returns (DexBorrowData memory dexBorrowData) {
-        address quoteToken = _isQuoteInToken0ForSmartDebtOracle(_oracle)
-            ? _dexData.constantViews.token0
-            : _dexData.constantViews.token1;
-
-        (uint256 quoteTokensPerShare,) = IDexSmartDebtOracle(_oracle).dexSmartDebtSharesRates();
+        address quoteToken;
+        uint256 quoteTokensPerShare;
+        if (_oracleV2.config.usdOracle != address(0)) {
+            quoteToken = _dexData.constantViews.token0;
+            (_oracleV2.borrowPrice, _oracleV2.borrowQuotePrice) =
+                _getOracleV2DexPrice(_dexData, _oracleV2.config, false);
+        } else {
+            quoteToken = _isQuoteInToken0ForSmartDebtOracle(_oracle)
+                ? _dexData.constantViews.token0
+                : _dexData.constantViews.token1;
+            (quoteTokensPerShare,) = IDexSmartDebtOracle(_oracle).dexSmartDebtSharesRates();
+        }
 
         dexBorrowData = DexBorrowData({
             dexPool: _dexData.dex,
