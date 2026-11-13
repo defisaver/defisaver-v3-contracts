@@ -58,4 +58,10 @@ interface IDexSmartDebtOracle {
         external
         view
         returns (address colDebtOracle_, bool colDebtInvert_);
+
+    /// @notice Collateral oracle configuration used by older T4 deployments.
+    function getDexSmartDebtOracleData()
+        external
+        view
+        returns (address colDebtOracle_, bool colDebtInvert_, uint256 debtPerColScale_);
 }

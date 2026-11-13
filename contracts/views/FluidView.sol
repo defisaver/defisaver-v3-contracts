@@ -12,26 +12,24 @@ import { IFluidDexResolver } from "../interfaces/protocols/fluid/resolvers/IFlui
 import {
     IFluidLendingResolver
 } from "../interfaces/protocols/fluid/resolvers/IFluidLendingResolver.sol";
-import { FluidRatioHelper } from "../../contracts/actions/fluid/helpers/FluidRatioHelper.sol";
-import { FluidVaultTypes } from "../../contracts/actions/fluid/helpers/FluidVaultTypes.sol";
 import {
     IFluidVaultOracleV2,
     IFluidUsdOracleV2
 } from "../interfaces/protocols/fluid/oracles/IFluidVaultOracleV2.sol";
 import { IERC20 } from "../interfaces/token/IERC20.sol";
 
+import { FluidRatioHelper } from "../../contracts/actions/fluid/helpers/FluidRatioHelper.sol";
+import { FluidVaultTypes } from "../../contracts/actions/fluid/helpers/FluidVaultTypes.sol";
+
 /// @title FluidView - aggregate various information about Fluid vaults and users
 contract FluidView is FluidRatioHelper {
     using FluidVaultTypes for uint256;
 
-    /// @dev V2 prices are USD per whole share/token, scaled by 1e27.
-    struct OracleV2Data {
-        IFluidVaultOracleV2.OracleConfig config;
-        uint256 supplyPrice;
-        uint256 borrowPrice;
-        uint256 supplyQuotePrice;
-        uint256 borrowQuotePrice;
-    }
+    /**
+     *
+     *                         ERRORS
+     *
+     */
 
     error InvalidOracleV2Price();
 
@@ -67,9 +65,9 @@ contract FluidView is FluidRatioHelper {
         uint256 maxSupplyShares; // max supply shares, in 1e18
         uint256 token0Supplied; // token0 supplied, in token0 decimals
         uint256 token1Supplied; // token1 supplied, in token1 decimals
-        uint256 sharesWithdrawable; // shares withdrawable, in 1e18
-        uint256 token0Withdrawable; // token0 withdrawable, in token0 decimals
-        uint256 token1Withdrawable; // token1 withdrawable, in token1 decimals
+        uint256 sharesWithdrawable; // vault-level share headroom after withdrawal gap, in 1e18
+        uint256 token0Withdrawable; // proportional token0 equivalent; not a single-token execution quote
+        uint256 token1Withdrawable; // proportional token1 equivalent; not a single-token execution quote
         uint256 token0PerSupplyShare; // token0 amount per 1e18 supply shares
         uint256 token1PerSupplyShare; // token1 amount per 1e18 supply shares
         uint256 token0SupplyRate; // token0 supply rate. E.g 320 = 3.2% APR
@@ -94,9 +92,9 @@ contract FluidView is FluidRatioHelper {
         uint256 maxBorrowShares; // max borrow shares, in 1e18
         uint256 token0Borrowed; // token0 borrowed, in token0 decimals
         uint256 token1Borrowed; // token1 borrowed, in token1 decimals
-        uint256 sharesBorrowable; // shares borrowable in 1e18
-        uint256 token0Borrowable; // token0 borrowable in token0 decimals
-        uint256 token1Borrowable; // token1 borrowable in token1 decimals
+        uint256 sharesBorrowable; // vault-level debt share headroom, in 1e18
+        uint256 token0Borrowable; // proportional token0 equivalent; not a single-token execution quote
+        uint256 token1Borrowable; // proportional token1 equivalent; not a single-token execution quote
         uint256 token0PerBorrowShare; // token0 amount per 1e18 borrow shares
         uint256 token1PerBorrowShare; // token1 amount per 1e18 borrow shares
         uint256 token0BorrowRate; // token0 borrow rate. E.g 320 = 3.2% APR
@@ -197,6 +195,20 @@ contract FluidView is FluidRatioHelper {
 
     /**
      *
+     *                         INTERNAL HELPER STRUCTS
+     *
+     */
+    /// @dev V2 prices are USD per whole share/token, scaled by 1e27.
+    struct OracleV2Data {
+        IFluidVaultOracleV2.OracleConfig config;
+        uint256 supplyPrice;
+        uint256 borrowPrice;
+        uint256 supplyQuotePrice;
+        uint256 borrowQuotePrice;
+    }
+
+    /**
+     *
      *                         EXTERNAL FUNCTIONS
      *
      */
@@ -270,6 +282,10 @@ contract FluidView is FluidRatioHelper {
 
     /// @notice Get vault data for a specific vault address. This also includes dex data.
     /// @dev This should be called with static call.
+    /// @dev Availability comes from the resolver's vault-adjusted limits (including withdrawal
+    /// gap and rounding), not its unadjusted Liquidity/DEX user data. For smart sides these
+    /// values are share limits; DEX liquidity, token composition and position health can
+    /// further constrain an actual operation. Use the estimate methods for a chosen token split.
     function getVaultData(address _vault) public returns (VaultData memory vaultData) {
         IFluidVaultResolver.VaultEntireData memory data =
             IFluidVaultResolver(FLUID_VAULT_RESOLVER).getVaultEntireData(_vault);
@@ -314,16 +330,16 @@ contract FluidView is FluidRatioHelper {
             totalPositions: data.vaultState.totalPositions,
             totalSupplyVault: data.totalSupplyAndBorrow.totalSupplyVault,
             totalBorrowVault: data.totalSupplyAndBorrow.totalBorrowVault,
-            withdrawalLimit: data.liquidityUserSupplyData.withdrawalLimit,
-            withdrawableUntilLimit: data.liquidityUserSupplyData.withdrawableUntilLimit,
-            withdrawable: data.liquidityUserSupplyData.withdrawable,
+            withdrawalLimit: data.limitsAndAvailability.withdrawLimit,
+            withdrawableUntilLimit: data.limitsAndAvailability.withdrawableUntilLimit,
+            withdrawable: data.limitsAndAvailability.withdrawable,
             baseWithdrawalLimit: data.liquidityUserSupplyData.baseWithdrawalLimit,
             withdrawExpandPercent: data.liquidityUserSupplyData.expandPercent,
             withdrawExpandDuration: data.liquidityUserSupplyData.expandDuration,
-            borrowLimit: data.liquidityUserBorrowData.borrowLimit,
-            borrowableUntilLimit: data.liquidityUserBorrowData.borrowableUntilLimit,
-            borrowable: data.liquidityUserBorrowData.borrowable,
-            borrowLimitUtilization: data.liquidityUserBorrowData.borrowLimitUtilization,
+            borrowLimit: data.limitsAndAvailability.borrowLimit,
+            borrowableUntilLimit: data.limitsAndAvailability.borrowableUntilLimit,
+            borrowable: data.limitsAndAvailability.borrowable,
+            borrowLimitUtilization: data.limitsAndAvailability.borrowLimitUtilization,
             maxBorrowLimit: data.liquidityUserBorrowData.maxBorrowLimit,
             borrowExpandPercent: data.liquidityUserBorrowData.expandPercent,
             borrowExpandDuration: data.liquidityUserBorrowData.expandDuration,
@@ -332,6 +348,10 @@ contract FluidView is FluidRatioHelper {
             dexSupplyData: dexSupplyData,
             dexBorrowData: dexBorrowData
         });
+
+        // The factory also lists vaults that have not been configured yet. Their resolver
+        // metadata is useful, but there is no oracle/share rate to query until activation.
+        if (vaultData.oracle == address(0)) return vaultData;
 
         OracleV2Data memory oracleV2;
         if (vaultData.isSmartColl || vaultData.isSmartDebt) {
@@ -800,7 +820,14 @@ contract FluidView is FluidRatioHelper {
         try IDexSmartCollOracle(_vaultOracle).dexSmartColSharesRates() returns (uint256, uint256) {
             return _vaultOracle;
         } catch {
-            (smartCollOracle,) = IDexSmartDebtOracle(_vaultOracle).getDexColDebtOracleData();
+            try IDexSmartDebtOracle(_vaultOracle).getDexColDebtOracleData() returns (
+                address colDebtOracle, bool
+            ) {
+                smartCollOracle = colDebtOracle;
+            } catch {
+                // Older mainnet T4 vaults expose a three-value configuration getter.
+                (smartCollOracle,,) = IDexSmartDebtOracle(_vaultOracle).getDexSmartDebtOracleData();
+            }
         }
     }
 

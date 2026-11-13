@@ -140,6 +140,9 @@ interface IFluidVaultResolver {
         // the current actual max withdrawable amount (e.g. if 10% is the limit, and 100M is supplied, it would be 10M)
         uint256 withdrawableUntilLimit;
         uint256 withdrawable; // actual currently withdrawable amount (supply - withdrawal Limit) & considering balance
+        // internal decay limit values
+        uint256 decayEndTimestamp; // computed from last update timestamp + decay duration. when decay will fully end.
+        uint256 decayAmount; // as in storage adjusted for decayed time leftover
     }
 
     // amounts are always in normal (for withInterest already multiplied with exchange price)
