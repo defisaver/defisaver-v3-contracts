@@ -9,6 +9,7 @@ require('@tenderly/hardhat-tenderly');
 require('solidity-coverage');
 
 const path = require('path');
+const { solidity, wethAddress, hardhatNetworks } = require('./scripts/deployment/config');
 const { subtask } = require('hardhat/config');
 const { TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS } = require('hardhat/builtin-tasks/task-names');
 const { glob } = require('hardhat/internal/util/glob');
@@ -140,75 +141,9 @@ module.exports = {
             },
             chainId: 1,
         },
-        // NETWORKS FOR DEPLOYING
-        mainnet: {
-            url: process.env.ETHEREUM_NODE,
-            accounts: [process.env.PRIV_KEY_MAINNET],
-            name: 'mainnet',
-            txType: 2,
-            blockExplorer: 'etherscan.io',
-            contractVerification: true,
-        },
-        optimism: {
-            url: process.env.OPTIMISM_NODE,
-            accounts: [process.env.PRIV_KEY_OPTIMISM],
-            chainId: 10,
-            name: 'optimistic',
-            txType: 2,
-            blockExplorer: 'optimistic.etherscan.io',
-            contractVerification: true,
-        },
-        base: {
-            url: process.env.BASE_NODE,
-            accounts: [process.env.PRIV_KEY_BASE],
-            chainId: 8453,
-            name: 'base',
-            txType: 2,
-            blockExplorer: 'basescan.org',
-            contractVerification: true,
-        },
-        arbitrum: {
-            url: process.env.ARBITRUM_NODE,
-            accounts: [process.env.PRIV_KEY_ARBITRUM],
-            chainId: 42161,
-            name: 'arbitrum',
-            txType: 0,
-            blockExplorer: 'arbiscan.io',
-            contractVerification: true,
-        },
-        linea: {
-            url: process.env.LINEA_NODE,
-            accounts: [process.env.PRIV_KEY_LINEA],
-            chainId: 59144,
-            name: 'linea',
-            txType: 0,
-            blockExplorer: 'lineascan.build',
-            contractVerification: true,
-        },
-        plasma: {
-            url: process.env.PLASMA_NODE,
-            accounts: [process.env.PRIV_KEY_PLASMA],
-            chainId: 9745,
-            name: 'plasma',
-            txType: 2,
-            blockExplorer: 'plasmascan.to',
-            contractVerification: true,
-        },
+        ...hardhatNetworks(),
     },
-    solidity: {
-        compilers: [
-            {
-                version: '0.8.24',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 1000,
-                    },
-                    evmVersion: 'cancun',
-                },
-            },
-        ],
-    },
+    solidity,
     paths: {
         sources: './contracts',
         tests: './test',
@@ -226,14 +161,7 @@ module.exports = {
     mocha: {
         timeout: 100000,
     },
-    wethAddress: {
-        Mainnet: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-        Arbitrum: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
-        Optimism: '0x4200000000000000000000000000000000000006',
-        Base: '0x4200000000000000000000000000000000000006',
-        Linea: '0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f',
-        Plasma: '0x6100E367285b01F48D07953803A2d8dCA5D19873',
-    },
+    wethAddress,
 };
 
 require('./scripts/hardhat-tasks');

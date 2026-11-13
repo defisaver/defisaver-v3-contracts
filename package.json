@@ -26,7 +26,7 @@
         "url": "https://github.com/DecenterApps/defisaver-v3-contracts/issues"
     },
     "engines": {
-        "node": ">=10"
+        "node": "^20.0.0 || ^22.0.0 || ^24.0.0"
     },
     "homepage": "https://github.com/DecenterApps/defisaver-v3-contracts#readme",
     "devDependencies": {
@@ -41,6 +41,7 @@
         "@nomiclabs/hardhat-ethers": "^2.2.3",
         "@nomiclabs/hardhat-waffle": "^2.0.0",
         "@tenderly/hardhat-tenderly": "^1.8.0",
+        "@solidity-parser/parser": "0.19.0",
         "@uniswap/sdk-core": "^3.1.1",
         "@uniswap/smart-order-router": "^3.5.0",
         "axios": ">=1.8.2",
@@ -51,6 +52,7 @@
         "commitizen": "^4.2.3",
         "cz-conventional-changelog": "^3.3.0",
         "decimal.js": "^10.3.1",
+        "dotenv": "^16.4.7",
         "dotenv-safe": "^8.2.0",
         "envfile": "^6.17.0",
         "eslint": "^8.57.0",

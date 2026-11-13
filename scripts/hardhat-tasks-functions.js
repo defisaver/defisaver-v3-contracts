@@ -1,13 +1,13 @@
 /* eslint-disable no-undef */ // This is to disable warning for hre undefined in file
 const fs = require('fs-extra');
 const { exec } = require('child_process');
-const axios = require('axios');
 const ethers = require('ethers');
 const path = require('path');
 const readline = require('readline');
 const readlineSync = require('readline-sync');
 const hardhatSettings = require('../hardhat.config');
 const { encrypt, decrypt } = require('./utils/crypto');
+const { verifySource } = require('./deployment/verify');
 
 function findAllFiles(dirPath, arrayOfFiles = []) {
     const files = fs.readdirSync(dirPath);
@@ -168,10 +168,11 @@ function getInput(text) {
 }
 
 function execShellCommand(cmd) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         exec(cmd, (error, stdout, stderr) => {
             if (error) {
-                console.warn(error);
+                reject(error);
+                return;
             }
             console.log(stderr);
             resolve(stdout || stderr);
@@ -199,7 +200,7 @@ async function deployContract(contractNames, args) {
     /* //////////////////////////////////////////////////////////////
                             AGREE_TO_DEPLOY
     ////////////////////////////////////////////////////////////// */
-    const nonceInfo = args.nonce ? ` with nonce: ${args.nonce}` : '';
+    const nonceInfo = args.nonce !== undefined ? ` with nonce: ${args.nonce}` : '';
     const prompt = await getInput(
         `You're deploying ${contracts.length} contract(s) on ${network} at gas price of ${gasPriceSelected} gwei${nonceInfo}.\nAre you 100% sure? (Y/n)!\n`,
     );
@@ -224,7 +225,7 @@ async function deployContract(contractNames, args) {
     }
 
     console.log('Starting deployment process');
-    await execShellCommand('npx hardhat compile');
+    await hre.run('compile');
 
     /* //////////////////////////////////////////////////////////////
                           SET_DEPLOY_CONFIG
@@ -243,7 +244,7 @@ async function deployContract(contractNames, args) {
             maxPriorityFeePerGas: hre.ethers.utils.parseUnits('0.05', 'gwei'),
         };
     }
-    if (args.nonce) {
+    if (args.nonce !== undefined) {
         overrides.nonce = parseInt(args.nonce, 10);
     }
 
@@ -311,7 +312,10 @@ async function deployContract(contractNames, args) {
 
     // Deploy contracts sequentially to maintain nonce order
     const deployedAddresses = {};
-    let currentNonce = args.nonce ? parseInt(args.nonce, 10) : await deployer.getTransactionCount();
+    let currentNonce =
+        args.nonce !== undefined
+            ? parseInt(args.nonce, 10)
+            : await deployer.getTransactionCount('pending');
 
     await contracts.reduce(async (promise, contractName) => {
         await promise;
@@ -354,87 +358,24 @@ async function deployContract(contractNames, args) {
 }
 
 async function verifyContract(contractAddress, contractName) {
-    const network = hre.network.config.name;
-    const networkSupportsVerification = hre.network.config.contractVerification;
-    if (!networkSupportsVerification) {
-        return;
-    }
-    const flattenedFile = (
-        await fs.readFileSync(`contracts/flattened/${contractName}.sol`)
-    ).toString();
-    console.log('Starting verification process');
-    const config = {
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+    if (!hre.network.config.contractVerification) return;
+    const sourceName = `contracts/flattened/${contractName}.sol`;
+    const info = await hre.artifacts.getBuildInfo(`${sourceName}:${contractName}`);
+    if (!info)
+        throw new Error(`Missing build info for ${contractName}; restore the deployment artifacts`);
+    const { chainId } = await hre.ethers.provider.getNetwork();
+    await verifySource({
+        chainId,
+        address: contractAddress,
+        sourceName,
+        name: contractName,
+        input: info.input,
+        solcLongVersion: info.solcLongVersion,
+        apiKey: process.env.ETHERSCAN_API_KEY,
+        onGuid: (guid) => {
+            if (guid) console.log(`Verification submitted with GUID: ${guid}`);
         },
-    };
-    const params = new URLSearchParams();
-
-    const apiKey = process.env.ETHERSCAN_API_KEY;
-    let chainId = 1; // Default to mainnet
-
-    if (network === 'arbitrum') {
-        chainId = 42161;
-    } else if (network === 'optimistic') {
-        chainId = 10;
-    } else if (network === 'base') {
-        chainId = 8453;
-    } else if (network === 'linea') {
-        chainId = 59144;
-    } else if (network === 'plasma') {
-        chainId = 9745;
-    }
-
-    // V2 API parameters - chainid, module, action, and apikey go in URL
-    const urlParams = new URLSearchParams();
-    urlParams.append('chainid', chainId);
-    urlParams.append('module', 'contract');
-    urlParams.append('action', 'verifysourcecode');
-    urlParams.append('apikey', apiKey);
-
-    // POST body parameters
-    params.append('contractaddress', contractAddress);
-    params.append('sourceCode', flattenedFile);
-    params.append('contractname', contractName);
-    params.append('codeformat', 'solidity-single-file');
-    let solVersion;
-    // https://etherscan.io/solcversions see supported sol versions
-    switch (hardhatSettings.solidity.compilers[0].version) {
-        case '=0.8.24':
-            solVersion = 'v0.8.24+commit.e11b9ed9';
-            break;
-        default:
-            solVersion = 'v0.8.24+commit.e11b9ed9';
-    }
-    params.append('compilerversion', solVersion);
-    params.append(
-        'optimizationUsed',
-        hardhatSettings.solidity.compilers[0].settings.optimizer.enabled ? 1 : 0,
-    );
-    params.append('runs', hardhatSettings.solidity.compilers[0].settings.optimizer.runs);
-    if (network === 'linea') {
-        params.append('EVMVersion', 'london');
-    } else {
-        params.append('EVMVersion', 'cancun');
-    }
-    /// @notice : MIT license
-    params.append('licenseType', 3);
-
-    // V2 API endpoint with URL parameters
-    const url = `https://api.etherscan.io/v2/api?${urlParams.toString()}`;
-    console.log(url);
-
-    const tx = await axios.post(url, params, config);
-    if (tx.data.status !== '1') {
-        throw new Error(tx.data.result);
-    }
-    console.log(`Verification submitted with GUID: ${tx.data.result}`);
-
-    const demoUrl = `https://${hre.network.config.blockExplorer}/sourcecode-demo.html`;
-
-    console.log(
-        `Check how verification is going at ${demoUrl} with API key ${apiKey} and receipt GUID ${tx.data.result}`,
-    );
+    });
 }
 
 async function flatten(filePath) {
