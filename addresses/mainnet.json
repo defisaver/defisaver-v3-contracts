@@ -4422,14 +4422,15 @@
     },
     {
         "name": "FluidView",
-        "address": "0xc8df052bD7A8d76a34c09e758Dff3c6298C0115c",
+        "address": "0xDd71a9cd4902a0BA417e609b986FA6A96D465C57",
         "id": "0xae75a797",
         "path": "contracts/views/FluidView.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xc8df052bD7A8d76a34c09e758Dff3c6298C0115c",
             "0xeEa800B16C51449322e48afA70FCeA948Dc58B10",
             "0xf8e3bbf7c95057be1fD5E741a9ADb73E956dC724"
         ]

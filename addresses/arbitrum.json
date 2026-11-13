@@ -1492,14 +1492,18 @@
     },
     {
         "name": "FluidView",
-        "address": "0xf9e6d5568887ac8eC6fA33B7eefD2A176A958e71",
+        "address": "0xc63b7847202324E3F3746A2f1E275598e33D5404",
         "id": "0xae75a797",
         "path": "contracts/views/FluidView.sol",
-        "version": "1.0.1",
+        "version": "1.0.3",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0x2d51BB6Ac5c1eC8DD6432e1FF980fC864B626e01"]
+        "history": [
+            "0x7d80a45eFA1F9033D5390fC8A3Ccd26eF1C8463e",
+            "0xf9e6d5568887ac8eC6fA33B7eefD2A176A958e71",
+            "0x2d51BB6Ac5c1eC8DD6432e1FF980fC864B626e01"
+        ]
     },
     {
         "name": "FluidDexOpen",
