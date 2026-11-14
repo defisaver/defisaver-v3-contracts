@@ -68,8 +68,6 @@ npx hardhat test ./test/aaveV3/full-test.js --network hardhat
 
 `npx hardhat customVerify [contract-address] [contract-name] --network [hardhat-settings-network-name]` - will verify on etherscan if a contract was deployed using a single file from customFlatten task
 
-`npx hardhat fladepver [gas-in-gwei] [ContractName1 ContractNam2 ... ContractNameN] [nonce (optional)] --network [hardhat-settings-network-name]` - will flatten to a single file (save it in contracts/flattened), deploy from it and then verify it on etherscan
-
 `npx hardhat encryptPrivateKey` - will encrypt the key with the secretWord. Put the output in .env as ENCRYPTED_KEY. Later on during deployment process it will ask you for secret word to decrypt the key for deployment use.
 
 `npx hardhat deployOnFork [Contract1] [Contract2] [ContractN]` - deploys the specified contracts on a Tenderly fork. Before running this command, add the Tenderly fork ID to the .env file where you want to deploy.
@@ -78,6 +76,64 @@ npx hardhat test ./test/aaveV3/full-test.js --network hardhat
 
 `node ./cmd/change-repo-network [current-network-name] [new-network-name]` - will change which contract the helper contracts import and extend
 
-`node ./cmd/deploy-multi.js Contract1 Contract2 --networks mainnet,base --gas mainnet=3,base=0.01` - builds, deploys and verifies across networks without switching the repo; use `--networks all` for all networks or `--build-only` to only build.
+### Deployment
 
-`node ./cmd/deploy-multi.js --resume <manifest.json>` - resumes the saved deployment and verification; add `--gas` when deploying a build-only run for the first time.
+#### Option 1: fladepver (legacy)
+
+Flatten, deploy and verify on one network. Gas is in gwei; add `--nonce 123` to set the starting nonce.
+
+```sh
+npx hardhat fladepver 3 Contract1 Contract2 --network mainnet
+```
+
+#### Option 2: deploy-multi
+
+Build, deploy and verify across networks without switching the repo. Gas caps are in gwei; only zero-argument constructors are supported.
+
+One contract, one network:
+
+```sh
+node ./cmd/deploy-multi.js Contract1 --networks mainnet --gas 3
+```
+
+Multiple contracts, one network:
+
+```sh
+node ./cmd/deploy-multi.js Contract1 Contract2 --networks base --gas 0.01
+```
+
+One contract, multiple networks — explicit gas caps or a shared cap with an override:
+
+```sh
+node ./cmd/deploy-multi.js Contract1 \
+  --networks mainnet,arbitrum,base --gas mainnet=3,arbitrum=0.02,base=0.01
+
+node ./cmd/deploy-multi.js Contract1 \
+  --networks mainnet,arbitrum,base --gas all=1.1,mainnet=3
+```
+
+Different contract groups per network, with gas overrides:
+
+```sh
+node ./cmd/deploy-multi.js \
+  Contract1,Contract2,Contract3@mainnet,arbitrum,base \
+  Contract4,Contract5@optimism \
+  Contract6@base,optimism \
+  --gas all=1.1,mainnet=3,base=0.01
+```
+
+Contract1 on all networks, Contract2 only on Optimism:
+
+```sh
+node ./cmd/deploy-multi.js Contract1 Contract2@optimism \
+  --networks all --gas all=1.1,mainnet=3
+```
+
+`--networks` applies only to names without `@`. Groups also support `@all`; overlapping groups deploy each contract once per network. `--gas 1.1` is shorthand for `--gas all=1.1`.
+
+Build only, then deploy from the saved manifest (also use `--resume` after an interrupted run):
+
+```sh
+node ./cmd/deploy-multi.js Contract1 --networks mainnet,base --build-only
+node ./cmd/deploy-multi.js --resume <manifest.json> --gas all=1.1,mainnet=3
+```
