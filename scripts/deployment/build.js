@@ -255,8 +255,8 @@ function buildNetwork(contracts, network, sources, outputDir) {
     return { bundleFile, bundleHash };
 }
 
-function prepare(names, selectedNetworks, outputDir) {
-    const contracts = resolveContracts(names);
+function prepare(targets, outputDir) {
+    const contracts = resolveContracts([...new Set(Object.values(targets).flat())]);
     const runsDir = path.join(outputDir, 'runs');
     for (const name of fs.existsSync(runsDir)
         ? fs.readdirSync(runsDir).filter((name) => name.endsWith('.json'))
@@ -264,10 +264,8 @@ function prepare(names, selectedNetworks, outputDir) {
         const previous = readJson(path.join(runsDir, name));
         const entries = previous.networks || [];
         const records = entries.flatMap((entry) => Object.values(entry.contracts));
-        const overlaps = entries.some(
-            (entry) =>
-                selectedNetworks.includes(entry.network) &&
-                names.some((name) => Object.hasOwn(entry.contracts, name)),
+        const overlaps = entries.some((entry) =>
+            targets[entry.network]?.some((name) => Object.hasOwn(entry.contracts, name)),
         );
         if (
             overlaps &&
@@ -279,17 +277,17 @@ function prepare(names, selectedNetworks, outputDir) {
             );
         }
     }
-    const snapshots = selectedNetworks.map((network) => ({
-        network,
-        sources: collectSources(contracts, network),
-    }));
+    const snapshots = Object.entries(targets).map(([network, names]) => {
+        const selected = names.map((name) => contracts.find((contract) => contract.name === name));
+        return { network, contracts: selected, sources: collectSources(selected, network) };
+    });
     const manifest = { version: 1, createdAt: new Date().toISOString(), networks: [] };
     const manifestFile = path.join(
         outputDir,
         'runs',
         `${Date.now()}-${crypto.randomBytes(4).toString('hex')}.json`,
     );
-    for (const { network, sources } of snapshots) {
+    for (const { network, contracts, sources } of snapshots) {
         const { bundleFile, bundleHash } = buildNetwork(contracts, network, sources, outputDir);
         manifest.networks.push({
             network,

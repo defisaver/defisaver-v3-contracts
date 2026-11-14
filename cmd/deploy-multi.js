@@ -21,17 +21,46 @@ function parseNetworks(value) {
     return names;
 }
 
+function parseTargets(groups, defaultNetworks) {
+    if (!groups.length) throw new Error('Supply contracts, or --resume');
+    const defaults = defaultNetworks === undefined ? undefined : parseNetworks(defaultNetworks);
+    const targets = {};
+    for (const group of groups) {
+        const [contracts, networkList, extra] = group.split('@');
+        const names = contracts.split(',');
+        if (extra !== undefined || names.some((name) => !/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)))
+            throw new Error(
+                `Invalid contract group: ${group}. Use Contract1,Contract2@mainnet,base`,
+            );
+        const selected = networkList === undefined ? defaults : parseNetworks(networkList);
+        if (!selected) throw new Error(`${group}: supply --networks or append @mainnet,base`);
+        for (const network of selected) {
+            targets[network] = [...new Set([...(targets[network] || []), ...names])];
+        }
+    }
+    return targets;
+}
+
 function parseGas(value, selected) {
     if (!value) return {};
     if (!value.includes('=')) return Object.fromEntries(selected.map((n) => [n, value]));
     const result = {};
     for (const part of value.split(',')) {
         const [network, gas, extra] = part.split('=');
-        if (!selected.includes(network) || result[network] || !gas || extra !== undefined)
+        if (
+            (network !== 'all' && !selected.includes(network)) ||
+            Object.hasOwn(result, network) ||
+            !gas ||
+            extra !== undefined
+        )
             throw new Error(`Invalid gas setting: ${part}`);
         result[network] = gas;
     }
-    return result;
+    return Object.fromEntries(
+        selected
+            .filter((network) => result[network] !== undefined || result.all !== undefined)
+            .map((network) => [network, result[network] ?? result.all]),
+    );
 }
 
 function lock(file = path.join(ROOT, 'deployments', 'multi.lock')) {
@@ -91,8 +120,11 @@ function confirmDeployment(network, address, gas, contracts, question = readline
 async function main(argv = process.argv) {
     const program = new Command()
         .description('Build, deploy and verify selected contracts sequentially across networks')
-        .argument('[contracts...]', 'Contract names (zero-argument constructors only)')
-        .option('--networks <list>', 'Comma-separated networks, or all')
+        .argument(
+            '[contracts...]',
+            'Contract names or Contract1,Contract2@mainnet,base (zero-argument constructors only)',
+        )
+        .option('--networks <list>', 'Default networks for contracts without @networks, or all')
         .option('--build-only', 'Build or validate saved builds without RPCs, keys or transactions')
         .option('--resume <manifest>', 'Resume an existing run using its saved builds')
         .option(
@@ -100,7 +132,7 @@ async function main(argv = process.argv) {
             'Build cache and run directory',
             path.join(ROOT, 'deployments/multi'),
         )
-        .option('--gas <prices>', 'Gwei cap: one value for all networks, or mainnet=3,base=0.01')
+        .option('--gas <prices>', 'Gwei cap: 1.1, all=1.1, or all=1.1,mainnet=3 (overrides)')
         .option(
             '--confirmations <count>',
             'Receipt confirmations before verification',
@@ -122,15 +154,13 @@ async function main(argv = process.argv) {
             program.getOptionValueSource('output') === 'cli')
     )
         throw new Error('--resume cannot be combined with contracts, --networks or --output');
-    if (!options.resume && (!program.args.length || !options.networks))
-        throw new Error('Supply contracts and --networks, or --resume');
-    const selected = options.resume ? undefined : parseNetworks(options.networks);
+    const targets = options.resume ? undefined : parseTargets(program.args, options.networks);
     const unlock = lock();
     let unlockRun;
     try {
         const requestedFile = options.resume
             ? path.resolve(options.resume)
-            : prepare(program.args, selected, path.resolve(options.output));
+            : prepare(targets, path.resolve(options.output));
         const file = fs.realpathSync(requestedFile);
         unlockRun = lock(`${file}.lock`);
         const run = loadRun(file);
@@ -214,4 +244,4 @@ if (require.main === module) {
     });
 }
 
-module.exports = { main, parseNetworks, parseGas, lock, confirmDeployment };
+module.exports = { main, parseNetworks, parseTargets, parseGas, lock, confirmDeployment };
