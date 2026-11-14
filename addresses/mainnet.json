@@ -3357,14 +3357,17 @@
     },
     {
         "name": "LlamaLendSwapper",
-        "address": "0x5E342d7b1561Fb30a0AaD7eCE025Fa76582B5807",
+        "address": "0x1946d286cD40970317F9192e2a35C72C62B7b547",
         "id": "0x4a94e2c3",
         "path": "contracts/actions/llamalend/advanced/LlamaLendSwapper.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
-        "history": ["0xacd1179c667e27f485798dca11d417d8603ddbaf"]
+        "history": [
+            "0x5E342d7b1561Fb30a0AaD7eCE025Fa76582B5807",
+            "0xacd1179c667e27f485798dca11d417d8603ddbaf"
+        ]
     },
     {
         "name": "CurveUsdView",
@@ -3989,14 +3992,17 @@
     },
     {
         "name": "CurveUsdSwapperTransient",
-        "address": "0xeF470FeC8670c6f4923Fa77732406d5d40AB8075",
+        "address": "0xfb667B694aeA7c1ECF3bd581d06FefdcA769099c",
         "id": "0x2ed1d3be",
         "path": "contracts/actions/curveusd/advanced/CurveUsdSwapperTransient.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
-        "history": ["0xcF0298592b8FCB3823d31Bb257b65afFCAcCb8b6"]
+        "history": [
+            "0xeF470FeC8670c6f4923Fa77732406d5d40AB8075",
+            "0xcF0298592b8FCB3823d31Bb257b65afFCAcCb8b6"
+        ]
     },
     {
         "name": "RenzoStake",

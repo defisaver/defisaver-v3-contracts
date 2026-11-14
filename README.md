@@ -77,3 +77,7 @@ npx hardhat test ./test/aaveV3/full-test.js --network hardhat
 ### Custom commands
 
 `node ./cmd/change-repo-network [current-network-name] [new-network-name]` - will change which contract the helper contracts import and extend
+
+`node ./cmd/deploy-multi.js Contract1 Contract2 --networks mainnet,base --gas mainnet=3,base=0.01` - builds, deploys and verifies across networks without switching the repo; use `--networks all` for all networks or `--build-only` to only build.
+
+`node ./cmd/deploy-multi.js --resume <manifest.json>` - resumes the saved deployment and verification; add `--gas` when deploying a build-only run for the first time.
