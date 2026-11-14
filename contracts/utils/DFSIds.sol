@@ -9,6 +9,10 @@ library DFSIds {
     bytes4 internal constant BOT_AUTH = bytes4(keccak256("BotAuth"));
     bytes4 internal constant BOT_AUTH_FOR_TX_SAVER = bytes4(keccak256("BotAuthForTxSaver"));
     bytes4 internal constant KYBER_SCALING_HELPER = bytes4(keccak256("KyberInputScalingHelper"));
+    bytes4 internal constant WRAPPER_EXCHANGE_REGISTRY =
+        bytes4(keccak256("WrapperExchangeRegistry"));
+    bytes4 internal constant EXCHANGE_AGGREGATOR_REGISTRY =
+        bytes4(keccak256("ExchangeAggregatorRegistry"));
     bytes4 internal constant LLAMALEND_SWAPPER = bytes4(keccak256("LlamaLendSwapper"));
     bytes4 internal constant CURVE_TRANSIENT_SWAPPER =
         bytes4(keccak256("CurveUsdSwapperTransient"));

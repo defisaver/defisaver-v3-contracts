@@ -671,25 +671,25 @@
     },
     {
         "name": "ExchangeAggregatorRegistry",
-        "address": "0xB297cB5B1380cDD68A238cA38e8d54C809f3De32",
+        "address": "0x1d08eDc77Ab432eaA2a5175f929563e3490974b4",
         "id": "0x04abec26",
         "path": "contracts/exchangeV3/registries/ExchangeAggregatorRegistry.sol",
-        "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": 86400,
         "registryIds": [],
-        "history": []
+        "history": ["0xB297cB5B1380cDD68A238cA38e8d54C809f3De32"]
     },
     {
         "name": "WrapperExchangeRegistry",
-        "address": "0x586328A3F24E2c1A41D9A3a5B2Ed123A156dB82e",
+        "address": "0x8586feA43C071437c33BA93CD5c67A13A256fB61",
         "id": "0x0df19746",
         "path": "contracts/exchangeV3/registries/WrapperExchangeRegistry.sol",
-        "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": 86400,
         "registryIds": [],
-        "history": []
+        "history": ["0x586328A3F24E2c1A41D9A3a5B2Ed123A156dB82e"]
     },
     {
         "name": "Discount",

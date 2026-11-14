@@ -104,25 +104,25 @@
     },
     {
         "name": "ExchangeAggregatorRegistry",
-        "address": "0xe40178A2f521FDdF0410d87AE853aDf04500502f",
+        "address": "0x1d2Fa7dAcC660A9124c3685EE8a6E699d10409Eb",
         "id": "0x04abec26",
         "path": "contracts/exchangeV3/registries/ExchangeAggregatorRegistry.sol",
-        "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": 86400,
         "registryIds": [],
-        "history": []
+        "history": ["0xe40178A2f521FDdF0410d87AE853aDf04500502f"]
     },
     {
         "name": "WrapperExchangeRegistry",
-        "address": "0xef86E36CbbDAdA9F5318Df5D6908760cfF226B54",
+        "address": "0xEd4e245364B2Bf3783417F8dFed1260Ca3F50eed",
         "id": "0x0df19746",
         "path": "contracts/exchangeV3/registries/WrapperExchangeRegistry.sol",
-        "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": 86400,
         "registryIds": [],
-        "history": []
+        "history": ["0xef86E36CbbDAdA9F5318Df5D6908760cfF226B54"]
     },
     {
         "name": "TransientStorage",
