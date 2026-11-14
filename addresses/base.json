@@ -1837,5 +1837,16 @@
         "changeTime": 86400,
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "StrategyPartialExecutionStorage",
+        "address": "0x77b0C2668aEB6071Ef0d6B84AE5b9136595f5b51",
+        "id": "0x381d7b8c",
+        "path": "contracts/core/strategy/StrategyPartialExecutionStorage.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
     }
 ]

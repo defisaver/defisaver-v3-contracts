@@ -1377,14 +1377,14 @@
     },
     {
         "name": "TriggerView",
-        "address": "0x4e30a875883187F6Af8E3493127d11a322E52379",
+        "address": "0x6282D1Eeb9848b52dA695069bc04135Dc0AaFf95",
         "id": "0x628ee7ee",
         "path": "contracts/views/TriggerView.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x4e30a875883187F6Af8E3493127d11a322E52379"]
     },
     {
         "name": "CompV3PriceTrigger",
@@ -1459,6 +1459,17 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": 86400,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "StrategyPartialExecutionStorage",
+        "address": "0x7A2C6f738D5123504623Fed7B83c5eB989467C13",
+        "id": "0x381d7b8c",
+        "path": "contracts/core/strategy/StrategyPartialExecutionStorage.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     }
