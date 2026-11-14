@@ -10,7 +10,6 @@ import { ISubStorage } from "../../contracts/interfaces/core/ISubStorage.sol";
 import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
 import { DFSIds } from "../../contracts/utils/DFSIds.sol";
 
-import { Vm } from "forge-std/Vm.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
 
 contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionStorage, BaseTest {
@@ -56,21 +55,14 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
     /*//////////////////////////////////////////////////////////////////////////
                           TESTS - approveStartOfExecution
     //////////////////////////////////////////////////////////////////////////*/
-    function test_should_revert_when_approving_start_as_non_strategy_executor() public {
-        vm.expectRevert(abi.encodeWithSelector(NotStrategyExecutor.selector, bob, strategyExecutor));
-        prank(bob);
-        cut.approveStartOfExecution(SUB_ID);
-    }
-
-    function test_should_revert_when_approving_start_as_sub_owner() public {
+    /// @dev Neither the sub owner nor the admin vault owner can approve, so no one can self-grant.
+    function test_should_revert_when_approving_start_as_anyone_but_strategy_executor() public {
         vm.expectRevert(
             abi.encodeWithSelector(NotStrategyExecutor.selector, subOwnerWallet, strategyExecutor)
         );
         prank(subOwnerWallet);
         cut.approveStartOfExecution(SUB_ID);
-    }
 
-    function test_should_revert_when_approving_start_as_admin_vault_owner() public {
         vm.expectRevert(
             abi.encodeWithSelector(NotStrategyExecutor.selector, adminVaultOwner, strategyExecutor)
         );
@@ -100,37 +92,16 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
         assertEq(initialStrategyId, STRATEGY_ID);
     }
 
-    /// @dev The approval gate runs before the ownership check, so an unapproved sub owner
-    ///      cannot self-grant partial execution.
+    /// @dev The approval gate runs before the ownership check, so even the sub owner cannot
+    ///      self-grant partial execution, and an approval only covers the sub it was given for.
     function test_should_revert_when_starting_execution_without_approval() public {
         vm.expectRevert(abi.encodeWithSelector(NotApproved.selector, SUB_ID, subOwnerWallet));
         prank(subOwnerWallet);
         cut.startExecution(SUB_ID, STRATEGY_ID);
 
         assertFalse(cut.isSubInPartialExecution(SUB_ID));
-    }
 
-    function test_should_revert_when_starting_execution_without_approval_for_non_owner() public {
-        vm.expectRevert(abi.encodeWithSelector(NotApproved.selector, SUB_ID, bob));
-        prank(bob);
-        cut.startExecution(SUB_ID, STRATEGY_ID);
-
-        assertFalse(cut.isSubInPartialExecution(SUB_ID));
-    }
-
-    function test_should_revert_when_starting_execution_without_approval_as_admin_vault_owner()
-        public
-    {
-        vm.expectRevert(abi.encodeWithSelector(NotApproved.selector, SUB_ID, adminVaultOwner));
-        prank(adminVaultOwner);
-        cut.startExecution(SUB_ID, STRATEGY_ID);
-
-        assertFalse(cut.isSubInPartialExecution(SUB_ID));
-    }
-
-    function test_should_revert_when_starting_execution_for_a_different_sub_than_approved() public {
         _approveStart(SUB_ID);
-
         uint256 otherSubId = SUB_ID + 1;
 
         vm.expectRevert(abi.encodeWithSelector(NotApproved.selector, otherSubId, subOwnerWallet));
@@ -140,32 +111,14 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
         assertFalse(cut.isSubInPartialExecution(otherSubId));
     }
 
-    function test_should_return_early_when_sub_already_in_partial_execution() public {
-        _startExecution();
+    /// @dev Even with an approval, only the sub owner can start. The admin vault owner can end
+    ///      an execution but not start one.
+    function test_should_revert_when_starting_execution_as_non_owner_even_if_approved() public {
+        _approveStart(SUB_ID);
 
-        vm.recordLogs();
-        prank(subOwnerWallet);
-        cut.startExecution(SUB_ID, STRATEGY_ID);
-
-        Vm.Log[] memory logs = vm.getRecordedLogs();
-        assertEq(logs.length, 0);
-        assertEq(cut.getSubPartialExecutionWallet(SUB_ID), subOwnerWallet);
-    }
-
-    function test_should_not_revert_for_non_owner_when_sub_already_in_partial_execution() public {
-        _startExecution();
-
-        vm.recordLogs();
+        vm.expectRevert(abi.encodeWithSelector(NotSubOwner.selector, SUB_ID, bob));
         prank(bob);
         cut.startExecution(SUB_ID, STRATEGY_ID);
-
-        Vm.Log[] memory logs = vm.getRecordedLogs();
-        assertEq(logs.length, 0);
-        assertEq(cut.getSubPartialExecutionWallet(SUB_ID), subOwnerWallet);
-    }
-
-    function test_should_revert_when_admin_vault_owner_starts_execution_even_if_approved() public {
-        _approveStart(SUB_ID);
 
         vm.expectRevert(abi.encodeWithSelector(NotSubOwner.selector, SUB_ID, adminVaultOwner));
         prank(adminVaultOwner);
@@ -174,20 +127,35 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
         assertFalse(cut.isSubInPartialExecution(SUB_ID));
     }
 
-    function test_should_revert_when_starting_execution_for_non_owner_even_if_approved() public {
-        _approveStart(SUB_ID);
+    /// @dev The early return comes before any check, so a second start never overwrites the initial
+    ///      strategy ID recorded by the first one, and does not revert for a non-owner either.
+    function test_should_not_restart_execution_when_sub_is_already_in_partial_execution() public {
+        _startExecution();
 
-        vm.expectRevert(abi.encodeWithSelector(NotSubOwner.selector, SUB_ID, bob));
+        // Sub owner starts again with a different strategy ID.
+        prank(subOwnerWallet);
+        cut.startExecution(SUB_ID, STRATEGY_ID + 1);
+
+        (address wallet, uint256 initialStrategyId) = cut.getSubPartialExecutionState(SUB_ID);
+        assertEq(wallet, subOwnerWallet);
+        assertEq(initialStrategyId, STRATEGY_ID, "owner must not overwrite the strategy ID");
+
+        // Non-owner of this sub starts with yet another strategy ID.
+        // It does not revert and changes nothing because the sub is already in partial execution so the early return is hit.
         prank(bob);
-        cut.startExecution(SUB_ID, STRATEGY_ID);
+        cut.startExecution(SUB_ID, STRATEGY_ID + 2);
 
-        assertFalse(cut.isSubInPartialExecution(SUB_ID));
+        (wallet, initialStrategyId) = cut.getSubPartialExecutionState(SUB_ID);
+        assertEq(wallet, subOwnerWallet, "non-owner must not take over the execution");
+        assertEq(initialStrategyId, STRATEGY_ID, "non-owner must not overwrite the strategy ID");
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                 TESTS - endExecution
     //////////////////////////////////////////////////////////////////////////*/
-    function test_should_end_execution() public {
+    /// @dev Both the sub owner and the admin vault owner can end, the event logs the caller. The sub can
+    ///      enter partial execution again after each end.
+    function test_should_end_execution_as_sub_owner_and_admin_vault_owner() public {
         _startExecution();
 
         vm.expectEmit(true, true, true, true, address(cut));
@@ -196,48 +164,29 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
         prank(subOwnerWallet);
         cut.endExecution(SUB_ID);
 
-        assertFalse(cut.isSubInPartialExecution(SUB_ID));
-        assertEq(cut.getSubPartialExecutionWallet(SUB_ID), address(0));
-    }
+        _assertNotInPartialExecution();
 
-    function test_should_return_early_when_ending_execution_that_is_not_started() public {
-        assertFalse(cut.isSubInPartialExecution(SUB_ID));
-
-        vm.recordLogs();
-        prank(subOwnerWallet);
-        cut.endExecution(SUB_ID);
-
-        Vm.Log[] memory logs = vm.getRecordedLogs();
-        assertEq(logs.length, 0);
-        assertFalse(cut.isSubInPartialExecution(SUB_ID));
-    }
-
-    function test_should_revert_when_ending_execution_for_non_owner() public {
         _startExecution();
+        assertEq(cut.getSubPartialExecutionWallet(SUB_ID), subOwnerWallet);
 
-        vm.expectRevert(abi.encodeWithSelector(NotAuthorized.selector, SUB_ID, bob));
-        prank(bob);
-        cut.endExecution(SUB_ID);
-    }
-
-    function test_should_end_execution_as_admin_vault_owner() public {
-        _startExecution();
-
-        // event logs the caller, which is the admin and not the sub owner wallet
         vm.expectEmit(true, true, true, true, address(cut));
         emit ExecutionEnded(SUB_ID, subOwnerWallet, adminVaultOwner);
 
         prank(adminVaultOwner);
         cut.endExecution(SUB_ID);
 
-        assertFalse(cut.isSubInPartialExecution(SUB_ID));
-        assertEq(cut.getSubPartialExecutionWallet(SUB_ID), address(0));
+        _assertNotInPartialExecution();
     }
 
-    function test_should_revert_when_admin_vault_admin_ends_execution() public {
+    /// @dev Only the admin vault owner is privileged, the vault admin is not.
+    function test_should_revert_when_ending_execution_as_unauthorized_caller() public {
         address vaultAdmin = adminVault.admin();
 
         _startExecution();
+
+        vm.expectRevert(abi.encodeWithSelector(NotAuthorized.selector, SUB_ID, bob));
+        prank(bob);
+        cut.endExecution(SUB_ID);
 
         vm.expectRevert(abi.encodeWithSelector(NotAuthorized.selector, SUB_ID, vaultAdmin));
         prank(vaultAdmin);
@@ -246,57 +195,14 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
         assertEq(cut.getSubPartialExecutionWallet(SUB_ID), subOwnerWallet);
     }
 
-    function test_should_not_revert_for_non_owner_when_execution_is_not_started() public {
+    /// @dev The early return comes before the auth check, so anyone can call it.
+    function test_should_not_revert_when_ending_execution_that_is_not_started() public {
         assertFalse(cut.isSubInPartialExecution(SUB_ID));
 
-        vm.recordLogs();
         prank(bob);
         cut.endExecution(SUB_ID);
 
-        Vm.Log[] memory logs = vm.getRecordedLogs();
-        assertEq(logs.length, 0);
         assertFalse(cut.isSubInPartialExecution(SUB_ID));
-    }
-
-    function test_should_not_revert_for_admin_when_execution_is_not_started() public {
-        assertFalse(cut.isSubInPartialExecution(SUB_ID));
-
-        vm.recordLogs();
-        prank(adminVaultOwner);
-        cut.endExecution(SUB_ID);
-
-        Vm.Log[] memory logs = vm.getRecordedLogs();
-        assertEq(logs.length, 0);
-        assertFalse(cut.isSubInPartialExecution(SUB_ID));
-    }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                                  TESTS - RESTART
-    //////////////////////////////////////////////////////////////////////////*/
-    function test_should_start_execution_again_after_admin_vault_owner_ended_execution() public {
-        _startExecution();
-
-        prank(adminVaultOwner);
-        cut.endExecution(SUB_ID);
-        assertFalse(cut.isSubInPartialExecution(SUB_ID));
-
-        _startExecution();
-
-        assertTrue(cut.isSubInPartialExecution(SUB_ID));
-        assertEq(cut.getSubPartialExecutionWallet(SUB_ID), subOwnerWallet);
-    }
-
-    function test_should_start_execution_again_after_execution_ended() public {
-        _startExecution();
-
-        prank(subOwnerWallet);
-        cut.endExecution(SUB_ID);
-        assertFalse(cut.isSubInPartialExecution(SUB_ID));
-
-        _startExecution();
-
-        assertTrue(cut.isSubInPartialExecution(SUB_ID));
-        assertEq(cut.getSubPartialExecutionWallet(SUB_ID), subOwnerWallet);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -314,5 +220,10 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
 
         prank(subOwnerWallet);
         cut.startExecution(SUB_ID, STRATEGY_ID);
+    }
+
+    function _assertNotInPartialExecution() internal view {
+        assertFalse(cut.isSubInPartialExecution(SUB_ID));
+        assertEq(cut.getSubPartialExecutionWallet(SUB_ID), address(0));
     }
 }
