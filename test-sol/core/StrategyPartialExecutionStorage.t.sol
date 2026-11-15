@@ -70,6 +70,53 @@ contract TestCore_StrategyPartialExecutionStorage is StrategyPartialExecutionSto
         cut.approveStartOfExecution(SUB_ID);
     }
 
+    /// forge-config: default.isolate = true
+    /// @dev The approval lives in transient storage, so it is gone in the next transaction. Isolation makes
+    ///      each call its own transaction, otherwise the approval would still be set.
+    function test_should_not_keep_start_approval_after_the_transaction() public {
+        _approveStart(SUB_ID);
+
+        vm.expectRevert(abi.encodeWithSelector(NotApproved.selector, SUB_ID, subOwnerWallet));
+        prank(subOwnerWallet);
+        cut.startExecution(SUB_ID, STRATEGY_ID);
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                              TESTS - clearStartApproval
+    //////////////////////////////////////////////////////////////////////////*/
+    /// @dev The sub owner revokes a granted approval, after which it can no longer start an execution.
+    function test_should_clear_start_approval() public {
+        _approveStart(SUB_ID);
+
+        prank(subOwnerWallet);
+        cut.clearStartApproval(SUB_ID);
+
+        vm.expectRevert(abi.encodeWithSelector(NotApproved.selector, SUB_ID, subOwnerWallet));
+        prank(subOwnerWallet);
+        cut.startExecution(SUB_ID, STRATEGY_ID);
+    }
+
+    /// @dev Clearing needs an approval, which is also what a second clear finds. A non-owner cannot
+    ///      revoke the sub owner's approval, and leaves it untouched.
+    function test_should_revert_when_clearing_start_approval_without_approval_or_as_non_owner()
+        public
+    {
+        vm.expectRevert(abi.encodeWithSelector(NotApproved.selector, SUB_ID, subOwnerWallet));
+        prank(subOwnerWallet);
+        cut.clearStartApproval(SUB_ID);
+
+        _approveStart(SUB_ID);
+
+        vm.expectRevert(abi.encodeWithSelector(NotSubOwner.selector, SUB_ID, bob));
+        prank(bob);
+        cut.clearStartApproval(SUB_ID);
+
+        // The approval is untouched, the owner can still use it.
+        prank(subOwnerWallet);
+        cut.startExecution(SUB_ID, STRATEGY_ID);
+        assertTrue(cut.isSubInPartialExecution(SUB_ID));
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                               TESTS - startExecution
     //////////////////////////////////////////////////////////////////////////*/
