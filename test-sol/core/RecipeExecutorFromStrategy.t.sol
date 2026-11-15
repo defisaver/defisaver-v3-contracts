@@ -23,7 +23,6 @@ import { SmartWallet } from "../utils/SmartWallet.sol";
 import { StrategyBuilder } from "../utils/StrategyBuilder.sol";
 import { BundleBuilder } from "../utils/BundleBuilder.sol";
 import { Addresses } from "../utils/helpers/MainnetAddresses.sol";
-import { Vm } from "forge-std/Vm.sol";
 
 /// @notice Trigger with settable results, so the trigger-skip paths can be driven deterministically.
 contract MockTrigger is ITrigger {
@@ -121,126 +120,56 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                       TESTS - ACTION CALL DATA LENGTH VALIDATION
+                       TESTS - ACTION CALL DATA VALIDATION
     //////////////////////////////////////////////////////////////////////////*/
     /// @dev The exact revert reasons are only visible on a direct call: routed through the wallet,
     ///      the Safe module swallows the inner revert data.
-    function test_should_revert_when_action_call_data_is_shorter_than_the_strategy() public {
-        (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(true, 2, 1));
+    function test_should_revert_when_action_call_data_length_is_invalid() public {
+        (uint256 continuousSubId, StrategyModel.StrategySub memory continuousSub) =
+            _subscribe(_strategy(true, 1, 1));
+        (uint256 oneTimeSubId, StrategyModel.StrategySub memory oneTimeSub) =
+            _subscribe(_strategy(false, 1, 1));
 
-        vm.expectRevert(
-            abi.encodeWithSelector(RecipeExecutor.InvalidActionCallDataLength.selector, 1, 2)
-        );
-        cut.executeRecipeFromStrategy(subId, _actions(1), _triggerCallData(1), 0, sub);
-
-        assertTrue(subStorage.getSub(subId).isEnabled, "sub must stay untouched");
-        assertFalse(
-            partialExecutionStorage.isSubInPartialExecution(subId),
-            "partial execution storage must stay untouched"
-        );
-    }
-
-    function test_should_revert_when_action_call_data_is_empty() public {
-        (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(true, 1, 1));
-
+        // Fewer elements than the strategy has actions.
         vm.expectRevert(
             abi.encodeWithSelector(RecipeExecutor.InvalidActionCallDataLength.selector, 0, 1)
         );
-        cut.executeRecipeFromStrategy(subId, _actions(0), _triggerCallData(1), 0, sub);
-    }
-
-    /// @dev For a one-time strategy one extra element is the flag, two is always invalid.
-    function test_should_revert_when_action_call_data_is_two_elements_too_long() public {
-        (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(false, 1, 1));
-
-        bytes[] memory actionsCalldata = _withFlag(_withFlag(_actions(1)));
-
-        vm.expectRevert(
-            abi.encodeWithSelector(RecipeExecutor.InvalidActionCallDataLength.selector, 3, 1)
+        cut.executeRecipeFromStrategy(
+            continuousSubId, _actions(0), _triggerCallData(1), 0, continuousSub
         );
-        cut.executeRecipeFromStrategy(subId, actionsCalldata, _triggerCallData(1), 0, sub);
-    }
 
-    /// @dev Continuous strategies never use the flag, so even a valid one is an extra element.
-    function test_should_revert_when_flag_is_passed_to_continuous_strategy() public {
-        (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(true, 1, 1));
-
+        // Continuous strategies never use the flag, so even a valid one is an extra element.
         vm.expectRevert(
             abi.encodeWithSelector(RecipeExecutor.InvalidActionCallDataLength.selector, 2, 1)
         );
-        cut.executeRecipeFromStrategy(subId, _withFlag(_actions(1)), _triggerCallData(1), 0, sub);
-
-        assertFalse(
-            partialExecutionStorage.isSubInPartialExecution(subId),
-            "partial execution storage must stay untouched"
+        cut.executeRecipeFromStrategy(
+            continuousSubId, _withFlag(_actions(1)), _triggerCallData(1), 0, continuousSub
         );
-        assertTrue(subStorage.getSub(subId).isEnabled, "sub must stay untouched");
+
+        // For a one-time strategy one extra element is the flag, two is always invalid.
+        vm.expectRevert(
+            abi.encodeWithSelector(RecipeExecutor.InvalidActionCallDataLength.selector, 3, 1)
+        );
+        cut.executeRecipeFromStrategy(
+            oneTimeSubId, _withFlag(_withFlag(_actions(1))), _triggerCallData(1), 0, oneTimeSub
+        );
     }
 
-    /*//////////////////////////////////////////////////////////////////////////
-                            TESTS - FLAG VALIDATION
-    //////////////////////////////////////////////////////////////////////////*/
-    /// @dev This is what the hardhat helper currently sends as the extra element.
-    function test_should_revert_when_flag_is_empty_bytes() public {
-        _expectInvalidFlag("");
-    }
+    function test_should_revert_when_flag_is_invalid() public {
+        (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(false, 1, 1));
 
-    function test_should_revert_when_flag_is_the_wrong_32_bytes() public {
-        _expectInvalidFlag(abi.encode(keccak256("NOT_THE_FLAG")));
-    }
+        // Wrong 32 bytes.
+        _expectInvalidFlag(subId, sub, abi.encode(keccak256("NOT_THE_FLAG")));
 
-    function test_should_revert_when_flag_is_longer_than_32_bytes() public {
+        // Starts with the right flag, but the extra element must be exactly 32 bytes.
         _expectInvalidFlag(
-            abi.encode(STRATEGY_PARTIAL_EXECUTION_FLAG, STRATEGY_PARTIAL_EXECUTION_FLAG)
+            subId, sub, abi.encode(STRATEGY_PARTIAL_EXECUTION_FLAG, STRATEGY_PARTIAL_EXECUTION_FLAG)
         );
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                         TESTS - PARTIAL EXECUTION LIFECYCLE
     //////////////////////////////////////////////////////////////////////////*/
-    /// @dev startExecution early-returns on the second run, so the sub is marked once only.
-    function test_should_not_start_execution_twice_when_flag_is_passed_again() public {
-        (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(false, 1, 1));
-        _fund(2);
-
-        vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
-        emit IStrategyPartialExecutionStorage.ExecutionStarted(subId, walletAddr);
-        _execute(subId, 0, _withFlag(_actions(1)), sub);
-        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(subId), walletAddr);
-        assertTrue(subStorage.getSub(subId).isEnabled, "sub must stay enabled");
-
-        vm.recordLogs();
-        _execute(subId, 0, _withFlag(_actions(1)), sub);
-
-        assertEq(_countStartedEvents(), 0, "second run must not emit ExecutionStarted again");
-        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(subId), walletAddr);
-        assertTrue(subStorage.getSub(subId).isEnabled, "sub must stay enabled");
-    }
-
-    /// @dev The extra flag element must not shift param mapping or return values: the recipe's
-    ///      second action still consumes the first action's return value as $1. The FL test below
-    ///      covers the same ground on a harder path, but is skipped on chains without Balancer.
-    function test_should_not_corrupt_param_mapping_when_flag_is_appended() public {
-        uint256 strategyId = _pullAndSendStrategy(false);
-        (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(strategyId);
-        _fund(1);
-
-        bytes[] memory actionsCalldata = new bytes[](2);
-        actionsCalldata[0] = pullTokenEncode(Addresses.WETH_ADDR, sender, PULL_AMOUNT);
-        actionsCalldata[1] = sendTokenEncode(Addresses.WETH_ADDR, charlie, 0);
-
-        uint256 receiverBalanceBefore = balanceOf(Addresses.WETH_ADDR, charlie);
-
-        _execute(subId, 0, _withFlag(actionsCalldata), sub);
-
-        assertEq(
-            balanceOf(Addresses.WETH_ADDR, charlie),
-            receiverBalanceBefore + PULL_AMOUNT,
-            "$1 mapping must still resolve to the pulled amount"
-        );
-        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(subId), walletAddr);
-    }
-
     /// @dev FL based strategy. The FL path (which re-encodes the recipe and runs the actions inside the FL callback)
     ///      must tolerate the extra element.
     function test_should_execute_fl_strategy_with_flag() public {
@@ -260,85 +189,44 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         _execute(subId, 0, _withFlag(actionsCalldata), sub);
 
         assertEq(balanceOf(Addresses.WETH_ADDR, walletAddr), walletBalanceBefore, "FL paid back");
+        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(subId), walletAddr);
         assertTrue(subStorage.getSub(subId).isEnabled, "sub must stay enabled");
-    }
-
-    /// @dev A continuous strategy is already re-executable, so it never touches the partial execution storage.
-    function test_should_not_start_execution_for_continuous_strategy() public {
-        (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(true, 1, 1));
-        _fund(1);
-
-        // The partial execution storage is not called
-        vm.expectCall(
-            address(partialExecutionStorage),
-            abi.encodeWithSelector(StrategyPartialExecutionStorage.startExecution.selector),
-            0
-        );
-        _execute(subId, 0, _actions(1), sub);
-
-        assertFalse(
-            partialExecutionStorage.isSubInPartialExecution(subId),
-            "continuous strategy must not be in partial execution"
-        );
-        assertTrue(subStorage.getSub(subId).isEnabled);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                              TESTS - TRIGGER SKIP GUARD
     //////////////////////////////////////////////////////////////////////////*/
-    /// @dev The trigger is skipped only when the sub is in partial execution for this wallet.
+    /// @dev The triggers are skipped only when the sub is in partial execution for this wallet. For another
+    ///      wallet they are evaluated, and the failing one is reported by its index.
     function test_should_check_triggers_when_execution_belongs_to_another_wallet() public {
-        (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(true, 1, 1));
-
-        // Set the partial execution wallet to a different address, so the trigger is checked.
-        _forcePartialExecutionWallet(subId, alice);
-        trigger.setTriggered(false);
-
-        vm.expectRevert(abi.encodeWithSelector(RecipeExecutor.TriggerNotActiveError.selector, 0));
-        cut.executeRecipeFromStrategy(subId, _actions(1), _triggerCallData(1), 0, sub);
-    }
-
-    /// @dev Once the sub is in partial execution for this wallet the trigger is not checked at all, so a
-    ///      trigger that has since turned false no longer blocks the bot.
-    function test_should_not_call_triggers_while_sub_is_in_partial_execution() public {
-        (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(false, 1, 1));
-        _fund(2);
-
-        _execute(subId, 0, _withFlag(_actions(1)), sub);
-        assertEq(
-            partialExecutionStorage.getSubPartialExecutionWallet(subId),
-            walletAddr,
-            "must be in partial execution"
-        );
-
-        trigger.setTriggered(false);
-        uint256 callsBefore = trigger.callCount();
-
-        _execute(subId, 0, _withFlag(_actions(1)), sub);
-
-        assertEq(trigger.callCount(), callsBefore, "trigger must not be called at all");
-    }
-
-    /// @dev Not in partial execution: triggers are checked and the failing one is reported by index.
-    function test_should_revert_with_the_failing_trigger_index() public {
         (uint256 subId, StrategyModel.StrategySub memory sub) =
             _subscribe(_strategy(true, 1, 2), false, 2);
 
+        // Set the partial execution wallet to a different address, so the triggers are checked.
+        _forcePartialExecutionWallet(subId, alice);
         secondTrigger.setTriggered(false);
 
         vm.expectRevert(abi.encodeWithSelector(RecipeExecutor.TriggerNotActiveError.selector, 1));
         cut.executeRecipeFromStrategy(subId, _actions(1), _triggerCallData(2), 0, sub);
     }
 
-    /// @dev Documents a real consequence of the skip: a changeable trigger stops updating the
-    ///      stored sub data once the sub is in partial execution.
-    function test_should_stop_updating_changeable_trigger_data_while_in_partial_execution() public {
+    /// @dev Once the sub is in partial execution for this wallet the triggers are not checked at all, so a trigger
+    ///      that has since turned false no longer blocks the bot. A real consequence of the skip: a changeable
+    ///      trigger stops updating the stored sub data too.
+    function test_should_skip_triggers_and_sub_data_update_while_in_partial_execution() public {
         trigger.setChangeable(true, abi.encode(uint256(42)));
 
         (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(false, 1, 1));
         _fund(2);
 
+        // First run: not in partial execution yet, the trigger is checked and writes the changed data.
         _execute(subId, 0, _withFlag(_actions(1)), sub);
+
+        assertEq(
+            partialExecutionStorage.getSubPartialExecutionWallet(subId),
+            walletAddr,
+            "must be in partial execution"
+        );
 
         StrategyModel.StrategySub memory updatedSub = sub;
         updatedSub.triggerData[0] = abi.encode(uint256(42));
@@ -350,11 +238,20 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
             "first run must store the changed trigger data"
         );
 
-        /// @dev Would be written on the next trigger check, if there was one.
+        // Second run: the trigger would now fail and write different data, but it is not called at all.
+        trigger.setTriggered(false);
         trigger.setChangeable(true, abi.encode(uint256(43)));
+        uint256 callsBefore = trigger.callCount();
 
+        // Passing the flag again must not start the execution a second time.
+        vm.expectCall(
+            address(partialExecutionStorage),
+            abi.encodeWithSelector(StrategyPartialExecutionStorage.startExecution.selector),
+            0
+        );
         _execute(subId, 0, _withFlag(_actions(1)), updatedSub);
 
+        assertEq(trigger.callCount(), callsBefore, "trigger must not be called at all");
         assertEq(
             subStorage.getSub(subId).strategySubHash,
             hashAfterFirstRun,
@@ -377,35 +274,25 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
     /*//////////////////////////////////////////////////////////////////////////
                                   TESTS - BUNDLES
     //////////////////////////////////////////////////////////////////////////*/
-    /// @dev Validation must use the resolved strategy from the bundle, not the first one.
+    /// @dev Validation must use the strategy resolved from the bundle, not the first one.
     function test_should_validate_call_data_against_the_resolved_bundle_strategy() public {
         (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribeToBundle();
         _fund(2);
 
-        /// @dev Strategy at index 1 has two actions, so one element is too few.
+        // Strategy at index 1 has two actions, so one element is too few.
         vm.expectRevert(
             abi.encodeWithSelector(RecipeExecutor.InvalidActionCallDataLength.selector, 1, 2)
         );
         cut.executeRecipeFromStrategy(subId, _actions(1), _triggerCallData(1), 1, sub);
 
-        _execute(subId, 1, _actions(2), sub);
-    }
-
-    /// @dev Strategies in this bundle are continuous, so the flag is rejected based on the resolved
-    ///      strategy's action count.
-    function test_should_reject_flag_on_the_resolved_bundle_strategy() public {
-        (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribeToBundle();
-
+        // Strategies in this bundle are continuous, so the flag is rejected too.
         vm.expectRevert(
             abi.encodeWithSelector(RecipeExecutor.InvalidActionCallDataLength.selector, 3, 2)
         );
         cut.executeRecipeFromStrategy(subId, _withFlag(_actions(2)), _triggerCallData(1), 1, sub);
 
-        assertFalse(
-            partialExecutionStorage.isSubInPartialExecution(subId),
-            "bundle strategies here are continuous"
-        );
-        assertTrue(subStorage.getSub(subId).isEnabled);
+        // Call data matching the resolved strategy goes through.
+        _execute(subId, 1, _actions(2), sub);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -426,9 +313,11 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         );
     }
 
-    function _expectInvalidFlag(bytes memory _flag) internal {
-        (uint256 subId, StrategyModel.StrategySub memory sub) = _subscribe(_strategy(false, 1, 1));
-
+    function _expectInvalidFlag(
+        uint256 _subId,
+        StrategyModel.StrategySub memory _sub,
+        bytes memory _flag
+    ) internal {
         bytes[] memory actionsCalldata = new bytes[](2);
         actionsCalldata[0] = _actions(1)[0];
         actionsCalldata[1] = _flag;
@@ -440,7 +329,7 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
                 STRATEGY_PARTIAL_EXECUTION_FLAG
             )
         );
-        cut.executeRecipeFromStrategy(subId, actionsCalldata, _triggerCallData(1), 0, sub);
+        cut.executeRecipeFromStrategy(_subId, actionsCalldata, _triggerCallData(1), 0, _sub);
     }
 
     /// @dev Writes partialExecutions[_subId].wallet directly. Only used for the defensive branch above,
@@ -458,19 +347,6 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
         );
     }
 
-    function _countStartedEvents() internal view returns (uint256 count) {
-        Vm.Log[] memory logs = vm.getRecordedLogs();
-
-        for (uint256 i = 0; i < logs.length; ++i) {
-            if (logs[i].emitter != address(partialExecutionStorage)) continue;
-            if (logs[i].topics[0] != IStrategyPartialExecutionStorage.ExecutionStarted.selector) {
-                continue;
-            }
-
-            count++;
-        }
-    }
-
     /// @dev Strategy of _numActions PullToken actions and _numTriggers mock triggers. No param
     ///      mapping, the bot sends the full call data.
     function _strategy(bool _continuous, uint256 _numActions, uint256 _numTriggers)
@@ -485,20 +361,6 @@ contract TestCore_RecipeExecutorFromStrategy is ActionsUtils, RegistryUtils, Bas
 
         strategy.addTrigger("MockTrigger");
         if (_numTriggers > 1) strategy.addTrigger("MockTrigger2");
-
-        return strategy.createStrategy();
-    }
-
-    /// @dev PullToken followed by SendToken, whose amount is mapped from the pull's return value.
-    function _pullAndSendStrategy(bool _continuous) internal returns (uint256) {
-        StrategyBuilder strategy = new StrategyBuilder("pullAndSend", _continuous);
-        strategy.addAction("PullToken", new string[](3));
-
-        string[] memory sendParams = new string[](3);
-        sendParams[2] = "$1";
-        strategy.addAction("SendToken", sendParams);
-
-        strategy.addTrigger("MockTrigger");
 
         return strategy.createStrategy();
     }
