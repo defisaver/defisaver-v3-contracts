@@ -44,6 +44,33 @@ function checkRuntime(code, contract) {
     }
 }
 
+async function waitForRuntime(
+    provider,
+    address,
+    contract,
+    blockNumber,
+    timeoutMs = 60000,
+    pollMs = 1000,
+) {
+    const deadline = Date.now() + timeoutMs;
+    let lastError;
+    do {
+        for (const blockTag of [blockNumber, undefined]) {
+            try {
+                const code = await provider.getCode(address, blockTag);
+                checkRuntime(code, contract);
+                return;
+            } catch (error) {
+                lastError = error;
+            }
+        }
+        await new Promise((resolve) => setTimeout(resolve, pollMs));
+    } while (Date.now() < deadline);
+    throw new Error(
+        `${contract.name}: on-chain runtime did not become available from the receipt block (${lastError?.message || 'unknown RPC error'})`,
+    );
+}
+
 function checkTransaction(transaction, record, network, contract) {
     if (
         !transaction ||
@@ -59,6 +86,21 @@ function checkTransaction(transaction, record, network, contract) {
     ) {
         throw new Error(`${contract.name}: saved transaction does not match the deployment`);
     }
+}
+
+async function findDuplicateDeployment(provider, network, contract, root = ROOT) {
+    const file = path.join(root, 'addresses', `${network}.json`);
+    if (!fs.existsSync(file)) return undefined;
+    const entries = readJson(file);
+    if (!Array.isArray(entries)) throw new Error(`${file}: expected an array`);
+    const entry = entries.find((item) => item.name === contract.name);
+    if (!entry) return undefined;
+    const candidates = [entry.address, ...(entry.history || [])].filter(Boolean);
+    for (const address of candidates) {
+        const code = await provider.getCode(address);
+        if (code.toLowerCase() === contract.deployedBytecode.toLowerCase()) return address;
+    }
+    return undefined;
 }
 
 async function deployContract({
@@ -159,7 +201,13 @@ async function deployContract({
         );
     }
     await checkChain(provider, network);
-    checkRuntime(await provider.getCode(record.address), contract);
+    await waitForRuntime(
+        provider,
+        record.address,
+        contract,
+        receipt.blockNumber,
+        Math.min(timeoutMs, 60000),
+    );
     record.confirmed = true;
     if (!wasConfirmed) record.confirmedAt = new Date().toISOString();
     delete record.rawTransaction;
@@ -219,15 +267,33 @@ async function executeRun(
         timeoutMs = 300000,
         verify = verifySource,
         recordAddress = updateAddress,
+        allowDuplicateBytecode = false,
+        verificationMode = 'submit',
     },
 ) {
     const { manifest, bundles, save } = run;
-    if (!apiKey) throw new Error('ETHERSCAN_API_KEY is required');
+    if (verificationMode !== 'skip' && !apiKey) throw new Error('ETHERSCAN_API_KEY is required');
     confirmations = Math.max(confirmations, manifest.confirmations || 1);
     manifest.confirmations = confirmations;
-    for (const entry of manifest.networks) {
+    for (let i = 0; i < manifest.networks.length; i++) {
+        const entry = manifest.networks[i];
         await checkChain(providers[entry.network], entry.network);
         if (Object.values(entry.contracts).some((record) => !record.transactionHash)) {
+            if (!allowDuplicateBytecode) {
+                for (const contract of bundles[i].contracts) {
+                    if (entry.contracts[contract.name].transactionHash) continue;
+                    const duplicate = await findDuplicateDeployment(
+                        providers[entry.network],
+                        entry.network,
+                        contract,
+                    );
+                    if (duplicate) {
+                        throw new Error(
+                            `${entry.network}/${contract.name}: identical runtime bytecode already exists at ${duplicate}; refusing a duplicate deployment because the explorer can reuse its Similar Match source. Use --allow-duplicate-bytecode only if this is intentional.`,
+                        );
+                    }
+                }
+            }
             const gas = gasPrices[entry.network] || entry.gas;
             gasOverrides(entry.network, gas);
             entry.gas = gas;
@@ -256,7 +322,7 @@ async function executeRun(
                     `${entry.network}: signer differs from earlier deployments in this run`,
                 );
             }
-            if (Object.values(entry.contracts).some((record) => !record.verified)) {
+            if (Object.values(entry.contracts).some((record) => !record.confirmed)) {
                 const signer =
                     wallet?.address ||
                     Object.values(entry.contracts).find((record) => record.deployer)?.deployer;
@@ -280,13 +346,13 @@ async function executeRun(
                     record.addressRecorded = true;
                     save();
                 }
-                if (!record.verified) {
+                if (!record.verified && verificationMode !== 'skip') {
                     const started = Date.now();
                     record.verificationStartedAt = new Date().toISOString();
                     save();
                     pending++;
                     const job = (async () => {
-                        await verify({
+                        const result = await verify({
                             chainId: bundle.chainId,
                             address: record.address,
                             ...contract,
@@ -301,48 +367,65 @@ async function executeRun(
                             onStatus: (status) =>
                                 console.log(`${entry.network}/${contract.name}: ${status}`),
                             timeoutMs,
+                            verificationMode,
                         });
-                        record.verified = true;
-                        record.verifiedAt = new Date().toISOString();
+                        if (result?.verified) {
+                            record.verified = true;
+                            record.verifiedAt = new Date().toISOString();
+                        }
                         save();
-                        console.log(
-                            `${entry.network}/${contract.name}: verified (${Math.round((Date.now() - started) / 1000)}s)`,
-                        );
+                        if (result?.verified) {
+                            console.log(
+                                `${entry.network}/${contract.name}: verified (${Math.round((Date.now() - started) / 1000)}s)`,
+                            );
+                        }
                     })();
-                    jobs.push(
-                        job.then(
-                            () => {
-                                pending--;
-                            },
-                            (error) => {
-                                pending--;
-                                failures.push(
-                                    `${entry.network}/${contract.name}: ${error.message}`,
-                                );
-                                console.error(
-                                    `${entry.network}/${contract.name}: verification incomplete; resume to retry (${error.message})`,
-                                );
-                            },
-                        ),
+                    const trackedJob = job.then(
+                        () => {
+                            pending--;
+                        },
+                        (error) => {
+                            pending--;
+                            failures.push(`${entry.network}/${contract.name}: ${error.message}`);
+                            console.error(
+                                `${entry.network}/${contract.name}: verification incomplete; resume to retry (${error.message})`,
+                            );
+                        },
                     );
+                    jobs.push(trackedJob);
                 }
             }
         }
     } finally {
         if (pending)
-            console.log(
-                `Waiting for ${pending} background verification(s). You can interrupt and --resume later.`,
-            );
+            console.log(`Waiting for ${pending} verification submission/status request(s).`);
         await Promise.all(jobs);
     }
-    if (failures.length)
+    if (failures.length && verificationMode === 'wait')
         throw new Error(`Verification incomplete; use --resume to retry:\n${failures.join('\n')}`);
+    if (failures.length) {
+        console.error(
+            `Verification submission incomplete for ${failures.length} contract(s); deployment succeeded and --resume can retry.`,
+        );
+    }
+    return {
+        failures,
+        pendingVerifications: manifest.networks.reduce(
+            (count, entry) =>
+                count +
+                Object.values(entry.contracts).filter((record) => record.guid && !record.verified)
+                    .length,
+            0,
+        ),
+    };
 }
 
 module.exports = {
     gasOverrides,
     checkChain,
     checkRuntime,
+    waitForRuntime,
+    findDuplicateDeployment,
     deployContract,
     updateAddress,
     executeRun,
