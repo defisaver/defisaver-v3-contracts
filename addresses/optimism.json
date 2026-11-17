@@ -111,25 +111,31 @@
     },
     {
         "name": "ParaswapWrapper",
-        "address": "0xf6E18D389dd4e1E76C5aAb4b34E3e64e70569F43",
+        "address": "0xd17aC6a346283cCaEe3A77B2c0d49833fD34c67f",
         "id": "0x115fa27e",
         "path": "contracts/exchangeV3/offchainWrappersV3/ParaswapWrapper.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0xD90Ebd5E551d7451FA289b033755e74588230063"]
+        "history": [
+            "0xf6E18D389dd4e1E76C5aAb4b34E3e64e70569F43",
+            "0xD90Ebd5E551d7451FA289b033755e74588230063"
+        ]
     },
     {
         "name": "OneInchWrapper",
-        "address": "0xCcCacf99C7Fe354b88E428cCfba282431F7a8da2",
+        "address": "0xD6CC305Ca777d31c8ca86C82D383DA6A29F963c7",
         "id": "0x82854967",
         "path": "contracts/exchangeV3/offchainWrappersV3/OneInchWrapper.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0x6aB5ee6758235a3aBf6F32578EC2Cb655f2A94a8"]
+        "history": [
+            "0xCcCacf99C7Fe354b88E428cCfba282431F7a8da2",
+            "0x6aB5ee6758235a3aBf6F32578EC2Cb655f2A94a8"
+        ]
     },
     {
         "name": "OdosWrapper",
@@ -144,14 +150,14 @@
     },
     {
         "name": "BebopWrapper",
-        "address": "0x57AE9cc546fd969916703A5bC11a1482957C5346",
+        "address": "0x8DF241C5c6b203A5b96317ee4C809989aBE3d721",
         "id": "0x8391a2d1",
         "path": "contracts/exchangeV3/offchainWrappersV3/BebopWrapper.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x57AE9cc546fd969916703A5bC11a1482957C5346"]
     },
     {
         "name": "KyberInputScalingHelper",
@@ -170,14 +176,15 @@
     },
     {
         "name": "KyberAggregatorWrapper",
-        "address": "0x7B1EcaEAD78a2D3B1672892B9AE5527Dea8a40e4",
+        "address": "0xAC92Ad661Ec8739273AcE93c924776818ae25ae1",
         "id": "0x1abf4ed0",
         "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
-        "version": "1.0.7",
+        "version": "1.0.8",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x7B1EcaEAD78a2D3B1672892B9AE5527Dea8a40e4",
             "0xd94BeaAC0d40fDe0F85D2172DC568E9CfC4C389E",
             "0xF83127C2967D50e47323fDb1cc3920E856ee4Fbc",
             "0x9512e7da2014562FFD28401De2566d7ed256C8e3",
@@ -244,28 +251,30 @@
     },
     {
         "name": "UniV3WrapperV3",
-        "address": "0xF723B39fe2Aa9102dE45Bc8ECd3417805aAC79Aa",
+        "address": "0x478A3E7a694bCc714AC50801A6144F656041FB7d",
         "id": "0x7c1f8079",
         "path": "contracts/exchangeV3/onchainWrappersV3/UniV3WrapperV3.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xF723B39fe2Aa9102dE45Bc8ECd3417805aAC79Aa",
             "0x836905C8dBE5887060c3E367578B4676901163A0",
             "0xc6F57b45c20aE92174b8B7F86Bb51A1c8e4AD357"
         ]
     },
     {
         "name": "CurveWrapperV3",
-        "address": "0x571A4dbE7BDC118d0B74A9f52E96F288FF8DF85D",
+        "address": "0x956B9B265C49C0ABdB5fc6A284894684238eFA3E",
         "id": "0xb856c9af",
         "path": "contracts/exchangeV3/onchainWrappersV3/CurveWrapperV3.sol",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x571A4dbE7BDC118d0B74A9f52E96F288FF8DF85D",
             "0x2d262e1c4210B7e6Bc5C7013A338e22aF01BD5A2",
             "0xa1a94eF3a366e6Ce53Cb733D93caF66f8124F7bA",
             "0x6c47D2eFa8DCBAb412203C1Fd0A59D8c2ed272AF"
@@ -273,14 +282,17 @@
     },
     {
         "name": "ZeroxWrapper",
-        "address": "0x031D6d3C95dD2188D1A1A57e8DcD8051f3B938ca",
+        "address": "0xF29dB48D22CA58bE97784d113390CC6e90590eCe",
         "id": "0x6eddecea",
         "path": "contracts/exchangeV3/offchainWrappersV3/ZeroxWrapper.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0xa34452B833fCEfA71E1555d1f654e54eBFFD6022"]
+        "history": [
+            "0x031D6d3C95dD2188D1A1A57e8DcD8051f3B938ca",
+            "0xa34452B833fCEfA71E1555d1f654e54eBFFD6022"
+        ]
     },
     {
         "name": "DFSPrices",
@@ -1421,25 +1433,25 @@
     },
     {
         "name": "FlyWrapper",
-        "address": "0x0f0b4479603cd9ac2D977234d37f0B3A07A4E8c3",
+        "address": "0x143535984Ffe1F6061C80C7Fed0Bf1886724b333",
         "id": "0x92b2d9f8",
         "path": "contracts/exchangeV3/offchainWrappersV3/FlyWrapper.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x0f0b4479603cd9ac2D977234d37f0B3A07A4E8c3"]
     },
     {
         "name": "OpenOceanWrapper",
-        "address": "0x9Cfb942ED7C438D5257dA4266277Cb454ab5d02b",
+        "address": "0x74E3E0d2ded7041477DF683262BCEBd740E083f1",
         "id": "0x9e3c90cd",
         "path": "contracts/exchangeV3/offchainWrappersV3/OpenOceanWrapper.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x9Cfb942ED7C438D5257dA4266277Cb454ab5d02b"]
     },
     {
         "name": "AaveV3BoostCollateralTrigger",

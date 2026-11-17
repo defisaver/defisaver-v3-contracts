@@ -197,14 +197,14 @@
     },
     {
         "name": "ZeroxWrapper",
-        "address": "0x16c9de87215D2198614dbC5419658eAdf4465025",
+        "address": "0x581DcDC6329cD07356d1b0F8C8B8BD2ED9CbF544",
         "id": "0x6eddecea",
         "path": "contracts/exchangeV3/offchainWrappersV3/ZeroxWrapper.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x16c9de87215D2198614dbC5419658eAdf4465025"]
     },
     {
         "name": "AaveV3ATokenPayback",
@@ -505,14 +505,14 @@
     },
     {
         "name": "KyberAggregatorWrapper",
-        "address": "0xa4673229241Fb5fAaCFd849375DCb8fc8d07e826",
+        "address": "0x83206CF61eC41C2E7BFf277d67dAc7A54721AB23",
         "id": "0x1abf4ed0",
         "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xa4673229241Fb5fAaCFd849375DCb8fc8d07e826"]
     },
     {
         "name": "TxSaverExecutor",
@@ -669,14 +669,14 @@
     },
     {
         "name": "PendleWrapper",
-        "address": "0x862E533198C9656B75bB6A5dDF0953F7ED5E8507",
+        "address": "0x31821FfFa44F4030aBF4f69A1E806c9A53D8EF76",
         "id": "0x42cdd62e",
         "path": "contracts/exchangeV3/offchainWrappersV3/PendleWrapper.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x862E533198C9656B75bB6A5dDF0953F7ED5E8507"]
     },
     {
         "name": "DFSSellNoFee",
@@ -713,25 +713,25 @@
     },
     {
         "name": "FlyWrapper",
-        "address": "0x741FcFC1D708CEA0d845Fd04de51022b6d00e060",
+        "address": "0x879DFB98Db36A2246158566355f25e7eda29c7d7",
         "id": "0x92b2d9f8",
         "path": "contracts/exchangeV3/offchainWrappersV3/FlyWrapper.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x741FcFC1D708CEA0d845Fd04de51022b6d00e060"]
     },
     {
         "name": "OpenOceanWrapper",
-        "address": "0x170aF7f192369ac6Cb95CaCDE27C1EA9479675D2",
+        "address": "0xc5db590C2dC8afE1B1b1Ca383F2363d92a00165b",
         "id": "0x9e3c90cd",
         "path": "contracts/exchangeV3/offchainWrappersV3/OpenOceanWrapper.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x170aF7f192369ac6Cb95CaCDE27C1EA9479675D2"]
     },
     {
         "name": "KyberInputScalingHelper",

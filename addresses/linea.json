@@ -175,25 +175,25 @@
     },
     {
         "name": "ZeroxWrapper",
-        "address": "0x49658e0cf3883c338397c7257619b280df581057",
+        "address": "0x6F53fa9e7d1323d24515a51AB72Da3cf1E9883Bc",
         "id": "0x6eddecea",
         "path": "contracts/exchangeV3/offchainWrappersV3/ZeroxWrapper.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x49658e0cf3883c338397c7257619b280df581057"]
     },
     {
         "name": "OneInchWrapper",
-        "address": "0xC2505e154666e0d551bEfd7fF446D43349E513A2",
+        "address": "0x3094D0D64fa5318162150720c19669d1A163937B",
         "id": "0x82854967",
         "path": "contracts/exchangeV3/offchainWrappersV3/OneInchWrapper.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xC2505e154666e0d551bEfd7fF446D43349E513A2"]
     },
     {
         "name": "OdosWrapper",
@@ -208,14 +208,14 @@
     },
     {
         "name": "KyberAggregatorWrapper",
-        "address": "0xdf92f1c22a4e114919b14bdb274071d5a55e3e58",
+        "address": "0x1A8B4DF4DE4274630A5c5a8E42Fa5F0DdF654ec2",
         "id": "0x1abf4ed0",
         "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xdf92f1c22a4e114919b14bdb274071d5a55e3e58"]
     },
     {
         "name": "AaveV3ATokenPayback",
@@ -559,25 +559,25 @@
     },
     {
         "name": "FlyWrapper",
-        "address": "0x3D57875885e3cEe9E56Cb65D21789893B6e67815",
+        "address": "0xC196dC97Eb0B58E3755a71143b41D3F24595643f",
         "id": "0x92b2d9f8",
         "path": "contracts/exchangeV3/offchainWrappersV3/FlyWrapper.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x3D57875885e3cEe9E56Cb65D21789893B6e67815"]
     },
     {
         "name": "OpenOceanWrapper",
-        "address": "0xe1315EE74E2A3057c0ede9E0E2cf30b3ee3ad121",
+        "address": "0xdeF8B05Ce194D50C376233C9C5530027f6180442",
         "id": "0x9e3c90cd",
         "path": "contracts/exchangeV3/offchainWrappersV3/OpenOceanWrapper.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xe1315EE74E2A3057c0ede9E0E2cf30b3ee3ad121"]
     },
     {
         "name": "TransientStorageCancun",
