@@ -89,6 +89,38 @@ function positiveInteger(value) {
     return number;
 }
 
+function sourceTag(value) {
+    if (!/^[A-Za-z0-9_.-]{1,64}$/.test(value)) {
+        throw new Error('Source tag must use 1-64 letters, numbers, dots, dashes or underscores');
+    }
+    return value;
+}
+
+function verificationMode(value) {
+    if (!['submit', 'wait', 'skip'].includes(value)) {
+        throw new Error('Verification mode must be submit, wait or skip');
+    }
+    return value;
+}
+
+function exportVerificationInputs(run, directory) {
+    const files = [];
+    for (const bundle of run.bundles) {
+        const networkDir = path.join(directory, bundle.network);
+        fs.mkdirSync(networkDir, { recursive: true });
+        for (const contract of bundle.contracts) {
+            const file = path.join(networkDir, `${contract.name}.json`);
+            const build = bundle.builds[contract.buildId];
+            fs.writeFileSync(file, `${JSON.stringify(build.input, null, 2)}\n`, {
+                flag: 'wx',
+                mode: 0o600,
+            });
+            files.push(file);
+        }
+    }
+    return files;
+}
+
 function confirmDeployment(network, address, gas, contracts, question = readline.question) {
     console.log(
         `\n${network} (chain ${networks[network].chainId}), signer ${address || 'saved transaction'}, gas cap ${gas || 'saved transaction'} gwei`,
@@ -119,13 +151,32 @@ function confirmDeployment(network, address, gas, contracts, question = readline
 
 async function main(argv = process.argv) {
     const program = new Command()
-        .description('Build, deploy and verify selected contracts sequentially across networks')
+        .description('Build and deploy contracts across networks with configurable verification')
         .argument(
             '[contracts...]',
             'Contract names or Contract1,Contract2@mainnet,base (zero-argument constructors only)',
         )
         .option('--networks <list>', 'Default networks for contracts without @networks, or all')
         .option('--build-only', 'Build or validate saved builds without RPCs, keys or transactions')
+        .option(
+            '--allow-duplicate-bytecode',
+            'Allow deployment when identical runtime bytecode already exists in address history',
+        )
+        .option(
+            '--source-tag <tag>',
+            'Change only compiler metadata, preserving executable runtime logic',
+            sourceTag,
+        )
+        .option(
+            '--verification <mode>',
+            'submit GUIDs and exit, wait concurrently for exact matches, or skip',
+            verificationMode,
+            'submit',
+        )
+        .option(
+            '--export-verification <directory>',
+            'Export one uploadable Standard JSON input per contract, then exit',
+        )
         .option('--resume <manifest>', 'Resume an existing run using its saved builds')
         .option(
             '--output <directory>',
@@ -151,16 +202,19 @@ async function main(argv = process.argv) {
         options.resume &&
         (program.args.length ||
             options.networks ||
+            options.sourceTag ||
             program.getOptionValueSource('output') === 'cli')
     )
-        throw new Error('--resume cannot be combined with contracts, --networks or --output');
+        throw new Error(
+            '--resume cannot be combined with contracts, --networks, --source-tag or --output',
+        );
     const targets = options.resume ? undefined : parseTargets(program.args, options.networks);
     const unlock = lock();
     let unlockRun;
     try {
         const requestedFile = options.resume
             ? path.resolve(options.resume)
-            : prepare(targets, path.resolve(options.output));
+            : prepare(targets, path.resolve(options.output), options.sourceTag);
         const file = fs.realpathSync(requestedFile);
         unlockRun = lock(`${file}.lock`);
         const run = loadRun(file);
@@ -169,6 +223,12 @@ async function main(argv = process.argv) {
             console.log(
                 `${bundle.network} (${bundle.chainId}): ${bundle.contracts.map((c) => c.name).join(', ')}`,
             );
+        if (options.exportVerification) {
+            const directory = path.resolve(options.exportVerification);
+            const files = exportVerificationInputs(run, directory);
+            console.log(`Exported ${files.length} verification input(s) to ${directory}`);
+            return directory;
+        }
         if (options.buildOnly) {
             console.log('Build-only complete. No RPC connections or transactions.');
             return file;
@@ -192,11 +252,13 @@ async function main(argv = process.argv) {
             });
         }
         let password;
-        await executeRun(run, {
+        const result = await executeRun(run, {
             providers,
             apiKey: process.env.ETHERSCAN_API_KEY,
             confirmations: options.confirmations,
             timeoutMs: options.timeout * 1000,
+            allowDuplicateBytecode: options.allowDuplicateBytecode,
+            verificationMode: options.verification,
             gasPrices: parseGas(
                 options.gas,
                 run.manifest.networks.map((n) => n.network),
@@ -227,7 +289,22 @@ async function main(argv = process.argv) {
             confirm: confirmDeployment,
         });
         password = undefined;
-        console.log(`Deployment and verification complete. Manifest: ${file}`);
+        if (options.verification === 'skip') {
+            console.log(`Deployment complete; verification skipped. Manifest: ${file}`);
+        } else if (result.failures.length) {
+            console.log(
+                `Deployment complete; ${result.failures.length} verification submission(s) need retry. Manifest: ${file}`,
+            );
+        } else if (result.pendingVerifications) {
+            console.log(
+                `Deployment complete; ${result.pendingVerifications} verification(s) are processing asynchronously.`,
+            );
+            console.log(
+                `Check later with: node ./cmd/deploy-multi.js --resume ${file} --verification wait`,
+            );
+        } else {
+            console.log(`Deployment and exact verification complete. Manifest: ${file}`);
+        }
         return file;
     } finally {
         unlockRun?.();
@@ -244,4 +321,14 @@ if (require.main === module) {
     });
 }
 
-module.exports = { main, parseNetworks, parseTargets, parseGas, lock, confirmDeployment };
+module.exports = {
+    main,
+    parseNetworks,
+    parseTargets,
+    parseGas,
+    sourceTag,
+    verificationMode,
+    lock,
+    confirmDeployment,
+    exportVerificationInputs,
+};

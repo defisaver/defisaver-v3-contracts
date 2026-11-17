@@ -181,16 +181,16 @@ function validateContract(contract) {
     }
 }
 
-function buildNetwork(contracts, network, sources, outputDir) {
+function buildNetwork(contracts, network, sourceSets, outputDir) {
     const sourceHash = hash(
         JSON.stringify({
-            version: 2,
+            version: 3,
             chainId: networks[network].chainId,
             hardhat: require('hardhat/package.json').version,
             solidity,
             contracts,
             network,
-            sources,
+            sourceSets,
         }),
     );
     const dir = path.join(outputDir, 'builds', network, sourceHash);
@@ -204,19 +204,6 @@ function buildNetwork(contracts, network, sources, outputDir) {
         return { bundleFile, bundleHash };
     }
     fs.rmSync(dir, { recursive: true, force: true });
-    for (const [name, { content }] of Object.entries(sources)) {
-        const file = path.join(dir, name);
-        fs.mkdirSync(path.dirname(file), { recursive: true });
-        fs.writeFileSync(file, content);
-    }
-    const configFile = path.join(dir, 'hardhat.config.js');
-    fs.writeFileSync(configFile, `module.exports = ${JSON.stringify({ solidity })};\n`);
-    console.log(`${network}: compiling ${Object.keys(sources).length} source files`);
-    execFileSync(
-        process.execPath,
-        [require.resolve('hardhat/internal/cli/cli'), 'compile', '--config', configFile],
-        { cwd: ROOT, stdio: 'inherit' },
-    );
     const bundle = {
         network,
         chainId: networks[network].chainId,
@@ -225,10 +212,31 @@ function buildNetwork(contracts, network, sources, outputDir) {
         contracts: [],
     };
     for (const { name, sourceName } of contracts) {
-        const artifactFile = path.join(dir, 'artifacts', sourceName, `${name}.json`);
+        const sources = sourceSets[name];
+        if (!sources) throw new Error(`${network}/${name}: missing isolated source set`);
+        const compilationDir = path.join(dir, 'compilations', name);
+        for (const [source, { content }] of Object.entries(sources)) {
+            const file = path.join(compilationDir, source);
+            fs.mkdirSync(path.dirname(file), { recursive: true });
+            fs.writeFileSync(file, content);
+        }
+        const configFile = path.join(compilationDir, 'hardhat.config.js');
+        fs.writeFileSync(configFile, `module.exports = ${JSON.stringify({ solidity })};\n`);
+        console.log(`${network}/${name}: compiling ${Object.keys(sources).length} source files`);
+        execFileSync(
+            process.execPath,
+            [require.resolve('hardhat/internal/cli/cli'), 'compile', '--config', configFile],
+            { cwd: ROOT, stdio: 'inherit' },
+        );
+        const artifactFile = path.join(compilationDir, 'artifacts', sourceName, `${name}.json`);
         const artifact = readJson(artifactFile);
         const debug = readJson(artifactFile.replace(/\.json$/, '.dbg.json'));
         const info = readJson(path.resolve(path.dirname(artifactFile), debug.buildInfo));
+        const expectedSources = Object.keys(sources).sort();
+        const compiledSources = Object.keys(info.input.sources).sort();
+        if (JSON.stringify(compiledSources) !== JSON.stringify(expectedSources)) {
+            throw new Error(`${network}/${name}: compiler input is not dependency-isolated`);
+        }
         bundle.builds[info.id] = { input: info.input, solcLongVersion: info.solcLongVersion };
         const definition = info.output.sources[sourceName].ast.nodes.find(
             (node) => node.nodeType === 'ContractDefinition' && node.name === name,
@@ -255,7 +263,7 @@ function buildNetwork(contracts, network, sources, outputDir) {
     return { bundleFile, bundleHash };
 }
 
-function prepare(targets, outputDir) {
+function prepare(targets, outputDir, sourceTag) {
     const contracts = resolveContracts([...new Set(Object.values(targets).flat())]);
     const runsDir = path.join(outputDir, 'runs');
     for (const name of fs.existsSync(runsDir)
@@ -279,16 +287,31 @@ function prepare(targets, outputDir) {
     }
     const snapshots = Object.entries(targets).map(([network, names]) => {
         const selected = names.map((name) => contracts.find((contract) => contract.name === name));
-        return { network, contracts: selected, sources: collectSources(selected, network) };
+        const sourceSets = Object.fromEntries(
+            selected.map((contract) => {
+                const sources = collectSources([contract], network);
+                if (sourceTag) {
+                    sources[contract.sourceName].content +=
+                        `\n// deploy-multi source tag: ${sourceTag}\n`;
+                }
+                return [contract.name, sources];
+            }),
+        );
+        return { network, contracts: selected, sourceSets };
     });
-    const manifest = { version: 1, createdAt: new Date().toISOString(), networks: [] };
+    const manifest = {
+        version: 1,
+        createdAt: new Date().toISOString(),
+        sourceTag,
+        networks: [],
+    };
     const manifestFile = path.join(
         outputDir,
         'runs',
         `${Date.now()}-${crypto.randomBytes(4).toString('hex')}.json`,
     );
-    for (const { network, contracts, sources } of snapshots) {
-        const { bundleFile, bundleHash } = buildNetwork(contracts, network, sources, outputDir);
+    for (const { network, contracts, sourceSets } of snapshots) {
+        const { bundleFile, bundleHash } = buildNetwork(contracts, network, sourceSets, outputDir);
         manifest.networks.push({
             network,
             bundle: path.relative(path.dirname(manifestFile), bundleFile),

@@ -135,5 +135,7 @@ Build only, then deploy from the saved manifest (also use `--resume` after an in
 
 ```sh
 node ./cmd/deploy-multi.js Contract1 --networks mainnet,base --build-only
-node ./cmd/deploy-multi.js --resume <manifest.json> --gas all=1.1,mainnet=3
+node ./cmd/deploy-multi.js --resume <deployments/multi/runs/manifest.json> --gas all=1.1,mainnet=3
 ```
+
+For every command and deployment mode, see the [deploy-multi handbook](cmd/docs/DEPLOY_MULTI.md).
