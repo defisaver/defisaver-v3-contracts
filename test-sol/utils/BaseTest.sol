@@ -22,7 +22,7 @@ contract BaseTest is Config {
     address internal constant alice = address(0xaa);
     address internal constant charlie = address(0xcc);
     address internal constant jane = address(0x11);
-    uint256 internal constant SIGNER_PK = 0xA11CE;
+    uint256 internal constant SIGNER_PK = 0xA11CEE;
 
     uint256 internal constant MAINNET_CHAIN_ID = 1;
     uint256 internal constant ARBITRUM_CHAIN_ID = 42_161;

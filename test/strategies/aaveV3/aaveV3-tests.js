@@ -541,6 +541,8 @@ const aaveV3CloseToDebtStrategyTest = async (numTestPairs) => {
 
             strategyExecutor = await redeployCore(isL2);
 
+            // trigger reads StrategyPartialExecutionStorage from registry, so it has to be deployed
+            await redeploy('StrategyPartialExecutionStorage');
             await redeploy('AaveV3QuotePriceTrigger');
             await redeploy('DFSSell');
             await redeploy('SendTokenAndUnwrap');
@@ -800,6 +802,8 @@ const aaveV3FLCloseToDebtStrategyTest = async (numTestPairs) => {
 
             strategyExecutor = await redeployCore(isL2);
 
+            // trigger reads StrategyPartialExecutionStorage from registry, so it has to be deployed
+            await redeploy('StrategyPartialExecutionStorage');
             await redeploy('AaveV3QuotePriceTrigger');
             await redeploy('DFSSell');
             await redeploy('SendTokenAndUnwrap');
@@ -1053,6 +1057,8 @@ const aaveV3CloseToCollStrategyTest = async (numTestPairs) => {
 
             strategyExecutor = await redeployCore(isL2);
 
+            // trigger reads StrategyPartialExecutionStorage from registry, so it has to be deployed
+            await redeploy('StrategyPartialExecutionStorage');
             await redeploy('AaveV3QuotePriceTrigger');
             await redeploy('DFSSell');
             await redeploy('SendTokenAndUnwrap');
@@ -1338,6 +1344,8 @@ const aaveV3FLCloseToCollStrategyTest = async (numTestPairs) => {
 
             strategyExecutor = await redeployCore(isL2);
 
+            // trigger reads StrategyPartialExecutionStorage from registry, so it has to be deployed
+            await redeploy('StrategyPartialExecutionStorage');
             await redeploy('AaveV3QuotePriceTrigger');
             await redeploy('DFSSell');
             await redeploy('SendTokenAndUnwrap');

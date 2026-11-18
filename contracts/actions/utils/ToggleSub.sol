@@ -2,12 +2,17 @@
 
 pragma solidity =0.8.24;
 
+import {
+    IStrategyPartialExecutionStorage
+} from "../../interfaces/core/IStrategyPartialExecutionStorage.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { SubStorage } from "../../core/strategy/SubStorage.sol";
 import { Permission } from "../../auth/Permission.sol";
+import { DFSIds } from "../../utils/DFSIds.sol";
 
 /// @title ToggleSub - Sets the state of the sub to active or deactivated.
 /// @notice User can only disable/enable his own subscriptions.
+/// @dev Clears the partial execution storage for the subscription.
 contract ToggleSub is ActionBase, Permission {
     /// @param subId ID of the subscription to toggle
     /// @param active Whether to activate or deactivate the subscription
@@ -44,6 +49,11 @@ contract ToggleSub is ActionBase, Permission {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function updateSubData(Params memory _inputData) internal {
+        IStrategyPartialExecutionStorage partialExecutionStorage = IStrategyPartialExecutionStorage(
+            registry.getAddr(DFSIds.STRATEGY_PARTIAL_EXECUTION_STORAGE)
+        );
+        partialExecutionStorage.endExecution(_inputData.subId);
+
         if (_inputData.active) {
             /// @notice This gives wallet permission to our auth contract to be able to execute the strategy.
             _givePermissionToAuthContract(_isDSProxy(address(this)));
