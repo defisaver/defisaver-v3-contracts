@@ -8,6 +8,7 @@
   * [Smart wallets](protocol/core/smart-wallets.md)
   * [DFS Registry](protocol/core/dfs-registry.md)
   * [Strategy Executor](protocol/core/strategy-executor.md)
+  * [StrategyPartialExecutionStorage](protocol/core/strategypartialexecutionstorage.md)
   * [Recipe Executor](protocol/core/task-manager.md)
   * [Safe Module Auth](protocol/core/safe-module-auth.md)
   * [Proxy Auth](protocol/core/proxy-auth.md)

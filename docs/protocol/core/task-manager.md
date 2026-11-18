@@ -29,7 +29,9 @@ struct Recipe {
 }
 ```
 
-When the recipe is called through the `StrategyExecutor` there are additional checks if the triggers are executed correctly. All triggers must return true for the execution to continue. After that, from the Strategy data a new Recipe object is created and goes through the same flow as a manually executed recipe.&#x20;
+When the recipe is called through the `StrategyExecutor` there are additional checks if the triggers are executed correctly. All triggers must return true for the execution to continue. After that, from the Strategy data a new Recipe object is created and goes through the same flow as a manually executed recipe.
+
+Partial execution: a one-time strategy can be executed in several transactions. To do this, the backend sends one extra element at the end of `_actionCallData`, the `STRATEGY_PARTIAL_EXECUTION_FLAG`. On the first execution, triggers are checked as usual, but the subscription is not disabled. It is stored in `StrategyPartialExecutionStorage` instead. While the subscription is in partial execution, the trigger check and the sub data update are skipped. The final execution is sent without the flag. It disables the subscription and clears the partial execution state. The flag is only valid for one-time strategies. Any other length of `_actionCallData`, or a different value for the extra element, reverts.
 
 {% hint style="info" %}
 Triggers can be changeable! If Trigger returns true to a `isChangeable()` call after the trigger is checked, the sub-data of that trigger can be updated. Useful for strategies, for example, where on every five days some recipe happens, trigger adds five days from the last execution as the next trigger date.
@@ -55,6 +57,9 @@ interface IRecipeExecutor {
     ) external payable;
     
     /// @notice Called by user wallet through the auth contract to execute a recipe & check triggers
+    /// @dev If sub is already in partial execution state, it will skip the trigger check and sub data update
+    /// @dev It is possible for the position to be closed manually during partial execution, leaving the subscription enabled.
+    ///      Such subscriptions cannot be disabled on-chain and must be flagged and handled by the backend.
     /// @param _subId Id of the subscription we want to execute
     /// @param _actionCallData All input data needed to execute actions
     /// @param _triggerCallData All input data needed to check triggers

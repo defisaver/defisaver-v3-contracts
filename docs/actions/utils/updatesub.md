@@ -6,11 +6,13 @@ icon: hammer
 
 ### Description
 
-Updates users sub information on SubStorage contract
+Updates users sub information on SubStorage contract.
 
 > **Notes**
 >
-> User can only change his own subscriptions
+> User can only change his own subscriptions.
+>
+> Clears the partial execution storage for the subscription.
 
 ### Action ID
 

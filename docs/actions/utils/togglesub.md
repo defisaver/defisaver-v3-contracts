@@ -6,11 +6,15 @@ icon: hammer
 
 ### Description
 
-ToggleSub - Sets the state of the sub to active or deactivated
+ToggleSub - Sets the state of the sub to active or deactivated.
+
+
 
 > **Notes**
 >
-> User can only disable/enable his own subscriptions. This gives permission to dsproxy or safe to our auth contract to be able to execute the strategy
+> User can only disable/enable his own subscriptions. This gives permission to dsproxy or safe to our auth contract to be able to execute the strategy.
+>
+> Clears the partial execution storage for the subscription.
 
 ### Action ID
 
