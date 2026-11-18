@@ -1196,14 +1196,15 @@
     },
     {
         "name": "DFSSell",
-        "address": "0x901d383c37b30cefad9b6e2bbb0539a40e02c5f4",
+        "address": "0xa144A66eEa5E92540f4fe52836B2C3d60De69e6a",
         "id": "0x7f2a0f35",
         "path": "contracts/actions/exchange/DFSSell.sol",
-        "version": "1.0.5",
+        "version": "1.0.6",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
         "history": [
+            "0x901d383c37b30cefad9b6e2bbb0539a40e02c5f4",
             "0xba7f206610e2aab9f027c92debee4ff6f1682657",
             "0x8bfc99652358884AF965324e6A233014510F0CFc",
             "0x951D7B421f45FF0e4A8ddE0288aE3f9C2C69b784",
@@ -1213,25 +1214,26 @@
     },
     {
         "name": "DFSSellNoFee",
-        "address": "0x3845C89c861eBb0a0c856CEBB064Ee93678bdE8E",
+        "address": "0xfBfd56efC7f29cD9F5a9277C0B2B4FFbb9Edb2fb",
         "id": "0xebf16d4a",
         "path": "contracts/actions/exchange/DFSSellNoFee.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
-        "history": []
+        "history": ["0x3845C89c861eBb0a0c856CEBB064Ee93678bdE8E"]
     },
     {
         "name": "LimitSell",
-        "address": "0xC804aA5692787c3Af8FFca0AC1C0879aeA194163",
+        "address": "0xD33421953910E1B77f907EA34cF02036934f2f6B",
         "id": "0x8c712c04",
         "path": "contracts/actions/exchange/LimitSell.sol",
-        "version": "1.0.4",
+        "version": "1.0.5",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
         "history": [
+            "0xC804aA5692787c3Af8FFca0AC1C0879aeA194163",
             "0x0ed287DB2d0cd0A9Dd1e3391b2D3199370f7B129",
             "0xDa0df9dBD89FE40881EC2C4B000D44C76eA2Dd4A",
             "0x02b0eE3b52e8E0749444a7255B9D86c50d18D19A",
@@ -3371,14 +3373,15 @@
     },
     {
         "name": "LlamaLendSwapper",
-        "address": "0x1946d286cD40970317F9192e2a35C72C62B7b547",
+        "address": "0x71025072c75E3f95A5b4Db70A56373F4B06E0f26",
         "id": "0x4a94e2c3",
         "path": "contracts/actions/llamalend/advanced/LlamaLendSwapper.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
         "history": [
+            "0x1946d286cD40970317F9192e2a35C72C62B7b547",
             "0x5E342d7b1561Fb30a0AaD7eCE025Fa76582B5807",
             "0xacd1179c667e27f485798dca11d417d8603ddbaf"
         ]
@@ -3701,14 +3704,15 @@
     },
     {
         "name": "LSVSell",
-        "address": "0xE4D93b8d55D7456e85afc0fcF91AC085aF26bbBA",
+        "address": "0x3c4913f8c295A9aF8BB77d3A5e7248e977D91781",
         "id": "0x9fde5493",
         "path": "contracts/actions/lsv/LSVSupply.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
         "history": [
+            "0xE4D93b8d55D7456e85afc0fcF91AC085aF26bbBA",
             "0xd8F142FFaA386E639ae43c5ab0F52474Bc9432F4",
             "0x0c1bb9A39d4A0EF4215Ade19Ce4F954E8419Dfd7"
         ]
@@ -4006,14 +4010,15 @@
     },
     {
         "name": "CurveUsdSwapperTransient",
-        "address": "0xfb667B694aeA7c1ECF3bd581d06FefdcA769099c",
+        "address": "0xff6D8Bc83bB44bD6AbF0900046465951333bb32f",
         "id": "0x2ed1d3be",
         "path": "contracts/actions/curveusd/advanced/CurveUsdSwapperTransient.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
         "history": [
+            "0xfb667B694aeA7c1ECF3bd581d06FefdcA769099c",
             "0xeF470FeC8670c6f4923Fa77732406d5d40AB8075",
             "0xcF0298592b8FCB3823d31Bb257b65afFCAcCb8b6"
         ]

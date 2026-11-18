@@ -78,14 +78,14 @@
     },
     {
         "name": "DFSSell",
-        "address": "0xAC17f651591f417934EeA04CF6629584Eb50A4bB",
+        "address": "0x7107A975120dd06efA446782c8c3A2A3FaDe0F41",
         "id": "0x7f2a0f35",
         "path": "contracts/actions/exchange/DFSSell.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
-        "history": []
+        "history": ["0xAC17f651591f417934EeA04CF6629584Eb50A4bB"]
     },
     {
         "name": "FLAction",
@@ -680,14 +680,14 @@
     },
     {
         "name": "DFSSellNoFee",
-        "address": "0x45314C4265a378427f204483b3eFb89981129085",
+        "address": "0xA1C459e28b383a3107046efe165456B6de373052",
         "id": "0xebf16d4a",
         "path": "contracts/actions/exchange/DFSSellNoFee.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
-        "history": []
+        "history": ["0x45314C4265a378427f204483b3eFb89981129085"]
     },
     {
         "name": "FLAaveV3CarryDebt",

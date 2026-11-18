@@ -78,14 +78,14 @@
     },
     {
         "name": "DFSSell",
-        "address": "0x0a9b2080c14daf008ae87c977dfdf5f5d6d0937f",
+        "address": "0x741FcFC1D708CEA0d845Fd04de51022b6d00e060",
         "id": "0x7f2a0f35",
         "path": "contracts/actions/exchange/DFSSell.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
-        "history": []
+        "history": ["0x0a9b2080c14daf008ae87c977dfdf5f5d6d0937f"]
     },
     {
         "name": "FLAction",

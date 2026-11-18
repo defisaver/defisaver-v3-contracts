@@ -806,14 +806,15 @@
     },
     {
         "name": "DFSSell",
-        "address": "0x9f234af5c10c136863a20865ba00b26951ab8269",
+        "address": "0x28144F33fd68C6a84EDbd6CF9562F2E60E9698D5",
         "id": "0x7f2a0f35",
         "path": "contracts/actions/exchange/DFSSell.sol",
-        "version": "1.0.4",
+        "version": "1.0.5",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
         "history": [
+            "0x9f234af5c10c136863a20865ba00b26951ab8269",
             "0x47c402981f3d06e467befc9bbae8da4135ff5e28",
             "0x01f7DB086076a16Cebd940A95919Af088C0662FD",
             "0xC6c601fcAa870efd26C624F8c65fbc54cBe533b1",
@@ -822,14 +823,15 @@
     },
     {
         "name": "LimitSellL2",
-        "address": "0x73f3989b1872e3d9232B7b024D4E21C6c803638f",
+        "address": "0xD1A757780115FA89410EBb0612f36EE64D17ad31",
         "id": "0x5cc47139",
         "path": "contracts/actions/exchange/LimitSellL2.sol",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
         "history": [
+            "0x73f3989b1872e3d9232B7b024D4E21C6c803638f",
             "0xFbA4C507b3f5d17e38eA1a44530300A4c5e745AE",
             "0xdbEE7981c45acA9444FA98bf3bf9769A4FeAfe74",
             "0x08426bE896D68C4e37441D60d6EA43865CcF8B5C"
