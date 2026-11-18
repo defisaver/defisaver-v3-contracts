@@ -36,7 +36,8 @@ async function confirmExactSource({
 }) {
     while (Date.now() < deadline) {
         const result = await request({ ...common, action: 'getsourcecode', address });
-        const source = Array.isArray(result.result) ? result.result[0] : undefined;
+        const hasSourceList = result?.status === '1' && Array.isArray(result.result);
+        const source = hasSourceList ? result.result[0] : undefined;
         const similarMatch = String(source?.SimilarMatch || '').trim();
         if (similarMatch) {
             throw new Error(
@@ -52,12 +53,13 @@ async function confirmExactSource({
             report('exact verification confirmed');
             return;
         }
-        const message = String(result.result || result.message || 'Unknown explorer response');
+        const message = String(result?.result || result?.message || 'Unknown explorer response');
         if (
-            result.status === '0' &&
-            !/pending|queue|rate limit|unable to locate|not verified|try again|temporarily/i.test(
-                message,
-            )
+            !hasSourceList &&
+            (result?.status !== '0' ||
+                !/pending|queue|rate limit|unable to locate|not verified|try again|temporarily/i.test(
+                    message,
+                ))
         ) {
             throw new Error(`${name}: could not confirm exact verification: ${message}`);
         }
@@ -96,27 +98,6 @@ async function verifySource(
             onStatus(message);
         }
     };
-    if (verificationMode === 'submit' && guid) {
-        const result = await request({ ...common, action: 'getsourcecode', address });
-        const source = Array.isArray(result.result) ? result.result[0] : undefined;
-        const similarMatch = String(source?.SimilarMatch || '').trim();
-        if (similarMatch) {
-            throw new Error(
-                `${name}: explorer only has Similar Match source from ${similarMatch}, not this exact compiler input`,
-            );
-        }
-        if (source?.SourceCode && source?.ContractName) {
-            if (source.ContractName !== name) {
-                throw new Error(
-                    `${name}: explorer published source as unexpected contract ${source.ContractName}`,
-                );
-            }
-            report('exact verification confirmed');
-            return { submitted: true, verified: true };
-        }
-        report('verification already submitted');
-        return { submitted: true, verified: false };
-    }
     report(guid ? 'resuming verification' : 'submitting verification');
     let accepted = false;
     while (Date.now() < deadline) {
@@ -136,7 +117,11 @@ async function verifySource(
                       licenseType: 3,
                   },
         );
-        const message = String(result.result || 'Unknown explorer response');
+        const message = typeof result?.result === 'string' && result.result.trim();
+        if (!message || !['0', '1'].includes(result.status)) {
+            throw new Error(`${name}: invalid explorer verification response`);
+        }
+        const failed = /^fail(?:ed|ure)?\b/i.test(message);
         if (
             /^(Pass - Verified|Already Verified|Contract source code already verified)/i.test(
                 message,
@@ -153,20 +138,27 @@ async function verifySource(
                 return { submitted: true, verified: false };
             }
             report('verification submitted; waiting for explorer');
-        } else if (checking && /unable to locate.*guid|guid.*not found/i.test(message)) {
+        } else if (
+            checking &&
+            /unable to locate.*guid|guid.*(?:not found|expired)|unknown g?uid/i.test(message)
+        ) {
             guid = undefined;
             onGuid(null);
             report('verification receipt expired; resubmitting');
+        } else if (checking && /^(?:pending(?: in queue)?|queued)$/i.test(message)) {
+            report('verification queued at explorer');
+            if (verificationMode === 'submit') return { submitted: true, verified: false };
         } else if (
+            failed ||
             !/pending|queue|rate limit|unable to locate.*(contract|code)|does not have bytecode|not deployed|try again|temporarily/i.test(
                 message,
             )
         ) {
-            if (checking) onGuid(null);
+            if (checking && failed) onGuid(null);
             throw new Error(`${name}: verification failed: ${message}`);
         } else if (/rate limit/i.test(message)) report('explorer rate limit; retrying');
         else if (!checking) report('waiting for explorer to index the deployment');
-        else report('verification queued at explorer');
+        else report('retrying verification status');
         await wait(pollMs);
     }
     if (!accepted) throw new Error(`${name}: verification timed out; resume to continue`);

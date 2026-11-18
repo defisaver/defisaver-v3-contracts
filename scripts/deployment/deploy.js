@@ -5,6 +5,14 @@ const { networks } = require('./config');
 const { ROOT, readJson, writeJson } = require('./build');
 const { verifySource } = require('./verify');
 
+const needsSignature = (record) => !record.transactionHash;
+
+function unsignedContracts(contracts) {
+    const entries = Object.entries(contracts);
+    if (entries.some(([, record]) => record.reverted)) return [];
+    return entries.filter(([, record]) => needsSignature(record)).map(([name]) => name);
+}
+
 function gasOverrides(network, gas) {
     if (typeof gas !== 'string' || !/^\d+(\.\d+)?$/.test(gas))
         throw new Error(`${network}: supply a positive gas price in gwei`);
@@ -68,6 +76,7 @@ async function waitForRuntime(
     } while (Date.now() < deadline);
     throw new Error(
         `${contract.name}: on-chain runtime did not become available from the receipt block (${lastError?.message || 'unknown RPC error'})`,
+        { cause: lastError },
     );
 }
 
@@ -116,8 +125,13 @@ async function deployContract({
 }) {
     const started = Date.now();
     const wasConfirmed = record.confirmed;
+    const revertedError = () =>
+        new Error(
+            `${contract.name}: transaction ${record.transactionHash} reverted; start a fresh run for the failed and remaining contracts on ${network}`,
+        );
+    if (record.reverted) throw revertedError();
     await checkChain(provider, network);
-    if (!record.transactionHash) {
+    if (needsSignature(record)) {
         if (Object.keys(record).length)
             throw new Error(`${contract.name}: inconsistent deployment state`);
         const factory = new ethers.ContractFactory(contract.abi, contract.bytecode, wallet);
@@ -192,7 +206,18 @@ async function deployContract({
     if (
         receipt.transactionHash !== record.transactionHash ||
         !Number.isSafeInteger(receipt.confirmations) ||
-        receipt.confirmations < confirmations ||
+        receipt.confirmations < confirmations
+    ) {
+        throw new Error(`${contract.name}: receipt hash or confirmation count differs`);
+    }
+    await checkChain(provider, network);
+    if (receipt.status === 0 && !wasConfirmed) {
+        record.reverted = true;
+        delete record.rawTransaction;
+        save();
+        throw revertedError();
+    }
+    if (
         receipt.status !== 1 ||
         receipt.contractAddress?.toLowerCase() !== record.address.toLowerCase()
     ) {
@@ -200,7 +225,6 @@ async function deployContract({
             `${contract.name}: deployment failed or receipt address differs; refusing to redeploy`,
         );
     }
-    await checkChain(provider, network);
     await waitForRuntime(
         provider,
         record.address,
@@ -247,7 +271,7 @@ function updateAddress(network, contract, address, root = ROOT) {
             path: contract.sourceName,
             version: '1.0.0',
             inRegistry,
-            changeTime: inRegistry ? '86400' : 0,
+            changeTime: inRegistry ? 86400 : 0,
             registryIds: [],
             history: [],
         });
@@ -255,11 +279,23 @@ function updateAddress(network, contract, address, root = ROOT) {
     writeJson(file, entries, 4);
 }
 
+async function runAcrossNetworks(plans, action) {
+    const outcomes = await Promise.allSettled(plans.map(action));
+    const errors = [];
+    for (const [i, outcome] of outcomes.entries()) {
+        if (outcome.status === 'rejected') {
+            errors.push(new Error(plans[i].entry.network, { cause: outcome.reason }));
+        }
+    }
+    if (errors.length) throw new AggregateError(errors, 'Deployment incomplete');
+}
+
 async function executeRun(
     run,
     {
         providers,
         getWallet,
+        checkPending,
         confirm,
         gasPrices,
         apiKey,
@@ -275,28 +311,53 @@ async function executeRun(
     if (verificationMode !== 'skip' && !apiKey) throw new Error('ETHERSCAN_API_KEY is required');
     confirmations = Math.max(confirmations, manifest.confirmations || 1);
     manifest.confirmations = confirmations;
-    for (let i = 0; i < manifest.networks.length; i++) {
-        const entry = manifest.networks[i];
-        await checkChain(providers[entry.network], entry.network);
-        if (Object.values(entry.contracts).some((record) => !record.transactionHash)) {
-            if (!allowDuplicateBytecode) {
-                for (const contract of bundles[i].contracts) {
-                    if (entry.contracts[contract.name].transactionHash) continue;
-                    const duplicate = await findDuplicateDeployment(
-                        providers[entry.network],
-                        entry.network,
-                        contract,
+    const plans = manifest.networks.map((entry, i) => ({
+        entry,
+        bundle: bundles[i],
+        provider: providers[entry.network],
+        unsigned: unsignedContracts(entry.contracts),
+    }));
+    await runAcrossNetworks(plans, async ({ entry, provider, bundle, unsigned }) => {
+        await checkChain(provider, entry.network);
+        if (!allowDuplicateBytecode) {
+            for (const contract of bundle.contracts) {
+                if (!unsigned.includes(contract.name)) continue;
+                const duplicate = await findDuplicateDeployment(provider, entry.network, contract);
+                if (duplicate) {
+                    throw new Error(
+                        `${entry.network}/${contract.name}: identical runtime bytecode already exists at ${duplicate}; refusing a duplicate deployment because the explorer can reuse its Similar Match source. Use --allow-duplicate-bytecode only if this is intentional.`,
                     );
-                    if (duplicate) {
-                        throw new Error(
-                            `${entry.network}/${contract.name}: identical runtime bytecode already exists at ${duplicate}; refusing a duplicate deployment because the explorer can reuse its Similar Match source. Use --allow-duplicate-bytecode only if this is intentional.`,
-                        );
-                    }
                 }
             }
-            const gas = gasPrices[entry.network] || entry.gas;
-            gasOverrides(entry.network, gas);
-            entry.gas = gas;
+        }
+    });
+    const signers = {};
+    for (const plan of plans) {
+        if (!plan.unsigned.length) continue;
+        const { network, contracts } = plan.entry;
+        const gas = gasPrices[network] || plan.entry.gas;
+        gasOverrides(network, gas);
+        plan.entry.gas = gas;
+        const wallet = await getWallet(network, plan.provider);
+        if (
+            Object.values(contracts).some(
+                (record) => record.deployer && record.deployer !== wallet.address,
+            )
+        ) {
+            throw new Error(`${network}: signer differs from earlier deployments in this run`);
+        }
+        plan.wallet = wallet;
+        signers[network] = wallet.address;
+    }
+    if (Object.keys(signers).length) checkPending?.(signers);
+    for (const { entry, wallet } of plans) {
+        const records = Object.values(entry.contracts);
+        if (
+            !records.some((record) => record.reverted) &&
+            records.some((record) => !record.confirmed)
+        ) {
+            const signer = wallet?.address || records.find((record) => record.deployer)?.deployer;
+            await confirm(entry.network, signer, entry.gas, entry.contracts);
         }
     }
     save();
@@ -304,30 +365,7 @@ async function executeRun(
     const failures = [];
     let pending = 0;
     try {
-        for (let i = 0; i < manifest.networks.length; i++) {
-            const entry = manifest.networks[i];
-            const bundle = bundles[i];
-            const provider = providers[entry.network];
-            const needsWallet = Object.values(entry.contracts).some(
-                (record) => !record.transactionHash,
-            );
-            const wallet = needsWallet ? await getWallet(entry.network, provider) : undefined;
-            if (
-                wallet &&
-                Object.values(entry.contracts).some(
-                    (record) => record.deployer && record.deployer !== wallet.address,
-                )
-            ) {
-                throw new Error(
-                    `${entry.network}: signer differs from earlier deployments in this run`,
-                );
-            }
-            if (Object.values(entry.contracts).some((record) => !record.confirmed)) {
-                const signer =
-                    wallet?.address ||
-                    Object.values(entry.contracts).find((record) => record.deployer)?.deployer;
-                await confirm(entry.network, signer, entry.gas, entry.contracts);
-            }
+        await runAcrossNetworks(plans, async ({ entry, bundle, provider, wallet }) => {
             for (const contract of bundle.contracts) {
                 const record = entry.contracts[contract.name];
                 await deployContract({
@@ -348,6 +386,7 @@ async function executeRun(
                 }
                 if (!record.verified && verificationMode !== 'skip') {
                     const started = Date.now();
+                    const label = `${entry.network}/${contract.name}`;
                     record.verificationStartedAt = new Date().toISOString();
                     save();
                     pending++;
@@ -364,38 +403,34 @@ async function executeRun(
                                 if (guid) record.verificationSubmittedAt = new Date().toISOString();
                                 save();
                             },
-                            onStatus: (status) =>
-                                console.log(`${entry.network}/${contract.name}: ${status}`),
+                            onStatus: (status) => console.log(`${label}: ${status}`),
                             timeoutMs,
                             verificationMode,
                         });
                         if (result?.verified) {
                             record.verified = true;
                             record.verifiedAt = new Date().toISOString();
-                        }
-                        save();
-                        if (result?.verified) {
+                            save();
                             console.log(
-                                `${entry.network}/${contract.name}: verified (${Math.round((Date.now() - started) / 1000)}s)`,
+                                `${label}: verified (${Math.round((Date.now() - started) / 1000)}s)`,
                             );
                         }
                     })();
-                    const trackedJob = job.then(
-                        () => {
-                            pending--;
-                        },
-                        (error) => {
-                            pending--;
-                            failures.push(`${entry.network}/${contract.name}: ${error.message}`);
-                            console.error(
-                                `${entry.network}/${contract.name}: verification incomplete; resume to retry (${error.message})`,
-                            );
-                        },
+                    jobs.push(
+                        job
+                            .catch((error) => {
+                                failures.push(`${label}: ${error.message}`);
+                                console.error(
+                                    `${label}: verification incomplete; resume to retry (${error.message})`,
+                                );
+                            })
+                            .finally(() => {
+                                pending--;
+                            }),
                     );
-                    jobs.push(trackedJob);
                 }
             }
-        }
+        });
     } finally {
         if (pending)
             console.log(`Waiting for ${pending} verification submission/status request(s).`);
@@ -421,6 +456,8 @@ async function executeRun(
 }
 
 module.exports = {
+    needsSignature,
+    unsignedContracts,
     gasOverrides,
     checkChain,
     checkRuntime,

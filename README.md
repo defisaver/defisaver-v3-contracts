@@ -131,11 +131,12 @@ node ./cmd/deploy-multi.js Contract1 Contract2@optimism \
 
 `--networks` applies only to names without `@`. Groups also support `@all`; overlapping groups deploy each contract once per network. `--gas 1.1` is shorthand for `--gas all=1.1`.
 
-Build only, then deploy from the saved manifest (also use `--resume` after an interrupted run):
+Build only, then set `MANIFEST` to the path printed on the `Manifest:` line. Use the same path to resume an interrupted run.
 
 ```sh
 node ./cmd/deploy-multi.js Contract1 --networks mainnet,base --build-only
-node ./cmd/deploy-multi.js --resume <deployments/multi/runs/manifest.json> --gas all=1.1,mainnet=3
+MANIFEST="path/to/your/manifest.json"
+node ./cmd/deploy-multi.js --resume "$MANIFEST" --gas all=1.1,mainnet=3
 ```
 
 For every command and deployment mode, see the [deploy-multi handbook](cmd/docs/DEPLOY_MULTI.md).

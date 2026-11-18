@@ -6,11 +6,17 @@ Supported networks are `mainnet`, `arbitrum`, `optimism`, `base`, `linea` and `p
 
 Each contract gets an isolated compiler input. Progress is saved in a run manifest under `deployments/multi/runs`, so an interrupted run can continue without redeploying completed contracts. Successful deployments are also written to the matching file in `addresses`.
 
+For the resume examples, set `MANIFEST` to the path printed on the `Manifest:` line for your run.
+
+```sh
+MANIFEST="path/to/your/manifest.json"
+```
+
 ## Before deployment
 
-Set the RPC URL and encrypted deployment key in `.env`. Verification also needs `ETHERSCAN_API_KEY`, unless it is skipped. The script prints the signer, gas cap and contracts before asking for confirmation on each network.
+Set the RPC URL and encrypted deployment key in `.env`. Verification also needs `ETHERSCAN_API_KEY`, unless it is skipped. The script prints the signer, gas cap and contracts before asking for confirmation on each network. After all networks pass preflight checks and you approve them, the networks deploy in parallel. Each network waits for one contract to confirm before starting the next. A deployment failure stops that network while the others finish.
 
-Gas values are caps in gwei. A deployment needs a gas cap unless the resumed manifest already has one saved.
+Gas values are caps in gwei. Each network with an unsigned deployment needs a gas cap, which can come from the saved manifest. On resume, gas overrides apply only to unsigned transactions. Build-only and export runs ignore `--gas`.
 
 ## Deploy contracts
 
@@ -101,7 +107,7 @@ No follow-up command is required. To check all pending jobs and update the manif
 
 ```sh
 node ./cmd/deploy-multi.js \
-  --resume deployments/multi/runs/1794922061510-3569c014.json \
+  --resume "$MANIFEST" \
   --verification wait
 ```
 
@@ -131,7 +137,7 @@ Submit verification later:
 
 ```sh
 node ./cmd/deploy-multi.js \
-  --resume deployments/multi/runs/1794922061510-3569c014.json \
+  --resume "$MANIFEST" \
   --verification submit
 ```
 
@@ -139,9 +145,11 @@ node ./cmd/deploy-multi.js \
 
 Export one Solidity Standard JSON input per contract. This does not connect to an RPC or send transactions.
 
+With contract names, export first builds and saves a new manifest. With `--resume`, it uses the saved builds. Combining `--export-verification` and `--build-only` performs the export and exits.
+
 ```sh
 node ./cmd/deploy-multi.js \
-  --resume deployments/multi/runs/1794922061510-3569c014.json \
+  --resume "$MANIFEST" \
   --export-verification ./verification-inputs
 ```
 
@@ -159,11 +167,15 @@ Deploy from that manifest:
 
 ```sh
 node ./cmd/deploy-multi.js \
-  --resume deployments/multi/runs/1794922061510-3569c014.json \
+  --resume "$MANIFEST" \
   --gas all=1.1
 ```
 
 The same `--resume` command continues an interrupted deployment. Confirmed contracts are not deployed again.
+
+Runs sharing a manifest directory take a signing lock when they have unsigned transactions. Use the same runs directory for releases from the same signer. An unresolved signature reserves that signer on its network, even for a different contract. If a run stops after signing, resume the printed manifest to recover the original transaction. Once the run exits, pending explorer verification alone does not block a later release.
+
+A receipt with a confirmed revert ends deployment on that network for that manifest. Its hash and nonce stay in the manifest. To retry, start a fresh run naming the failed contract and any later unsigned contracts on that network. A timeout or ambiguous receipt still requires `--resume`.
 
 When resuming, do not pass contract names, `--networks`, `--source-tag` or `--output`. Those values are already fixed in the manifest.
 
