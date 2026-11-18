@@ -1005,6 +1005,7 @@ const formatMockExchangeObj = async (
     destTokenInfo,
     srcAmount,
     wrapper = undefined,
+    fillBps = 10000,
 ) => {
     if (!wrapper) {
         wrapper = await getContractFromRegistry('MockExchangeWrapper');
@@ -1031,7 +1032,9 @@ const formatMockExchangeObj = async (
         0,
         nullAddress,
         wrapper.address,
-        hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [rate]),
+        fillBps === 10000
+            ? hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [rate])
+            : hre.ethers.utils.defaultAbiCoder.encode(['uint256', 'uint256'], [rate, fillBps]),
         [nullAddress, nullAddress, nullAddress, 0, 0, hre.ethers.utils.toUtf8Bytes('')],
     ];
 };

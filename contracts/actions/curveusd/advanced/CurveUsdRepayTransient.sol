@@ -79,7 +79,8 @@ contract CurveUsdRepayTransient is ActionBase, CurveUsdHelper {
         ICrvUsdController(_params.controllerAddress).repay_extended(curveUsdTransientSwapper, info);
 
         // there shouldn't be any funds left on swapper contract after sell but withdrawing it just in case
-        CurveUsdSwapperTransient(curveUsdTransientSwapper).withdrawAll(_params.controllerAddress);
+        CurveUsdSwapperTransient(payable(curveUsdTransientSwapper))
+            .withdrawAll(_params.controllerAddress);
 
         // If the amount received from swap is higher than debt there will be leftover debtTokens
         // that will be sent to the user wallet. In that case, if we also haven't sold 100% of collToken,

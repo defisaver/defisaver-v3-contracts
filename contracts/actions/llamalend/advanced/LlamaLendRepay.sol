@@ -83,7 +83,7 @@ contract LlamaLendRepay is ActionBase, LlamaLendHelper {
         ILlamaLendController(_params.controllerAddress).repay_extended(llamalendSwapper, info);
 
         // there shouldn't be any funds left on swapper contract but withdrawing it just in case
-        LlamaLendSwapper(llamalendSwapper).withdrawAll(_params.controllerAddress);
+        LlamaLendSwapper(payable(llamalendSwapper)).withdrawAll(_params.controllerAddress);
 
         // if the amount received from swap is higher than debt there will be leftover debtToken
         // if we haven't sold 100% of coll from the position there will be leftover collToken
