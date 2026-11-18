@@ -263,28 +263,35 @@ function buildNetwork(contracts, network, sourceSets, outputDir) {
     return { bundleFile, bundleHash };
 }
 
-function prepare(targets, outputDir, sourceTag) {
-    const contracts = resolveContracts([...new Set(Object.values(targets).flat())]);
-    const runsDir = path.join(outputDir, 'runs');
-    for (const name of fs.existsSync(runsDir)
-        ? fs.readdirSync(runsDir).filter((name) => name.endsWith('.json'))
-        : []) {
-        const previous = readJson(path.join(runsDir, name));
-        const entries = previous.networks || [];
-        const records = entries.flatMap((entry) => Object.values(entry.contracts));
-        const overlaps = entries.some((entry) =>
-            targets[entry.network]?.some((name) => Object.hasOwn(entry.contracts, name)),
-        );
-        if (
-            overlaps &&
-            records.some((record) => record.transactionHash) &&
-            records.some((record) => !record.verified)
-        ) {
-            throw new Error(
-                `An unfinished deployment overlaps this request; use --resume ${path.join(runsDir, name)}`,
-            );
+function checkPendingDeployments(runsDir, targets, currentFile, signers = {}) {
+    if (!fs.existsSync(runsDir)) return;
+    for (const filename of fs.readdirSync(runsDir)) {
+        const file = path.join(runsDir, filename);
+        if (!filename.endsWith('.json') || file === currentFile) continue;
+        for (const { network, contracts } of readJson(file).networks || []) {
+            if (!targets[network]) continue;
+            const signer = signers[network]?.toLowerCase();
+            for (const [name, record] of Object.entries(contracts)) {
+                if (!record.transactionHash || record.reverted) continue;
+                const sameContract = targets[network].includes(name);
+                const sameSigner =
+                    signer && (!record.deployer || record.deployer.toLowerCase() === signer);
+                if (
+                    (sameContract && !(record.confirmed && record.addressRecorded)) ||
+                    (sameSigner && !record.confirmed)
+                ) {
+                    throw new Error(
+                        `${network}/${name}: unfinished deployment; use --resume ${file}`,
+                    );
+                }
+            }
         }
     }
+}
+
+function prepare(targets, outputDir, sourceTag) {
+    const contracts = resolveContracts([...new Set(Object.values(targets).flat())]);
+    checkPendingDeployments(path.join(outputDir, 'runs'), targets);
     const snapshots = Object.entries(targets).map(([network, names]) => {
         const selected = names.map((name) => contracts.find((contract) => contract.name === name));
         const sourceSets = Object.fromEntries(
@@ -369,6 +376,7 @@ module.exports = {
     transformSource,
     collectSources,
     buildNetwork,
+    checkPendingDeployments,
     prepare,
     loadRun,
 };

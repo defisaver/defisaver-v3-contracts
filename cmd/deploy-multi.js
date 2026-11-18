@@ -4,9 +4,9 @@ const path = require('path');
 const { Command } = require('commander');
 const { ethers } = require('ethers');
 const readline = require('readline-sync');
-const { ROOT, prepare, loadRun } = require('../scripts/deployment/build');
+const { ROOT, prepare, loadRun, checkPendingDeployments } = require('../scripts/deployment/build');
 const { networks } = require('../scripts/deployment/config');
-const { executeRun } = require('../scripts/deployment/deploy');
+const { executeRun, gasOverrides, unsignedContracts } = require('../scripts/deployment/deploy');
 const { decrypt } = require('../scripts/utils/crypto');
 
 function parseNetworks(value) {
@@ -69,8 +69,15 @@ function lock(file = path.join(ROOT, 'deployments', 'multi.lock')) {
         fs.writeFileSync(file, String(process.pid), { flag: 'wx', mode: 0o600 });
     } catch (error) {
         if (error.code !== 'EEXIST') throw error;
+        let owner = '';
+        try {
+            const pid = fs.readFileSync(file, 'utf8').trim();
+            if (/^\d+$/.test(pid)) owner = ` (PID ${pid})`;
+        } catch {
+            // Another process may already have released the lock.
+        }
         throw new Error(
-            `Deployment lock exists: ${file}. If its process is no longer running, remove this file and resume.`,
+            `Deployment lock exists: ${file}${owner}. If its process is no longer running, remove this file and resume.`,
         );
     }
     const release = () => {
@@ -122,13 +129,6 @@ function exportVerificationInputs(run, directory) {
 }
 
 function confirmDeployment(network, address, gas, contracts, question = readline.question) {
-    console.log(
-        `\n${network} (chain ${networks[network].chainId}), signer ${address || 'saved transaction'}, gas cap ${gas || 'saved transaction'} gwei`,
-    );
-    console.log(`Contracts: ${Object.keys(contracts).join(', ')}`);
-    if (question(`Type ${network} to deploy/resume: `) !== network)
-        throw new Error('Deployment cancelled');
-
     let highestGas = ethers.constants.Zero;
     for (const record of Object.values(contracts)) {
         if (record.confirmed) continue;
@@ -139,17 +139,76 @@ function confirmDeployment(network, address, gas, contracts, question = readline
             : ethers.utils.parseUnits(gas, 'gwei');
         if (price.gt(highestGas)) highestGas = price;
     }
+    const fee = `${ethers.utils.formatUnits(highestGas, 'gwei')} gwei`;
+    console.log(
+        `\n${network} (chain ${networks[network].chainId}), signer ${address || 'saved transaction'}, highest fee per gas ${fee}`,
+    );
+    console.log(`Contracts: ${Object.keys(contracts).join(', ')}`);
+    if (question(`Type ${network} to deploy/resume: `) !== network)
+        throw new Error('Deployment cancelled');
     if (
         highestGas.gt(ethers.utils.parseUnits('300', 'gwei')) &&
         question(
-            `WARNING: ${network} gas cap is ${ethers.utils.formatUnits(highestGas, 'gwei')} gwei (above 300). Type YES to accept this high gas price: `,
+            `WARNING: ${network} highest fee per gas is ${fee} (above 300). Type YES to accept this high gas price: `,
         ) !== 'YES'
     ) {
         throw new Error('High-gas deployment cancelled');
     }
 }
 
-async function main(argv = process.argv) {
+function deploymentKeyEnv(network, env) {
+    const { keyEnv } = networks[network];
+    if (env[keyEnv]) return keyEnv;
+    if (network === 'optimism' && env.ENCRYPTED_KEY_OPTIMISM) return 'ENCRYPTED_KEY_OPTIMISM';
+    throw new Error(`Missing ${keyEnv}`);
+}
+
+function preflight(entries, options, env) {
+    if (options.verification !== 'skip' && !env.ETHERSCAN_API_KEY)
+        throw new Error('ETHERSCAN_API_KEY is required');
+    const prices = parseGas(
+        options.gas,
+        entries.map((entry) => entry.network),
+    );
+    const unsignedTargets = {};
+    for (const { network, names, contracts, gas } of entries) {
+        const { rpcEnv } = networks[network];
+        if (!env[rpcEnv]) throw new Error(`Missing ${rpcEnv}`);
+        const unsigned = names ?? unsignedContracts(contracts);
+        if (!unsigned.length) continue;
+        unsignedTargets[network] = unsigned;
+        deploymentKeyEnv(network, env);
+        gasOverrides(network, prices[network] || gas);
+    }
+    return { gasPrices: prices, unsignedTargets };
+}
+
+function formatDeploymentError(error, env) {
+    if (
+        error instanceof AggregateError &&
+        error.errors.every((failure) => failure.cause && Object.hasOwn(networks, failure.message))
+    ) {
+        return [
+            error.message,
+            ...error.errors.map(
+                (failure) => `${failure.message}: ${formatDeploymentError(failure.cause, env)}`,
+            ),
+        ].join('\n');
+    }
+    // Ethers may include the full RPC URL and request body in a nested transport error.
+    let detail = error;
+    while (!detail.requestBody && (detail.error || detail.cause))
+        detail = detail.error || detail.cause;
+    const network = Object.keys(networks).find((name) => {
+        const url = env[networks[name].rpcEnv];
+        return url && (detail.url ? detail.url === url : error.message.includes(url));
+    });
+    if (!network && !detail.url) return error.message;
+    const method = /"method"\s*:\s*"(\w+)"/.exec(detail.requestBody)?.[1] || 'request';
+    return `${network || 'Deployment'}: RPC ${method} failed (${error.code || detail.code || 'unknown error'})`;
+}
+
+async function main(argv = process.argv, env = { ...process.env }) {
     const program = new Command()
         .description('Build and deploy contracts across networks with configurable verification')
         .argument(
@@ -211,11 +270,24 @@ async function main(argv = process.argv) {
     const targets = options.resume ? undefined : parseTargets(program.args, options.networks);
     const unlock = lock();
     let unlockRun;
+    let unlockSigning;
+    let file;
     try {
-        const requestedFile = options.resume
-            ? path.resolve(options.resume)
-            : prepare(targets, path.resolve(options.output), options.sourceTag);
-        const file = fs.realpathSync(requestedFile);
+        let settings;
+        if (!options.buildOnly && !options.exportVerification) {
+            require('dotenv').config({ path: path.join(ROOT, '.env'), processEnv: env });
+            if (targets)
+                settings = preflight(
+                    Object.entries(targets).map(([network, names]) => ({ network, names })),
+                    options,
+                    env,
+                );
+        }
+        file = fs.realpathSync(
+            options.resume
+                ? path.resolve(options.resume)
+                : prepare(targets, path.resolve(options.output), options.sourceTag),
+        );
         unlockRun = lock(`${file}.lock`);
         const run = loadRun(file);
         console.log(`Manifest: ${file}`);
@@ -233,42 +305,34 @@ async function main(argv = process.argv) {
             console.log('Build-only complete. No RPC connections or transactions.');
             return file;
         }
-        require('dotenv').config({ path: path.join(ROOT, '.env') });
+        const { gasPrices, unsignedTargets } =
+            settings ?? preflight(run.manifest.networks, options, env);
+        if (Object.keys(unsignedTargets).length) {
+            // Different checkouts can share a runs directory and have different repository locks.
+            const runsDir = path.dirname(file);
+            unlockSigning = lock(path.join(runsDir, '.signing.lock'));
+        }
         const providers = {};
-        for (const entry of run.manifest.networks) {
-            const config = networks[entry.network];
-            if (
-                Object.values(entry.contracts).some((record) => !record.transactionHash) &&
-                !process.env[config.keyEnv] &&
-                !(entry.network === 'optimism' && process.env.ENCRYPTED_KEY_OPTIMISM)
-            ) {
-                throw new Error(`Missing ${config.keyEnv}`);
-            }
-            const rpc = process.env[config.rpcEnv];
-            if (!rpc) throw new Error(`Missing ${networks[entry.network].rpcEnv}`);
-            providers[entry.network] = new ethers.providers.JsonRpcProvider({
-                url: rpc,
+        for (const { network } of run.manifest.networks) {
+            providers[network] = new ethers.providers.JsonRpcProvider({
+                url: env[networks[network].rpcEnv],
                 timeout: 30000,
             });
         }
         let password;
         const result = await executeRun(run, {
             providers,
-            apiKey: process.env.ETHERSCAN_API_KEY,
+            apiKey: env.ETHERSCAN_API_KEY,
             confirmations: options.confirmations,
             timeoutMs: options.timeout * 1000,
             allowDuplicateBytecode: options.allowDuplicateBytecode,
             verificationMode: options.verification,
-            gasPrices: parseGas(
-                options.gas,
-                run.manifest.networks.map((n) => n.network),
-            ),
+            gasPrices,
+            checkPending: (signers) =>
+                checkPendingDeployments(path.dirname(file), unsignedTargets, file, signers),
             getWallet: async (network, provider) => {
-                const keyEnv = networks[network].keyEnv;
-                const encrypted =
-                    process.env[keyEnv] ||
-                    (network === 'optimism' && process.env.ENCRYPTED_KEY_OPTIMISM);
-                if (!encrypted) throw new Error(`Missing ${keyEnv}`);
+                const keyEnv = deploymentKeyEnv(network, env);
+                const encrypted = env[keyEnv];
                 if (password) {
                     try {
                         return new ethers.Wallet(decrypt(encrypted, password), provider);
@@ -300,13 +364,17 @@ async function main(argv = process.argv) {
                 `Deployment complete; ${result.pendingVerifications} verification(s) are processing asynchronously.`,
             );
             console.log(
-                `Check later with: node ./cmd/deploy-multi.js --resume ${file} --verification wait`,
+                `Check later with: node ./cmd/deploy-multi.js --resume '${file.replaceAll("'", "'\\''")}' --verification wait`,
             );
         } else {
             console.log(`Deployment and exact verification complete. Manifest: ${file}`);
         }
         return file;
+    } catch (error) {
+        if (file) console.error(`Manifest: ${file}`);
+        throw error;
     } finally {
+        unlockSigning?.();
         unlockRun?.();
         unlock();
     }
@@ -315,8 +383,9 @@ async function main(argv = process.argv) {
 if (require.main === module) {
     process.once('SIGINT', () => process.exit(130));
     process.once('SIGTERM', () => process.exit(143));
-    main().catch((error) => {
-        console.error(error.message);
+    const env = { ...process.env };
+    main(process.argv, env).catch((error) => {
+        console.error(formatDeploymentError(error, env));
         process.exitCode = 1;
     });
 }
