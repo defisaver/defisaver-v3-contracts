@@ -15,7 +15,6 @@ const {
 const {
     getControllers,
     collateralSupplyAmountInUsd,
-    borrowAmountInUsd,
     supplyToMarket,
 } = require('../../utils/llamalend');
 const { llamalendCreate, llamalendBorrow } = require('../../utils/actions');
@@ -33,6 +32,7 @@ describe('LlamaLend-Borrow', function () {
     let view;
 
     before(async () => {
+        await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', ['0x0']);
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
         snapshot = await takeSnapshot();
@@ -56,17 +56,16 @@ describe('LlamaLend-Borrow', function () {
             const collTokenAddr = await controller.collateral_token();
             const debtTokenAddr = await controller.borrowed_token();
             const collToken = getAssetInfoByAddress(collTokenAddr, chainId);
-            const debtToken = getAssetInfoByAddress(debtTokenAddr, chainId);
             await supplyToMarket(controllerAddr, chainId);
             const supplyAmount = fetchAmountinUSDPrice(
                 collToken.symbol,
                 collateralSupplyAmountInUsd,
             );
-            const borrowAmount = fetchAmountinUSDPrice(debtToken.symbol, borrowAmountInUsd);
             if (supplyAmount === 'Infinity') return;
-            if (borrowAmount === 'Infinity') return;
             const supplyAmountInWei = hre.ethers.utils.parseUnits(supplyAmount, collToken.decimals);
-            const borrowAmountWei = hre.ethers.utils.parseUnits(borrowAmount, debtToken.decimals);
+            const borrowAmountWei = (await controller.max_borrowable(supplyAmountInWei, 10))
+                .mul(3)
+                .div(4);
             await setBalance(collTokenAddr, senderAcc.address, supplyAmountInWei);
             await approve(collTokenAddr, proxy.address, senderAcc);
             await llamalendCreate(

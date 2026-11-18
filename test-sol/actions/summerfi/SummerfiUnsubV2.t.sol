@@ -9,7 +9,7 @@ import { SFProxyUtils } from "test-sol/utils/summerfi/SFProxyUtils.sol";
 import { SummerfiUnsubV2 } from "contracts/actions/summerfi/SummerfiUnsubV2.sol";
 import { RecipeExecutor } from "contracts/core/RecipeExecutor.sol";
 import { StrategyModel } from "contracts/core/strategy/StrategyModel.sol";
-import { SFProxyEntryPoint } from "contracts/actions/summerfi/SFProxyEntryPoint.sol";
+import { SFProxyEntryPoint } from "contracts/wallet-adapters/summerfi/SFProxyEntryPoint.sol";
 import {
     IAccountImplementation
 } from "contracts/interfaces/protocols/summerfi/IAccountImplementation.sol";

@@ -7,7 +7,7 @@ import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
 import { PullToken } from "../../contracts/actions/utils/PullToken.sol";
 import { SendToken } from "../../contracts/actions/utils/SendToken.sol";
 import { FLAction } from "../../contracts/actions/flashloan/FLAction.sol";
-import { SFProxyEntryPoint } from "../../contracts/actions/summerfi/SFProxyEntryPoint.sol";
+import { SFProxyEntryPoint } from "../../contracts/wallet-adapters/summerfi/SFProxyEntryPoint.sol";
 import { FLHelper } from "../../contracts/actions/flashloan/helpers/FLHelper.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
 import { ActionsUtils } from "../utils/ActionsUtils.sol";

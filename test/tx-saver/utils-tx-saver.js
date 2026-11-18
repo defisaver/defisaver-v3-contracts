@@ -62,7 +62,7 @@ const openAavePositionEncodedData = async (senderAcc, wallet, txSaverUserSignedD
     const poolAddress = await aaveMarketContract.getPool();
     const aavePool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
 
-    const supplyAsset = getAssetInfo('WETH', chainIds[network]);
+    const supplyAsset = getAssetInfo('wstETH', chainIds[network]);
     const supplyToken = supplyAsset.address;
     const supplyAmount = fetchAmountinUSDPrice(supplyAsset.symbol, '50000');
     const supplyAmountInWei = hre.ethers.utils.parseUnits(supplyAmount, supplyAsset.decimals);
@@ -148,7 +148,7 @@ const llamaLendLevCreateEncodedData = async (
 ) => {
     await supplyToMarket(controllerAddr, chainIds[network]);
     const supplyAmount = fetchAmountinUSDPrice(collToken.symbol, '50000');
-    const borrowAmount = fetchAmountinUSDPrice(debToken.symbol, '60000');
+    const borrowAmount = fetchAmountinUSDPrice(debToken.symbol, '20000');
     if (supplyAmount === 'Infinity') return;
     if (borrowAmount === 'Infinity') return;
     const supplyAmountInWei = hre.ethers.utils.parseUnits(supplyAmount, collToken.decimals);

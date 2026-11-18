@@ -5,6 +5,7 @@ import { IDSProxyFactory } from "../../contracts/interfaces/DS/IDSProxyFactory.s
 import { IDSProxy } from "../../contracts/interfaces/DS/IDSProxy.sol";
 import { ISafeProxyFactory } from "../../contracts/interfaces/protocols/safe/ISafeProxyFactory.sol";
 import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
+import { SubProxy, StrategyModel } from "../../contracts/core/strategy/SubProxy.sol";
 import { Addresses } from "./helpers/MainnetAddresses.sol";
 
 abstract contract UserWallet {
@@ -69,5 +70,14 @@ abstract contract UserWallet {
         } else {
             proxy.execute(_target, _calldata);
         }
+    }
+
+    function subscribeToStrategy(
+        bool _isSafe,
+        address _subProxy,
+        StrategyModel.StrategySub memory _sub
+    ) public {
+        bytes memory fnData = abi.encodeWithSelector(SubProxy.subscribeToStrategy.selector, _sub);
+        executeWithWallet(_isSafe, _subProxy, fnData, 0);
     }
 }

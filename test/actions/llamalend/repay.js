@@ -17,7 +17,6 @@ const {
 const {
     getControllers,
     collateralSupplyAmountInUsd,
-    borrowAmountInUsd,
     supplyToMarket,
 } = require('../../utils/llamalend');
 const { llamalendCreate, llamalendRepay } = require('../../utils/actions');
@@ -33,14 +32,59 @@ describe('LlamaLend-Repay', function () {
     let snapshot;
     let view;
     let mockWrapper;
+    let swapper;
+
+    // Opens a position and returns its tokens and collateral amount, or skips the test
+    // when the market tokens are not known to the test helpers.
+    const createPosition = async (test, controllerAddr) => {
+        const controller = await hre.ethers.getContractAt('ILlamaLendController', controllerAddr);
+        const collTokenAddr = await controller.collateral_token();
+        const debtTokenAddr = await controller.borrowed_token();
+        const collToken = getAssetInfoByAddress(collTokenAddr, chainId);
+        const debtToken = getAssetInfoByAddress(debtTokenAddr, chainId);
+        if (collToken.symbol === '?' || debtToken.symbol === '?') test.skip();
+        await supplyToMarket(controllerAddr, chainId);
+        const supplyAmount = fetchAmountinUSDPrice(collToken.symbol, collateralSupplyAmountInUsd);
+        if (supplyAmount === 'Infinity') test.skip();
+        const supplyAmountInWei = hre.ethers.utils.parseUnits(supplyAmount, collToken.decimals);
+        const borrowAmountWei = (await controller.max_borrowable(supplyAmountInWei, 10))
+            .mul(3)
+            .div(4);
+
+        await setBalance(collTokenAddr, senderAcc.address, supplyAmountInWei);
+        await approve(collTokenAddr, proxy.address, senderAcc);
+        await llamalendCreate(
+            proxy,
+            controllerAddr,
+            senderAcc.address,
+            senderAcc.address,
+            supplyAmountInWei,
+            borrowAmountWei,
+            10,
+        );
+
+        // Collateral that sells for half of the debt at the mock exchange rate.
+        const supplyValueInDebtWei = hre.ethers.utils.parseUnits(
+            fetchAmountinUSDPrice(debtToken.symbol, collateralSupplyAmountInUsd),
+            debtToken.decimals,
+        );
+        const partialSellAmount = supplyAmountInWei
+            .mul(borrowAmountWei.div(2))
+            .div(supplyValueInDebtWei);
+
+        return { collToken, debtToken, supplyAmountInWei, partialSellAmount };
+    };
+
+    const expectEmptySwapper = async (collToken, debtToken) => {
+        expect(await balanceOf(debtToken.address, swapper.address)).to.eq(0);
+        expect(await balanceOf(collToken.address, swapper.address)).to.eq(0);
+    };
 
     before(async () => {
+        await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', ['0x0']);
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
-        await redeploy('LlamaLendCreate');
-        await redeploy('LlamaLendRepay');
-        await redeploy('LlamaLendSwapper');
-        await redeploy('TxSaverExecutor');
+        swapper = await redeploy('LlamaLendSwapper');
         mockWrapper = await redeploy('MockExchangeWrapper');
         await setNewExchangeWrapper(senderAcc, mockWrapper.address);
         view = await (await hre.ethers.getContractFactory('LlamaLendView')).deploy();
@@ -53,91 +97,41 @@ describe('LlamaLend-Repay', function () {
     });
     for (let i = 0; i < controllers.length; i++) {
         const controllerAddr = controllers[i];
-        it(`should create a Llamalend position and then repay it partially in ${controllerAddr} Llamalend market`, async () => {
-            const controller = await hre.ethers.getContractAt(
-                'ILlamaLendController',
+        it(`should create a Llamalend position and then repay it partially in ${controllerAddr} Llamalend market`, async function () {
+            const { collToken, debtToken, partialSellAmount } = await createPosition(
+                this,
                 controllerAddr,
-            );
-            const collTokenAddr = await controller.collateral_token();
-            const debtTokenAddr = await controller.borrowed_token();
-            const collToken = getAssetInfoByAddress(collTokenAddr, chainId);
-            const debtToken = getAssetInfoByAddress(debtTokenAddr, chainId);
-            await supplyToMarket(controllerAddr, chainId);
-            const supplyAmount = fetchAmountinUSDPrice(
-                collToken.symbol,
-                collateralSupplyAmountInUsd,
-            );
-            const borrowAmount = fetchAmountinUSDPrice(debtToken.symbol, borrowAmountInUsd);
-            if (supplyAmount === 'Infinity') return;
-            if (borrowAmount === 'Infinity') return;
-            const supplyAmountInWei = hre.ethers.utils.parseUnits(supplyAmount, collToken.decimals);
-            const borrowAmountWei = hre.ethers.utils.parseUnits(borrowAmount, debtToken.decimals);
-
-            await setBalance(collTokenAddr, senderAcc.address, supplyAmountInWei);
-            await approve(collTokenAddr, proxy.address, senderAcc);
-            await llamalendCreate(
-                proxy,
-                controllerAddr,
-                senderAcc.address,
-                senderAcc.address,
-                supplyAmountInWei,
-                borrowAmountWei,
-                10,
             );
 
             const exchangeData = await formatMockExchangeObj(
                 collToken,
                 debtToken,
-                supplyAmountInWei.div(2),
+                partialSellAmount,
+                mockWrapper,
             );
-            const infoBeforeBoost = await view.callStatic.userData(controllerAddr, proxy.address);
-            console.log(infoBeforeBoost.collRatio / 1e18);
+            const infoBeforeRepay = await view.callStatic.userData(controllerAddr, proxy.address);
             await llamalendRepay(proxy, controllerAddr, i, exchangeData, senderAcc.address);
-            const infoAfterBoost = await view.callStatic.userData(controllerAddr, proxy.address);
-            console.log(infoAfterBoost.collRatio / 1e18);
-            expect(infoAfterBoost.collRatio).to.be.gt(infoBeforeBoost.collRatio);
-            expect(infoAfterBoost.debtAmount).to.be.lt(infoBeforeBoost.debtAmount);
-            expect(infoAfterBoost.marketCollateralAmount).to.be.lt(
-                infoBeforeBoost.marketCollateralAmount,
+            const infoAfterRepay = await view.callStatic.userData(controllerAddr, proxy.address);
+            expect(infoAfterRepay.collRatio).to.be.gt(infoBeforeRepay.collRatio);
+            expect(infoAfterRepay.debtAmount).to.be.lt(infoBeforeRepay.debtAmount);
+            expect(infoAfterRepay.marketCollateralAmount).to.be.lt(
+                infoBeforeRepay.marketCollateralAmount,
             );
+            await expectEmptySwapper(collToken, debtToken);
         });
-        it(`should create a Llamalend position and then repay it fully in ${controllerAddr} Llamalend market`, async () => {
-            const controller = await hre.ethers.getContractAt(
-                'ILlamaLendController',
+        it(`should create a Llamalend position and then repay it fully in ${controllerAddr} Llamalend market`, async function () {
+            const { collToken, debtToken, supplyAmountInWei } = await createPosition(
+                this,
                 controllerAddr,
             );
-            const collTokenAddr = await controller.collateral_token();
-            const debtTokenAddr = await controller.borrowed_token();
-            const collToken = getAssetInfoByAddress(collTokenAddr, chainId);
-            const debtToken = getAssetInfoByAddress(debtTokenAddr, chainId);
-            await supplyToMarket(controllerAddr, chainId);
-            const supplyAmount = fetchAmountinUSDPrice(
-                collToken.symbol,
-                collateralSupplyAmountInUsd,
-            );
-            const borrowAmount = fetchAmountinUSDPrice(debtToken.symbol, borrowAmountInUsd);
-            if (supplyAmount === 'Infinity') return;
-            if (borrowAmount === 'Infinity') return;
-            const supplyAmountInWei = hre.ethers.utils.parseUnits(supplyAmount, collToken.decimals);
-            const borrowAmountWei = hre.ethers.utils.parseUnits(borrowAmount, debtToken.decimals);
 
-            await setBalance(collTokenAddr, senderAcc.address, supplyAmountInWei);
-            await approve(collTokenAddr, proxy.address, senderAcc);
-            await llamalendCreate(
-                proxy,
-                controllerAddr,
-                senderAcc.address,
-                senderAcc.address,
-                supplyAmountInWei,
-                borrowAmountWei,
-                10,
-            );
             const exchangeData = await formatMockExchangeObj(
                 collToken,
                 debtToken,
                 supplyAmountInWei.mul('100').div('105'),
+                mockWrapper,
             );
-            const infoBeforeBoost = await view.callStatic.userData(controllerAddr, proxy.address);
+            const infoBeforeRepay = await view.callStatic.userData(controllerAddr, proxy.address);
             const collTokenBefore = await balanceOf(collToken.address, senderAcc.address);
             const debtTokenBefore = await balanceOf(debtToken.address, senderAcc.address);
             await llamalendRepay(proxy, controllerAddr, i, exchangeData, senderAcc.address);
@@ -145,14 +139,14 @@ describe('LlamaLend-Repay', function () {
             const debtTokenAfter = await balanceOf(debtToken.address, senderAcc.address);
             expect(collTokenAfter).to.be.gt(collTokenBefore);
             expect(debtTokenAfter).to.be.gt(debtTokenBefore);
-            const infoAfterBoost = await view.callStatic.userData(controllerAddr, proxy.address);
-            console.log(infoAfterBoost.collRatio / 1e18);
+            const infoAfterRepay = await view.callStatic.userData(controllerAddr, proxy.address);
 
-            expect(infoAfterBoost.collRatio).to.be.eq(0);
-            expect(infoAfterBoost.debtAmount).to.be.lt(infoBeforeBoost.debtAmount);
-            expect(infoAfterBoost.marketCollateralAmount).to.be.lt(
-                infoBeforeBoost.marketCollateralAmount,
+            expect(infoAfterRepay.collRatio).to.be.eq(0);
+            expect(infoAfterRepay.debtAmount).to.be.lt(infoBeforeRepay.debtAmount);
+            expect(infoAfterRepay.marketCollateralAmount).to.be.lt(
+                infoBeforeRepay.marketCollateralAmount,
             );
+            await expectEmptySwapper(collToken, debtToken);
         });
     }
 });

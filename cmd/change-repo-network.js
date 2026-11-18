@@ -61,7 +61,7 @@ async function changeWethAddress(oldNetwork, newNetwork) {
     );
 }
 
-async function changeHardhatConfig(oldNetwork, newNetwork) {
+async function changeHardhatConfig(newNetwork) {
     const configPath = 'hardhat.config.js';
     const configContent = (await fs.readFileSync(configPath)).toString();
 
@@ -71,7 +71,6 @@ async function changeHardhatConfig(oldNetwork, newNetwork) {
     const newConfig = {
         chainId: chainIds[networkName],
         nodeEnv: networkName === 'mainnet' ? 'ETHEREUM_NODE' : `${newNetwork.toUpperCase()}_NODE`,
-        evmVersion: networkName === 'linea' ? 'london' : 'cancun',
     };
 
     // Update only the forking url in hardhat config
@@ -90,13 +89,6 @@ async function changeHardhatConfig(oldNetwork, newNetwork) {
         /(hardhat:\s*{[\s\S]*?chainId:\s*)\d+/,
         `$1${newConfig.chainId}`,
     );
-
-    if (oldNetwork === 'Linea' || newNetwork === 'Linea') {
-        updatedContent = updatedContent.replace(
-            /evmVersion:\s*['"].*?['"]/,
-            `evmVersion: '${newConfig.evmVersion}'`,
-        );
-    }
 
     fs.writeFileSync(configPath, updatedContent);
 }
@@ -158,58 +150,6 @@ async function changeTestAddressesImport(newNetwork) {
     }
 }
 
-async function excludeCancunSpecificChanges(oldNetwork, newNetwork) {
-    const targetFiles = [
-        'contracts/actions/checkers/CompV3RatioCheck.sol',
-        'contracts/triggers/CompV3PriceTrigger.sol',
-        'contracts/triggers/CompV3RatioTrigger.sol',
-    ];
-
-    if (newNetwork === 'Linea') {
-        const files = getAllFiles('./contracts');
-        await Promise.all(
-            files.map(async (file) => {
-                const content = (await fs.readFileSync(file)).toString();
-                let updatedContent = content
-                    .replace(/tload\(/g, 'sload(')
-                    .replace(/tstore\(/g, 'sstore(');
-
-                if (targetFiles.some((target) => file.includes(target))) {
-                    updatedContent = updatedContent
-                        .replace(/TransientStorageCancun/g, 'TransientStorage')
-                        .replace(/TRANSIENT_STORAGE_CANCUN/g, 'TRANSIENT_STORAGE');
-                }
-
-                if (updatedContent !== content) {
-                    console.log(`Updating ${file}`);
-                    fs.writeFileSync(file, updatedContent);
-                }
-            }),
-        );
-    } else if (oldNetwork === 'Linea') {
-        const files = getAllFiles('./contracts');
-        await Promise.all(
-            files.map(async (file) => {
-                const content = (await fs.readFileSync(file)).toString();
-                let updatedContent = content
-                    .replace(/sload\(/g, 'tload(')
-                    .replace(/sstore\(/g, 'tstore(');
-
-                if (targetFiles.some((target) => file.includes(target))) {
-                    updatedContent = updatedContent
-                        .replace(/TransientStorage/g, 'TransientStorageCancun')
-                        .replace(/TRANSIENT_STORAGE/g, 'TRANSIENT_STORAGE_CANCUN');
-                }
-
-                if (updatedContent !== content) {
-                    console.log(`Updating ${file}`);
-                    fs.writeFileSync(file, updatedContent);
-                }
-            }),
-        );
-    }
-}
-
 async function main() {
     try {
         console.log(`Changing repo network from ${oldNetworkName} to ${newNetworkName}...`);
@@ -219,10 +159,8 @@ async function main() {
         console.log('✓ Updated test-sol address imports');
         await changeWethAddress(oldNetworkName, newNetworkName);
         console.log('✓ Updated WETH addresses');
-        await changeHardhatConfig(oldNetworkName, newNetworkName);
+        await changeHardhatConfig(newNetworkName);
         console.log('✓ Updated hardhat config');
-        await excludeCancunSpecificChanges(oldNetworkName, newNetworkName);
-        console.log('✓ Excluded Cancun-specific changes');
         console.log('Compiling contracts...');
         await execShellCommand('npx hardhat compile');
         console.log('✓ Compilation complete');

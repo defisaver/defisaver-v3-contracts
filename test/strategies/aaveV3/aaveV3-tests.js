@@ -39,10 +39,6 @@ const {
 } = require('../utils/utils-strategies');
 
 const {
-    createAaveV3RepayL2Strategy,
-    createAaveFLV3RepayL2Strategy,
-    createAaveV3BoostL2Strategy,
-    createAaveFLV3BoostL2Strategy,
     createAaveV3FLCloseToDebtL2Strategy,
     createAaveV3FLCloseToCollL2Strategy,
     createAaveV3CloseToDebtL2Strategy,
@@ -57,7 +53,6 @@ const {
 } = require('../../../strategies-spec/mainnet');
 const {
     subAaveV3L2AutomationStrategy,
-    updateAaveV3L2AutomationStrategy,
     subAaveV3CloseBundle,
 } = require('../utils/l2-strategy-subs');
 
@@ -83,25 +78,6 @@ const {
 const { aaveV3Supply, aaveV3Borrow } = require('../../utils/actions');
 
 const { RATIO_STATE_OVER } = require('../utils/triggers');
-
-const deployBundles = async () => {
-    await openStrategyAndBundleStorage();
-    const aaveRepayStrategyEncoded = createAaveV3RepayL2Strategy();
-    const aaveRepayFLStrategyEncoded = createAaveFLV3RepayL2Strategy();
-
-    const strategyId1 = await createStrategy(...aaveRepayStrategyEncoded, true);
-    const strategyId2 = await createStrategy(...aaveRepayFLStrategyEncoded, true);
-
-    await createBundle([strategyId1, strategyId2]);
-
-    const aaveBoostStrategyEncoded = createAaveV3BoostL2Strategy();
-    const aaveBoostFLStrategyEncoded = createAaveFLV3BoostL2Strategy();
-
-    const strategyId11 = await createStrategy(...aaveBoostStrategyEncoded, true);
-    const strategyId22 = await createStrategy(...aaveBoostFLStrategyEncoded, true);
-
-    await createBundle([strategyId11, strategyId22]);
-};
 
 const deployCloseToDebtBundle = async (proxy, isFork = undefined, isL1 = false) => {
     await openStrategyAndBundleStorage(isFork);
@@ -260,8 +236,6 @@ const aaveV3RepayStrategyTest = async (numTestPairs) => {
                     debtAssetId,
                 );
 
-                await deployBundles();
-
                 const targetRatio = 230;
                 const ratioUnder = 220;
 
@@ -305,19 +279,7 @@ const aaveV3RepayStrategyTest = async (numTestPairs) => {
                 const ratioBefore = await aaveView.getRatio(addrs[network].AAVE_MARKET, proxyAddr);
                 console.log(`Aave position ratio: ${ratioBefore / 1e16}%`);
 
-                const targetRatio = hre.ethers.utils.parseUnits('2.2', '18');
-                const ratioUnder = hre.ethers.utils.parseUnits('2', '18');
-
-                await updateAaveV3L2AutomationStrategy(
-                    proxy,
-                    subIds.firstSub,
-                    subIds.secondSub,
-                    ratioUnder.toHexString().slice(2),
-                    '0',
-                    '0',
-                    targetRatio.toHexString().slice(2),
-                    false,
-                );
+                subIds = await subAaveV3L2AutomationStrategy(proxy, 200, 0, 0, 220, false);
 
                 const repayAmount = hre.ethers.utils.parseUnits(
                     fetchAmountinUSDPrice(testPairs[i].collAsset, '2300'),
@@ -361,7 +323,6 @@ const aaveV3BoostStrategyTest = async (numTestPairs) => {
         let debtAssetId;
         let flAction;
         let flAddr; // eslint-disable-line no-unused-vars
-        let aaveV3SubProxy;
 
         before(async () => {
             console.log(`Network: ${network}`);
@@ -393,7 +354,6 @@ const aaveV3BoostStrategyTest = async (numTestPairs) => {
             await redeploy('AaveV3Supply', isFork);
             await redeploy('AaveV3Borrow', isFork);
             await redeploy('AaveV3RatioCheck', isFork);
-            aaveV3SubProxy = await redeploy('AaveV3SubProxy', isFork, 8, 9);
             aaveView = await redeploy('AaveV3View', isFork);
             // flAction = await redeploy('FLAction', true);
         });
@@ -450,7 +410,6 @@ const aaveV3BoostStrategyTest = async (numTestPairs) => {
                     targetRatio,
                     0,
                     true,
-                    aaveV3SubProxy.address,
                 );
             });
 

@@ -32,18 +32,6 @@ const curveUsdGetDebtAction = new dfs.actions.curveusd.CurveUsdGetDebtAction(
     debtor
 );
 
-const curveUsdLevCreateAction = new dfs.actions.curveusd.CurveUsdLevCreateAction(
-    controllerAddress,
-    collateralAmount,
-    debtAmount,
-    minAmount,
-    nBands,
-    from,
-    additionData,
-    gasUsed,
-    dfsFeeDivider
-);
-
 const curveUsdLevCreateTransientAction = new dfs.actions.curveusd.CurveUsdLevCreateTransientAction(
     controllerAddress,
     from,
@@ -62,16 +50,6 @@ const curveUsdPaybackAction = new dfs.actions.curveusd.CurveUsdPaybackAction(
     maxActiveBand
 );
 
-const curveUsdRepayAction = new dfs.actions.curveusd.CurveUsdRepayAction(
-    controllerAddress,
-    collAmount,
-    to,
-    minAmount,
-    additionData,
-    gasUsed,
-    dfsFeeDivider
-);
-
 const curveUsdRepayTransientAction = new dfs.actions.curveusd.CurveUsdRepayTransientAction(
     controllerAddress,
     to,
@@ -84,18 +62,6 @@ const curveUsdSelfLiquidateAction = new dfs.actions.curveusd.CurveUsdSelfLiquida
     minCrvUsdExpected,
     from,
     to
-);
-
-const curveUsdSelfLiquidateWithCollAction = new dfs.actions.curveusd.CurveUsdSelfLiquidateWithCollAction(
-    controllerAddress,
-    percentage,
-    minCrvUsdExpected,
-    swapAmount,
-    minAmount,
-    to,
-    additionData,
-    gasUsed,
-    dfsFeeDivider
 );
 
 const curveUsdSelfLiquidateWithCollTransientAction = new dfs.actions.curveusd.CurveUsdSelfLiquidateWithCollTransientAction(

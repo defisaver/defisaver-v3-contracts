@@ -143,7 +143,7 @@ const runPartialExecutionCloseTests = () => {
                 expectedIsEnabled,
             ) => {
                 const partialExecutionWallet =
-                    await partialExecutionStorage.getPartialExecutionWallet(subId);
+                    await partialExecutionStorage.getSubPartialExecutionWallet(subId);
                 const storedSub = await subStorage.getSub(subId);
                 console.log(
                     `EXECUTION WALLET IN PARTIAL EXECUTION STORAGE FOR SUB ${subId}: ${partialExecutionWallet}`,

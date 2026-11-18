@@ -34,7 +34,7 @@ const {
     createStrategy,
     addBotCaller,
     setMCDPriceVerifier,
-    subToMcdProxy,
+    subToStrategy,
 } = require('../utils/utils-strategies');
 
 const { getRatio } = require('../../utils/mcd');
@@ -42,10 +42,6 @@ const { getRatio } = require('../../utils/mcd');
 const {
     createYearnRepayStrategy,
     createYearnRepayStrategyWithExchange,
-    createMcdBoostCompositeStrategy,
-    createMcdFLBoostCompositeStrategy,
-    createMcdRepayCompositeStrategy,
-    createMcdFLRepayCompositeStrategy,
 } = require('../../../strategies-spec/mainnet');
 
 const {
@@ -70,30 +66,6 @@ const {
 const { openVault, yearnSupply } = require('../../utils/actions');
 
 const { RATIO_STATE_OVER } = require('../utils/triggers');
-
-const createRepayBundle = async (proxy, isFork) => {
-    const repayCompositeStrategyEncoded = createMcdRepayCompositeStrategy();
-    const flRepayCompositeStrategyEncoded = createMcdFLRepayCompositeStrategy();
-
-    await openStrategyAndBundleStorage(isFork);
-
-    const strategyId1 = await createStrategy(...repayCompositeStrategyEncoded, true);
-    const strategyId2 = await createStrategy(...flRepayCompositeStrategyEncoded, true);
-
-    return createBundle([strategyId1, strategyId2]);
-};
-
-const createBoostBundle = async (proxy, isFork) => {
-    const boostCompositeStrategy = createMcdBoostCompositeStrategy();
-    const flBoostCompositeStrategy = createMcdFLBoostCompositeStrategy();
-
-    await openStrategyAndBundleStorage(isFork);
-
-    const strategyId1 = await createStrategy(...boostCompositeStrategy, true);
-    const strategyId2 = await createStrategy(...flBoostCompositeStrategy, true);
-
-    return createBundle([strategyId1, strategyId2]);
-};
 
 const mcdBoostStrategyTest = async (numTests) => {
     describe('Mcd-Boost-Strategy', function () {
@@ -123,19 +95,12 @@ const mcdBoostStrategyTest = async (numTests) => {
             await redeploy('MockExchangeWrapper').then(({ address }) =>
                 setNewExchangeWrapper(senderAcc, address),
             );
-            await redeploy('McdRatio');
             await redeploy('McdBoostComposite');
             await redeploy('DFSSell');
 
             await addBotCaller(botAcc.address);
 
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
-        });
-
-        it('... should create boost and repay bundle', async () => {
-            const repayBundleId = await createRepayBundle(proxy);
-            const boostBundleId = await createBoostBundle(proxy);
-            await redeploy('McdSubProxy', false, repayBundleId, boostBundleId);
         });
 
         const ilkSubset = ilks
@@ -166,7 +131,7 @@ const mcdBoostStrategyTest = async (numTests) => {
             expect(openSupplyAmount).to.not.be.eq(0, `cant fetch price for ${tokenData.symbol}`);
 
             let snapshotId;
-            it('... should sub via mcdSubProxy', async () => {
+            it('... should subscribe to the Maker boost bundle', async () => {
                 vaultId = await openVault(
                     proxy,
                     ilkData.ilkLabel,
@@ -176,25 +141,18 @@ const mcdBoostStrategyTest = async (numTests) => {
 
                 console.log('VaultId: ', vaultId);
 
-                const ratioUnder = 180;
                 const ratioOver = 220;
-                const targetRatioRepay = 200;
                 const targetRatioBoost = 200;
-                const boostEnabled = true;
 
-                const subData = automationSdk.strategySubService.makerEncode.leverageManagement(
+                strategySub = automationSdk.strategySubService.makerEncode.leverageManagement(
                     vaultId,
-                    ratioUnder.toString(),
-                    ratioOver.toString(),
-                    targetRatioBoost.toString(),
-                    targetRatioRepay.toString(),
-                    boostEnabled,
+                    ratioOver,
+                    targetRatioBoost,
+                    automationSdk.enums.RatioState.OVER,
+                    true,
+                    DAI_ADDR,
                 );
-
-                ({ boostSubId: subId, boostSub: strategySub } = await subToMcdProxy(
-                    proxy,
-                    subData,
-                ));
+                subId = await subToStrategy(proxy, strategySub);
 
                 snapshotId = await takeSnapshot();
             });
@@ -286,18 +244,12 @@ const mcdRepayStrategyTest = async (numTests) => {
             await redeploy('MockExchangeWrapper').then(({ address }) =>
                 setNewExchangeWrapper(senderAcc, address),
             );
-            await redeploy('McdRatio');
             await redeploy('McdRepayComposite');
 
             await addBotCaller(botAcc.address);
             await setMCDPriceVerifier(mcdRatioTriggerAddr);
 
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
-        });
-
-        it('... should create a repay bundle', async () => {
-            const repayBundleId = await createRepayBundle(proxy);
-            await redeploy('McdSubProxy', false, repayBundleId, 0);
         });
 
         const ilkSubset = ilks
@@ -329,7 +281,7 @@ const mcdRepayStrategyTest = async (numTests) => {
             );
             const openSupplyAmount = fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_USD);
             let snapshotId;
-            it('... should sub via mcdSubProxy', async () => {
+            it('... should subscribe to the Maker repay bundle', async () => {
                 vaultId = await openVault(
                     proxy,
                     ilkData.ilkLabel,
@@ -340,24 +292,17 @@ const mcdRepayStrategyTest = async (numTests) => {
                 console.log('Vault id: ', vaultId);
 
                 const ratioUnder = 260;
-                const ratioOver = 0;
-                const targetRatioBoost = 0;
                 const targetRatioRepay = 290;
-                const boostEnabled = false;
 
-                const subData = automationSdk.strategySubService.makerEncode.leverageManagement(
+                strategySub = automationSdk.strategySubService.makerEncode.leverageManagement(
                     vaultId,
-                    ratioUnder.toString(),
-                    ratioOver.toString(),
-                    targetRatioBoost.toString(),
-                    targetRatioRepay.toString(),
-                    boostEnabled,
+                    ratioUnder,
+                    targetRatioRepay,
+                    automationSdk.enums.RatioState.UNDER,
+                    false,
+                    DAI_ADDR,
                 );
-
-                ({ repaySubId: subId, repaySub: strategySub } = await subToMcdProxy(
-                    proxy,
-                    subData,
-                ));
+                subId = await subToStrategy(proxy, strategySub);
 
                 snapshotId = await takeSnapshot();
             });
@@ -961,6 +906,4 @@ module.exports = {
     mcdRepayFromYearnStrategyTest,
     mcdCloseToDaiStrategyTest,
     mcdCloseToCollStrategyTest,
-    createRepayBundle,
-    createBoostBundle,
 };

@@ -16,6 +16,7 @@ const {
     setNewExchangeWrapper,
     setBalance,
     fetchAmountinUSDPrice,
+    resetForkToBlock,
 } = require('../../utils/utils');
 
 const { supplyComp, executeAction } = require('../../utils/actions');
@@ -30,20 +31,20 @@ const compBoostRecipeTest = async () => {
         let proxy;
         let uniWrapper;
         let compView;
-        let dydxFlAddr;
-        let aaveV2FlAddr;
+        let flActionAddr;
 
         before(async () => {
+            // Preserve the legacy Compound V2 markets used by these recipes.
+            await resetForkToBlock(20000000);
             await redeploy('CompSupply');
             await redeploy('CompBorrow');
             await redeploy('RecipeExecutor');
             await redeploy('DFSSell');
-            await redeploy('FLDyDx');
-            await redeploy('FLAaveV2');
+            await redeploy('FLAction');
+            await redeploy('SendToken');
 
             compView = await redeploy('CompView');
-            dydxFlAddr = await getAddrFromRegistry('FLDyDx');
-            aaveV2FlAddr = await getAddrFromRegistry('FLAaveV2');
+            flActionAddr = await getAddrFromRegistry('FLAction');
 
             uniWrapper = await redeploy('UniswapWrapperV3');
 
@@ -172,7 +173,7 @@ const compBoostRecipeTest = async () => {
             });
         });
 
-        it('...Boost 500 DAI for ETH using dYdX FL', async () => {
+        it('...Boost 500 DAI for ETH using FLAction (Balancer)', async () => {
             const collAsset = 'ETH';
             const debtAsset = 'DAI';
             const debtAmount = 500;
@@ -196,11 +197,13 @@ const compBoostRecipeTest = async () => {
 
             const recipe = new dfs.Recipe('Compound FL Boost', [
                 // Flashloan DAI
-                new dfs.actions.flashloan.DyDxFlashLoanAction(
-                    assetAmountInWei(debtAmount, debtAsset),
-                    getAssetInfo(debtAsset).address,
-                    nullAddress,
-                    [],
+                new dfs.actions.flashloan.FLAction(
+                    new dfs.actions.flashloan.BalancerFlashLoanAction(
+                        [getAssetInfo(debtAsset).address],
+                        [assetAmountInWei(debtAmount, debtAsset)],
+                        nullAddress,
+                        [],
+                    ),
                 ),
                 // Sell DAI for ETH
                 new dfs.actions.basic.SellAction(
@@ -229,7 +232,7 @@ const compBoostRecipeTest = async () => {
                 // Pay DAI flashloan back
                 new dfs.actions.basic.SendTokenAction(
                     getAssetInfo(debtAsset).address,
-                    dydxFlAddr,
+                    flActionAddr,
                     '$1',
                 ),
             ]);
@@ -307,13 +310,15 @@ const compBoostRecipeTest = async () => {
             );
             const recipe = new dfs.Recipe('Compound FL Boost', [
                 // Flashloan BAT
-                new dfs.actions.flashloan.AaveV2FlashLoanAction(
-                    [getAssetInfo(debtAsset).address],
-                    [assetAmountInWei(debtAmount, debtAsset)],
-                    [0],
-                    nullAddress,
-                    nullAddress,
-                    [],
+                new dfs.actions.flashloan.FLAction(
+                    new dfs.actions.flashloan.AaveV2FlashLoanAction(
+                        [getAssetInfo(debtAsset).address],
+                        [assetAmountInWei(debtAmount, debtAsset)],
+                        [0],
+                        nullAddress,
+                        nullAddress,
+                        [],
+                    ),
                 ),
                 // Sell BAT for ETH
                 new dfs.actions.basic.SellAction(
@@ -337,7 +342,7 @@ const compBoostRecipeTest = async () => {
                 new dfs.actions.compound.CompoundBorrowAction(
                     getAssetInfo(`c${debtAsset}`).address,
                     '$1',
-                    aaveV2FlAddr,
+                    flActionAddr,
                 ),
             ]);
 
@@ -400,17 +405,20 @@ const compCreateRecipeTest = async () => {
         let proxy;
         let uniWrapper;
         let compView;
-        let dydxFlAddr;
+        let flActionAddr;
 
         before(async () => {
+            // Preserve the legacy Compound V2 markets used by these recipes.
+            await resetForkToBlock(20000000);
             await redeploy('CompSupply');
             await redeploy('CompBorrow');
             await redeploy('RecipeExecutor');
-            await redeploy('FLDyDx');
+            await redeploy('FLAction');
+            await redeploy('SendToken');
             await redeploy('DFSSell');
 
             compView = await redeploy('CompView');
-            dydxFlAddr = await getAddrFromRegistry('FLDyDx');
+            flActionAddr = await getAddrFromRegistry('FLAction');
 
             uniWrapper = await redeploy('UniswapWrapperV3');
 
@@ -496,7 +504,7 @@ const compCreateRecipeTest = async () => {
             });
         });
 
-        it('...should create a leveraged position of 2000$ in ETH/500 DAI using dYdX FL', async () => {
+        it('...should create a leveraged position of 2000$ in ETH/500 DAI using FLAction (Balancer)', async () => {
             const collAsset = 'ETH';
             const debtAsset = 'DAI';
             const fetchedAmount = fetchAmountinUSDPrice(collAsset, '2000');
@@ -527,11 +535,13 @@ const compCreateRecipeTest = async () => {
 
             const recipe = new dfs.Recipe('Compound Leveraged Create', [
                 // Flashloan DAI
-                new dfs.actions.flashloan.DyDxFlashLoanAction(
-                    assetAmountInWei(debtAmount, debtAsset),
-                    getAssetInfo(debtAsset).address,
-                    nullAddress,
-                    [],
+                new dfs.actions.flashloan.FLAction(
+                    new dfs.actions.flashloan.BalancerFlashLoanAction(
+                        [getAssetInfo(debtAsset).address],
+                        [assetAmountInWei(debtAmount, debtAsset)],
+                        nullAddress,
+                        [],
+                    ),
                 ),
                 // Sell DAI for ETH
                 new dfs.actions.basic.SellAction(
@@ -567,7 +577,7 @@ const compCreateRecipeTest = async () => {
                 // Pay DAI flashloan back
                 new dfs.actions.basic.SendTokenAction(
                     getAssetInfo(debtAsset).address,
-                    dydxFlAddr,
+                    flActionAddr,
                     '$1',
                 ),
             ]);

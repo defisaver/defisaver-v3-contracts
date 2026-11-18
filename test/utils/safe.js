@@ -21,7 +21,10 @@ const SAFE_MASTER_COPY_VERSIONS = {
 };
 
 const encodeSetupArgs = async (setupArgs) => {
-    const safeInterface = await hre.ethers.getContractAt('ISafe', SAFE_SINGLETON_ADDR);
+    const safeInterface = await hre.ethers.getContractAt(
+        'contracts/interfaces/protocols/safe/ISafe.sol:ISafe',
+        SAFE_SINGLETON_ADDR,
+    );
     return safeInterface.interface.encodeFunctionData('setup', setupArgs);
 };
 

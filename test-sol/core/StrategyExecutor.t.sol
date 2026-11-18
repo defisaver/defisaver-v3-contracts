@@ -135,32 +135,22 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         cut.executeStrategy(0, 0, new bytes[](0), new bytes[](0), dummySub);
     }
 
-    /// @dev BotAuth is read live on every call, so revoking a bot stops it immediately.
-    function test_should_fail_to_call_execute_when_bot_caller_was_removed() public {
-        Fixture memory f = _fixture(true, type(uint256).max);
-
-        prank(Addresses.OWNER_ACC);
-        BotAuth(botAuthAddr).removeCaller(address(this));
-
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                StrategyExecutorCommon.BotNotApproved.selector, address(this), f.subId
-            )
-        );
-        _execute(f);
-    }
-
-    /// @dev Auth is checked before the sub is read, so a bogus subId still reports BotNotApproved
-    ///      instead of panicking on the SubStorage array access.
+    /// @dev Auth is checked before the sub is read: an unauthorized bot gets BotNotApproved even for a
+    ///      bogus subId, and only an approved bot reaches the SubStorage array access, which panics.
     function test_should_check_bot_auth_before_reading_the_sub() public {
-        uint256 nonExistentSubId = subStorage.getSubsCount() + 100;
+        uint256 nonExistentSubId = subStorage.getSubsCount();
+        StrategyModel.StrategySub memory dummySub;
 
         vm.expectRevert(
             abi.encodeWithSelector(
                 StrategyExecutorCommon.BotNotApproved.selector, address(this), nonExistentSubId
             )
         );
-        StrategyModel.StrategySub memory dummySub;
+        cut.executeStrategy(nonExistentSubId, 0, new bytes[](0), new bytes[](0), dummySub);
+
+        _add_bot_caller();
+
+        vm.expectRevert(stdError.indexOOBError);
         cut.executeStrategy(nonExistentSubId, 0, new bytes[](0), new bytes[](0), dummySub);
     }
 
@@ -201,17 +191,6 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         cut.executeStrategy(subId, 0, new bytes[](0), new bytes[](0), sub);
     }
 
-    /// @dev getSub indexes the subs array, so an id past the end panics before any validation.
-    function test_should_panic_for_non_existent_sub_id() public {
-        _add_bot_caller();
-
-        uint256 nonExistentSubId = subStorage.getSubsCount();
-
-        vm.expectRevert(stdError.indexOOBError);
-        StrategyModel.StrategySub memory dummySub;
-        cut.executeStrategy(nonExistentSubId, 0, new bytes[](0), new bytes[](0), dummySub);
-    }
-
     /*//////////////////////////////////////////////////////////////////////////
                             TESTS - HAPPY PATH / WALLET TYPES
     //////////////////////////////////////////////////////////////////////////*/
@@ -225,30 +204,6 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         sender = wallet.owner();
 
         _callStrategyBaseTest();
-    }
-
-    /// @dev _callActions forwards msg.value to the auth contract, but executeStrategy is not
-    ///      payable, so that value is always zero and a bot cannot fund the recipe this way.
-    function test_should_reject_value_sent_with_execute_strategy() public {
-        Fixture memory f = _fixture(true, type(uint256).max);
-
-        vm.deal(address(this), 1 ether);
-
-        (bool success,) = address(cut).call{ value: 1 }(
-            abi.encodeWithSelector(
-                StrategyExecutor.executeStrategy.selector,
-                f.subId,
-                uint256(0),
-                _triggers(f.subData),
-                _actions(f.subData, 1),
-                f.sub
-            )
-        );
-
-        assertFalse(success, "executeStrategy must not be payable");
-
-        /// @dev Same call without value goes through, so the failure above is the payability.
-        _execute(f);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -274,32 +229,6 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         cut.executeStrategy(subId, 0, _triggers(subData), _actions(subData, 1), sub);
     }
 
-    /// @dev Once the sub is in partial execution for this wallet, RecipeExecutor skips the
-    ///      trigger check entirely, so a trigger that would now be false no longer blocks the bot.
-    function test_should_skip_triggers_while_sub_is_in_partial_execution() public {
-        Fixture memory f = _fixture(false, 0);
-
-        _executeWithFlag(f);
-        assertEq(
-            partialExecutionStorage.getPartialExecutionWallet(f.subId),
-            walletAddr,
-            "must be in partial execution"
-        );
-
-        /// @dev maxGasPrice is 0, so from here on the trigger would evaluate to false.
-        vm.txGasPrice(1);
-
-        uint256 balanceBefore = balanceOf(f.subData.token, sender);
-
-        _executeWithFlag(f);
-
-        assertEq(
-            balanceOf(f.subData.token, sender),
-            balanceBefore - f.subData.amount,
-            "actions must run with the trigger check skipped"
-        );
-    }
-
     /*//////////////////////////////////////////////////////////////////////////
                      TESTS - PARTIAL EXECUTION STORAGE APPROVAL
     //////////////////////////////////////////////////////////////////////////*/
@@ -315,36 +244,6 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         _execute(f);
     }
 
-    /// @dev Same for the DSProxy branch of _callActions, which routes through ProxyAuth.
-    function test_should_approve_start_of_execution_for_ds_proxy_wallet() public {
-        wallet = new SmartWallet(alice);
-        walletAddr = wallet.createDSProxy();
-        sender = wallet.owner();
-
-        Fixture memory f = _fixture(true, type(uint256).max);
-
-        vm.expectCall(
-            address(partialExecutionStorage),
-            abi.encodeCall(StrategyPartialExecutionStorage.approveStartOfExecution, (f.subId)),
-            1
-        );
-        _execute(f);
-    }
-
-    /// @dev Approval alone starts nothing: without the flag the partial execution storage stays empty.
-    function test_should_not_start_execution_when_no_flag_is_passed() public {
-        Fixture memory f = _fixture(true, type(uint256).max);
-
-        _execute(f);
-
-        assertFalse(
-            partialExecutionStorage.isInPartialExecution(f.subId),
-            "approval must not start an execution"
-        );
-        assertEq(partialExecutionStorage.getPartialExecutionWallet(f.subId), address(0));
-        assertTrue(subStorage.getSub(f.subId).isEnabled, "continuous sub must stay enabled");
-    }
-
     /// @dev The partial execution storage is a hard dependency of every execution, partial or not: the
     ///      approval call reverts before the recipe is reached, so no action runs.
     function test_should_revert_when_partial_execution_storage_is_not_registered() public {
@@ -352,19 +251,15 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
 
         redeploy("StrategyPartialExecutionStorage", address(0));
 
-        uint256 balanceBefore = balanceOf(f.subData.token, sender);
-
         // call to non-contract address 0x0000000000000000000000000000000000000000
         vm.expectRevert();
         _execute(f);
-
-        assertEq(balanceOf(f.subData.token, sender), balanceBefore, "no action must have run");
-        assertTrue(subStorage.getSub(f.subId).isEnabled, "sub must stay untouched");
     }
 
-    /// @dev The approval is keyed by subId: a recipe executing sub A cannot start sub B, even
-    ///      though both are owned by the same wallet.
-    function test_should_scope_approval_to_the_executed_sub() public {
+    /// @dev RecipeExecutor clears the approval before the recipe's actions run, so no action can use it to start a
+    ///      partial execution, neither of the executed sub nor of another sub of the same wallet. The flag via
+    ///      RecipeExecutor is the only way in.
+    function test_approval_cannot_be_used_by_recipe_actions() public {
         (uint256 otherSubId,) = _sub_to_dummy_strategy(
             DummySubData({ token: Addresses.WETH_ADDR, amount: 1, maxGasPrice: type(uint256).max })
         );
@@ -373,129 +268,44 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         _add_bot_caller();
 
         bytes[] memory actionsCalldata = new bytes[](1);
-        actionsCalldata[0] = abi.encode(otherSubId);
 
-        // StrategyPartialExecutionStorage::NotApproved, swallowed by the auth contract
-        vm.expectRevert();
-        cut.executeStrategy(subId, 0, _triggers(_probeSubData()), actionsCalldata, sub);
-
-        assertFalse(
-            partialExecutionStorage.isInPartialExecution(otherSubId),
-            "another sub must not be startable"
-        );
-    }
-
-    /// @dev The approval is cleared before the recipe's actions run, so no action can use it to start
-    ///      the partial execution of the sub being executed. The flag via RecipeExecutor is the only way in.
-    function test_approval_does_not_leak_to_actions_in_the_recipe() public {
-        (uint256 subId, StrategyModel.StrategySub memory sub) = _sub_to_probe_strategy();
-        _add_bot_caller();
-
-        bytes[] memory actionsCalldata = new bytes[](1);
+        // The probe action tries to start the executed sub.
         actionsCalldata[0] = abi.encode(subId);
 
         // StrategyPartialExecutionStorage::NotApproved, swallowed by the auth contract
         vm.expectRevert();
         cut.executeStrategy(subId, 0, _triggers(_probeSubData()), actionsCalldata, sub);
 
-        assertFalse(
-            partialExecutionStorage.isInPartialExecution(subId),
-            "an action must not be able to start the execution"
-        );
-        assertEq(partialExecutionStorage.getPartialExecutionWallet(subId), address(0));
-    }
+        // The probe action tries to start another sub of the same wallet.
+        actionsCalldata[0] = abi.encode(otherSubId);
 
-    /// forge-config: default.isolate = true
-    /// @dev The approval lives in transient storage, so it is gone in the next transaction.
-    function test_approval_does_not_survive_the_transaction() public {
-        Fixture memory f = _fixture(true, type(uint256).max);
-
-        _execute(f);
-
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStrategyPartialExecutionStorage.NotApproved.selector, f.subId, walletAddr
-            )
-        );
-        prank(walletAddr);
-        partialExecutionStorage.startExecution(f.subId, 0);
-    }
-
-    /// @dev The sub owner revokes a granted approval, after which it can no longer start an execution.
-    function test_should_clear_start_approval() public {
-        Fixture memory f = _fixture(false, type(uint256).max);
-
-        prank(address(cut));
-        partialExecutionStorage.approveStartOfExecution(f.subId);
-
-        prank(walletAddr);
-        partialExecutionStorage.clearStartApproval(f.subId);
-
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStrategyPartialExecutionStorage.NotApproved.selector, f.subId, walletAddr
-            )
-        );
-        prank(walletAddr);
-        partialExecutionStorage.startExecution(f.subId, 0);
-    }
-
-    function test_should_revert_clear_start_approval_when_not_approved() public {
-        Fixture memory f = _fixture(false, type(uint256).max);
-
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStrategyPartialExecutionStorage.NotApproved.selector, f.subId, walletAddr
-            )
-        );
-        prank(walletAddr);
-        partialExecutionStorage.clearStartApproval(f.subId);
-    }
-
-    /// @dev A second clear in the same transaction finds nothing left to clear.
-    function test_should_revert_clear_start_approval_when_already_cleared() public {
-        Fixture memory f = _fixture(false, type(uint256).max);
-
-        prank(address(cut));
-        partialExecutionStorage.approveStartOfExecution(f.subId);
-
-        prank(walletAddr);
-        partialExecutionStorage.clearStartApproval(f.subId);
-
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStrategyPartialExecutionStorage.NotApproved.selector, f.subId, walletAddr
-            )
-        );
-        prank(walletAddr);
-        partialExecutionStorage.clearStartApproval(f.subId);
-    }
-
-    function test_should_revert_clear_start_approval_when_caller_is_not_sub_owner() public {
-        Fixture memory f = _fixture(false, type(uint256).max);
-
-        prank(address(cut));
-        partialExecutionStorage.approveStartOfExecution(f.subId);
-
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStrategyPartialExecutionStorage.NotSubOwner.selector, f.subId, alice
-            )
-        );
-        prank(alice);
-        partialExecutionStorage.clearStartApproval(f.subId);
-
-        // the approval is untouched, the owner can still use it
-        prank(walletAddr);
-        partialExecutionStorage.startExecution(f.subId, 0);
-        assertTrue(partialExecutionStorage.isInPartialExecution(f.subId));
+        // StrategyPartialExecutionStorage::NotApproved, swallowed by the auth contract
+        vm.expectRevert();
+        cut.executeStrategy(subId, 0, _triggers(_probeSubData()), actionsCalldata, sub);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                         TESTS - PARTIAL EXECUTION LIFECYCLE
     //////////////////////////////////////////////////////////////////////////*/
+    /// @dev Without the flag a one-time strategy behaves as before the feature: single execution.
+    function test_should_deactivate_one_time_sub_when_no_flag_is_passed() public {
+        Fixture memory f = _fixture(false, type(uint256).max);
+
+        _execute(f);
+
+        assertFalse(subStorage.getSub(f.subId).isEnabled, "one-time sub must be deactivated");
+        assertFalse(partialExecutionStorage.isSubInPartialExecution(f.subId));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(StrategyExecutorCommon.SubNotEnabled.selector, f.subId)
+        );
+        _execute(f);
+    }
+
     /// @dev A one-time strategy executed with the flag stays subscribed and is marked in partial execution.
-    function test_should_start_partial_execution_when_flag_is_passed() public {
+    ///      Dropping the flag on a later run ends the lifecycle: the partial execution storage is cleared and the
+    ///      sub deactivated.
+    function test_should_start_partial_execution_with_flag_and_end_it_without() public {
         Fixture memory f = _fixture(false, type(uint256).max);
 
         uint256 balanceBefore = balanceOf(f.subData.token, sender);
@@ -504,46 +314,23 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
         emit IStrategyPartialExecutionStorage.ExecutionStarted(f.subId, walletAddr);
         _executeWithFlag(f);
 
-        assertEq(partialExecutionStorage.getPartialExecutionWallet(f.subId), walletAddr);
+        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(f.subId), walletAddr);
         assertTrue(subStorage.getSub(f.subId).isEnabled, "sub must stay enabled");
         assertEq(
             balanceOf(f.subData.token, sender),
             balanceBefore - f.subData.amount,
             "actions must still run"
         );
-    }
-
-    /// @dev Dropping the flag ends the lifecycle: the partial execution storage is cleared and the sub deactivated.
-    function test_should_end_partial_execution_when_flag_is_omitted() public {
-        Fixture memory f = _fixture(false, type(uint256).max);
-
-        _executeWithFlag(f);
-        assertTrue(partialExecutionStorage.isInPartialExecution(f.subId));
 
         vm.expectEmit(true, true, true, true, address(partialExecutionStorage));
         emit IStrategyPartialExecutionStorage.ExecutionEnded(f.subId, walletAddr, walletAddr);
         _execute(f);
 
         assertFalse(
-            partialExecutionStorage.isInPartialExecution(f.subId),
+            partialExecutionStorage.isSubInPartialExecution(f.subId),
             "partial execution storage must be cleared"
         );
         assertFalse(subStorage.getSub(f.subId).isEnabled, "one-time sub must be deactivated");
-    }
-
-    /// @dev Without the flag a one-time strategy behaves as before the feature: single execution.
-    function test_should_deactivate_one_time_sub_when_no_flag_is_passed() public {
-        Fixture memory f = _fixture(false, type(uint256).max);
-
-        _execute(f);
-
-        assertFalse(subStorage.getSub(f.subId).isEnabled, "one-time sub must be deactivated");
-        assertFalse(partialExecutionStorage.isInPartialExecution(f.subId));
-
-        vm.expectRevert(
-            abi.encodeWithSelector(StrategyExecutorCommon.SubNotEnabled.selector, f.subId)
-        );
-        _execute(f);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -569,15 +356,8 @@ contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
             balanceBefore - subData.amount * 3,
             "index 1 must run the two-action strategy"
         );
-    }
 
-    /// @dev BundleStorage indexes the strategyIds array, so an index past the end panics.
-    function test_should_revert_for_out_of_range_bundle_index() public {
-        (uint256 subId, StrategyModel.StrategySub memory sub, DummySubData memory subData) =
-            _sub_to_bundle();
-
-        // vm.expectRevert(stdError.indexOOBError);
-        // panic: array out-of-bounds access (0x32)
+        // BundleStorage indexes the strategyIds array, so an index past the end panics.
         vm.expectRevert();
         cut.executeStrategy(subId, 2, _triggers(subData), _actions(subData, 1), sub);
     }

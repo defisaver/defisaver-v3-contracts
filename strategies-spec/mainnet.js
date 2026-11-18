@@ -647,9 +647,11 @@ const createLiquityCloseToCollStrategy = (isTrailing = false) => {
     }
 
     liquityCloseToCollStrategy.addTrigger(trigger);
-    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
-        '%loanAmount', // (trove.debt - 200 LUSD) in weth + a bit over to handle slippage
-        '&weth', // hardcoded only weth is used (currently must be set by backend)
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['&weth'],
+            ['%loanAmount'], // (trove.debt - 200 LUSD) in weth plus slippage
+        ),
     );
 
     const sellAction = new dfs.actions.basic.SellAction(
@@ -672,7 +674,7 @@ const createLiquityCloseToCollStrategy = (isTrailing = false) => {
 
     const sendFL = new dfs.actions.basic.SendTokenAction(
         '&weth', // hardcoded only can send weth
-        '%balancerFlAddr', // kept variable this can change (FL must be paid back to work)
+        '%flActionAddr', // kept variable this can change (FL must be paid back to work)
         '$1', // hardcoded output from FL action
     );
 
@@ -2916,43 +2918,6 @@ const createLiquityDsrSupplyStrategy = () => {
     return liquityDsrSupplyStrategy.encodeForDsProxyCall();
 };
 
-const createCurveUsdAdvancedRepayStrategy = () => {
-    const repayStrategy = new dfs.Strategy('CurveUsdAdvancedRepayStrategy');
-
-    repayStrategy.addSubSlot('&controllerAddress', 'address');
-    repayStrategy.addSubSlot('&ratioState', 'uint8');
-    repayStrategy.addSubSlot('&targetRatio', 'uint256');
-    repayStrategy.addSubSlot('&collAddress', 'address');
-    repayStrategy.addSubSlot('&crvUsdAddress', 'address');
-
-    const curveUsdCollRatioTrigger = new dfs.triggers.CurveUsdCollRatioTrigger(
-        nullAddress,
-        nullAddress,
-        '0',
-        '0',
-    );
-    repayStrategy.addTrigger(curveUsdCollRatioTrigger);
-
-    const curveUsdRepayAction = new dfs.actions.curveusd.CurveUsdRepayAction(
-        '&controllerAddress', // taken from subdata
-        '%collAmount', // calculated by backend
-        '&eoa', // most likely wont be used as this will only be partial repay
-        '%minAmount', // calculated by backend
-        '%additionalData', // packed data for exchange
-        '%gasUsed', // sent by backend
-        '%dfsFeeDivider', // 400 (25bps)
-    );
-
-    const curveUsdCollRatioCheckAction = new dfs.actions.checkers.CurveUsdCollRatioCheck(
-        '&ratioState', // taken from subdata
-        '&targetRatio', // taken from subdata
-        '&controllerAddress', // taken from subdata
-    );
-
-    repayStrategy.addAction(curveUsdRepayAction);
-    repayStrategy.addAction(curveUsdCollRatioCheckAction);
-    return repayStrategy.encodeForDsProxyCall();
-};
 const createCurveUsdRepayStrategy = () => {
     const repayStrategy = new dfs.Strategy('CurveUsdRepayStrategy');
 
@@ -6573,6 +6538,170 @@ const createAaveV3FLCollateralSwitchStrategy = () => {
     return aaveV3FLCollateralSwitchStrategy.encodeForDsProxyCall();
 };
 
+const createAaveV3GenericFLCollateralSwitchStrategy = () => {
+    const aaveV3GenericFLCollateralSwitchStrategy = new dfs.Strategy(
+        'AaveV3GenericFLCollateralSwitchStrategy',
+    );
+
+    aaveV3GenericFLCollateralSwitchStrategy.addSubSlot('&fromAsset', 'address');
+    aaveV3GenericFLCollateralSwitchStrategy.addSubSlot('&fromAssetId', 'uint16');
+    aaveV3GenericFLCollateralSwitchStrategy.addSubSlot('&toAsset', 'address');
+    aaveV3GenericFLCollateralSwitchStrategy.addSubSlot('&toAssetId', 'uint16');
+    aaveV3GenericFLCollateralSwitchStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3GenericFLCollateralSwitchStrategy.addSubSlot('&amountToSwitch', 'uint256');
+    aaveV3GenericFLCollateralSwitchStrategy.addSubSlot('&user', 'address');
+
+    const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
+    aaveV3GenericFLCollateralSwitchStrategy.addTrigger(trigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%fromAsset'], // Sent by backend.
+            ['%flAmount'], // Sent by backend.
+        ),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&fromAsset',
+            '&toAsset',
+            '%flAmount', // Sent by backend.
+            '%exchangeWrapper', // Sent by backend.
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // Sent by backend.
+        '&toAsset',
+        '$2',
+    );
+    const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
+        '%false', // useDefaultMarket - Sent by backend.
+        '&marketAddr',
+        '$3',
+        '&proxy',
+        '&toAsset',
+        '&toAssetId',
+        '%true', // enableAsColl - Sent by backend.
+        '%true', // useOnBehalf - Sent by backend.
+        '&user',
+    );
+    /// @dev No effect for proxy positions where aTokens are already on the proxy.
+    /// Required for EOA positions so withdraw can burn pulled aTokens.
+    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+        '%aFromTokenAddr', // aToken for fromAsset - Sent by backend.
+        '&user',
+        '&amountToSwitch',
+    );
+    const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        '%false', // useDefaultMarket - Sent by backend.
+        '&marketAddr',
+        '$5',
+        '&proxy',
+        '&fromAssetId',
+    );
+    const returnFLAction = new dfs.actions.basic.SendTokenAction(
+        '&fromAsset',
+        '%flAddress', // Sent by backend.
+        '$1',
+    );
+    const returnAnyDust = new dfs.actions.basic.SendTokenAndUnwrapAction(
+        '&fromAsset',
+        '&eoa',
+        '%max(uint)', // Sent by backend.
+    );
+
+    aaveV3GenericFLCollateralSwitchStrategy.addActions([
+        flAction,
+        sellAction,
+        feeTakingAction,
+        supplyAction,
+        pullTokenAction,
+        withdrawAction,
+        returnFLAction,
+        returnAnyDust,
+    ]);
+
+    return aaveV3GenericFLCollateralSwitchStrategy.encodeForDsProxyCall();
+};
+
+const createAaveV3GenericFLDebtSwitchStrategy = () => {
+    const aaveV3GenericFLDebtSwitchStrategy = new dfs.Strategy('AaveV3GenericFLDebtSwitchStrategy');
+
+    aaveV3GenericFLDebtSwitchStrategy.addSubSlot('&fromAsset', 'address');
+    aaveV3GenericFLDebtSwitchStrategy.addSubSlot('&fromAssetId', 'uint16');
+    aaveV3GenericFLDebtSwitchStrategy.addSubSlot('&toAsset', 'address');
+    aaveV3GenericFLDebtSwitchStrategy.addSubSlot('&toAssetId', 'uint16');
+    aaveV3GenericFLDebtSwitchStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3GenericFLDebtSwitchStrategy.addSubSlot('&amountToSwitch', 'uint256');
+    aaveV3GenericFLDebtSwitchStrategy.addSubSlot('&user', 'address');
+
+    const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
+    aaveV3GenericFLDebtSwitchStrategy.addTrigger(trigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%toAsset'], // Sent by backend.
+            ['%flAmount'], // Sent by backend.
+        ),
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&toAsset',
+            '&fromAsset',
+            '%flAmount', // Sent by backend
+            '%exchangeWrapper', // Sent by backend.
+        ),
+        '&proxy',
+        '&proxy',
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // Sent by backend.
+        '&fromAsset',
+        '$2',
+    );
+
+    const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
+        '%false', //  useDefaultMarket - Sent by backend.
+        '&marketAddr',
+        '&amountToSwitch',
+        '&proxy',
+        '%rateMode', // variable type of debt - Sent by backend
+        '&fromAsset',
+        '&fromAssetId',
+        '%true', // useOnBehalf - hardcoded to true - Sent by backend
+        '&user', // onBehalf
+    );
+
+    const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
+        '%false', // useDefaultMarket - Sent by backend
+        '&marketAddr',
+        '$1', // output of FL action
+        '%flAddress', // Sent by backend
+        '%rateMode', // variable type of debt - Sent by backend
+        '&toAssetId',
+        '%true', // useOnBehalf - hardcoded to true - Sent by backend
+        '&user', // onBehalf
+    );
+
+    const returnAnyDust = new dfs.actions.basic.SendTokenAndUnwrapAction(
+        '&fromAsset',
+        '&eoa',
+        '%max(uint)', // Sent by backend,
+    );
+
+    aaveV3GenericFLDebtSwitchStrategy.addAction(flAction);
+    aaveV3GenericFLDebtSwitchStrategy.addAction(sellAction);
+    aaveV3GenericFLDebtSwitchStrategy.addAction(feeTakingAction);
+    aaveV3GenericFLDebtSwitchStrategy.addAction(paybackAction);
+    aaveV3GenericFLDebtSwitchStrategy.addAction(borrowAction);
+    aaveV3GenericFLDebtSwitchStrategy.addAction(returnAnyDust);
+
+    return aaveV3GenericFLDebtSwitchStrategy.encodeForDsProxyCall();
+};
+
 const createSparkGenericFLCloseToCollStrategy = () => {
     const sparkGenericFLCloseToCollStrategy = new dfs.Strategy('SparkGenericFLCloseToCollStrategy');
 
@@ -8910,7 +9039,6 @@ module.exports = {
     createLiquityDsrPaybackStrategy,
     createLiquityDsrSupplyStrategy,
     createLiquityDebtInFrontRepayStrategy,
-    createCurveUsdAdvancedRepayStrategy,
     createCurveUsdRepayStrategy,
     createCurveUsdFLRepayStrategy,
     createCurveUsdBoostStrategy,
@@ -8966,6 +9094,8 @@ module.exports = {
     createAaveV3GenericFLCloseToCollStrategy,
     createAaveV3GenericFLCloseToDebtStrategy,
     createAaveV3FLCollateralSwitchStrategy,
+    createAaveV3GenericFLCollateralSwitchStrategy,
+    createAaveV3GenericFLDebtSwitchStrategy,
     createSparkGenericFLCloseToCollStrategy,
     createSparkGenericFLCloseToDebtStrategy,
     createMorphoBlueFLCloseToCollStrategy,

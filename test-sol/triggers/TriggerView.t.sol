@@ -6,7 +6,7 @@ import { ISubStorage } from "../../contracts/interfaces/core/ISubStorage.sol";
 import { ITrigger } from "../../contracts/interfaces/core/ITrigger.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
 import { RegistryUtils } from "../utils/RegistryUtils.sol";
-import { TriggerView } from "../../contracts/views/strategy/TriggerView.sol";
+import { TriggerView } from "../../contracts/views/TriggerView.sol";
 import { BundleStorage } from "../../contracts/core/strategy/BundleStorage.sol";
 import { StrategyStorage } from "../../contracts/core/strategy/StrategyStorage.sol";
 import {
@@ -182,7 +182,7 @@ contract TestTriggerView is BaseTest, RegistryUtils, TriggerView {
         prank(subOwnerWallet);
         partialExecutionStorage.startExecution(_subId, 0);
 
-        assertEq(partialExecutionStorage.getPartialExecutionWallet(_subId), subOwnerWallet);
+        assertEq(partialExecutionStorage.getSubPartialExecutionWallet(_subId), subOwnerWallet);
     }
 
     /// @dev Mocks the ratio + min debt trigger outcomes, runs checkTriggers and asserts the result.

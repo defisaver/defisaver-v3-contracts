@@ -37,7 +37,7 @@ ignored=(
   actions/llamalend
   actions/lsv
   actions/mcd
-  actions/merkel
+  actions/merkl
   actions/morpho
   actions/morpho-blue
   actions/reflexer

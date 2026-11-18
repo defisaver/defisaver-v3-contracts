@@ -3,7 +3,6 @@ pragma solidity =0.8.24;
 
 import { AaveV3Borrow } from "../../../contracts/actions/aaveV3/AaveV3Borrow.sol";
 import { AaveV3Payback } from "../../../contracts/actions/aaveV3/AaveV3Payback.sol";
-import { AaveV3SubProxy } from "../../../contracts/actions/aaveV3/AaveV3SubProxy.sol";
 import { AaveV3Supply } from "../../../contracts/actions/aaveV3/AaveV3Supply.sol";
 import { AaveV3Withdraw } from "../../../contracts/actions/aaveV3/AaveV3Withdraw.sol";
 import { AaveV3RatioCheck } from "../../../contracts/actions/checkers/AaveV3RatioCheck.sol";
@@ -15,6 +14,7 @@ import { SafeModuleAuth } from "../../../contracts/core/strategy/SafeModuleAuth.
 import { StrategyExecutor } from "../../../contracts/core/strategy/StrategyExecutor.sol";
 import { StrategyModel } from "../../../contracts/core/strategy/StrategyModel.sol";
 import { SubStorage } from "../../../contracts/core/strategy/SubStorage.sol";
+import { SubProxy } from "../../../contracts/core/strategy/SubProxy.sol";
 import {
     WrapperExchangeRegistry
 } from "../../../contracts/exchangeV3/registries/WrapperExchangeRegistry.sol";
@@ -193,17 +193,15 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils, AaveV3Te
     }
 
     function _subToAutomationBundles(bool _isSafe) internal {
-        AaveV3SubProxy subProxy = new AaveV3SubProxy(repayBundleId, boostBundleId);
+        SubProxy subProxy = new SubProxy();
+        repaySub = _buildRepaySub();
+        boostSub = _buildBoostSub();
 
-        AaveV3SubProxy.AaveSubData memory params = user.subToAutomationBundles(
-            _isSafe, address(subProxy), MIN_RATIO, MAX_RATIO, TARGET_RATIO_BOOST, TARGET_RATIO_REPAY
-        );
+        user.subscribeToStrategy(_isSafe, address(subProxy), repaySub);
+        user.subscribeToStrategy(_isSafe, address(subProxy), boostSub);
 
         repaySubId = SubStorage(SUB_STORAGE_ADDR).getSubsCount() - 2;
         boostSubId = SubStorage(SUB_STORAGE_ADDR).getSubsCount() - 1;
-
-        repaySub = _formatRepaySub(params);
-        boostSub = _formatBoostSub(params);
     }
 
     function _walletSetUpBeforeEachTest(bool _isSafe) internal returns (bool) {
@@ -378,43 +376,35 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils, AaveV3Te
     /*//////////////////////////////////////////////////////////////////////////
                                        HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function _formatRepaySub(AaveV3SubProxy.AaveSubData memory _user)
-        public
-        view
-        returns (StrategyModel.StrategySub memory sub)
-    {
+    function _buildRepaySub() public view returns (StrategyModel.StrategySub memory sub) {
         sub.strategyOrBundleId = repayBundleId;
         sub.isBundle = true;
 
         bytes memory triggerData = abi.encode(
-            wallet, AAVE_MARKET, uint256(_user.minRatio), uint8(AaveV3SubProxy.RatioState.UNDER)
+            wallet, AAVE_MARKET, uint256(MIN_RATIO), uint8(AaveV3RatioTrigger.RatioState.UNDER)
         );
         sub.triggerData = new bytes[](1);
         sub.triggerData[0] = triggerData;
 
         sub.subData = new bytes32[](4);
-        sub.subData[0] = bytes32(uint256(_user.targetRatioRepay)); // targetRatio
+        sub.subData[0] = bytes32(uint256(TARGET_RATIO_REPAY)); // targetRatio
         sub.subData[1] = bytes32(uint256(1)); // ratioState = repay
         sub.subData[2] = bytes32(uint256(1)); // useDefaultMarket = true
         sub.subData[3] = bytes32(uint256(0)); // onBehalfOf = false
     }
 
-    function _formatBoostSub(AaveV3SubProxy.AaveSubData memory _user)
-        public
-        view
-        returns (StrategyModel.StrategySub memory sub)
-    {
+    function _buildBoostSub() public view returns (StrategyModel.StrategySub memory sub) {
         sub.strategyOrBundleId = boostBundleId;
         sub.isBundle = true;
 
         bytes memory triggerData = abi.encode(
-            wallet, AAVE_MARKET, uint256(_user.maxRatio), uint8(AaveV3SubProxy.RatioState.OVER)
+            wallet, AAVE_MARKET, uint256(MAX_RATIO), uint8(AaveV3RatioTrigger.RatioState.OVER)
         );
         sub.triggerData = new bytes[](1);
         sub.triggerData[0] = triggerData;
 
         sub.subData = new bytes32[](5);
-        sub.subData[0] = bytes32(uint256(_user.targetRatioBoost)); // targetRatio
+        sub.subData[0] = bytes32(uint256(TARGET_RATIO_BOOST)); // targetRatio
         sub.subData[1] = bytes32(uint256(0)); // ratioState = boost
         sub.subData[2] = bytes32(uint256(1)); // useDefaultMarket = true
         sub.subData[3] = bytes32(uint256(0)); // onBehalfOf = false

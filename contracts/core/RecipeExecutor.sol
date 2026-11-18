@@ -4,8 +4,8 @@ pragma solidity =0.8.24;
 
 /**
  * @title RecipeExecutor
- * @notice Entry point for executing recipes (manually or as part of a strategy)
- * @dev RecipeExecutor can be used in two scenarios:
+ * @notice Entry point for executing recipes (manually, as part of a strategy, or through TxSaver)
+ * @dev RecipeExecutor can be used in three scenarios:
  * 1) Execute a recipe manually through user's wallet by calling executeRecipe().
  *    Supports 4 smart wallet types:
  *    - safe wallet
@@ -100,6 +100,17 @@ pragma solidity =0.8.24;
  *                                        │              │                                         └────────────────────────┘
  *                                        └──────────────┘
  *
+ * 3) Execute a recipe through TxSaver
+ *    Supports safe wallet only.
+ *    Executing recipe actions is not shown as it is the same as previous scenarios (manually or as part of a strategy).
+ *
+ *          executeTx()                       execTransaction()                    Delegate call
+ *  ┌─────┐              ┌─────────────────┐                   ┌──────────────┐  - executeRecipeFromTxSaver() ┌─────────────────┐
+ *  │ Bot ├─────────────►│ TxSaverExecutor ├──────────────────►│ Safe Wallet  ├──────────────────────────────►│ Recipe Executor │
+ *  └─────┘              └─────────────────┘                   └──────────────┘                               └────────┬────────┘
+ *                                                                                                                     │
+ *                                                                                                                     ▼
+ *                                                                                                                    ...
  *
  *
  */
@@ -156,7 +167,7 @@ contract RecipeExecutor is
     //////////////////////////////////////////////////////////////*/
 
     /// For strategy execution all triggers must be active
-    error TriggerNotActiveError(uint256);
+    error TriggerNotActiveError(uint256 triggerIndex);
 
     /// For TxSaver, total gas cost fee taken from user can't be higher than maxTxCost set by user
     error TxCostInFeeTokenTooHighError(uint256 maxTxCost, uint256 txCost);
@@ -238,6 +249,9 @@ contract RecipeExecutor is
     }
 
     /// @notice Called by user wallet through the auth contract to execute a recipe & check triggers
+    /// @dev If sub is already in partial execution state, it will skip the trigger check and sub data update
+    /// @dev It is possible for the position to be closed manually during partial execution, leaving the subscription enabled.
+    ///      Such subscriptions cannot be disabled on-chain and must be flagged and handled by the backend.
     /// @param _subId Id of the subscription we want to execute
     /// @param _actionCallData All input data needed to execute actions
     /// @param _triggerCallData All input data needed to check triggers
@@ -269,7 +283,7 @@ contract RecipeExecutor is
 
         // skip triggers check if the sub is already in partial execution
         // deliberately skips updating sub data too
-        if (!_isInPartialExecutionState(partialExecutionStorage, _subId)) {
+        if (!_isSubInPartialExecutionForThisWallet(partialExecutionStorage, _subId)) {
             _requireTriggers(_subId, strategy, _sub, _triggerCallData);
         }
 
@@ -278,7 +292,7 @@ contract RecipeExecutor is
             // don't disable sub if partialExecution is active
             if (_isStrategyPartialExecutionActive(_actionCallData, strategy.actionIds.length)) {
                 // if sub is not already in partial execution, start it
-                if (!partialExecutionStorage.isInPartialExecution(_subId)) {
+                if (!partialExecutionStorage.isSubInPartialExecution(_subId)) {
                     partialExecutionStorage.startExecution(_subId, strategyId);
                 }
             } else {
@@ -303,6 +317,7 @@ contract RecipeExecutor is
 
     /// @notice This is the callback function that FL actions call
     /// @dev FL function must be the first action and repayment is done last
+    /// @dev This function is callable by anyone, but only calls originating from a flash loan action have semantic meaning.
     /// @param _currRecipe Recipe to be executed
     /// @param _flAmount Result value from FL action
     function executeActionsFromFL(Recipe calldata _currRecipe, bytes32 _flAmount)
@@ -477,11 +492,11 @@ contract RecipeExecutor is
         _removePermissionFrom(walletType, _flActionAddr);
     }
 
-    function _isInPartialExecutionState(
+    function _isSubInPartialExecutionForThisWallet(
         IStrategyPartialExecutionStorage _partialExecutionStorage,
         uint256 _subId
     ) internal view returns (bool) {
-        return _partialExecutionStorage.getPartialExecutionWallet(_subId) == address(this);
+        return _partialExecutionStorage.getSubPartialExecutionWallet(_subId) == address(this);
     }
 
     /// @notice Checks if the specified address is of FL type action

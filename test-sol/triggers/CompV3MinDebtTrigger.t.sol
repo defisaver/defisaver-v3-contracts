@@ -168,7 +168,7 @@ contract TestCompV3MinDebtTrigger is BaseTest {
         }
 
         if (_targetDebtUsd > 0 && !_openDebtPosition(_market, user, _targetDebtUsd)) {
-            console.log("SKIPPED, no usable collateral or base price:", _market);
+            console.log("SKIPPED, no usable collateral, base price or Comet is paused:", _market);
             return;
         }
 
@@ -200,6 +200,9 @@ contract TestCompV3MinDebtTrigger is BaseTest {
         internal
         returns (bool)
     {
+        // Supply (collateral) and withdraw (borrow) must both be open on the Comet.
+        if (IComet(_market).isSupplyPaused() || IComet(_market).isWithdrawPaused()) return false;
+
         address collateral = _collateralFor(_market);
         address baseToken = IComet(_market).baseToken();
         if (collateral == address(0) || getTokenPriceInUSD(baseToken) == 0) return false;

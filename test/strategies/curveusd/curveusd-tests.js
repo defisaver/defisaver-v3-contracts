@@ -33,7 +33,6 @@ const {
 } = require('../utils/strategy-subs');
 const {
     callCurveUsdRepayStrategy,
-    callCurveUsdAdvancedRepayStrategy,
     callCurveUsdFLRepayStrategy,
     callCurveUsdBoostStrategy,
     callCurveUsdFLDebtBoostStrategy,
@@ -293,7 +292,6 @@ const curveUsdRepayStrategyTest = async () => {
             await redeploy('DFSSell');
             await redeploy('FLAction');
             await redeploy('SendTokens');
-            await redeploy('CurveUsdRepay');
             await addBotCaller(botAcc.address);
 
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
@@ -336,49 +334,6 @@ const curveUsdRepayStrategyTest = async () => {
                     collateralAsset.address,
                     crvUsdAddress,
                 ));
-            });
-            it(`Executes advanced repay strategy for ${assetSymbol} market`, async () => {
-                snapshot = await takeSnapshot();
-                const userDataBefore = await crvusdView.userData(controllerAddress, proxy.address);
-                const collRatioBefore = userDataBefore.collRatio;
-                const repayAmount = hre.ethers.utils.parseUnits(
-                    fetchAmountinUSDPrice(assetSymbol, REPAY_AMOUNT_USD),
-                    collateralAsset.decimals,
-                );
-                const exchangeObj = await formatExchangeObjCurve(
-                    collateralAsset.address,
-                    crvUsdAddress,
-                    repayAmount,
-                    addrs.mainnet.CURVE_USD_WRAPPER,
-                );
-
-                if (!isExchangePathValid(exchangeObj[8])) {
-                    console.log('TEST SKIPPED! Invalid exchange path for asset');
-                    expect(true).to.be.equal(true);
-                    await revertToSnapshot(snapshot);
-                } else {
-                    await callCurveUsdAdvancedRepayStrategy(
-                        botAcc,
-                        strategyExecutor,
-                        0,
-                        subId,
-                        strategySub,
-                        repayAmount,
-                        exchangeObj[8],
-                    );
-                    const userDataAfter = await crvusdView.userData(
-                        controllerAddress,
-                        proxy.address,
-                    );
-                    const collRatioAfter = userDataAfter.collRatio;
-                    console.log(
-                        `Collateral ratio went from ${collRatioBefore / 1e16}% to ${
-                            collRatioAfter / 1e16
-                        }%`,
-                    );
-                    expect(collRatioAfter).to.be.gt(collRatioBefore);
-                    await revertToSnapshot(snapshot);
-                }
             });
             it(`Executes a regular repay strategy for ${assetSymbol} market`, async () => {
                 snapshot = await takeSnapshot();

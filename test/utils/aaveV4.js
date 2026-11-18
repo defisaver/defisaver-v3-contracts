@@ -562,6 +562,35 @@ const signBorrowPermit = (signer, spoke, reserveId, spender, amount) =>
 const signWithdrawPermit = (signer, spoke, reserveId, spender, amount) =>
     signTakerPermit(signer, spoke, reserveId, spender, amount, 'WithdrawPermit');
 
+const signSetUsingAsCollateralPermission = async (signer, spoke, delegatee, permission = true) => {
+    const configPM = await hre.ethers.getContractAt(
+        'IConfigPositionManager',
+        CONFIG_POSITION_MANAGER,
+    );
+    const nonce = await configPM.nonces(signer.address, 0);
+    const deadline = (await hre.ethers.provider.getBlock('latest')).timestamp + 3600;
+    const structHash = hre.ethers.utils.keccak256(
+        hre.ethers.utils.defaultAbiCoder.encode(
+            ['bytes32', 'address', 'address', 'address', 'bool', 'uint256', 'uint256'],
+            [
+                await configPM.SET_CAN_SET_USING_AS_COLLATERAL_PERMISSION_PERMIT_TYPEHASH(),
+                spoke,
+                signer.address,
+                delegatee,
+                permission,
+                nonce,
+                deadline,
+            ],
+        ),
+    );
+    const digest = hre.ethers.utils.solidityKeccak256(
+        ['bytes2', 'bytes32', 'bytes32'],
+        ['0x1901', await configPM.DOMAIN_SEPARATOR(), structHash],
+    );
+    const signature = hre.ethers.utils.joinSignature(signer._signingKey().signDigest(digest));
+    return { signature, nonce, deadline };
+};
+
 module.exports = {
     EOA_ACC_INDEX,
     AAVE_V4_AUTOMATION_TEST_PAIRS,
@@ -587,6 +616,7 @@ module.exports = {
     ALL_POSITION_MANAGER_UPDATES,
     CORE_RESERVE_ID_USDC,
     CORE_RESERVE_ID_WETH,
+    CORE_RESERVE_ID_WSTETH,
     CORE_RESERVE_ID_USDT,
     deployAaveV4RepayBundle,
     deployAaveV4BoostBundle,
@@ -607,4 +637,5 @@ module.exports = {
     signSetUserManagersIntent,
     signBorrowPermit,
     signWithdrawPermit,
+    signSetUsingAsCollateralPermission,
 };

@@ -24,10 +24,10 @@ interface IStrategyPartialExecutionStorage {
     function clearStartApproval(uint256 _subId) external;
     function startExecution(uint256 _subId, uint256 _strategyId) external;
     function endExecution(uint256 _subId) external;
-    function getPartialExecution(uint256 _subId)
+    function getSubPartialExecutionState(uint256 _subId)
         external
         view
         returns (address wallet, uint256 initialStrategyId);
-    function getPartialExecutionWallet(uint256 _subId) external view returns (address);
-    function isInPartialExecution(uint256 _subId) external view returns (bool);
+    function getSubPartialExecutionWallet(uint256 _subId) external view returns (address);
+    function isSubInPartialExecution(uint256 _subId) external view returns (bool);
 }
