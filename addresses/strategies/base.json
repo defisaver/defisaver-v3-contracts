@@ -1214,7 +1214,7 @@
             ["&3", 0, "$1"],
             ["&3", "&eoa", 0]
         ],
-        "bundleIds": [27]
+        "bundleIds": [27, 43, 44]
     },
     {
         "name": "AaveV3GenericFLCloseToCollL2Strategy",
@@ -1241,7 +1241,7 @@
             ["&1", 0, "$1"],
             ["&1", "&3", "&eoa", "&eoa", 0, 0]
         ],
-        "bundleIds": [27]
+        "bundleIds": [27, 43, 44]
     },
     {
         "name": "AaveV3FLCollateralSwitchL2Strategy",
