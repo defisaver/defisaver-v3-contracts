@@ -232,7 +232,8 @@ const flyTestData = [
 const getFlyQuote = async (sellAssetInfo, buyAssetInfo, amount, flyWrapper) => {
     const options = {
         method: 'GET',
-        baseURL: 'https://api.fly.trade/aggregator/quote/transaction',
+        baseURL: 'https://api.magpiefi.xyz/aggregator/quote/transaction',
+        headers: { apikey: process.env.FLY_API_KEY },
         params: {
             network: 'ethereum',
             fromTokenAddress: sellAssetInfo.address,
