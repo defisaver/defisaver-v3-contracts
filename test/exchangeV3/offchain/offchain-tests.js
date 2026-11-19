@@ -6,6 +6,7 @@ const dfs = require('@defisaver/sdk');
 const { default: axios } = require('axios');
 const {
     getProxy,
+    setupExchangeFork,
     redeploy,
     balanceOf,
     setNewExchangeWrapper,
@@ -18,7 +19,6 @@ const {
     takeSnapshot,
     revertToSnapshot,
     network,
-    addToRegistry,
     DAI_ADDR,
     isNetworkFork,
     getOwnerAddr,
@@ -26,21 +26,6 @@ const {
 
 const { executeAction } = require('../../utils/actions');
 const { topUp } = require('../../../scripts/utils/fork');
-
-const trades = [
-    {
-        sellToken: 'WETH',
-        buyToken: 'DAI',
-        amount: '1',
-        fee: 3000,
-    },
-    {
-        sellToken: 'DAI',
-        buyToken: 'WBTC',
-        amount: '30000',
-        fee: 3000,
-    },
-];
 
 const getKyberApiUrlByChainId = (chainId) => {
     if (chainId === 10) {
@@ -99,13 +84,11 @@ const getBebopQuote = async (
             'source-auth': `${process.env.BEBOP_SOURCE_AUTH}`,
         },
     };
-    console.log('Bebop quote request:', JSON.stringify(options, null, 2));
     const response = await axios(options);
-    console.log('Bebop quote response:', JSON.stringify(response.data, null, 2));
     return response.data;
 };
 
-const bebopTest = async () => {
+const bebopTest = () => {
     describe('Dfs-Sell-via-Bebop-Aggregator (Parametrized)', function () {
         this.timeout(400000);
 
@@ -116,6 +99,7 @@ const bebopTest = async () => {
         const chainId = chainIds[network];
 
         before(async () => {
+            await setupExchangeFork();
             bebopWrapper = await redeploy('BebopWrapper');
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
@@ -241,7 +225,7 @@ const bebopTest = async () => {
 const flyTestData = [
     { sellToken: 'WETH', buyToken: 'USDC', rawAmount: '100' },
     { sellToken: 'USDC', buyToken: 'WETH', rawAmount: '500000' },
-    { sellToken: 'DAI', buyToken: 'WBTC', rawAmount: '1000000' },
+    { sellToken: 'DAI', buyToken: 'WBTC', rawAmount: '10000' },
     { sellToken: 'WBTC', buyToken: 'USDT', rawAmount: '10' },
 ];
 
@@ -249,6 +233,7 @@ const getFlyQuote = async (sellAssetInfo, buyAssetInfo, amount, flyWrapper) => {
     const options = {
         method: 'GET',
         baseURL: 'https://api.magpiefi.xyz/aggregator/quote/transaction',
+        headers: { apikey: process.env.FLY_API_KEY },
         params: {
             network: 'ethereum',
             fromTokenAddress: sellAssetInfo.address,
@@ -259,13 +244,12 @@ const getFlyQuote = async (sellAssetInfo, buyAssetInfo, amount, flyWrapper) => {
             toAddress: flyWrapper.address,
             gasless: false,
         },
-        headers: { apikey: `${process.env.FLY_API_KEY}` },
     };
     const response = await axios(options);
     return response.data;
 };
 
-const flyTest = async () => {
+const flyTest = () => {
     describe('Dfs-Sell-via-Fly-Aggregator', function () {
         this.timeout(400000);
 
@@ -280,6 +264,7 @@ const flyTest = async () => {
         const isFork = isNetworkFork();
 
         before(async () => {
+            await setupExchangeFork();
             senderAcc = (await hre.ethers.getSigners())[0];
 
             if (isFork) {
@@ -295,7 +280,7 @@ const flyTest = async () => {
             /// @dev the dfs fee is taken off srcAmount and paid in the sell token, so both the
             /// receiver and the per pair divider are needed to say exactly how much should move
             const feeRecipient = await hre.ethers.getContractAt(
-                'FeeRecipient',
+                'contracts/utils/fee/FeeRecipient.sol:FeeRecipient',
                 addrs[network].FEE_RECIPIENT_ADDR,
             );
             feeReceiverAddr = await feeRecipient.getFeeAddr();
@@ -516,13 +501,13 @@ const getOpenOceanQuote = async (
     return response.data.data;
 };
 
-const getOpenOceanAmountOffsets = (callData, amount) => {
+const getAmountOffsets = (callData, amount) => {
     const amountHex = hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [amount]).slice(2);
 
     return [...callData.matchAll(new RegExp(amountHex, 'gi'))].map((match) => match.index / 2 - 1);
 };
 
-const openOceanTest = async () => {
+const openOceanTest = () => {
     describe('Dfs-Sell-via-OpenOcean-Aggregator', function () {
         this.timeout(400000);
 
@@ -536,6 +521,7 @@ const openOceanTest = async () => {
         const isFork = isNetworkFork();
 
         before(async () => {
+            await setupExchangeFork();
             senderAcc = (await hre.ethers.getSigners())[0];
 
             if (isFork) {
@@ -551,7 +537,7 @@ const openOceanTest = async () => {
             /// @dev the dfs fee is taken off srcAmount and paid in the sell token, so both the
             /// receiver and the per pair divider are needed to say exactly how much should move
             const feeRecipient = await hre.ethers.getContractAt(
-                'FeeRecipient',
+                'contracts/utils/fee/FeeRecipient.sol:FeeRecipient',
                 addrs[network].FEE_RECIPIENT_ADDR,
             );
             feeReceiverAddr = await feeRecipient.getFeeAddr();
@@ -602,7 +588,7 @@ const openOceanTest = async () => {
                     const price = 1; // anything bigger than 0 triggers the offchain if
                     const protocolFee = 0;
 
-                    const offsets = getOpenOceanAmountOffsets(quote.data, amount);
+                    const offsets = getAmountOffsets(quote.data, amount);
 
                     /// @dev the wrapper takes a single offset, so anything other than one hit
                     /// means the order no longer looks the way it is being rewritten
@@ -711,194 +697,96 @@ const openOceanTest = async () => {
     });
 };
 
-const kyberTest = async () => {
-    /// @dev works on mainnet and kyber
+const kyberTest = () => {
     describe('Dfs-Sell-via-Kyber-Aggregator', function () {
         this.timeout(400000);
-
+        const chainId = chainIds[network];
+        const src = getAssetInfo('WETH', chainId).address;
+        const dest = getAssetInfo('DAI', chainId).address;
+        const amount = hre.ethers.utils.parseEther('1');
+        const clientId = 'partner-staging';
+        const api = axios.create({
+            baseURL: getKyberApiUrlByChainId(chainId),
+            headers: { 'x-client-id': clientId },
+        });
         let senderAcc;
         let proxy;
-        let kyberAggregatorWrapper;
+        let wrapper;
         let snapshot;
 
         before(async () => {
-            await addToRegistry(
-                'KyberInputScalingHelper',
-                '0x2f577A41BeC1BE1152AeEA12e73b7391d15f655D',
-            );
-            await redeploy('DFSSell');
-            await redeploy('RecipeExecutor');
-            await redeploy('PullToken');
-            kyberAggregatorWrapper = await redeploy('KyberAggregatorWrapper');
-
-            senderAcc = (await hre.ethers.getSigners())[0];
+            await setupExchangeFork();
+            wrapper = await redeploy('KyberAggregatorWrapper');
+            [senderAcc] = await hre.ethers.getSigners();
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
-            await setNewExchangeWrapper(senderAcc, kyberAggregatorWrapper.address);
+            await setNewExchangeWrapper(senderAcc, wrapper.address);
         });
 
         beforeEach(async () => {
             snapshot = await takeSnapshot();
         });
-
         afterEach(async () => {
             await revertToSnapshot(snapshot);
         });
 
-        for (let i = 0; i < 1; ++i) {
-            const trade = trades[i];
-            it(`... should try to sell ${trade.sellToken} for ${trade.buyToken} with offchain calldata (Kyber) in a single DFSSell action`, async () => {
-                const chainId = chainIds[network];
-                const sellAssetInfo = getAssetInfo(trade.sellToken, chainId);
-                const buyAssetInfo = getAssetInfo(trade.buyToken, chainId);
-
-                const buyBalanceBefore = await balanceOf(buyAssetInfo.address, senderAcc.address);
-                const amount = hre.ethers.utils.parseUnits('1', sellAssetInfo.decimals);
-
-                await setBalance(sellAssetInfo.address, senderAcc.address, amount);
-                await approve(sellAssetInfo.address, proxy.address);
-                const baseUrl = getKyberApiUrlByChainId(chainId);
-                const clientId = 'partner-staging';
-                const headers = {
-                    'x-client-id': clientId,
-                };
-                const options = {
-                    method: 'GET',
-                    baseURL: baseUrl,
-                    url: `routes?tokenIn=${sellAssetInfo.address}&tokenOut=${
-                        buyAssetInfo.address
-                    }&amountIn=${amount.toString()}&saveGas=false&gasInclude=true&x-client-id=${clientId}`,
-                    headers,
-                };
-                const priceObject = await axios(options).then((response) => response.data.data);
-                const secondOptions = {
-                    method: 'POST',
-                    baseURL: baseUrl,
-                    url: 'route/build',
-                    headers,
-                    data: {
-                        routeSummary: priceObject.routeSummary,
-                        sender: kyberAggregatorWrapper.address,
-                        recipient: kyberAggregatorWrapper.address,
-                        slippageTolerance: 1000,
-                        deadline: 1776079017,
-                        source: clientId,
+        for (const inRecipe of [false, true]) {
+            it(`sells WETH for DAI ${inRecipe ? 'in a recipe' : 'directly'}`, async () => {
+                await setBalance(src, senderAcc.address, amount);
+                await approve(src, proxy.address);
+                const route = await api.get('routes', {
+                    params: {
+                        tokenIn: src,
+                        tokenOut: dest,
+                        amountIn: amount.toString(),
+                        saveGas: false,
+                        gasInclude: true,
                     },
-                };
-                const resultObject = await axios(secondOptions).then((response) => response.data);
-                // THIS IS CHANGEABLE WITH API INFORMATION
-                const allowanceTarget = priceObject.routerAddress;
-                const price = 1; // just for testing, anything bigger than 0 triggers offchain if
-                const protocolFee = 0;
-                const callData = resultObject.data.data;
-
-                const exchangeObject = formatExchangeObjForOffchain(
-                    sellAssetInfo.address,
-                    buyAssetInfo.address,
+                });
+                const { routeSummary, routerAddress } = route.data.data;
+                const built = await api.post('route/build', {
+                    routeSummary,
+                    sender: wrapper.address,
+                    recipient: wrapper.address,
+                    slippageTolerance: 1000,
+                    source: clientId,
+                });
+                const callData = built.data.data.data;
+                await addToExchangeAggregatorRegistry(senderAcc, routerAddress);
+                const order = formatExchangeObjForOffchain(
+                    src,
+                    dest,
                     amount,
-                    kyberAggregatorWrapper.address,
-                    priceObject.routerAddress,
-                    allowanceTarget,
-                    price,
-                    protocolFee,
+                    wrapper.address,
+                    routerAddress,
+                    routerAddress,
+                    1,
+                    0,
                     callData,
                 );
-
-                await addToExchangeAggregatorRegistry(senderAcc, priceObject.routerAddress);
-                // test single action so no changing of amount
-
-                const sellAction = new dfs.actions.basic.SellAction(
-                    exchangeObject,
-                    senderAcc.address,
+                const sell = new dfs.actions.basic.SellAction(
+                    order,
+                    inRecipe ? proxy.address : senderAcc.address,
                     senderAcc.address,
                 );
-                const functionData = sellAction.encodeForDsProxyCall()[1];
-                await executeAction('DFSSell', functionData, proxy);
-                const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
-                expect(buyBalanceBefore).is.lt(buyBalanceAfter);
-                await revertToSnapshot(snapshot);
-            });
-            it(`... should try to sell ${trade.sellToken} for ${trade.buyToken} with offchain calldata (Kyber) in a recipe`, async () => {
-                const chainId = chainIds[network];
-                const sellAssetInfo = getAssetInfo(trade.sellToken, chainId);
-                const buyAssetInfo = getAssetInfo(trade.buyToken, chainId);
-
-                const buyBalanceBefore = await balanceOf(buyAssetInfo.address, senderAcc.address);
-                const amount = hre.ethers.utils.parseUnits('1', sellAssetInfo.decimals);
-
-                await setBalance(sellAssetInfo.address, senderAcc.address, amount);
-                await approve(sellAssetInfo.address, proxy.address);
-                const baseUrl = getKyberApiUrlByChainId(chainId);
-                const clientId = 'partner-staging';
-                const headers = {
-                    'x-client-id': clientId,
-                };
-                const options = {
-                    method: 'GET',
-                    baseURL: baseUrl,
-                    url: `routes?tokenIn=${sellAssetInfo.address}&tokenOut=${
-                        buyAssetInfo.address
-                    }&amountIn=${amount.toString()}&saveGas=false&gasInclude=true&x-client-id=${clientId}`,
-                    headers,
-                };
-                const priceObject = await axios(options).then((response) => response.data.data);
-                const secondOptions = {
-                    method: 'POST',
-                    baseURL: baseUrl,
-                    url: 'route/build',
-                    headers,
-                    data: {
-                        routeSummary: priceObject.routeSummary,
-                        sender: kyberAggregatorWrapper.address,
-                        recipient: kyberAggregatorWrapper.address,
-                        slippageTolerance: 1000,
-                        deadline: 1776079017,
-                        source: clientId,
-                    },
-                };
-                const resultObject = await axios(secondOptions).then((response) => response.data);
-
-                // THIS IS CHANGEABLE WITH API INFORMATION
-                const allowanceTarget = priceObject.routerAddress;
-                const price = 1; // just for testing, anything bigger than 0 triggers offchain if
-                const protocolFee = 0;
-                const callData = resultObject.data.data;
-
-                const exchangeObject = formatExchangeObjForOffchain(
-                    sellAssetInfo.address,
-                    buyAssetInfo.address,
-                    amount,
-                    kyberAggregatorWrapper.address,
-                    priceObject.routerAddress,
-                    allowanceTarget,
-                    price,
-                    protocolFee,
-                    callData,
+                const action = inRecipe
+                    ? new dfs.Recipe('SellRecipe', [
+                          new dfs.actions.basic.PullTokenAction(src, senderAcc.address, amount),
+                          sell,
+                      ])
+                    : sell;
+                const buyBalanceBefore = await balanceOf(dest, senderAcc.address);
+                await executeAction(
+                    inRecipe ? 'RecipeExecutor' : 'DFSSell',
+                    action.encodeForDsProxyCall()[1],
+                    proxy,
                 );
-
-                await addToExchangeAggregatorRegistry(senderAcc, priceObject.routerAddress);
-                // test recipe
-                const sellRecipe = new dfs.Recipe('SellRecipe', [
-                    new dfs.actions.basic.PullTokenAction(
-                        sellAssetInfo.address,
-                        senderAcc.address,
-                        amount,
-                    ),
-                    new dfs.actions.basic.SellAction(
-                        exchangeObject,
-                        proxy.address,
-                        senderAcc.address,
-                    ),
-                ]);
-                const functionData = sellRecipe.encodeForDsProxyCall()[1];
-                await executeAction('RecipeExecutor', functionData, proxy);
-                const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
-                expect(buyBalanceBefore).is.lt(buyBalanceAfter);
+                expect(await balanceOf(dest, senderAcc.address)).to.be.gt(buyBalanceBefore);
             });
         }
     });
 };
 
-const paraswapTest = async () => {
+const paraswapTest = () => {
     // @dev Works only on mainnet forks
     describe('Dfs-Sell-via-Paraswap-Aggregator', function () {
         this.timeout(400000);
@@ -914,9 +802,7 @@ const paraswapTest = async () => {
         let sellAssetInfo;
 
         before(async () => {
-            await redeploy('DFSSell');
-            await redeploy('WrapEth');
-            await redeploy('RecipeExecutor');
+            await setupExchangeFork();
             paraswapWrapper = await redeploy('ParaswapWrapper');
 
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -938,7 +824,6 @@ const paraswapTest = async () => {
                 url: `/prices?srcToken=${sellAssetInfo.address}&srcDecimals=${sellAssetInfo.decimals}&destToken=${buyAssetInfo.address}&destDecimals=${buyAssetInfo.decimals}&amount=${amount}&side=SELL&network=${networkId}&version=6.2`,
             };
             const priceObject = await axios(options).then((response) => response.data.priceRoute);
-            console.log(priceObject);
 
             const secondOptions = {
                 method: 'POST',
@@ -964,15 +849,7 @@ const paraswapTest = async () => {
             const protocolFee = 0;
             const callData = resultObject.data;
 
-            let amountInHex = hre.ethers.utils.defaultAbiCoder.encode(
-                ['uint256'],
-                [priceObject.srcAmount],
-            );
-            amountInHex = amountInHex.slice(2);
-
-            let offset = callData.toString().indexOf(amountInHex);
-            offset = offset / 2 - 1;
-
+            const [offset] = getAmountOffsets(callData, priceObject.srcAmount);
             const paraswapSpecialCalldata = hre.ethers.utils.defaultAbiCoder.encode(
                 ['(bytes,uint256)'],
                 [[callData, offset]],
@@ -1001,7 +878,7 @@ const paraswapTest = async () => {
             await revertToSnapshot(snapshot);
         });
 
-        it('... should try to sell WETH for DAI with offchain calldata (Paraswap)', async () => {
+        it('... should try to sell WETH for USDC with offchain calldata (Paraswap)', async () => {
             const sellAction = new dfs.actions.basic.SellAction(
                 exchangeObject,
                 senderAcc.address,
@@ -1016,7 +893,7 @@ const paraswapTest = async () => {
 
             expect(buyBalanceBefore).is.lt(buyBalanceAfter);
         });
-        it('... should try to sell WETH for DAI with offchain calldata (Paraswap) in a recipe', async () => {
+        it('... should try to sell WETH for USDC with offchain calldata (Paraswap) in a recipe', async () => {
             // test recipe
             const sellRecipe = new dfs.Recipe('SellRecipe', [
                 new dfs.actions.basic.PullTokenAction(
@@ -1037,7 +914,7 @@ const paraswapTest = async () => {
     });
 };
 
-const oneInchTest = async () => {
+const oneInchTest = () => {
     describe('Dfs-Sell-via-1inch-Aggregator', function () {
         this.timeout(400000);
 
@@ -1052,11 +929,9 @@ const oneInchTest = async () => {
         let sellAssetInfo;
 
         before(async () => {
+            await setupExchangeFork();
             const chainId = chainIds[network];
 
-            await redeploy('DFSSell');
-            await redeploy('PullToken');
-            await redeploy('RecipeExecutor');
             oneInchWrapper = await redeploy('OneInchWrapper');
 
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -1096,21 +971,7 @@ const oneInchTest = async () => {
             const protocolFee = 0;
             const callData = priceObject.tx.data;
 
-            let amountInHex = hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [amount]);
-            amountInHex = amountInHex.slice(2);
-
-            const sourceStr = callData;
-            const searchStr = amountInHex.toString();
-            const indexes = [...sourceStr.matchAll(new RegExp(searchStr, 'gi'))].map(
-                (a) => a.index,
-            );
-
-            const offsets = [];
-
-            for (let i = 0; i < indexes.length; i++) {
-                offsets[i] = indexes[i] / 2 - 1;
-            }
-
+            const offsets = getAmountOffsets(callData, amount);
             const specialCalldata = hre.ethers.utils.defaultAbiCoder.encode(
                 ['(bytes,uint256[])'],
                 [[callData, offsets]],
@@ -1139,7 +1000,7 @@ const oneInchTest = async () => {
             await revertToSnapshot(snapshot);
         });
 
-        it('... should try to sell WETH for DAI with offchain calldata (1inch)', async () => {
+        it('... should try to sell WETH for USDC with offchain calldata (1inch)', async () => {
             const sellAction = new dfs.actions.basic.SellAction(
                 exchangeObject,
                 senderAcc.address,
@@ -1153,7 +1014,7 @@ const oneInchTest = async () => {
 
             expect(buyBalanceBefore).is.lt(buyBalanceAfter);
         });
-        it('... should try to sell WETH for DAI with offchain calldata (1inch) in a recipe', async () => {
+        it('... should try to sell WETH for USDC with offchain calldata (1inch) in a recipe', async () => {
             // test recipe
             const sellRecipe = new dfs.Recipe('SellRecipe', [
                 new dfs.actions.basic.PullTokenAction(
@@ -1174,7 +1035,7 @@ const oneInchTest = async () => {
     });
 };
 
-const zeroxTest = async () => {
+const zeroxTest = () => {
     describe('Dfs-Sell-0x', function () {
         this.timeout(140000);
 
@@ -1183,6 +1044,7 @@ const zeroxTest = async () => {
         let snapshot;
 
         before(async () => {
+            await setupExchangeFork();
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
         });
@@ -1204,6 +1066,7 @@ const zeroxTest = async () => {
             await approve(sellAssetInfo.address, proxy.address);
 
             const zeroxWrapper = addrs[network].ZEROX_WRAPPER;
+            await setNewExchangeWrapper(senderAcc, zeroxWrapper);
 
             const options = {
                 method: 'GET',
@@ -1212,7 +1075,7 @@ const zeroxTest = async () => {
                     sellAssetInfo.address
                 }&buyToken=${
                     buyAssetInfo.address
-                }&sellAmount=${sellAmount.toString()}&taker=${zeroxWrapper}`,
+                }&sellAmount=${sellAmount.toString()}&taker=${zeroxWrapper}&txOrigin=${senderAcc.address}`,
                 headers: {
                     '0x-api-key': `${process.env.ZEROX_API_KEY}`,
                     '0x-version': 'v2',
@@ -1259,209 +1122,117 @@ const zeroxTest = async () => {
     });
 };
 
-const pendleRouterTest = async () => {
+const pendleRouterTest = () => {
     describe('Dfs-Sell-via-Pendle-Router', function () {
         this.timeout(400000);
 
-        const testSwaps = [
-            {
-                sellToken: DAI_ADDR,
-                buyToken: '0x62c6e813b9589c3631ba0cdb013acdb8544038b7', // PT USDe Nov
-                pendleMarket: '0x4eaa571eafcd96f51728756bd7f396459bb9b869',
-            },
-            {
-                buyToken: DAI_ADDR,
-                sellToken: '0x62c6e813b9589c3631ba0cdb013acdb8544038b7', // PT USDe Nov
-                pendleMarket: '0x4eaa571eafcd96f51728756bd7f396459bb9b869',
-            },
-            {
-                sellToken: DAI_ADDR,
-                buyToken: '0xe6a934089bbee34f832060ce98848359883749b3', // PT sUSDe Nov
-                pendleMarket: '0xb6ac3d5da138918ac4e84441e924a20daa60dbdd',
-            },
-            {
-                buyToken: DAI_ADDR,
-                sellToken: '0xe6a934089bbee34f832060ce98848359883749b3', // PT sUSDe Nov
-                pendleMarket: '0xb6ac3d5da138918ac4e84441e924a20daa60dbdd',
-            },
-        ];
-
-        const PENDLE_ROUTER = '0x888888888889758F76e7103c6CbF23ABbF58F946';
-
+        const router = '0x888888888889758F76e7103c6CbF23ABbF58F946';
+        const amount = hre.ethers.utils.parseEther('1');
         let senderAcc;
-        let pendleWrapper;
         let proxy;
+        let wrapper;
+        let markets;
         let snapshot;
 
-        const validateNoTokensLeftOnProxy = async (sellToken, buyToken) => {
-            const proxySellTokenBalance = await balanceOf(sellToken, proxy.address);
-            const proxyBuyTokenBalance = await balanceOf(buyToken, proxy.address);
-
-            expect(proxySellTokenBalance).to.be.eq(0);
-            expect(proxyBuyTokenBalance).to.be.eq(0);
-        };
-
-        // @dev This test uses live API response and latest state. Keep in mind that swap won't be available after PT maturity.
-        // Date: 2025-05-07 Block: 22431905
         before(async () => {
-            await redeploy('DFSSellNoFee');
-            await redeploy('PullToken');
-            await redeploy('RecipeExecutor');
-            pendleWrapper = await redeploy('PendleWrapper');
-            senderAcc = (await hre.ethers.getSigners())[0];
+            await setupExchangeFork('DFSSellNoFee');
+            wrapper = await redeploy('PendleWrapper');
+            [senderAcc] = await hre.ethers.getSigners();
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
-            await setNewExchangeWrapper(senderAcc, pendleWrapper.address);
-            await addToExchangeAggregatorRegistry(senderAcc, PENDLE_ROUTER);
+            await setNewExchangeWrapper(senderAcc, wrapper.address);
+            await addToExchangeAggregatorRegistry(senderAcc, router);
+            const { data } = await axios.get(
+                'https://api-v2.pendle.finance/core/v1/1/markets/active',
+            );
+            markets = data.markets.sort((a, b) => b.details.liquidity - a.details.liquidity);
         });
 
         beforeEach(async () => {
             snapshot = await takeSnapshot();
         });
-
         afterEach(async () => {
             await revertToSnapshot(snapshot);
         });
 
-        for (let i = 0; i < testSwaps.length; ++i) {
-            const testSwap = testSwaps[i];
-            const sellAsset = testSwap.sellToken;
-            const buyAsset = testSwap.buyToken;
-            const chainId = 1;
-            const slippage = 0.05;
-            const enableAggregator = true;
-            const tokenIn = sellAsset;
-            const tokenOut = buyAsset;
-            const amountIn = hre.ethers.utils.parseUnits('1', 18);
-            const router = PENDLE_ROUTER;
-            const allowanceTarget = PENDLE_ROUTER;
-            const price = 1; // just for testing, anything bigger than 0 triggers offchain if
-            const protocolFee = 0;
-            it(`... should try to sell ${testSwap.sellToken} for ${testSwap.buyToken} with offchain calldata (Pendle) action direct`, async () => {
-                const pendleMarketContract = await hre.ethers.getContractAt(
-                    'IPendleMarket',
-                    testSwap.pendleMarket,
-                );
-                const isExpired = await pendleMarketContract.isExpired();
-                if (isExpired) {
-                    console.log('Pendle market is expired. Skipping test...');
-                    expect(true).to.be.true;
-                    return;
+        for (const underlying of ['USDe', 'sUSDe']) {
+            for (const buyPt of [true, false]) {
+                const pair = buyPt ? `DAI for PT-${underlying}` : `PT-${underlying} for DAI`;
+                for (const inRecipe of [false, true]) {
+                    it(`sells ${pair} ${inRecipe ? 'in a recipe' : 'directly'}`, async () => {
+                        const market = markets.find(({ name }) => name === underlying);
+                        expect(market, `active ${underlying} market`).to.exist;
+                        const [, pt] = market.pt.split('-');
+                        const [src, dest] = buyPt ? [DAI_ADDR, pt] : [pt, DAI_ADDR];
+                        await setBalance(src, senderAcc.address, amount);
+                        await approve(src, proxy.address);
+
+                        const { data } = await axios.get(
+                            'https://api-v2.pendle.finance/core/v2/sdk/1/convert',
+                            {
+                                params: {
+                                    receiver: wrapper.address,
+                                    slippage: 0.05,
+                                    enableAggregator: true,
+                                    tokensIn: src,
+                                    tokensOut: dest,
+                                    amountsIn: amount.toString(),
+                                },
+                            },
+                        );
+                        const { tx } = data.routes[0];
+                        expect(tx.to.toLowerCase()).to.eq(router.toLowerCase());
+                        const order = formatExchangeObjForOffchain(
+                            src,
+                            dest,
+                            amount,
+                            wrapper.address,
+                            router,
+                            router,
+                            1,
+                            0,
+                            tx.data,
+                        );
+                        const sell = new dfs.actions.basic.SellNoFeeAction(
+                            order,
+                            inRecipe ? proxy.address : senderAcc.address,
+                            senderAcc.address,
+                        );
+                        const action = inRecipe
+                            ? new dfs.Recipe('SellRecipeNoFee', [
+                                  new dfs.actions.basic.PullTokenAction(
+                                      src,
+                                      senderAcc.address,
+                                      amount,
+                                  ),
+                                  sell,
+                              ])
+                            : sell;
+                        const balanceBefore = await balanceOf(dest, senderAcc.address);
+                        await executeAction(
+                            inRecipe ? 'RecipeExecutor' : 'DFSSellNoFee',
+                            action.encodeForDsProxyCall()[1],
+                            proxy,
+                        );
+                        expect(await balanceOf(dest, senderAcc.address)).to.be.gt(balanceBefore);
+                        expect(await balanceOf(src, senderAcc.address)).to.eq(0);
+                        expect(await balanceOf(src, proxy.address)).to.eq(0);
+                        expect(await balanceOf(dest, proxy.address)).to.eq(0);
+                    });
                 }
-
-                const receiver = pendleWrapper.address;
-                await setBalance(sellAsset, senderAcc.address, amountIn);
-                await approve(sellAsset, proxy.address);
-
-                const options = {
-                    method: 'GET',
-                    baseURL: `https://api-v2.pendle.finance/core/v2/sdk/${chainId}/`,
-                    url: `convert?receiver=${receiver}&slippage=${slippage}&enableAggregator=${enableAggregator}&tokensIn=${tokenIn}&tokensOut=${tokenOut}&amountsIn=${amountIn}`,
-                };
-                const res = await axios(options);
-
-                const exchangeObject = formatExchangeObjForOffchain(
-                    sellAsset,
-                    buyAsset,
-                    amountIn,
-                    pendleWrapper.address,
-                    router,
-                    allowanceTarget,
-                    price,
-                    protocolFee,
-                    res.data.routes[0].tx.data /* calldata */,
-                );
-
-                const sellActionNoFee = new dfs.actions.basic.SellNoFeeAction(
-                    exchangeObject,
-                    senderAcc.address,
-                    senderAcc.address,
-                );
-
-                const functionData = sellActionNoFee.encodeForDsProxyCall()[1];
-
-                const buyBalanceBefore = await balanceOf(buyAsset, senderAcc.address);
-                const sellBalanceBefore = await balanceOf(sellAsset, senderAcc.address);
-
-                await executeAction('DFSSellNoFee', functionData, proxy);
-
-                const sellBalanceAfter = await balanceOf(sellAsset, senderAcc.address);
-                const buyBalanceAfter = await balanceOf(buyAsset, senderAcc.address);
-
-                expect(buyBalanceBefore).is.lt(buyBalanceAfter);
-                expect(sellBalanceAfter).is.eq(sellBalanceBefore.sub(amountIn));
-                await validateNoTokensLeftOnProxy(sellAsset, buyAsset);
-            });
-            it(`... should try to sell ${testSwap.sellToken} for ${testSwap.buyToken} with offchain calldata (Pendle) in a recipe`, async () => {
-                const pendleMarketContract = await hre.ethers.getContractAt(
-                    'IPendleMarket',
-                    testSwap.pendleMarket,
-                );
-                const isExpired = await pendleMarketContract.isExpired();
-                if (isExpired) {
-                    console.log('Pendle market is expired. Skipping test...');
-                    expect(true).to.be.true;
-                    return;
-                }
-
-                const receiver = pendleWrapper.address;
-                await setBalance(sellAsset, senderAcc.address, amountIn);
-                await approve(sellAsset, proxy.address);
-
-                const options = {
-                    method: 'GET',
-                    baseURL: `https://api-v2.pendle.finance/core/v2/sdk/${chainId}/`,
-                    url: `convert?receiver=${receiver}&slippage=${slippage}&enableAggregator=${enableAggregator}&tokensIn=${tokenIn}&tokensOut=${tokenOut}&amountsIn=${amountIn}`,
-                };
-                const res = await axios(options);
-
-                const exchangeObject = formatExchangeObjForOffchain(
-                    sellAsset,
-                    buyAsset,
-                    amountIn,
-                    pendleWrapper.address,
-                    router,
-                    allowanceTarget,
-                    price,
-                    protocolFee,
-                    res.data.routes[0].tx.data /* calldata */,
-                );
-
-                const sellRecipe = new dfs.Recipe('SellRecipeNoFee', [
-                    new dfs.actions.basic.PullTokenAction(sellAsset, senderAcc.address, amountIn),
-                    new dfs.actions.basic.SellNoFeeAction(
-                        exchangeObject,
-                        proxy.address,
-                        senderAcc.address,
-                    ),
-                ]);
-
-                const functionData = sellRecipe.encodeForDsProxyCall()[1];
-
-                const buyBalanceBefore = await balanceOf(buyAsset, senderAcc.address);
-                const sellBalanceBefore = await balanceOf(sellAsset, senderAcc.address);
-
-                await executeAction('RecipeExecutor', functionData, proxy);
-
-                const sellBalanceAfter = await balanceOf(sellAsset, senderAcc.address);
-                const buyBalanceAfter = await balanceOf(buyAsset, senderAcc.address);
-
-                expect(buyBalanceBefore).is.lt(buyBalanceAfter);
-                expect(sellBalanceAfter).is.eq(sellBalanceBefore.sub(amountIn));
-                await validateNoTokensLeftOnProxy(sellAsset, buyAsset);
-            });
+            }
         }
     });
 };
 
-const offchainExchangeFullTest = async () => {
-    await paraswapTest();
-    await oneInchTest();
-    await kyberTest();
-    await zeroxTest();
-    await pendleRouterTest();
-    await bebopTest();
-    await flyTest();
-    await openOceanTest();
+const offchainExchangeFullTest = () => {
+    paraswapTest();
+    oneInchTest();
+    kyberTest();
+    zeroxTest();
+    pendleRouterTest();
+    bebopTest();
+    flyTest();
+    openOceanTest();
 };
 
 module.exports = {
