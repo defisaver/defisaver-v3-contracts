@@ -5,6 +5,7 @@ const { expect } = require('chai');
 const storageSlots = require('../storageSlots.json');
 
 const { BigNumber } = hre.ethers;
+const erc20Artifact = 'contracts/interfaces/token/IERC20.sol:IERC20';
 
 const { findAllFiles } = require('../../scripts/hardhat-tasks-functions');
 
@@ -26,7 +27,7 @@ const addrs = {
         TX_SAVER_FEE_RECEIVER: '0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479',
         FEE_RECIPIENT_ADDR: '0x39C4a92Dc506300c3Ea4c67ca4CA611102ee6F2A',
         EXCHANGE_OWNER_ADDR: '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00',
-        WRAPPER_EXCHANGE_REGISTRY: '0x653893375dD1D942D2C429caB51641F2bf14d426',
+        WRAPPER_EXCHANGE_REGISTRY: '0x6E6e95bC0Da741c835a3570F9681d5B0D00B4E3A',
         SubProxy: '0x88B8cEb76b88Ee0Fb7160E6e2Ad86055a32D72d4',
         UNISWAP_WRAPPER: '0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54',
         UNISWAP_V3_WRAPPER: '0xfd077F7990AeE7A0F59b1aD98c6dBeB9aBFf0D7a',
@@ -50,10 +51,10 @@ const addrs = {
         AAVE_V3_POOL_DATA_PROVIDER: '0x7B4EB56E7CD4b454BA8ff71E4518426369a138a3',
         CURVE_WRAPPER_V3: '0xdE73496DD6349829C6649aCaDe31FB1371528AC5',
         COMET_USDC_NATIVE_ADDR: '0xc3d688B66703497DAA19211EEdff47f25384cdc3',
-        EXCHANGE_AGGREGATOR_REGISTRY_ADDR: '0x7b67D9D7993A258C4b2C31CDD9E6cbD5Fb674985',
+        EXCHANGE_AGGREGATOR_REGISTRY_ADDR: '0x98eAC0Cb47951166b880E3a53477Fd3aa3bA6Ea8',
         STRATEGY_STORAGE_ADDR: '0xF52551F95ec4A2B4299DcC42fbbc576718Dbf933',
         BUNDLE_STORAGE_ADDR: '0x223c6aDE533851Df03219f6E3D8B763Bd47f84cf',
-        ZEROX_WRAPPER: '0x11e048f19844B7bAa6D9eA4a20eD4fACF7b757b2',
+        ZEROX_WRAPPER: '0x2463d84a4ACF9e01Bb28083CB3053f09bffAcc01',
         STRATEGY_EXECUTOR_ADDR: '0x8278DA54b4A47c0f6F4a0a4b00B6f31678f30181',
         REFILL_CALLER: '0x33fDb79aFB4456B604f376A45A546e7ae700e880',
         MORPHO_BLUE_VIEW: '0x10B621823D4f3E85fBDF759e252598e4e097C1fd',
@@ -75,7 +76,7 @@ const addrs = {
         DAI_ADDRESS: '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
         USDC_ADDR: '0x0b2c639c533813f4aa9d7837caf62653d097ff85',
         EXCHANGE_OWNER_ADDR: '0xc9a956923bfb5f141f1cd4467126b3ae91e5cc33',
-        WRAPPER_EXCHANGE_REGISTRY: '0x82b039Ca3c16E971132603f960a6E98582d8F021',
+        WRAPPER_EXCHANGE_REGISTRY: '0x4F07399419Ccf8265F82621A7a3f5077E62E1CE6',
         PROXY_AUTH_ADDR: '0xD6ae16A1aF3002D75Cc848f68060dE74Eccc6043',
         AAVE_MARKET: '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb',
         SubProxy: '0xFF9f0B8d0a4270f98C52842d163fd34728109692',
@@ -90,13 +91,13 @@ const addrs = {
         ADMIN_VAULT: '0x136b1bEAfff362530F98f10E3D8C38f3a3F3d38C',
         ADMIN_ACC: '0x98118fD1Da4b3369AEe87778168e97044980632F',
         AAVE_V3_POOL_DATA_PROVIDER: '0x69FA688f1Dc47d4B5d8029D5a35FB7a548310654',
-        EXCHANGE_AGGREGATOR_REGISTRY_ADDR: '0x79586d55DECB755B9Bb436B2287eFf93025E549D',
+        EXCHANGE_AGGREGATOR_REGISTRY_ADDR: '0x0290d314C3852bFaCBAa7F84cb67050A0594a909',
         STRATEGY_STORAGE_ADDR: '0xDdDE69c3Fd246D9D62f9712c814b333728f113A4',
         BUNDLE_STORAGE_ADDR: '0xc98C5312829006b2D4bBd47162d49B1aa6C275Ab',
         COMET_USDC_ADDR: '0x2e44e174f7D53F0212823acC11C01A11d58c5bCB',
         COMET_USDC_REWARDS_ADDR: '0x443EA0340cb75a160F31A440722dec7b5bc3C2E9',
         TX_SAVER_FEE_RECEIVER: '0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479',
-        ZEROX_WRAPPER: '0x031D6d3C95dD2188D1A1A57e8DcD8051f3B938ca',
+        ZEROX_WRAPPER: '0xF29dB48D22CA58bE97784d113390CC6e90590eCe',
         STRATEGY_EXECUTOR_ADDR: '0xf8BFE1adf836A11fF72cDFbe1Bc363D58b72Cc45',
         FEE_RECIPIENT_ADDR: '0x5b12C2B979CB3aB89DD4813837873bC4Dd1930D0',
         REFILL_CALLER: '0xaFdFC3814921d49AA412d6a22e3F44Cc555dDcC8',
@@ -115,7 +116,7 @@ const addrs = {
         USDC_ADDR: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',
         USDC_NATIVE_ADDR: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
         EXCHANGE_OWNER_ADDR: '0x926516e60521556f4ab5e7bf16a4d41a8539c7d1',
-        WRAPPER_EXCHANGE_REGISTRY: '0x4a0c7BDF7F58AA04852Da07CDb3d367521f81446',
+        WRAPPER_EXCHANGE_REGISTRY: '0xa00d10EC5963f2bFca1863F974a57E79CF2Ce6Dd',
         FEE_RECEIVER: '0xe000e3c9428D539566259cCd89ed5fb85e655A01',
         TX_SAVER_FEE_RECEIVER: '0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479',
         FEE_RECIPIENT_ADDR: '0xe000e3c9428D539566259cCd89ed5fb85e655A01',
@@ -137,11 +138,11 @@ const addrs = {
         ADMIN_VAULT: '0xd47D8D97cAd12A866900eEc6Cde1962529F25351',
         ADMIN_ACC: '0x6AFEA85cFAB61e3a55Ad2e4537252Ec05796BEfa',
         AAVE_V3_POOL_DATA_PROVIDER: '0x69FA688f1Dc47d4B5d8029D5a35FB7a548310654',
-        EXCHANGE_AGGREGATOR_REGISTRY_ADDR: '0xcc0Ae28CC4ae2944B61d3b205F47F5f3aE5Ca204',
+        EXCHANGE_AGGREGATOR_REGISTRY_ADDR: '0x61CAe57F2b01539e2a980d1e7A3942f458694108',
         AVG_GAS_PRICE: 0.5,
         STRATEGY_STORAGE_ADDR: '0x6aeA695fcd0655650323e9dc5f80Ac0b15A91Da2',
         BUNDLE_STORAGE_ADDR: '0x8332F2a50A9a6C85a476e1ea33031681291cB694',
-        ZEROX_WRAPPER: '0x94a58e456F1De766b13e45104D79201A218c1607',
+        ZEROX_WRAPPER: '0xca367C59489c9DC6962f078E783A2c771Abb4457',
         STRATEGY_EXECUTOR_ADDR: '0x7EC50D40C78A05dD9e8A93A222e21B2D2B29420B',
         REFILL_CALLER: '0xcbA094ae1B2B363886CC7f428206dB1b116834A2',
         FLUID_VAULT_T1_RESOLVER_ADDR: '0xD6373b375665DE09533478E8859BeCF12427Bb5e',
@@ -160,7 +161,7 @@ const addrs = {
         DAI_ADDRESS: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb',
         USDC_ADDR: '0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA',
         EXCHANGE_OWNER_ADDR: '0xC4D4b4F2Df76f9952E6e0Dc79861582A5b7269c3',
-        WRAPPER_EXCHANGE_REGISTRY: '0x586328A3F24E2c1A41D9A3a5B2Ed123A156dB82e',
+        WRAPPER_EXCHANGE_REGISTRY: '0x8586feA43C071437c33BA93CD5c67A13A256fB61',
         PROXY_AUTH_ADDR: '0xD34BBE7398F7F08952b033bbaF2D2xC84231dCEdc',
         AAVE_MARKET: '0xe20fCBdBfFC4Dd138cE8b2E6FBb6CB49777ad64D',
         SubProxy: '0xDC9441c4085B9B302506d64330e178E3C4890C87',
@@ -175,11 +176,11 @@ const addrs = {
         ADMIN_VAULT: '0xD8E67968d8a0df4beCf2D50daE1e34d4d80C701C',
         ADMIN_ACC: '0xF8EC1967A719027A95883a89579e7A77699899e4',
         AAVE_V3_POOL_DATA_PROVIDER: '0x2d8A3C5677189723C4cB8873CfC9C8976FDF38Ac',
-        EXCHANGE_AGGREGATOR_REGISTRY_ADDR: '0xB297cB5B1380cDD68A238cA38e8d54C809f3De32',
+        EXCHANGE_AGGREGATOR_REGISTRY_ADDR: '0x1d08eDc77Ab432eaA2a5175f929563e3490974b4',
         STRATEGY_STORAGE_ADDR: '0x3Ca96CebC7779Ee86685c67c999d0f03158Ee9cA',
         BUNDLE_STORAGE_ADDR: '0x6AB90ff536f0E2a880DbCdef1bB665C2acC0eDdC',
         TX_SAVER_FEE_RECEIVER: '0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479',
-        ZEROX_WRAPPER: '0xdAB5cC8CDCBA602E7ACfab262A4B09fDEEC20b51',
+        ZEROX_WRAPPER: '0x41ae874d27aF0C1F7B8f6ED17327CfEE4503dc7F',
         STRATEGY_EXECUTOR_ADDR: '0x0e778A2e5c9A2Cc75C5b38d6347284B8836E65D6',
         FEE_RECIPIENT_ADDR: '0xEDFc68e2874B0AFc0963e18AE4D68522aEc7f97D',
         REFILL_CALLER: '0xBefc466abe547B1785f382883833330a47C573f7',
@@ -198,7 +199,7 @@ const addrs = {
         WETH_ADDRESS: '0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f',
         DAI_ADDRESS: '0x4AF15ec2A0BD43Db75dd04E62FAA3B8EF36b00d5',
         USDC_ADDR: '0x176211869cA2b568f2A7D4EE941E073a821EE1ff',
-        WRAPPER_EXCHANGE_REGISTRY: '0x291EAc3cA14b7FcA8a93af4f6198E76FcFc6B0cD',
+        WRAPPER_EXCHANGE_REGISTRY: '0xFdfeA6469c537b19A334726E01621810bc49B929',
         FEE_RECEIVER: '0x2226836ec16ff5974dfd8df740cd461b42faffd5',
         FEE_RECIPIENT_ADDR: '0x2226836ec16ff5974dfd8df740cd461b42faffd5',
         TOKEN_GROUP_REGISTRY: '0xe40178a2f521fddf0410d87ae853adf04500502f',
@@ -207,9 +208,9 @@ const addrs = {
         ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         ADMIN_VAULT: '0x71a9ef13c960c2f1dd17962d3592a5bcdfad6de0',
         ADMIN_ACC: '0x6271D249271A9bc9E0285D9865c74a812cEF57b0',
-        EXCHANGE_AGGREGATOR_REGISTRY_ADDR: '0xa793daa424d731bf597ea3a46a16afa283d80ea7',
+        EXCHANGE_AGGREGATOR_REGISTRY_ADDR: '0x6Dc6C0e38fBd066b89Ba7E6f711B4288246891b3',
         AVG_GAS_PRICE: 0.001,
-        ZEROX_WRAPPER: '0x49658e0cf3883c338397c7257619b280df581057',
+        ZEROX_WRAPPER: '0x6F53fa9e7d1323d24515a51AB72Da3cf1E9883Bc',
         DFS_SAFE_FACTORY: '0x95a8665Ba58aa13A58c60B0803572772cda153dB',
     },
     plasma: {
@@ -219,7 +220,7 @@ const addrs = {
         WXPL_ADDRESS: '0x6100E367285b01F48D07953803A2d8dCA5D19873', // WXPL on Plasma. This is WETH inside DFS contracts
         DAI_ADDRESS: '', // No deployment on Plasma
         USDC_ADDR: '', // No deployment on Plasma
-        WRAPPER_EXCHANGE_REGISTRY: '0xef86E36CbbDAdA9F5318Df5D6908760cfF226B54',
+        WRAPPER_EXCHANGE_REGISTRY: '0xEd4e245364B2Bf3783417F8dFed1260Ca3F50eed',
         FEE_RECEIVER: '0x4C0607dAD18c0DE19f6d7b25c0B0f1990818e9d7',
         FEE_RECIPIENT_ADDR: '0x4C0607dAD18c0DE19f6d7b25c0B0f1990818e9d7',
         TOKEN_GROUP_REGISTRY: '0x09fBeC68D216667C3262211D2E5609578951dCE0',
@@ -228,9 +229,9 @@ const addrs = {
         ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         ADMIN_VAULT: '0x6AB90ff536f0E2a880DbCdef1bB665C2acC0eDdC',
         ADMIN_ACC: '0x7CF4F485e3a7fDa831e0579465881C51F3912A28',
-        EXCHANGE_AGGREGATOR_REGISTRY_ADDR: '0xe40178A2f521FDdF0410d87AE853aDf04500502f',
+        EXCHANGE_AGGREGATOR_REGISTRY_ADDR: '0x1d2Fa7dAcC660A9124c3685EE8a6E699d10409Eb',
         AVG_GAS_PRICE: 0.001,
-        ZEROX_WRAPPER: '0x16c9de87215D2198614dbC5419658eAdf4465025',
+        ZEROX_WRAPPER: '0x581DcDC6329cD07356d1b0F8C8B8BD2ED9CbF544',
         USDT0_ADDR: '0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb',
         AAVE_V3_POOL_DATA_PROVIDER: '0xf2D6E38B407e31E7E7e4a16E6769728b76c7419F',
         DFS_SAFE_FACTORY: '0xdf92F1c22A4E114919B14bdb274071d5a55E3E58',
@@ -445,7 +446,7 @@ async function findBalancesSlot(tokenAddress) {
     const account = hre.ethers.constants.AddressZero;
     const probeA = encode(['uint'], [1]);
     const probeB = encode(['uint'], [2]);
-    const token = await hre.ethers.getContractAt('IERC20', tokenAddress);
+    const token = await hre.ethers.getContractAt(erc20Artifact, tokenAddress);
     let setStorageMethod;
     if (hre.network.config.isAnvil) {
         setStorageMethod = 'anvil_setStorageAt';
@@ -885,7 +886,10 @@ const getContractFromRegistry = async (name, isFork = false, ...args) => {
 
 const setCode = async (addr, code) => {
     const setCodeMethod = hre.network.config.isAnvil ? 'anvil_setCode' : 'hardhat_setCode';
-    await hre.network.provider.send(setCodeMethod, [addr, code]);
+    await hre.network.provider.send(isNetworkFork() ? 'tenderly_setCode' : setCodeMethod, [
+        addr,
+        code,
+    ]);
 };
 
 const setContractAt = async ({ name, address, args = [] }) => {
@@ -942,13 +946,13 @@ const redeployCore = async (isL2 = false) => {
 };
 
 const send = async (tokenAddr, to, amount) => {
-    const tokenContract = await hre.ethers.getContractAt('IERC20', tokenAddr);
+    const tokenContract = await hre.ethers.getContractAt(erc20Artifact, tokenAddr);
 
     await tokenContract.transfer(to, amount);
 };
 
 const approve = async (tokenAddr, to, signer) => {
-    const tokenContract = await hre.ethers.getContractAt('IERC20', tokenAddr);
+    const tokenContract = await hre.ethers.getContractAt(erc20Artifact, tokenAddr);
 
     const from = signer ? signer.address : tokenContract.signer.address;
     const allowance = await tokenContract.allowance(from, to);
@@ -966,7 +970,7 @@ const approve = async (tokenAddr, to, signer) => {
 };
 
 const getAllowance = async (tokenAddr, from, to) => {
-    const tokenContract = await hre.ethers.getContractAt('IERC20', tokenAddr);
+    const tokenContract = await hre.ethers.getContractAt(erc20Artifact, tokenAddr);
 
     const allowance = await tokenContract.allowance(from, to);
 
@@ -979,7 +983,7 @@ const balanceOf = async (tokenAddr, addr) => {
     if (tokenAddr.toLowerCase() === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee') {
         balance = await hre.ethers.provider.getBalance(addr);
     } else {
-        const tokenContract = await hre.ethers.getContractAt('IERC20', tokenAddr);
+        const tokenContract = await hre.ethers.getContractAt(erc20Artifact, tokenAddr);
         balance = await tokenContract.balanceOf(addr);
     }
     return balance;
@@ -993,7 +997,7 @@ const getNftOwner = async (nftAddr, tokenId) => {
 };
 
 const balanceOfOnTokenInBlock = async (tokenAddr, addr, block) => {
-    const tokenContract = await hre.ethers.getContractAt('IERC20', tokenAddr);
+    const tokenContract = await hre.ethers.getContractAt(erc20Artifact, tokenAddr);
     let balance = '';
     balance = await tokenContract.balanceOf(addr, { blockTag: block });
     return balance;
@@ -1355,18 +1359,22 @@ const setNewExchangeWrapper = async (acc, newAddr, isFork = false) => {
 
     const signer = await hre.ethers.provider.getSigner(ownerAddr);
 
-    const registryInstance = await hre.ethers.getContractFactory('WrapperExchangeRegistry');
-    const registry = await registryInstance.attach(addrs[network].WRAPPER_EXCHANGE_REGISTRY);
-    const registryByOwner = registry.connect(signer);
-
-    await registryByOwner.addWrapper(newAddr, { gasLimit: 300000 });
+    const registry = await hre.ethers.getContractAt(
+        'contracts/exchangeV3/registries/WrapperExchangeRegistry.sol:WrapperExchangeRegistry',
+        addrs[network].WRAPPER_EXCHANGE_REGISTRY,
+        signer,
+    );
+    await registry.addWrapper(newAddr, { gasLimit: 300000 });
     if (!isFork) {
         await stopImpersonatingAccount(ownerAddr);
     }
 };
 
 const depositToWeth = async (amount, signer) => {
-    const weth = await hre.ethers.getContractAt('IWETH', addrs[network].WETH_ADDRESS);
+    const weth = await hre.ethers.getContractAt(
+        'contracts/interfaces/token/IWETH.sol:IWETH',
+        addrs[network].WETH_ADDRESS,
+    );
 
     if (signer) {
         const wethWithSigner = weth.connect(signer);
@@ -1412,7 +1420,7 @@ const addToExchangeAggregatorRegistry = async (acc, newAddr, isFork = false) => 
     const signer = hre.ethers.provider.getSigner(ownerAddr);
 
     const registry = await hre.ethers.getContractAt(
-        'ExchangeAggregatorRegistry',
+        'contracts/exchangeV3/registries/ExchangeAggregatorRegistry.sol:ExchangeAggregatorRegistry',
         addrs[network].EXCHANGE_AGGREGATOR_REGISTRY_ADDR,
         signer,
     );
@@ -1603,6 +1611,12 @@ const resetForkToBlock = async (block) => {
     await setForkForTesting();
 };
 
+const setupExchangeFork = async (sellAction = 'DFSSell') => {
+    if (!isNetworkFork()) await resetForkToBlock();
+    // A registry upgrade would advance the fork clock past live quote deadlines.
+    const { deployedBytecode } = await hre.artifacts.readArtifact(sellAction);
+    await setCode(await getAddrFromRegistry(sellAction), deployedBytecode);
+};
 const mockChainlinkPriceFeed = async () => {
     const mockChainlinkFeedRegistryBytecode =
         require('../../artifacts/contracts/mocks/MockChainlinkFeedRegistry.sol/MockChainlinkFeedRegistry.json').deployedBytecode;
@@ -1888,6 +1902,7 @@ module.exports = {
     timeTravel,
     fetchStandardAmounts,
     setNewExchangeWrapper,
+    setupExchangeFork,
     fetchAmountinUSDPrice,
     getGasUsed,
     getNameId,

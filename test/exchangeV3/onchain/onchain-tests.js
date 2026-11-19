@@ -6,125 +6,83 @@ const dfs = require('@defisaver/sdk');
 const {
     getProxy,
     redeploy,
+    setupExchangeFork,
+    takeSnapshot,
+    revertToSnapshot,
     balanceOf,
     setNewExchangeWrapper,
     setBalance,
-    resetForkToBlock,
     Float2BN,
     formatExchangeObj,
-    BN2Float,
-    formatExchangeObjCurve,
+    USDT_ADDR,
+    ETH_ADDR,
+    WETH_ADDRESS,
+    nullAddress,
     addrs,
     placeHolderAddr,
     approve,
     network,
 } = require('../../utils/utils');
 
-const { sell, executeAction } = require('../../utils/actions');
+const { executeAction } = require('../../utils/actions');
 
-const trades = [
-    {
-        sellToken: 'WETH',
-        buyToken: 'DAI',
-        amount: '1',
-        fee: 3000,
+// Fixed two-hop routes exercise the wrapper without depending on the live route finder.
+const curveRoutes = {
+    LUSD: {
+        via: USDT_ADDR,
+        pools: [
+            '0xD51a44d3FaE010294C616388b506AcdA1bfAAE46', // tricrypto2
+            '0xEd279fDD11cA84bEef15AF5D39BB4d4bEE23F0cA', // LUSD/3Crv
+        ],
+        params: [
+            [2, 0, 1, 3, 3],
+            [3, 0, 2, 1, 4],
+        ],
     },
-    {
-        sellToken: 'DAI',
-        buyToken: 'WBTC',
-        amount: '30000',
-        fee: 3000,
+    STETH: {
+        via: ETH_ADDR,
+        pools: [WETH_ADDRESS, '0xDC24316b9AE028F1497c275EB9192a3Ea0f67022'],
+        params: [
+            [0, 0, 8, 0, 0],
+            [0, 1, 1, 1, 2],
+        ],
     },
-    {
-        sellToken: 'WETH',
-        buyToken: 'USDC',
-        amount: '1',
-        fee: 3000,
-    },
-    {
-        sellToken: 'USDC',
-        buyToken: 'WETH',
-        amount: '3000',
-        fee: 3000,
-    },
-    {
-        sellToken: 'WETH',
-        buyToken: 'USDT',
-        amount: '1',
-        fee: 3000,
-    },
-    {
-        sellToken: 'DAI',
-        buyToken: 'USDC',
-        amount: '3000',
-        fee: 500,
-    },
-];
+};
 
-const curveTrades = [
-    {
-        sellToken: 'WETH',
-        buyToken: 'LUSD',
-        amount: '1',
-    },
-    {
-        sellToken: 'LUSD',
-        buyToken: 'WETH',
-        amount: '3000',
-    },
-    {
-        sellToken: 'WETH',
-        buyToken: 'STETH',
-        amount: '1',
-    },
-    {
-        sellToken: 'STETH',
-        buyToken: 'WETH',
-        amount: '1',
-    },
-];
-
-// @dev If curve route contains some synthetix tokens, curve order may fail because of deadline
-const routeContainsSynthetixTokensThatCanBreakCurveOrder = (exchangeData) => {
-    const tokens = [
-        '5e74c9036fb86bd7ecdcb084a0673efc32ea31cb', // sETH
-        'fe18be6b3bd88a2d2a7f928d00292e7a9963cfc6', // sBTC
-        '57Ab1ec28D129707052df4dF418D58a2D46d5f51', // sUSD
-    ];
-    return tokens.some((t) => exchangeData.toString().includes(t));
+const encodeCurveRoute = (trade, src, dest) => {
+    const forward = trade.sellToken === 'WETH';
+    const { via, pools, params } = curveRoutes[forward ? trade.buyToken : trade.sellToken];
+    const [first, second] = forward ? pools : [pools[1], pools[0]];
+    const steps = forward ? params : params.map(([i, j, ...rest]) => [j, i, ...rest]).reverse();
+    return hre.ethers.utils.defaultAbiCoder.encode(
+        ['address[11]', 'uint256[5][5]', 'address[5]'],
+        [
+            [src, first, via, second, dest, ...Array(6).fill(nullAddress)],
+            [...steps, ...Array(3).fill([0, 0, 0, 0, 0])],
+            Array(5).fill(nullAddress),
+        ],
+    );
 };
 
 const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve = false) => {
     const sellAssetInfo = getAssetInfo(trade.sellToken);
     const buyAssetInfo = getAssetInfo(trade.buyToken);
 
-    const amount = Float2BN(trade.amount, getAssetInfo(trade.sellToken).decimals);
+    const amount = Float2BN(trade.amount, sellAssetInfo.decimals);
 
     await setBalance(buyAssetInfo.address, senderAcc.address, Float2BN('0'));
     await setBalance(sellAssetInfo.address, senderAcc.address, amount);
 
-    let exchangeObject;
-    if (!isCurve) {
-        exchangeObject = formatExchangeObj(
-            sellAssetInfo.address,
-            buyAssetInfo.address,
-            amount,
-            wrapper.address,
-            0,
-            trade.fee,
-        );
-    } else {
-        exchangeObject = await formatExchangeObjCurve(
-            sellAssetInfo.address,
-            buyAssetInfo.address,
-            amount,
-            wrapper.address,
-        );
-    }
-    const exchangeData = exchangeObject.at(-2);
-
-    if (routeContainsSynthetixTokensThatCanBreakCurveOrder(exchangeData)) {
-        return -1;
+    const exchangeObject = formatExchangeObj(
+        sellAssetInfo.address,
+        buyAssetInfo.address,
+        amount,
+        wrapper.address,
+        0,
+        trade.fee,
+    );
+    if (isCurve) {
+        exchangeObject[8] = encodeCurveRoute(trade, sellAssetInfo.address, buyAssetInfo.address);
     }
 
     const rate = await dfsPrices.callStatic.getExpectedRate(
@@ -132,35 +90,26 @@ const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve 
         sellAssetInfo.address,
         buyAssetInfo.address,
         amount,
-        exchangeData,
+        exchangeObject[8],
     );
 
     const expectedOutput = amount.mul(rate).div(Float2BN('1'));
 
-    const feeReceiverAmountBefore = await balanceOf(
-        sellAssetInfo.address,
-        addrs[network].FEE_RECEIVER,
+    const feeRecipient = await hre.ethers.getContractAt(
+        'contracts/utils/fee/FeeRecipient.sol:FeeRecipient',
+        addrs[network].FEE_RECIPIENT_ADDR,
     );
+    const feeReceiver = await feeRecipient.getFeeAddr();
+    const feeReceiverAmountBefore = await balanceOf(sellAssetInfo.address, feeReceiver);
 
-    await sell(
-        proxy,
-        sellAssetInfo.address,
-        buyAssetInfo.address,
-        amount,
-        wrapper.address,
-        senderAcc.address,
-        senderAcc.address,
-        trade.fee,
-        senderAcc,
-        isCurve,
-        false,
-        true, // sell in recipe so we can check the fee
-    );
+    await approve(sellAssetInfo.address, proxy.address, senderAcc);
+    const recipe = new dfs.Recipe('Sell', [
+        new dfs.actions.basic.PullTokenAction(sellAssetInfo.address, senderAcc.address, amount),
+        new dfs.actions.basic.SellAction(exchangeObject, proxy.address, senderAcc.address),
+    ]);
+    await executeAction('RecipeExecutor', recipe.encodeForDsProxyCall()[1], proxy);
 
-    const feeReceiverAmountAfter = await balanceOf(
-        sellAssetInfo.address,
-        addrs[network].FEE_RECEIVER,
-    );
+    const feeReceiverAmountAfter = await balanceOf(sellAssetInfo.address, feeReceiver);
 
     const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
 
@@ -178,18 +127,11 @@ const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve 
     // must be closeTo because 1 wei steth bug
     expect(feeReceiverAmountAfter).to.be.closeTo(feeReceiverAmountBefore.add(feeAmount), '1');
 
-    expect(buyBalanceAfter).is.gt('0');
-    if (Math.abs(buyBalanceAfter - expectedOutput) > expectedOutput * 0.01) {
-        console.log(`
-        Bad liquidity or rate getter:
-        Expected: ${+BN2Float(expectedOutput, buyAssetInfo.decimals)}
-        Output: ${+BN2Float(buyBalanceAfter, buyAssetInfo.decimals)}
-        `);
-    }
-    return rate;
+    expect(rate).to.be.gt(0);
+    expect(buyBalanceAfter).to.be.closeTo(expectedOutput, expectedOutput.div(100));
 };
 
-const dfsSellSameAssetTest = async () => {
+const dfsSellSameAssetTest = () => {
     describe('Dfs-same asset sell', function () {
         this.timeout(140000);
 
@@ -197,10 +139,7 @@ const dfsSellSameAssetTest = async () => {
         let proxy;
 
         before(async () => {
-            await redeploy('DFSSell');
-            await redeploy('RecipeExecutor');
-            await redeploy('PullToken');
-            await redeploy('SendToken');
+            await setupExchangeFork();
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
         });
@@ -241,7 +180,7 @@ const dfsSellSameAssetTest = async () => {
     });
 };
 
-const dfsSellTest = async () => {
+const dfsSellTest = () => {
     describe('Dfs-Sell-onchain', function () {
         this.timeout(400000);
 
@@ -252,11 +191,10 @@ const dfsSellTest = async () => {
         let uniV3Wrapper;
         let curveWrapper;
         let dfsPrices;
+        let snapshot;
 
         before(async () => {
-            await resetForkToBlock();
-            await redeploy('DFSSell');
-            await redeploy('RecipeExecutor');
+            await setupExchangeFork();
 
             dfsPrices = await redeploy('DFSPricesView');
             uniWrapper = await redeploy('UniswapWrapperV3');
@@ -272,62 +210,47 @@ const dfsSellTest = async () => {
             await setNewExchangeWrapper(senderAcc, curveWrapper.address);
         });
 
-        for (let i = 0; i < 1; ++i) {
-            const trade = trades[i];
+        beforeEach(async () => {
+            snapshot = await takeSnapshot();
+        });
+        afterEach(async () => {
+            await revertToSnapshot(snapshot);
+        });
 
-            it(`... should sell on Kyber ${trade.sellToken} for ${trade.buyToken}`, async () => {
-                const kyberRate = await executeSell(
-                    senderAcc,
-                    proxy,
-                    dfsPrices,
-                    trade,
-                    kyberWrapper,
-                );
-                console.log(`Kyber sell rate -> ${kyberRate}`);
-            });
-            it(`... should sell on Uniswap ${trade.sellToken} for ${trade.buyToken}`, async () => {
-                const uniRate = await executeSell(
-                    senderAcc,
-                    proxy,
-                    dfsPrices,
-                    { ...trade, fee: 0 },
-                    uniWrapper,
-                );
-                console.log(`Uniswap sell rate -> ${uniRate}`);
-            });
-            it(`... should sell on UniswapV3 ${trade.sellToken} for ${trade.buyToken}`, async () => {
-                const uniV3Rate = await executeSell(
-                    senderAcc,
-                    proxy,
-                    dfsPrices,
-                    trade,
-                    uniV3Wrapper,
-                );
-                console.log(`UniswapV3 sell rate -> ${uniV3Rate}`);
-            });
-        }
-
-        for (let i = 0; i < curveTrades.length; ++i) {
-            const trade = curveTrades[i];
-
-            it(`... should sell ${trade.sellToken} for ${trade.buyToken} on Curve`, async () => {
-                const curveRate = await executeSell(
-                    senderAcc,
-                    proxy,
-                    dfsPrices,
-                    trade,
-                    curveWrapper,
-                    true,
-                );
-                console.log(`Curve sell rate -> ${curveRate}`);
-            });
+        const trade = { sellToken: 'WETH', buyToken: 'DAI', amount: '1' };
+        it('sells WETH for DAI on Kyber', async () => {
+            await executeSell(senderAcc, proxy, dfsPrices, trade, kyberWrapper);
+        });
+        it('sells WETH for DAI on Uniswap', async () => {
+            await executeSell(senderAcc, proxy, dfsPrices, trade, uniWrapper);
+        });
+        it('sells WETH for DAI on Uniswap V3', async () => {
+            await executeSell(senderAcc, proxy, dfsPrices, { ...trade, fee: 3000 }, uniV3Wrapper);
+        });
+        for (const token of Object.keys(curveRoutes)) {
+            for (const [sellToken, buyToken] of [
+                ['WETH', token],
+                [token, 'WETH'],
+            ]) {
+                it(`sells ${sellToken} for ${buyToken} on Curve`, async () => {
+                    const amount = sellToken === 'LUSD' ? '3000' : '1';
+                    await executeSell(
+                        senderAcc,
+                        proxy,
+                        dfsPrices,
+                        { sellToken, buyToken, amount },
+                        curveWrapper,
+                        true,
+                    );
+                });
+            }
         }
     });
 };
 
-const onchainExchangeFullTest = async () => {
-    await dfsSellTest();
-    await dfsSellSameAssetTest();
+const onchainExchangeFullTest = () => {
+    dfsSellTest();
+    dfsSellSameAssetTest();
 };
 
 module.exports = {
