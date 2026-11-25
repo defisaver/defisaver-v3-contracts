@@ -1,8 +1,10 @@
 const axios = require('axios');
 
+/** @notice Pause between explorer requests for the given number of milliseconds. */
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 let nextRequestAt = 0;
 
+/** @notice Send a request to Etherscan, spacing requests across all networks. */
 async function explorerRequest(parameters) {
     // Share the request budget across concurrent network verifications.
     const delay = Math.max(0, nextRequestAt - Date.now());
@@ -24,6 +26,10 @@ async function explorerRequest(parameters) {
     }
 }
 
+/**
+ * @notice Wait for the explorer to publish source under the expected contract name and
+ * reject Similar Matches.
+ */
 async function confirmExactSource({
     common,
     address,
@@ -69,6 +75,10 @@ async function confirmExactSource({
     throw new Error(`${name}: exact verification status timed out; resume to continue`);
 }
 
+/**
+ * @notice Submit the compiler input or resume a saved explorer job. In wait mode, poll
+ * for an exact match.
+ */
 async function verifySource(
     {
         chainId,
@@ -92,6 +102,7 @@ async function verifySource(
     const common = { chainid: chainId, module: 'contract', apikey: apiKey };
     const deadline = Date.now() + timeoutMs;
     const reported = new Set();
+    /** @notice Show each verification status message once while polling. */
     const report = (message) => {
         if (!reported.has(message)) {
             reported.add(message);

@@ -9,6 +9,7 @@ const { networks } = require('../scripts/deployment/config');
 const { executeRun, gasOverrides, unsignedContracts } = require('../scripts/deployment/deploy');
 const { decrypt } = require('../scripts/utils/crypto');
 
+/** @notice Expand `all` or validate a comma-separated list of unique network names. */
 function parseNetworks(value) {
     const names = value === 'all' ? Object.keys(networks) : value.split(',');
     if (
@@ -21,6 +22,7 @@ function parseNetworks(value) {
     return names;
 }
 
+/** @notice Group contracts by network, using the default networks for groups without an @ suffix. */
 function parseTargets(groups, defaultNetworks) {
     if (!groups.length) throw new Error('Supply contracts, or --resume');
     const defaults = defaultNetworks === undefined ? undefined : parseNetworks(defaultNetworks);
@@ -41,6 +43,7 @@ function parseTargets(groups, defaultNetworks) {
     return targets;
 }
 
+/** @notice Apply a shared gas cap, then use any network-specific overrides. */
 function parseGas(value, selected) {
     if (!value) return {};
     if (!value.includes('=')) return Object.fromEntries(selected.map((n) => [n, value]));
@@ -63,6 +66,7 @@ function parseGas(value, selected) {
     );
 }
 
+/** @notice Create an exclusive lock file and return a function that releases it. */
 function lock(file = path.join(ROOT, 'deployments', 'multi.lock')) {
     fs.mkdirSync(path.dirname(file), { recursive: true });
     try {
@@ -90,12 +94,14 @@ function lock(file = path.join(ROOT, 'deployments', 'multi.lock')) {
     };
 }
 
+/** @notice Parse a positive whole number for a timeout or confirmation count. */
 function positiveInteger(value) {
     const number = Number(value);
     if (!Number.isSafeInteger(number) || number < 1) throw new Error('Expected a positive integer');
     return number;
 }
 
+/** @notice Validate the tag that will be appended to the contract source before compilation. */
 function sourceTag(value) {
     if (!/^[A-Za-z0-9_.-]{1,64}$/.test(value)) {
         throw new Error('Source tag must use 1-64 letters, numbers, dots, dashes or underscores');
@@ -103,6 +109,7 @@ function sourceTag(value) {
     return value;
 }
 
+/** @notice Accept the explorer verification modes `submit`, `wait`, and `skip`. */
 function verificationMode(value) {
     if (!['submit', 'wait', 'skip'].includes(value)) {
         throw new Error('Verification mode must be submit, wait or skip');
@@ -110,6 +117,7 @@ function verificationMode(value) {
     return value;
 }
 
+/** @notice Write one Standard JSON compiler input per contract, grouped by network. */
 function exportVerificationInputs(run, directory) {
     const files = [];
     for (const bundle of run.bundles) {
@@ -128,6 +136,7 @@ function exportVerificationInputs(run, directory) {
     return files;
 }
 
+/** @notice Ask the operator to confirm the network and approve any fee cap above 300 gwei. */
 function confirmDeployment(network, address, gas, contracts, question = readline.question) {
     let highestGas = ethers.constants.Zero;
     for (const record of Object.values(contracts)) {
@@ -156,6 +165,7 @@ function confirmDeployment(network, address, gas, contracts, question = readline
     }
 }
 
+/** @notice Find the environment variable holding the encrypted key for this network. */
 function deploymentKeyEnv(network, env) {
     const { keyEnv } = networks[network];
     if (env[keyEnv]) return keyEnv;
@@ -163,6 +173,7 @@ function deploymentKeyEnv(network, env) {
     throw new Error(`Missing ${keyEnv}`);
 }
 
+/** @notice Check required environment variables and validate gas caps for unsigned deployments. */
 function preflight(entries, options, env) {
     if (options.verification !== 'skip' && !env.ETHERSCAN_API_KEY)
         throw new Error('ETHERSCAN_API_KEY is required');
@@ -183,6 +194,7 @@ function preflight(entries, options, env) {
     return { gasPrices: prices, unsignedTargets };
 }
 
+/** @notice Summarize failures by network and omit connection details from recognized RPC errors. */
 function formatDeploymentError(error, env) {
     if (
         error instanceof AggregateError &&
@@ -208,6 +220,7 @@ function formatDeploymentError(error, env) {
     return `${network || 'Deployment'}: RPC ${method} failed (${error.code || detail.code || 'unknown error'})`;
 }
 
+/** @notice Create or resume a deployment run, or stop after building or exporting its compiler inputs. */
 async function main(argv = process.argv, env = { ...process.env }) {
     const program = new Command()
         .description('Build and deploy contracts across networks with configurable verification')
@@ -330,6 +343,7 @@ async function main(argv = process.argv, env = { ...process.env }) {
             gasPrices,
             checkPending: (signers) =>
                 checkPendingDeployments(path.dirname(file), unsignedTargets, file, signers),
+            /** @notice Try the previous password before prompting for this network's key. */
             getWallet: async (network, provider) => {
                 const keyEnv = deploymentKeyEnv(network, env);
                 const encrypted = env[keyEnv];
