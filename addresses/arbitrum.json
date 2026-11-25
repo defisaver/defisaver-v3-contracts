@@ -99,14 +99,14 @@
     },
     {
         "name": "ExchangeAggregatorRegistry",
-        "address": "0xcc0Ae28CC4ae2944B61d3b205F47F5f3aE5Ca204",
+        "address": "0x61CAe57F2b01539e2a980d1e7A3942f458694108",
         "id": "0x04abec26",
         "path": "contracts/exchangeV3/registries/ExchangeAggregatorRegistry.sol",
-        "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": 86400,
         "registryIds": [],
-        "history": []
+        "history": ["0xcc0Ae28CC4ae2944B61d3b205F47F5f3aE5Ca204"]
     },
     {
         "name": "Discount",
@@ -176,28 +176,30 @@
     },
     {
         "name": "UniV3WrapperV3",
-        "address": "0x37236458C59F4dCF17b96Aa67FC07Bbf5578d873",
+        "address": "0xC636Ea3cCFC9E13f59bd70248DafAD5F5413A09C",
         "id": "0x7c1f8079",
         "path": "contracts/exchangeV3/onchainWrappersV3/UniV3WrapperV3.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x37236458C59F4dCF17b96Aa67FC07Bbf5578d873",
             "0x6945432Cc46B2956Cd4583836c463284212d96A6",
             "0x48eF488054b5c570cF3A2AC0A0697B0b0D34c431"
         ]
     },
     {
         "name": "CurveWrapperV3",
-        "address": "0x836BCCf8831080AC115559c705c765392AFdCB98",
+        "address": "0x4274E221aadfDD427530c71c055b43fF04BAfE05",
         "id": "0xb856c9af",
         "path": "contracts/exchangeV3/onchainWrappersV3/CurveWrapperV3.sol",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x836BCCf8831080AC115559c705c765392AFdCB98",
             "0x506bC549432Ae8357385C86a20163960E3C9b33b",
             "0x6bfa86D54B75DcFEb58C6A80FadE947E180C3616",
             "0xB82b43c4c0ABF41Dfc342571C330964fF576a9b3"
@@ -205,25 +207,31 @@
     },
     {
         "name": "ZeroxWrapper",
-        "address": "0x94a58e456F1De766b13e45104D79201A218c1607",
+        "address": "0xca367C59489c9DC6962f078E783A2c771Abb4457",
         "id": "0x6eddecea",
         "path": "contracts/exchangeV3/offchainWrappersV3/ZeroxWrapper.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0x04a518629EBa20C949F94636F75291607c9B9Ca8"]
+        "history": [
+            "0x94a58e456F1De766b13e45104D79201A218c1607",
+            "0x04a518629EBa20C949F94636F75291607c9B9Ca8"
+        ]
     },
     {
         "name": "OneInchWrapper",
-        "address": "0xC20D9974304B5fCB3cF9DE2F985829546b290660",
+        "address": "0x693E4E88C0BBED5Dbe7471CdbC9390F9D5EBC130",
         "id": "0x82854967",
         "path": "contracts/exchangeV3/offchainWrappersV3/OneInchWrapper.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0x0EC0b0F3BaDD1d66235Eec303D698D4A7652E658"]
+        "history": [
+            "0xC20D9974304B5fCB3cF9DE2F985829546b290660",
+            "0x0EC0b0F3BaDD1d66235Eec303D698D4A7652E658"
+        ]
     },
     {
         "name": "OdosWrapper",
@@ -238,25 +246,28 @@
     },
     {
         "name": "BebopWrapper",
-        "address": "0xCA2f82b0499a59115718b919e74Aa931CF43d84b",
+        "address": "0xC3bBfb6294f92e9189766eC09bc481826898FEf1",
         "id": "0x8391a2d1",
         "path": "contracts/exchangeV3/offchainWrappersV3/BebopWrapper.sol",
-        "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
-        "registryIds": [],
-        "history": []
-    },
-    {
-        "name": "ParaswapWrapper",
-        "address": "0x6a1Ebcb09D419Affe500B4feA13A89511aD23c1b",
-        "id": "0x115fa27e",
-        "path": "contracts/exchangeV3/offchainWrappersV3/ParaswapWrapper.sol",
         "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0x38E7c23f6BbAA26EF076bbcFc2a509bcaA45797c"]
+        "history": ["0xCA2f82b0499a59115718b919e74Aa931CF43d84b"]
+    },
+    {
+        "name": "ParaswapWrapper",
+        "address": "0x199b1856f559fC1BfA33ab49C8055Db637543740",
+        "id": "0x115fa27e",
+        "path": "contracts/exchangeV3/offchainWrappersV3/ParaswapWrapper.sol",
+        "version": "1.0.2",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": [
+            "0x6a1Ebcb09D419Affe500B4feA13A89511aD23c1b",
+            "0x38E7c23f6BbAA26EF076bbcFc2a509bcaA45797c"
+        ]
     },
     {
         "name": "KyberInputScalingHelper",
@@ -275,14 +286,15 @@
     },
     {
         "name": "KyberAggregatorWrapper",
-        "address": "0x662c838c99526498f6a0632963bb8e561519b15a",
+        "address": "0x54429c102a6E66cB685B2A0C75e0982E960be107",
         "id": "0x1abf4ed0",
         "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
-        "version": "1.0.7",
+        "version": "1.0.8",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x662c838c99526498f6a0632963bb8e561519b15a",
             "0x08a110FD330F62A92F23e1C504c9c4e9b43eeBB6",
             "0xe8ec0f8c046817c3a7255aec40b48b7e54dd98fc",
             "0x7a77e9C66867da4eEf0feb9eA1759Ff9e51e7D4f",
@@ -316,14 +328,14 @@
     },
     {
         "name": "WrapperExchangeRegistry",
-        "address": "0x4a0c7BDF7F58AA04852Da07CDb3d367521f81446",
+        "address": "0xa00d10EC5963f2bFca1863F974a57E79CF2Ce6Dd",
         "id": "0x0df19746",
         "path": "contracts/exchangeV3/registries/WrapperExchangeRegistry.sol",
-        "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": 86400,
         "registryIds": [],
-        "history": []
+        "history": ["0x4a0c7BDF7F58AA04852Da07CDb3d367521f81446"]
     },
     {
         "name": "TokenGroupRegistry",
@@ -483,14 +495,15 @@
     },
     {
         "name": "DFSSell",
-        "address": "0x1393eef11454ab068dd5e0d0be5eb922603eef1a",
+        "address": "0x9AaC4041a964Af951Eedc09eFe12Cc3f8C6D54c6",
         "id": "0x7f2a0f35",
         "path": "contracts/actions/exchange/DFSSell.sol",
-        "version": "1.0.4",
+        "version": "1.0.5",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
         "history": [
+            "0x1393eef11454ab068dd5e0d0be5eb922603eef1a",
             "0xdC2C741b8A60B40BCc170F67C4aF02038b5086a7",
             "0xF940aE73cb01c81e657916D14e5699c73a22566c",
             "0x9109F34AB28D369cF894aF45C50E976B8E312a82",
@@ -521,14 +534,15 @@
     },
     {
         "name": "LimitSellL2",
-        "address": "0x47620F631f821219388c14Ae188aC30Edf042946",
+        "address": "0xCB5a8Be9a35AB24BE8712F8b9F95b0d73eCbA43c",
         "id": "0x5cc47139",
         "path": "contracts/actions/exchange/LimitSellL2.sol",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
         "history": [
+            "0x47620F631f821219388c14Ae188aC30Edf042946",
             "0x7e63C8f337eC217df43ae3F9254B17e799FC1a69",
             "0x2D5d36e458eB151D30B189805fF2517863A41c25",
             "0xC941B49Aaa9743a5EA4Ccd60Bf9a980861bA5201"
@@ -1331,14 +1345,15 @@
     },
     {
         "name": "LlamaLendSwapper",
-        "address": "0xce3701F72eF99d3990E2185729347435b14D9C6D",
+        "address": "0x7678C9DC82BD8f08c39049059E01b8300Cf0b182",
         "id": "0x4a94e2c3",
         "path": "contracts/actions/llamalend/advanced/LlamaLendSwapper.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
         "history": [
+            "0xce3701F72eF99d3990E2185729347435b14D9C6D",
             "0xee41a84da283a82cbeadab051aa07dbb442eb0b4",
             "0x9b4a6d3674b099317d0c5dfe2592ed222057c878"
         ]
@@ -1991,25 +2006,25 @@
     },
     {
         "name": "FlyWrapper",
-        "address": "0xBF0E9497A367D5015E54211110450a5e22a99726",
+        "address": "0x25897d646c325Ab3da158db001bE6aCaBb90bdD6",
         "id": "0x92b2d9f8",
         "path": "contracts/exchangeV3/offchainWrappersV3/FlyWrapper.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xBF0E9497A367D5015E54211110450a5e22a99726"]
     },
     {
         "name": "OpenOceanWrapper",
-        "address": "0x36f8188ECf71d5De57c76a579Cd584545483C45d",
+        "address": "0x026E0D1430197CbA024A9664fa59Fe01E0112A86",
         "id": "0x9e3c90cd",
         "path": "contracts/exchangeV3/offchainWrappersV3/OpenOceanWrapper.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x36f8188ECf71d5De57c76a579Cd584545483C45d"]
     },
     {
         "name": "AaveV3BoostCollateralTrigger",

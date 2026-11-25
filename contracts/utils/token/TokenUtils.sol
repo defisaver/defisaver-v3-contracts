@@ -22,7 +22,9 @@ library TokenUtils {
     }
 
     function removeAllowance(address _tokenAddr, address _to) internal {
-        if (_tokenAddr == ETH_ADDR) return;
+        if (_tokenAddr == ETH_ADDR || IERC20(_tokenAddr).allowance(address(this), _to) == 0) {
+            return;
+        }
 
         IERC20(_tokenAddr).safeApprove(_to, 0);
     }

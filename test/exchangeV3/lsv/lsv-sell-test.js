@@ -47,26 +47,23 @@ describe('LsvSell', function () {
     });
 
     const expectStakeInsteadOfSell = async (tx, srcToken, destToken) => {
-        const txHash = tx.hash;
-        const receipt = await hre.ethers.provider.getTransactionReceipt(txHash);
-        for (let i = 0; i < receipt.logs.length; i++) {
-            const log = receipt.logs[i];
-            const lsvSellEncoded = hre.ethers.utils.keccak256(
-                hre.ethers.utils.toUtf8Bytes('LSVSell'),
-            );
-            if (log.topics.length === 2 && log.topics[1] === lsvSellEncoded) {
-                const logDataSliced = receipt.logs[i].data.slice(130);
-                const decodedData = hre.ethers.utils.defaultAbiCoder.decode(
-                    ['address', 'address', 'address', 'uint256', 'uint256', 'uint256', 'bool'],
-                    `0x${logDataSliced}`,
-                );
-                expect(decodedData[1].toLowerCase()).to.be.eq(srcToken.address.toLowerCase());
-                expect(decodedData[2].toLowerCase()).to.be.eq(destToken.address.toLowerCase());
-                expect(decodedData[3]).to.be.eq(srcAmount);
-                expect(decodedData[6]).to.be.eq(false);
-                console.log(decodedData);
-            }
-        }
+        const { logs } = await tx.wait();
+        const log = logs.find(
+            ({ topics }) =>
+                topics[0] === hre.ethers.utils.id('ActionEvent(string,bytes)') &&
+                topics[1] === hre.ethers.utils.id('LSVSell'),
+        );
+        expect(log, 'LSVSell action event').to.exist;
+        const { defaultAbiCoder } = hre.ethers.utils;
+        const [data] = defaultAbiCoder.decode(['bytes'], log.data);
+        const [, src, dest, amount, , , shouldSell] = defaultAbiCoder.decode(
+            ['address', 'address', 'address', 'uint256', 'uint256', 'uint256', 'bool'],
+            data,
+        );
+        expect(src.toLowerCase()).to.eq(srcToken.address.toLowerCase());
+        expect(dest.toLowerCase()).to.eq(destToken.address.toLowerCase());
+        expect(amount).to.eq(srcAmount);
+        expect(shouldSell).to.eq(false);
     };
 
     const getEethTokens = async () => {
@@ -101,7 +98,7 @@ describe('LsvSell', function () {
         const recipe = new dfs.Recipe('LSVSell-Test-Lido', [sellAction]);
         const functionData = recipe.encodeForDsProxyCall()[1];
         const tx = await executeAction('RecipeExecutor', functionData, wallet);
-        expectStakeInsteadOfSell(tx, srcToken, destToken);
+        await expectStakeInsteadOfSell(tx, srcToken, destToken);
     };
 
     it('... should deposit WETH on lido if it gives better rate', async () => {
