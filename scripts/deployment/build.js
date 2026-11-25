@@ -6,9 +6,12 @@ const { tokenize } = require('@solidity-parser/parser');
 const { networks, solidity } = require('./config');
 
 const ROOT = path.resolve(__dirname, '../..');
+/** @notice Compute the SHA-256 digest used for build cache keys and bundle checksums. */
 const hash = (value) => crypto.createHash('sha256').update(value).digest('hex');
+/** @notice Read and parse a saved JSON file. */
 const readJson = (file) => JSON.parse(fs.readFileSync(file, 'utf8'));
 
+/** @notice Replace a JSON file atomically so an interrupted write cannot leave a partial manifest. */
 function writeJson(file, value, spaces = 2) {
     fs.mkdirSync(path.dirname(file), { recursive: true });
     const temporary = `${file}.${process.pid}.tmp`;
@@ -32,6 +35,7 @@ function writeJson(file, value, spaces = 2) {
     }
 }
 
+/** @notice Find Solidity source files recursively, skipping symlinks and flattened copies. */
 function listSources(dir) {
     return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
         if (entry.name === 'flattened' || entry.isSymbolicLink()) return [];
@@ -41,6 +45,7 @@ function listSources(dir) {
     });
 }
 
+/** @notice Resolve each contract name to a single source file under contracts/. */
 function resolveContracts(names, root = ROOT) {
     if (!names.length || new Set(names).size !== names.length) {
         throw new Error('Supply unique contract names.');
@@ -56,6 +61,10 @@ function resolveContracts(names, root = ROOT) {
     });
 }
 
+/**
+ * @notice Rewrite address imports and TokenUtils.WETH_ADDR for the target network and
+ * return the imports to follow.
+ */
 function transformSource(source, sourceName, network) {
     const target = networks[network];
     if (!Object.hasOwn(networks, network)) throw new Error(`Unknown network: ${network}`);
@@ -138,8 +147,10 @@ function transformSource(source, sourceName, network) {
     return { content: source, imports };
 }
 
+/** @notice Collect the network-specific sources needed to compile the selected contracts. */
 function collectSources(contracts, network, root = ROOT) {
     const sources = {};
+    /** @notice Add a source once, then follow its imports within contracts/. */
     function visit(sourceName) {
         if (sources[sourceName]) return;
         if (!sourceName.startsWith('contracts/') || sourceName.split('/').includes('..')) {
@@ -170,6 +181,10 @@ function collectSources(contracts, network, root = ROOT) {
     return Object.fromEntries(Object.entries(sources).sort(([a], [b]) => a.localeCompare(b)));
 }
 
+/**
+ * @notice Check for linked creation bytecode, a zero-argument constructor, and runtime
+ * code within the size limit.
+ */
 function validateContract(contract) {
     if (!/^0x[0-9a-f]+$/i.test(contract.bytecode))
         throw new Error(`${contract.name}: empty or unlinked bytecode`);
@@ -181,6 +196,7 @@ function validateContract(contract) {
     }
 }
 
+/** @notice Compile each contract in isolation and cache the resulting bundle for this network. */
 function buildNetwork(contracts, network, sourceSets, outputDir) {
     const sourceHash = hash(
         JSON.stringify({
@@ -263,6 +279,10 @@ function buildNetwork(contracts, network, sourceSets, outputDir) {
     return { bundleFile, bundleHash };
 }
 
+/**
+ * @notice Block a new deployment if another run in this directory has unfinished work
+ * for the same contract or signer on that network.
+ */
 function checkPendingDeployments(runsDir, targets, currentFile, signers = {}) {
     if (!fs.existsSync(runsDir)) return;
     for (const filename of fs.readdirSync(runsDir)) {
@@ -289,6 +309,7 @@ function checkPendingDeployments(runsDir, targets, currentFile, signers = {}) {
     }
 }
 
+/** @notice Build the selected contracts for each network and return the new manifest path. */
 function prepare(targets, outputDir, sourceTag) {
     const contracts = resolveContracts([...new Set(Object.values(targets).flat())]);
     checkPendingDeployments(path.join(outputDir, 'runs'), targets);
@@ -330,6 +351,10 @@ function prepare(targets, outputDir, sourceTag) {
     return manifestFile;
 }
 
+/**
+ * @notice Load a manifest and check its saved bundles against their checksums, networks,
+ * and contract lists.
+ */
 function loadRun(file) {
     const manifest = readJson(file);
     if (manifest.version !== 1 || !Array.isArray(manifest.networks) || !manifest.networks.length)

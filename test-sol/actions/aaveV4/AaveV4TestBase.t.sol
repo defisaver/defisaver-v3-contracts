@@ -232,6 +232,17 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
             return false;
         }
 
+        // Supplied reserve is always used as collateral in tests. Reserves with zero collateral
+        // factor give no borrowing power and aren't counted in activeCollateralCount.
+        if (
+            ISpoke(_spoke)
+                .getDynamicReserveConfig(_reserveId, _reserve.dynamicConfigKey)
+                .collateralFactor == 0
+        ) {
+            console2.log("Reserve collateral factor is 0, skipping test");
+            return false;
+        }
+
         IHub.SpokeData memory spokeData = IHub(_reserve.hub).getSpoke(_reserve.assetId, _spoke);
         if (!spokeData.active || spokeData.halted) {
             console2.log("Spoke is halted or inactive, skipping test");

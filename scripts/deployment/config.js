@@ -65,6 +65,7 @@ const networks = {
 };
 
 const wethAddress = Object.fromEntries(Object.values(networks).map((n) => [n.prefix, n.weth]));
+/** @notice Build Hardhat network entries from the shared chain settings and environment variables. */
 const hardhatNetworks = () =>
     Object.fromEntries(
         Object.entries(networks).map(([name, n]) => [

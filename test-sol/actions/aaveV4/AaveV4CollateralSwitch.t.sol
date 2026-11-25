@@ -8,6 +8,7 @@ import {
     AaveV4CollateralSwitch
 } from "../../../contracts/actions/aaveV4/AaveV4CollateralSwitch.sol";
 import { AaveV4TestBase } from "./AaveV4TestBase.t.sol";
+import { console2 } from "forge-std/console2.sol";
 import { AaveV4Encode } from "test-sol/utils/encode/AaveV4Encode.sol";
 
 contract TestAaveV4CollateralSwitch is AaveV4TestBase {
@@ -67,7 +68,10 @@ contract TestAaveV4CollateralSwitch is AaveV4TestBase {
 
             AaveV4TestPair memory testPair = tests[i];
 
-            _executeAaveV4Supply(testPair, 10, wallet, _testConfig.isEoa);
+            if (!_executeAaveV4Supply(testPair, 10, wallet, _testConfig.isEoa)) {
+                console2.log("Failed to supply assets. Check caps and reserve/spoke status.");
+                continue;
+            }
 
             _switch(testPair.spoke, testPair.collReserveId, _testConfig);
 

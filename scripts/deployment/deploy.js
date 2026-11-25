@@ -5,14 +5,17 @@ const { networks } = require('./config');
 const { ROOT, readJson, writeJson } = require('./build');
 const { verifySource } = require('./verify');
 
+/** @notice Return true until a signed transaction hash has been saved. */
 const needsSignature = (record) => !record.transactionHash;
 
+/** @notice List unsigned contracts, or none if this network's run ended in a revert. */
 function unsignedContracts(contracts) {
     const entries = Object.entries(contracts);
     if (entries.some(([, record]) => record.reverted)) return [];
     return entries.filter(([, record]) => needsSignature(record)).map(([name]) => name);
 }
 
+/** @notice Convert a cap in gwei into legacy or EIP-1559 fee fields for the network. */
 function gasOverrides(network, gas) {
     if (typeof gas !== 'string' || !/^\d+(\.\d+)?$/.test(gas))
         throw new Error(`${network}: supply a positive gas price in gwei`);
@@ -23,6 +26,7 @@ function gasOverrides(network, gas) {
     return { type: 2, maxFeePerGas: price, maxPriorityFeePerGas: price.lt(tip) ? price : tip };
 }
 
+/** @notice Check that the RPC reports the chain ID configured for this network. */
 async function checkChain(provider, network) {
     const chainId = Number(await provider.send('eth_chainId', []));
     if (chainId !== networks[network].chainId)
@@ -31,6 +35,10 @@ async function checkChain(provider, network) {
         );
 }
 
+/**
+ * @notice Compare on-chain runtime bytecode with the build, ignoring compiler-declared
+ * immutable values.
+ */
 function checkRuntime(code, contract) {
     const mask = (value) => {
         let result = value.slice(2).toLowerCase();
@@ -52,6 +60,7 @@ function checkRuntime(code, contract) {
     }
 }
 
+/** @notice Poll the receipt block and the latest block until the RPC returns matching runtime code. */
 async function waitForRuntime(
     provider,
     address,
@@ -80,6 +89,10 @@ async function waitForRuntime(
     );
 }
 
+/**
+ * @notice Check the deployment transaction against the saved signer, nonce, chain,
+ * creation bytecode, and predicted contract address.
+ */
 function checkTransaction(transaction, record, network, contract) {
     if (
         !transaction ||
@@ -97,6 +110,7 @@ function checkTransaction(transaction, record, network, contract) {
     }
 }
 
+/** @notice Look for identical runtime bytecode at current and past addresses for this contract. */
 async function findDuplicateDeployment(provider, network, contract, root = ROOT) {
     const file = path.join(root, 'addresses', `${network}.json`);
     if (!fs.existsSync(file)) return undefined;
@@ -112,6 +126,10 @@ async function findDuplicateDeployment(provider, network, contract, root = ROOT)
     return undefined;
 }
 
+/**
+ * @notice Sign a new deployment or resume its saved transaction, then check the receipt
+ * and runtime code.
+ */
 async function deployContract({
     provider,
     wallet,
@@ -242,6 +260,7 @@ async function deployContract({
         );
 }
 
+/** @notice Record a deployment in the network address file and move the previous address into history. */
 function updateAddress(network, contract, address, root = ROOT) {
     const file = path.join(root, 'addresses', `${network}.json`);
     const entries = fs.existsSync(file) ? readJson(file) : [];
@@ -279,6 +298,7 @@ function updateAddress(network, contract, address, root = ROOT) {
     writeJson(file, entries, 4);
 }
 
+/** @notice Run the plans concurrently and report any failures after all networks finish. */
 async function runAcrossNetworks(plans, action) {
     const outcomes = await Promise.allSettled(plans.map(action));
     const errors = [];
@@ -290,6 +310,10 @@ async function runAcrossNetworks(plans, action) {
     if (errors.length) throw new AggregateError(errors, 'Deployment incomplete');
 }
 
+/**
+ * @notice Deploy contracts in order on each network, saving confirmed addresses and
+ * tracking explorer verification.
+ */
 async function executeRun(
     run,
     {
