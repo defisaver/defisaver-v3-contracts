@@ -135,10 +135,6 @@ module.exports = {
             name: 'mainnet',
             hardfork: 'osaka',
             blockGasLimit: 0x1fffffffffffff,
-            accounts: {
-                balance: '10000000000000000000000000000',
-                privateKey: process.env.PRIV_KEY_MAINNET,
-            },
             chainId: 1,
         },
         ...hardhatNetworks(),

@@ -348,14 +348,15 @@ const openAaveV4ProxyPosition = async (
 };
 
 const openAaveV4EoaPosition = async (
-    eoaAddr,
+    eoa,
     collReserveId,
     debtReserveId,
     collAmountInUSD,
     debtAmountInUSD,
     spoke = MAIN_SPOKE,
 ) => {
-    const eoaSigner = await hre.ethers.getSigner(eoaAddr);
+    const eoaSigner = typeof eoa === 'string' ? await hre.ethers.getSigner(eoa) : eoa;
+    const eoaAddr = await eoaSigner.getAddress();
     const spokeContract = await hre.ethers.getContractAt('ISpoke', spoke);
 
     const collReserve = await getReserveData(spoke, collReserveId);

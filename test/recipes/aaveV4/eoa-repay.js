@@ -15,6 +15,7 @@ const {
     getOwnerAddr,
     getAndSetMockExchangeWrapper,
     getProxy,
+    sendEther,
 } = require('../../utils/utils');
 const { predictSafeAddress, signSafeTx, encodeSetupArgs } = require('../../utils/safe');
 const {
@@ -153,7 +154,7 @@ describe('AaveV4-EOA-Repay', function () {
     before(async function () {
         this.timeout(300000);
         const isFork = isNetworkFork();
-        senderAcc = new hre.ethers.Wallet(process.env.PRIV_KEY_MAINNET, hre.ethers.provider);
+        senderAcc = hre.ethers.Wallet.createRandom().connect(hre.ethers.provider);
         chainId = chainIds[network];
 
         console.log('Sender address:', senderAcc.address);
@@ -161,6 +162,9 @@ describe('AaveV4-EOA-Repay', function () {
         if (isFork) {
             await topUp(senderAcc.address);
             await topUp(getOwnerAddr());
+        } else {
+            const [funder] = await hre.ethers.getSigners();
+            await sendEther(funder, senderAcc.address, '10');
         }
 
         await redeploy('AaveV4Supply', isFork);
@@ -169,7 +173,7 @@ describe('AaveV4-EOA-Repay', function () {
         await redeploy('AaveV4Payback', isFork);
         await redeploy('AaveV4SetUserManagersWithSig', isFork);
         await redeploy('AaveV4DelegateWithdrawWithSig', isFork);
-        dfsSafeFactory = await redeploy('DFSSafeFactory', isFork);
+        dfsSafeFactory = (await redeploy('DFSSafeFactory', isFork)).connect(senderAcc);
 
         mockWrapper = await getAndSetMockExchangeWrapper(senderAcc, nullAddress, isFork);
 
@@ -190,7 +194,7 @@ describe('AaveV4-EOA-Repay', function () {
         safe.signer.address = senderAcc.address;
 
         await openAaveV4EoaPosition(
-            senderAcc.address,
+            senderAcc,
             collReserveId,
             debtReserveId,
             '10000',
@@ -261,7 +265,7 @@ describe('AaveV4-EOA-Repay', function () {
         console.log('Predicted safe address:', predictedSafe);
 
         await openAaveV4EoaPosition(
-            senderAcc.address,
+            senderAcc,
             collReserveId,
             debtReserveId,
             '10000',

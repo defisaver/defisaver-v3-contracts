@@ -68,18 +68,19 @@ const wethAddress = Object.fromEntries(Object.values(networks).map((n) => [n.pre
 /** @notice Build Hardhat network entries from the shared chain settings and environment variables. */
 const hardhatNetworks = () =>
     Object.fromEntries(
-        Object.entries(networks).map(([name, n]) => [
-            name,
-            {
-                url: process.env[n.rpcEnv],
-                accounts: [process.env[`PRIV_KEY_${name.toUpperCase()}`]],
-                chainId: n.chainId,
-                name: name === 'optimism' ? 'optimistic' : name,
-                txType: n.txType,
-                blockExplorer: n.explorer,
-                contractVerification: true,
-            },
-        ]),
+        Object.entries(networks)
+            .filter(([, n]) => process.env[n.rpcEnv])
+            .map(([name, n]) => [
+                name,
+                {
+                    url: process.env[n.rpcEnv],
+                    chainId: n.chainId,
+                    name: name === 'optimism' ? 'optimistic' : name,
+                    txType: n.txType,
+                    blockExplorer: n.explorer,
+                    contractVerification: true,
+                },
+            ]),
     );
 
 module.exports = { solidity, networks, wethAddress, hardhatNetworks };
